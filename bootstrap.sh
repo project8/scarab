@@ -1,6 +1,13 @@
 #!/bin/sh
 
-dir=$(pwd)
+if [ ! -d "./.git" ]
+then
+    echo "not in the top level of a git repo"
+    exit 1
+fi
 
-ln -s $dir/post-merge.sh .git/hooks/post-merge
-ln -s $dir/pre-commit.sh .git/hooks/pre-commit
+rel_pa="`dirname \"$0\"`"
+abs_pa="`( cd \"$rel_pa\" && pwd )`"
+
+ln -s $abs_pa/post-merge.sh .git/hooks/post-merge
+ln -s $abs_pa/pre-commit.sh .git/hooks/pre-commit
