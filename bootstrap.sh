@@ -11,3 +11,4 @@ abs_pa="`( cd \"$rel_pa\" && pwd )`"
 
 ln -s $abs_pa/post-merge.sh .git/hooks/post-merge
 ln -s $abs_pa/pre-commit.sh .git/hooks/pre-commit
+ln -s $abs_pa/post-commit.sh .git/hooks/post-commit
