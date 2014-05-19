@@ -2,5 +2,7 @@
 
 dir=$(pwd)
 
-ln -s $dir/post-merge.sh .git/hooks/post-merge
-ln -s $dir/pre-commit.sh .git/hooks/pre-commit
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+ln -s $SCRIPTDIR/post-merge.sh $dir/.git/hooks/post-merge
+ln -s $SCRIPTDIR/pre-commit.sh $dir/.git/hooks/pre-commit
