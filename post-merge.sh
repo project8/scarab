@@ -2,4 +2,4 @@
 
 echo "Doing post merge"
 
-bash pre-commit.sh
+bash pre-commit
