@@ -2,4 +2,6 @@
 
 echo "Doing post merge"
 
-bash pre-commit.sh
+HOOKS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+bash $HOOKS_DIR/pre-commit.sh
