@@ -1,9 +1,15 @@
 #!/bin/sh
 
-TOP=$(pwd)
+if [ ! -d "./.git" ]
+then
+    echo "not in the top level of a git repo"
+    exit 1
+fi
 
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+rel_pa="`dirname \"$0\"`"
+abs_pa="`( cd \"$rel_pa\" && pwd )`"
 
-ln -s $SCRIPTDIR/post-merge.sh $TOP/.git/hooks/post-merge
-ln -s $SCRIPTDIR/pre-commit.sh $TOP/.git/hooks/pre-commit
-ln -s $SCRIPTDIR/bump_version.py $TOP/.git/hooks/bump_version.py
+ln -s $abs_pa/post-merge.sh .git/hooks/post-merge
+ln -s $abs_pa/pre-commit.sh .git/hooks/pre-commit
+ln -s $abs_pa/post-commit.sh .git/hooks/post-commit
+ln -s $abs_pa/bump_version.py .git/hooks/bump_version.py
