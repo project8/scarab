@@ -1,3 +1,7 @@
+# CMakeLists.txt for Scarab/library
+# Author: N. Oblath
+# Created: Jan 4, 2016
+
 # Minimum cmake verison 3.0 required by the way CMake handles rpath information on Mac OSX.
 cmake_minimum_required (VERSION 3.0)
 
@@ -15,9 +19,9 @@ include( PackageBuilder )
 pbuilder_prepare_project()
 
 
-######################
-# drosophila options #
-######################
+##################
+# Scarab options #
+##################
 
 set( Scarab_BUILD_CODEC_JSON CACHE BOOL "Flag to enable building the JSON codec" )
 
@@ -25,9 +29,9 @@ set( Scarab_BUILD_CODEC_MSGPACK CACHE BOOL "Flag to enable building the msgpack 
 
 
 
-###########################
-# drosophila dependencies #
-###########################
+#######################
+# Scarab dependencies #
+#######################
 
 if( Scarab_BUILD_CODEC_JSON )
     # RapidJSON
@@ -42,9 +46,13 @@ endif( Scarab_BUILD_CODEC_MSGPACK )
 
 
 
-####################
-# Build Scarab #
-####################
+########################
+# Build Scarab library #
+########################
+
+# Unlike many other libraries in the P8 codebase, Scarab builds its library here, 
+# only using subdirectories to add relevant files to the Scarab_HEADERS and Scarab_SOURCES list variables.
+
 
 include_directories( BEFORE
     ${PROJECT_SOURCE_DIR}/utility
@@ -78,6 +86,13 @@ target_link_libraries( Scarab ${EXTERNAL_LIBRARIES} )
 
 pbuilder_install_headers( ${Scarab_HEADERS} )
 pbuilder_install_libraries( Scarab )
+
+
+###########
+# Testing #
+###########
+
+add_subdirectory( test )
 
 
 ################################
