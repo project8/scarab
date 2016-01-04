@@ -13,8 +13,10 @@ cmake_policy( SET CMP0048 NEW ) # version in project()
 
 # check if this is a stand-alone build
 set( PBUILDER_STANDALONE FALSE CACHE INTERNAL "Flag for whether or not this is a stand-alone build" )
+set( PBUILDER_CHILD_NAME_EXTENSION "${PROJECT_NAME}" CACHE INTERNAL "Submodule library name modifier" )
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
     set( PBUILDER_STANDALONE TRUE )
+else( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
 endif( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
 
 # preprocessor defintion for debug build
@@ -105,17 +107,40 @@ macro (pbuilder_add_submodule_libraries)
     list (APPEND SUBMODULE_LIBRARIES ${ARGN})
 endmacro ()
 
+macro (pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES)
+    set (FULL_LIB_NAME "${LIB_BASENAME}${PARENT_NAME_EXTENSION}")
+    message( STATUS "lib basename: ${LIB_BASENAME}")
+    message( STATUS "full lib name: ${FULL_LIB_NAME}")
+
+    set (FULL_PROJECT_LIBRARIES)
+    foreach (project_lib ${${PROJECT_LIBRARIES}})
+        list (APPEND FULL_PROJECT_LIBRARIES "${project_lib}${PARENT_NAME_EXTENSION}")
+    endforeach (project_lib)
+    message( STATUS "project libraries (lib): ${FULL_PROJECT_LIBRARIES}" )
+
+    add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
+    target_link_libraries( ${FULL_LIB_NAME} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES} )
+    pbuilder_install_libraries (${FULL_LIB_NAME})
+endmacro ()
+
 macro (pbuilder_install_libraries)
+    message( STATUS "installing libs: ${ARGN}" )
     install (TARGETS ${ARGN} EXPORT ${PROJECT_NAME}Targets DESTINATION ${LIB_INSTALL_DIR})
     #list (APPEND ${PROJECT_NAME}_LIBRARIES ${ARGN})
     set_property (GLOBAL APPEND PROPERTY ${PROJECT_NAME}_LIBRARIES ${ARGN})
     set_target_properties (${ARGN} PROPERTIES INSTALL_NAME_DIR ${LIB_INSTALL_DIR})
 endmacro ()
 
-macro (pbuilder_executables PROGRAMS LIB_DEPENDENCIES )
+macro (pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
+    set (FULL_PROJECT_LIBRARIES)
+    foreach (project_lib ${${PROJECT_LIBRARIES}})
+        list (APPEND FULL_PROJECT_LIBRARIES "${project_lib}${PARENT_NAME_EXTENSION}")
+    endforeach (project_lib)
+    message( STATUS "project libraries (exe): ${FULL_PROJECT_LIBRARIES}" )
+
     foreach (program ${${PROGRAMS}})
         add_executable (${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc)
-        target_link_libraries (${program} ${${LIB_DEPENDENCIES}} ${EXTERNAL_LIBRARIES})
+        target_link_libraries (${program} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES})
         pbuilder_install_executables (${program})
     endforeach (program)
 endmacro ()

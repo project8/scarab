@@ -81,11 +81,12 @@ endif( Scarab_BUILD_CODEC_MSGPACK )
 
 ##########
 
-add_library( Scarab ${Scarab_SOURCES} )
-target_link_libraries( Scarab ${EXTERNAL_LIBRARIES} )
+pbuilder_library( Scarab Scarab_SOURCES "" )
+#add_library( Scarab ${Scarab_SOURCES} )
+#target_link_libraries( Scarab ${EXTERNAL_LIBRARIES} )
 
 pbuilder_install_headers( ${Scarab_HEADERS} )
-pbuilder_install_libraries( Scarab )
+#pbuilder_install_libraries( Scarab )
 
 
 ###########
