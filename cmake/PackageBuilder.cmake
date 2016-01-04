@@ -1,7 +1,7 @@
 # PackageBuilder.cmake
 # Author: Noah Oblath
 # Parts of this script are based on work done by Sebastian Voecking and Marco Haag in the Kasper package
-# Convenient macros and default variable settings for the Katydid build.
+# Convenient macros and default variable settings for the Nymph-based build.
 #
 # Requires: CMake v3.0 or better (rpath treatment and version variables)
 
@@ -37,7 +37,7 @@ if (SET_INSTALL_PREFIX_TO_DEFAULT)
 endif (SET_INSTALL_PREFIX_TO_DEFAULT)
 
 # install subdirectories
-set (INCLUDE_INSTALL_SUBDIR "include" CACHE PATH "Install subdirectory for headers")
+set (INCLUDE_INSTALL_SUBDIR "include/${PROJECT_NAME}" CACHE PATH "Install subdirectory for headers")
 if( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
     set (LIB_INSTALL_SUBDIR "bin" CACHE PATH "Install subdirectory for libraries")
 else( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
@@ -51,10 +51,17 @@ set (LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_SUBDIR}")
 set (BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${BIN_INSTALL_SUBDIR}")
 set (CONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONFIG_INSTALL_SUBDIR}")
 
+# flag for building test programs
+set (${PROJECT_NAME}_ENABLE_TESTING OFF CACHE BOOL "Turn on or off the building of test programs")
+
+# flag for building executables (other than test programs)
+# this is particularly useful if a project is used multiple times and installed in a general location, where executables would overwrite each other.
+set (${PROJECT_NAME}_ENABLE_EXECUTABLES ON CACHE BOOL "Turn on or off the building of executables (other than test programs)")
+
 # build shared libraries
 set (BUILD_SHARED_LIBS ON)
 
-# global property to hold the names of katydid library targets
+# global property to hold the names of nymph library targets
 set_property (GLOBAL PROPERTY ${PROJECT_NAME}_LIBRARIES)
 
 # turn on RPATH for Mac OSX
@@ -74,7 +81,7 @@ set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # This should be called immediately after setting the project name
 macro (pbuilder_prepare_project)
-    # define the variables to describe the package (will go in the KatydidConfig.hh file)
+    # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
     set (${PROJECT_NAME}_PACKAGE_NAME "${PROJECT_NAME}")
     set (${PROJECT_NAME}_PACKAGE_STRING "${PROJECT_NAME} ${${PROJECT_NAME}_VERSION}")
     
