@@ -109,7 +109,13 @@ macro (pbuilder_add_submodule SM_NAME SM_LOCATION)
     message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${PARENT_LIB_NAME_SUFFIX}")
     
     add_subdirectory( ${SM_LOCATION} )
-    message( STATUS "SM ${SM_NAME} created libraries: ${${SM_NAME}_LIBRARIES}")
+    message( STATUS "SM ${SM_NAME} variables for parent:")
+    message( STATUS "${SM_NAME}_LIBRARIES: ${${SM_NAME}_LIBRARIES}")
+    message( STATUS "${SM_NAME}_LIBRARY_DIR: ${${SM_NAME}_LIBRARY_DIR}")
+    message( STATUS "${SM_NAME}_INCLUDE_DIR: ${${SM_NAME}_INCLUDE_DIR}")
+    message( STATUS "${SM_NAME}_DEP_INCLUDE_DIRS: ${${SM_NAME}_DEP_INCLUDE_DIRS}")
+    
+    unset (PARENT_LIB_NAME_SUFFIX CACHE)
 endmacro ()
 
 macro (pbuilder_add_ext_libraries)
