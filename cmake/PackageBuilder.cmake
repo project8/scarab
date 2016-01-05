@@ -76,6 +76,8 @@ SET(CMAKE_INSTALL_RPATH "${LIB_INSTALL_DIR}")
 # which point to directories outside the build tree to the install RPATH
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+set (LIB_POSTFIX)
+set (INC_PREFIX)
 
 ##########
 # MACROS #
@@ -98,6 +100,18 @@ macro (pbuilder_prepare_project)
     endif (EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.hh.in)
 endmacro ()
 
+macro (pbuilder_add_submodule SM_NAME SM_LOCATION)
+    if (NOT DEFINED PARENT_LIB_NAME_SUFFIX)
+        set (PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}" CACHE INTERNAL "Library name suffix for submodules")
+    else (NOT DEFINED PARENT_LIB_NAME_SUFFIX)
+        set (PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}_${PARENT_LIB_NAME_SUFFIX}")
+    endif (NOT DEFINED PARENT_LIB_NAME_SUFFIX)
+    message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${PARENT_LIB_NAME_SUFFIX}")
+    
+    add_subdirectory( ${SM_LOCATION} )
+    message( STATUS "SM ${SM_NAME} created libraries: ${${SM_NAME}_LIBRARIES}")
+endmacro ()
+
 macro (pbuilder_add_ext_libraries)
     list (APPEND EXTERNAL_LIBRARIES ${ARGN})
 endmacro ()
@@ -108,13 +122,14 @@ macro (pbuilder_add_submodule_libraries)
 endmacro ()
 
 macro (pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES)
-    set (FULL_LIB_NAME "${LIB_BASENAME}${PARENT_NAME_EXTENSION}")
+    message (STATUS "Building library ${LIB_BASENAME}; PARENT_LIB_NAME_SUFFIX is ${PARENT_LIB_NAME_SUFFIX}")
+    set (FULL_LIB_NAME "${LIB_BASENAME}${PARENT_LIB_NAME_SUFFIX}")
     message( STATUS "lib basename: ${LIB_BASENAME}")
     message( STATUS "full lib name: ${FULL_LIB_NAME}")
 
     set (FULL_PROJECT_LIBRARIES)
     foreach (project_lib ${${PROJECT_LIBRARIES}})
-        list (APPEND FULL_PROJECT_LIBRARIES "${project_lib}${PARENT_NAME_EXTENSION}")
+        list (APPEND FULL_PROJECT_LIBRARIES "${project_lib}${PARENT_LIB_NAME_SUFFIX}")
     endforeach (project_lib)
     message( STATUS "project libraries (lib): ${FULL_PROJECT_LIBRARIES}" )
 
@@ -134,7 +149,7 @@ endmacro ()
 macro (pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
     set (FULL_PROJECT_LIBRARIES)
     foreach (project_lib ${${PROJECT_LIBRARIES}})
-        list (APPEND FULL_PROJECT_LIBRARIES "${project_lib}${PARENT_NAME_EXTENSION}")
+        list (APPEND FULL_PROJECT_LIBRARIES "${project_lib}${PARENT_LIB_NAME_SUFFIX}")
     endforeach (project_lib)
     message( STATUS "project libraries (exe): ${FULL_PROJECT_LIBRARIES}" )
 
