@@ -16,8 +16,10 @@ set( PBUILDER_STANDALONE FALSE CACHE INTERNAL "Flag for whether or not this is a
 set( PBUILDER_CHILD_NAME_EXTENSION "${PROJECT_NAME}" CACHE INTERNAL "Submodule library name modifier" )
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
     set( PBUILDER_STANDALONE TRUE )
-else( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
 endif( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
+
+# define a variable pointing to the directory containing this file
+set( PBUILDER_DIR ${CMAKE_CURRENT_LIST_DIR} )
 
 # preprocessor defintion for debug build
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
