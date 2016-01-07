@@ -8,7 +8,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/scarab_api.hh
     ${dir}/destroyer.hh
     ${dir}/error.hh
-    ${dir}/member_variable.hh
+    ${dir}/member_variables.hh
     ${dir}/mutex.hh
     ${dir}/singleton.hh
     ${dir}/time.hh
