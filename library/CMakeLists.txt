@@ -27,6 +27,8 @@ set( Scarab_BUILD_CODEC_JSON FALSE CACHE BOOL "Flag to enable building the JSON 
 
 set( Scarab_BUILD_CODEC_MSGPACK FALSE CACHE BOOL "Flag to enable building the msgpack codec" )
 
+set( Scarab_BUILD_CODEC_YAML FALSE CACHE BOOL "Flag to enable building the yaml codec" )
+
 set( Scarab_BUILD_AUTHENTICATION TRUE CACHE BOOL "Flag to enable building of the authentication class (requires boost::filesystem)" )
 
 
@@ -44,6 +46,12 @@ if( Scarab_BUILD_CODEC_MSGPACK )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack/msgpack-c )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include )
 endif( Scarab_BUILD_CODEC_MSGPACK )
+
+if( Scarab_BUILD_CODEC_YAML )
+    # Yaml-cpp
+    add_subdirectory( param/codec/yaml/yaml-cpp )
+    #include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/yaml-cpp )
+endif( Scarab_BUILD_CODEC_YAML )
 
 if( Scarab_BUILD_AUTHENTICATION )
     # Boost (1.46 required for filesystem version 3)
