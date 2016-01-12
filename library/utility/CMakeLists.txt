@@ -6,6 +6,7 @@ set( dir ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/scarab_api.hh
+    ${dir}/concurrent_queue.hh
     ${dir}/destroyer.hh
     ${dir}/error.hh
     ${dir}/member_variables.hh

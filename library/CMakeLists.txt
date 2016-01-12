@@ -47,7 +47,7 @@ endif( Scarab_BUILD_CODEC_MSGPACK )
 
 if( Scarab_BUILD_AUTHENTICATION )
     # Boost (1.46 required for filesystem version 3)
-    find_package( Boost 1.46.0 REQUIRED COMPONENTS filesystem system )
+    find_package( Boost 1.46.0 REQUIRED COMPONENTS filesystem system thread date_time )
     # make sure dynamic linking is assumed for all boost libraries
     add_definitions( -DBOOST_ALL_DYN_LINK )
     include_directories( ${Boost_INCLUDE_DIRS} )
