@@ -38,19 +38,34 @@ set( Scarab_BUILD_AUTHENTICATION TRUE CACHE BOOL "Flag to enable building of the
 
 if( Scarab_BUILD_CODEC_JSON )
     # RapidJSON
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json/RapidJSON )
+    include_directories( BEFORE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON/internal 
+    )
+    install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON/internal
+        DESTINATION ${INCLUDE_INSTALL_DIR}/RapidJSON 
+        FILES_MATCHING PATTERN "*.h" 
+    )
 endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     # msgpack-c
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack/msgpack-c )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include )
+    include_directories( BEFORE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c 
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include
+    )
+    install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include
+        DESTINATION ${INCLUDE_INSTALL_DIR}/msgpack-c 
+        FILES_MATCHING PATTERN "*.h*" 
+    )
 endif( Scarab_BUILD_CODEC_MSGPACK )
 
 if( Scarab_BUILD_CODEC_YAML )
     # Yaml-cpp
     add_subdirectory( param/codec/yaml/yaml-cpp )
-    #include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/yaml-cpp )
+    # I'm hard-coding the include directory and library because I ran into an error when I tried to include ${CMAKE_CURRENT_BINARY_DIR}/param/codec/yaml/yaml-cpp/yaml-cpp-config.cmake )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
+    pbuilder_add_ext_libraries( yaml-cpp )
 endif( Scarab_BUILD_CODEC_YAML )
 
 if( Scarab_BUILD_AUTHENTICATION )
