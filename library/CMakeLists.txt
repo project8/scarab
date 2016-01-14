@@ -97,6 +97,8 @@ endif( Scarab_BUILD_AUTHENTICATION )
 
 ##########
 
+message(STATUS "Scarab sources: ${Scarab_SOURCES}" )
+
 pbuilder_library( Scarab Scarab_SOURCES "" )
 
 pbuilder_install_headers( ${Scarab_HEADERS} )

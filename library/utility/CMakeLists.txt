@@ -20,7 +20,7 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/error.cc
     ${dir}/mutex.cc
     ${dir}/time.cc
-    PARENT_SCOPE )
+)
 
 configure_file( ${dir}/scarab_version.cc.in ${CMAKE_CURRENT_BINARY_DIR}/scarab_version.cc )
 set( Scarab_SOURCES
