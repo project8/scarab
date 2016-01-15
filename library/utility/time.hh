@@ -19,6 +19,7 @@
 namespace scarab
 {
     typedef uint64_t time_nsec_type;
+}
 
 #ifndef NSEC_PER_SEC
 #define NSEC_PER_SEC 1000000000
@@ -34,31 +35,32 @@ namespace scarab
 #define MACGIGA UINT64_C(1000000000)
 #endif // MACNANO
     extern double thorax_timebase;
-    extern time_nsec_type thorax_timestart;
+    extern scarab::time_nsec_type thorax_timestart;
 #endif // __MACH__
 
 
-    extern SCARAB_API char date_time_format[];
-
 #ifdef _WIN32
-    struct timespec
-    {
-        time_t tv_sec;
-        long tv_nsec;
-#ifdef __cplusplus
-        inline bool operator==( const timespec& rhs ) const { return tv_nsec==rhs.tv_nsec && tv_sec==rhs.tv_sec; }
-        inline bool operator<( const timespec& rhs ) const { return tv_sec != rhs.tv_sec ? tv_sec < rhs.tv_sec : tv_nsec < rhs.tv_nsec; }
+struct timespec
+{
+    time_t tv_sec;
+    long tv_nsec;
+    //inline SCARAB_API bool operator==( const timespec& rhs ) const { return tv_nsec==rhs.tv_nsec && tv_sec==rhs.tv_sec; }
+    //inline SCARAB_API bool operator<( const timespec& rhs ) const { return tv_sec != rhs.tv_sec ? tv_sec < rhs.tv_sec : tv_nsec < rhs.tv_nsec; }
+};
 #endif
-    };
+//#else
+inline SCARAB_API bool operator==( const timespec& lhs, const timespec& rhs ) { return lhs.tv_nsec==rhs.tv_nsec && lhs.tv_sec==rhs.tv_sec; }
+inline SCARAB_API bool operator<( const timespec& lhs, const timespec& rhs ) { return lhs.tv_sec != rhs.tv_sec ? lhs.tv_sec < rhs.tv_sec : lhs.tv_nsec < rhs.tv_nsec; }
+//#endif
 
+namespace scarab
+{
+#ifdef _WIN32
     SCARAB_API LARGE_INTEGER getFILETIMEoffset();
     SCARAB_API int clock_gettime( int X, struct timespec* tv );
-#else
-#ifdef __cplusplus
-    inline bool operator==( const timespec& lhs, const timespec& rhs ) { return lhs.tv_nsec==rhs.tv_nsec && lhs.tv_sec==rhs.tv_sec; }
-    inline bool operator<( const timespec& lhs, const timespec& rhs ) { return lhs.tv_sec != rhs.tv_sec ? lhs.tv_sec < rhs.tv_sec : lhs.tv_nsec < rhs.tv_nsec; }
 #endif
-#endif
+
+    extern SCARAB_API char date_time_format[];
 
     SCARAB_API int get_time_monotonic( struct timespec* time );
 

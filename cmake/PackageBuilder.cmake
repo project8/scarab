@@ -56,11 +56,23 @@ set( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${BIN_INSTALL_SUBDIR}" )
 set( CONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONFIG_INSTALL_SUBDIR}" )
 
 # flag for building test programs
-set( ${PROJECT_NAME}_ENABLE_TESTING OFF CACHE BOOL "Turn on or off the building of test programs" )
+option( ${PROJECT_NAME}_ENABLE_TESTING "Turn on or off the building of test programs" OFF )
 
 # flag for building executables (other than test programs)
 # this is particularly useful if a project is used multiple times and installed in a general location, where executables would overwrite each other.
-set( ${PROJECT_NAME}_ENABLE_EXECUTABLES ON CACHE BOOL "Turn on or off the building of executables (other than test programs)" )
+option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of executables (other than test programs)" ON )
+
+# flag for using C++11
+option( USE_CPP11 "Flag for building with C++11" ON )
+if( USE_CPP11 )
+    add_definitions( -DUSE_CPP11 )
+    list( APPEND GLOBAL_COMPILE_OPTIONS "-std=c++11" )
+else( USE_CPP11 )
+    remove_definitions( -DUSE_CP11 )
+    if( DEFINED GLOBAL_COMPILE_OPTIONS )
+        list( REMOVE_ITEM GLOBAL_COMPILE_OPTIONS "-std=c++11" )
+    endif( DEFINED GLOBAL_COMPILE_OPTIONS )
+endif( USE_CPP11 )
 
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
@@ -161,6 +173,7 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES )
     message( STATUS "project libraries( lib ): ${FULL_PROJECT_LIBRARIES}" )
 
     add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
+    target_compile_options( ${FULL_LIB_NAME} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
     target_link_libraries( ${FULL_LIB_NAME} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES} )
     pbuilder_install_libraries( ${FULL_LIB_NAME})
 endmacro()
@@ -182,6 +195,7 @@ macro( pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
 
     foreach( program ${${PROGRAMS}} )
         add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
+         target_compile_options( ${program} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
         target_link_libraries( ${program} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES} )
         pbuilder_install_executables( ${program} )
     endforeach( program )
