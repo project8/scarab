@@ -5,7 +5,7 @@
 
 namespace scarab
 {
-#ifndef _WIN32
+#ifndef USE_CPP11
 
     mutex::mutex()
     {
@@ -36,30 +36,28 @@ namespace scarab
         return;
     }
 
-#else /* _WIN32 */
+#else /* USE_CPP11 */
 
     mutex::mutex()
     {
-        InitializeCriticalSection(&f_critical_section);
     }
     mutex::~mutex()
     {
-        DeleteCriticalSection(&f_critical_section);
     }
 
     bool mutex::trylock()
     {
-        return TryEnterCriticalSection(&f_critical_section);
+        return f_mutex.try_lock();
     }
 
     void mutex::lock()
     {
-        EnterCriticalSection(&f_critical_section);
+        f_mutex.lock();
         return;
     }
     void mutex::unlock()
     {
-        LeaveCriticalSection(&f_critical_section);
+        f_mutex.unlock();
         return;
     }
 
