@@ -23,10 +23,11 @@ pbuilder_prepare_project()
 # Scarab options #
 ##################
 
-set( Scarab_BUILD_CODEC_JSON CACHE BOOL "Flag to enable building the JSON codec" )
+set( Scarab_BUILD_CODEC_JSON FALSE CACHE BOOL "Flag to enable building the JSON codec" )
 
-set( Scarab_BUILD_CODEC_MSGPACK CACHE BOOL "Flag to enable building the msgpack codec" )
+set( Scarab_BUILD_CODEC_MSGPACK FALSE CACHE BOOL "Flag to enable building the msgpack codec" )
 
+set( Scarab_BUILD_AUTHENTICATION TRUE CACHE BOOL "Flag to enable building of the authentication class (requires boost::filesystem)" )
 
 
 #######################
@@ -44,7 +45,16 @@ if( Scarab_BUILD_CODEC_MSGPACK )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include )
 endif( Scarab_BUILD_CODEC_MSGPACK )
 
-
+if( Scarab_BUILD_AUTHENTICATION )
+    # Boost (1.46 required for filesystem version 3)
+    find_package( Boost 1.46.0 REQUIRED COMPONENTS filesystem system thread date_time )
+    # make sure dynamic linking is assumed for all boost libraries
+    add_definitions( -DBOOST_ALL_DYN_LINK )
+    include_directories( ${Boost_INCLUDE_DIRS} )
+    # No compiled libraries are currently required
+    pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
+endif( Scarab_BUILD_AUTHENTICATION )
+    
 
 ########################
 # Build Scarab library #
@@ -79,13 +89,19 @@ if( Scarab_BUILD_CODEC_MSGPACK )
     add_subdirectory( param/codec/msgpack )
 endif( Scarab_BUILD_CODEC_MSGPACK )
 
+if( Scarab_BUILD_AUTHENTICATION )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )
+    add_subdirectory( authentication )
+endif( Scarab_BUILD_AUTHENTICATION )
+
+
 ##########
 
-add_library( Scarab ${Scarab_SOURCES} )
-target_link_libraries( Scarab ${EXTERNAL_LIBRARIES} )
+message(STATUS "Scarab sources: ${Scarab_SOURCES}" )
+
+pbuilder_library( Scarab Scarab_SOURCES "" )
 
 pbuilder_install_headers( ${Scarab_HEADERS} )
-pbuilder_install_libraries( Scarab )
 
 
 ###########
