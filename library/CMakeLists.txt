@@ -23,20 +23,20 @@ pbuilder_prepare_project()
 # Scarab options #
 ##################
 
-set( Scarab_BUILD_CODEC_JSON FALSE CACHE BOOL "Flag to enable building the JSON codec" )
+option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" FALSE )
 
-set( Scarab_BUILD_CODEC_MSGPACK FALSE CACHE BOOL "Flag to enable building the msgpack codec" )
+option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the msgpack codec" FALSE )
 
-set( Scarab_BUILD_CODEC_YAML FALSE CACHE BOOL "Flag to enable building the yaml codec" )
+option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" FALSE )
 
-set( Scarab_BUILD_AUTHENTICATION TRUE CACHE BOOL "Flag to enable building of the authentication class (requires boost::filesystem)" )
+option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
 
 
 #######################
 # Scarab dependencies #
 #######################
 
-if( Scarab_BUILD_CODEC_JSON )
+if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     # RapidJSON
     include_directories( BEFORE 
         ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON
@@ -46,7 +46,7 @@ if( Scarab_BUILD_CODEC_JSON )
         DESTINATION ${INCLUDE_INSTALL_DIR}/RapidJSON 
         FILES_MATCHING PATTERN "*.h" 
     )
-endif( Scarab_BUILD_CODEC_JSON )
+endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     # msgpack-c
@@ -102,7 +102,7 @@ add_subdirectory( utility )
 add_subdirectory( logger )
 add_subdirectory( param )
 
-if( Scarab_BUILD_CODEC_JSON )
+if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
 endif( Scarab_BUILD_CODEC_JSON )
