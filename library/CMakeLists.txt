@@ -9,8 +9,12 @@ cmake_minimum_required (VERSION 3.0)
 # setup #
 #########
 
+# load the version number from the Scarab/VERSION file
+file( STRINGS ${CMAKE_SOURCE_DIR}/../VERSION scarab_version_from_file )
+string( REPLACE " " "." scarab_version ${scarab_version_from_file} )
+
 cmake_policy( SET CMP0048 NEW ) # version in project()
-project( Scarab VERSION 1.0.0 )
+project( Scarab VERSION ${scarab_version} )
 
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../cmake )
 
@@ -97,7 +101,7 @@ endif( Scarab_BUILD_AUTHENTICATION )
 
 ##########
 
-message(STATUS "Scarab sources: ${Scarab_SOURCES}" )
+#message(STATUS "Scarab sources: ${Scarab_SOURCES}" )
 
 pbuilder_library( Scarab Scarab_SOURCES "" )
 
