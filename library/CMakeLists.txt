@@ -10,7 +10,7 @@ cmake_minimum_required (VERSION 3.0)
 #########
 
 # load the version number from the Scarab/VERSION file
-file( STRINGS ${CMAKE_SOURCE_DIR}/../VERSION scarab_version_from_file )
+file( STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/../VERSION scarab_version_from_file )
 string( REPLACE " " "." scarab_version ${scarab_version_from_file} )
 
 cmake_policy( SET CMP0048 NEW ) # version in project()
