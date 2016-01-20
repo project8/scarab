@@ -28,3 +28,18 @@ Common C++ utilities.
   * Singleton base class
   * Version (base class scarab::version_semver and implementation scarab::version)
   * Time functions
+  
+  
+# Installation Instructions
+
+Basic installation procedure for linux and mac:
+```
+> cd library
+> mkdir build
+> cd build
+> ccmake ..
+```
+Now make any build option choices you desire.  Configure, then generate the Makefiles.
+```
+> make install
+```
