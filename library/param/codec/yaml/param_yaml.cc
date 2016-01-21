@@ -5,7 +5,12 @@
  *      Author: bidishasen97
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "param_yaml.hh"
+#include "param.hh"
+#include "logger.hh"
+
 #include <sstream>
 #include <fstream>
 
@@ -27,8 +32,7 @@ namespace scarab
 
     param_node* param_input_yaml::read_file(const std::string& a_filename)
     {
-        YAML::Node root_node = YAML::LoadFile(a_filename); //get root node
-        //difference with LoadAllFromFile
+        YAML::Node root_node = YAML::LoadFile(a_filename); //gets root node
         //check for errors in parsing file put load file line in try catch loop
 
         return param_input_yaml::read_node_type(root_node);
@@ -130,6 +134,96 @@ namespace scarab
                   }
               }
           }
+        }
+
+    param_output_yaml::param_output_yaml()
+    {
+
+    }
+
+    param_output_yaml::~param_output_yaml()
+    {
+
+    }
+
+    bool param_output_yaml::write_file(const param& a_to_write, const std::string& a_filename)
+        {
+            if (a_filename.empty())
+            {
+                //ERROR( dlog, “Filename cannot be an empty string” );
+                return false;
+            }
+
+            FILE* file = fopen(a_filename.c_str(), "w");
+
+             if (file == NULL)
+                {
+                    //ERROR( dlog, "Unable to open file: " << a_filename );
+                    return false;
+                }
+
+             YAML::Node a_node;
+
+             if (a_to_write.is_null())
+             {
+                 &a_node = NULL;
+             }
+
+             if (a_to_write.is_node())
+             {
+                 param_node p_node = a_to_write;
+                 for (param_node::const_iterator counter = p_node.begin(); counter != p_node.end(); ++counter)
+                 {
+                     a_node[ counter->first ] = counter->second; //get the values of keys and value
+                     //make aliases for repeats
+                 }
+
+             }
+
+             if (a_to_write.is_array())
+             {
+                 param_array array = a_to_write;
+                 for (int count = 0; count != (int) array.size(); ++count)
+                 {
+                     a_node.push_back( array.value_at(count) );
+                 }
+             }
+
+             if (a_to_write.is_value())
+             {
+                param_value value = a_to_write;
+                string type = value.type();
+
+                 if (type.compare("string") == 0)
+                 {
+                    a_node = value.as_string();
+                 }
+
+                 if (type.compare("bool") == 0)
+                 {
+                     a_node = value.as_bool();
+                 }
+
+                 if (type.compare("uint") == 0)
+                 {
+                     a_node = value.as_uint();
+                 }
+
+                 if (type.compare("double") == 0)
+                 {
+                     a_node = value.as_double();
+                 }
+
+                 if (type.compare("uint") == 0)
+                 {
+                     a_node = value.as_int();
+                 }
+             }
+
+             std::ofstream fout(a_filename.c_str());
+             fout << a_node;
+             fclose(file);
+            return true;
         }
 
 }

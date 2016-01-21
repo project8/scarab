@@ -43,7 +43,7 @@ namespace scarab
                 param_output_yaml();
                 virtual ~param_output_yaml();
 
-                static bool write_file();
+                static bool write_file(const param& a_to_write, const std::string& a_filename);
         };
 
 } /* namespace scarab */
