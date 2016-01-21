@@ -97,6 +97,11 @@ set( INC_PREFIX )
 # MACROS #
 ##########
 
+# Conveniece function for overriding the value of an option (aka a cached bool variable)
+macro( set_option VARIABLE VALUE )
+    set( ${VARIABLE} ${VALUE} CACHE BOOL "" FORCE )
+endmacro()
+
 # This should be called immediately after setting the project name
 macro( pbuilder_prepare_project )
     # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
