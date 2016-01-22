@@ -11,6 +11,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/error.hh
     ${dir}/member_variables.hh
     ${dir}/mutex.hh
+    ${dir}/path.hh
     ${dir}/scarab_api.hh
     ${dir}/scarab_version.hh
     ${dir}/singleton.hh
@@ -21,6 +22,7 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/digital.cc
     ${dir}/error.cc
     ${dir}/mutex.cc
+    ${dir}/path.cc
     ${dir}/time.cc
 )
 

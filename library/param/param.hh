@@ -14,15 +14,13 @@
 #include <sstream>
 #include <string>
 
-#include <boost/filesystem.hpp>
-
 #include "error.hh"
 //#include "logger.hh"
+#include "path.hh"
+
 
 namespace scarab
 {
-    typedef boost::filesystem::path path;
-
     //LOGGER(dlog_p, "param");
     class param_value;
     class param_array;
