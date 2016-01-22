@@ -22,6 +22,8 @@
 #include <unistd.h> // for readlink, gethostname and getlogin_r
 #endif
 
+using std::string;
+
 namespace scarab
 {
     LOGGER( slog, "scarab_version" );

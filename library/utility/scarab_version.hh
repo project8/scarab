@@ -16,8 +16,6 @@
 
 namespace scarab
 {
-    using std::string;
-
     class SCARAB_API version_ifc
     {
         public:
@@ -28,14 +26,14 @@ namespace scarab
             virtual unsigned minor_version() const = 0;
             virtual unsigned patch_version() const = 0;
 
-            virtual const string& version_str() const = 0;
+            virtual const std::string& version_str() const = 0;
 
-            virtual const string& package() const = 0;
-            virtual const string& commit() const = 0;
+            virtual const std::string& package() const = 0;
+            virtual const std::string& commit() const = 0;
 
-            virtual const string& exe_name() const = 0;
-            virtual const string& hostname() const = 0;
-            virtual const string& username() const = 0;
+            virtual const std::string& exe_name() const = 0;
+            virtual const std::string& hostname() const = 0;
+            virtual const std::string& username() const = 0;
     };
 
     class SCARAB_API version_semver : public version_ifc
