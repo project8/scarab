@@ -19,15 +19,15 @@
 #include "error.hh"
 //#include "logger.hh"
 
-
 namespace scarab
 {
+    typedef boost::filesystem::path path;
+
     //LOGGER(dlog_p, "param");
     class param_value;
     class param_array;
     class param_node;
 
-    using boost::filesystem::path;
 
     class SCARAB_API param
     {
@@ -501,6 +501,42 @@ namespace scarab
     //************************************
 
 
+    template<>
+    inline bool param_value::get< bool >() const
+    {
+        return as_bool();
+    }
+
+    template<>
+    inline uint64_t param_value::get< uint64_t >() const
+    {
+        return as_uint();
+    }
+
+    template<>
+    inline int64_t param_value::get< int64_t >() const
+    {
+        return as_int();
+    }
+
+    template<>
+    inline double param_value::get< double >() const
+    {
+        return as_double();
+    }
+
+    template<>
+    inline std::string param_value::get< std::string >() const
+    {
+        return as_string();
+    }
+
+    template<>
+    inline scarab::path param_value::get< scarab::path >() const
+    {
+        return as_path();
+    }
+
     template< typename XValType >
     XValType param_value::get() const
     {
@@ -517,12 +553,6 @@ namespace scarab
             return t_return;
         }
         return XValType();
-    }
-
-    template<>
-    inline std::string param_value::get< std::string >() const
-    {
-        return as_string();
     }
 
 
