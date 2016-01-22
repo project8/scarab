@@ -14,6 +14,8 @@
 #include <sstream>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 #include "error.hh"
 //#include "logger.hh"
 
@@ -25,6 +27,7 @@ namespace scarab
     class param_array;
     class param_node;
 
+    using boost::filesystem::path;
 
     class SCARAB_API param
     {
@@ -117,7 +120,8 @@ namespace scarab
             uint64_t as_uint() const;
             int64_t as_int() const;
             double as_double() const;
-            std::string as_string() const;
+            const std::string& as_string() const;
+            path as_path() const;
 
             template< typename XValType >
             XValType get() const;
@@ -165,6 +169,7 @@ namespace scarab
                 k_invalid
             } f_value_type;
 
+            mutable std::string f_buffer;
     };
 
 
