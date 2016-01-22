@@ -97,6 +97,11 @@ set( INC_PREFIX )
 # MACROS #
 ##########
 
+# Conveniece function for overriding the value of an option (aka a cached bool variable)
+macro( set_option VARIABLE VALUE )
+    set( ${VARIABLE} ${VALUE} CACHE BOOL "" FORCE )
+endmacro()
+
 # This should be called immediately after setting the project name
 macro( pbuilder_prepare_project )
     # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
@@ -196,10 +201,12 @@ macro( pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
 
     message( STATUS "pbuilder: will build the following executables: ${${PROGRAMS}}" )
     foreach( program ${${PROGRAMS}} )
-        add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
-         target_compile_options( ${program} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
-        target_link_libraries( ${program} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES} )
-        pbuilder_install_executables( ${program} )
+        if( NOT TARGET ${program} )
+            add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
+             target_compile_options( ${program} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
+            target_link_libraries( ${program} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES} )
+            pbuilder_install_executables( ${program} )
+        endif( NOT TARGET ${program} )
     endforeach( program )
 endmacro()
 

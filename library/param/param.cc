@@ -46,14 +46,16 @@ namespace scarab
 
     param_value::param_value() :
             param(),
-            f_value_type( k_invalid )
+            f_value_type( k_invalid ),
+            f_buffer()
     {
         //WARN( dlog, "param_value constructor: k_invalid" );
     }
 
     param_value::param_value( bool a_value ) :
             param(),
-            f_value_type( k_bool )
+            f_value_type( k_bool ),
+            f_buffer()
     {
         f_value.f_bool = a_value;
         //WARN( dlog, "param_value constructor: bool --> bool" );
@@ -61,7 +63,8 @@ namespace scarab
 
     param_value::param_value( uint8_t a_value ) :
             param(),
-            f_value_type( k_uint )
+            f_value_type( k_uint ),
+            f_buffer()
     {
         f_value.f_uint = a_value;
         //WARN( dlog, "param_value constructor: uint8 --> uint" );
@@ -69,7 +72,8 @@ namespace scarab
 
     param_value::param_value( uint16_t a_value ) :
             param(),
-            f_value_type( k_uint )
+            f_value_type( k_uint ),
+            f_buffer()
     {
         f_value.f_uint = a_value;
         //WARN( dlog, "param_value constructor: uint16 --> uint" );
@@ -77,7 +81,8 @@ namespace scarab
 
     param_value::param_value( uint32_t a_value ) :
             param(),
-            f_value_type( k_uint )
+            f_value_type( k_uint ),
+            f_buffer()
     {
         f_value.f_uint = a_value;
         //WARN( dlog, "param_value constructor: uint32 --> uint" );
@@ -85,7 +90,8 @@ namespace scarab
 
     param_value::param_value( uint64_t a_value ) :
             param(),
-            f_value_type( k_uint )
+            f_value_type( k_uint ),
+            f_buffer()
     {
         f_value.f_uint = a_value;
         //WARN( dlog, "param_value constructor: uint64 --> uint" );
@@ -93,7 +99,8 @@ namespace scarab
 
     param_value::param_value( int8_t a_value ) :
             param(),
-            f_value_type( k_int )
+            f_value_type( k_int ),
+            f_buffer()
     {
         f_value.f_int = a_value;
         //WARN( dlog, "param_value constructor: int8 --> int" );
@@ -101,7 +108,8 @@ namespace scarab
 
     param_value::param_value( int16_t a_value ) :
             param(),
-            f_value_type( k_int )
+            f_value_type( k_int ),
+            f_buffer()
     {
         f_value.f_int = a_value;
         //WARN( dlog, "param_value constructor: int16 --> int" );
@@ -110,7 +118,8 @@ namespace scarab
 
     param_value::param_value( int32_t a_value ) :
             param(),
-            f_value_type( k_int )
+            f_value_type( k_int ),
+            f_buffer()
     {
         f_value.f_int = a_value;
         //WARN( dlog, "param_value constructor: int32 --> int" );
@@ -118,7 +127,8 @@ namespace scarab
 
     param_value::param_value( int64_t a_value ) :
             param(),
-            f_value_type( k_int )
+            f_value_type( k_int ),
+            f_buffer()
     {
         f_value.f_int = a_value;
         //WARN( dlog, "param_value constructor: int64 --> int" );
@@ -126,7 +136,8 @@ namespace scarab
 
     param_value::param_value( float a_value ) :
             param(),
-            f_value_type( k_double )
+            f_value_type( k_double ),
+            f_buffer()
     {
         f_value.f_double = a_value;
         //WARN( dlog, "param_value constructor: float --> double" );
@@ -134,7 +145,8 @@ namespace scarab
 
     param_value::param_value( double a_value ) :
             param(),
-            f_value_type( k_double )
+            f_value_type( k_double ),
+            f_buffer()
     {
         f_value.f_double = a_value;
         //WARN( dlog, "param_value constructor: double --> double" );
@@ -142,7 +154,8 @@ namespace scarab
 
     param_value::param_value( const char* a_value ) :
             param(),
-            f_value_type( k_string )
+            f_value_type( k_string ),
+            f_buffer()
     {
         f_value.f_string = new string( a_value );
         //WARN( dlog, "param_value constructor: char* --> k_string" );
@@ -150,7 +163,8 @@ namespace scarab
 
     param_value::param_value( const string& a_value ) :
             param(),
-            f_value_type( k_string )
+            f_value_type( k_string ),
+            f_buffer()
     {
         f_value.f_string = new string( a_value );
         //WARN( dlog, "param_value constructor: string --> k_string" );
@@ -159,7 +173,8 @@ namespace scarab
     param_value::param_value( const param_value& orig ) :
             param( orig ),
             f_value( orig.f_value ),
-            f_value_type( orig.f_value_type )
+            f_value_type( orig.f_value_type ),
+            f_buffer()
     {
         if( f_value_type == k_string )
         {
@@ -285,7 +300,7 @@ namespace scarab
         }
         return 0.;
     }
-    string param_value::as_string() const
+    const string& param_value::as_string() const
     {
         if( f_value_type == k_string ) return *f_value.f_string;
 
@@ -295,7 +310,14 @@ namespace scarab
         else if( f_value_type == k_int ) t_conv << as_int();
         else if( f_value_type == k_double ) t_conv << as_double();
 
-        return t_conv.str();
+        t_conv >> f_buffer;
+        return f_buffer;
+    }
+
+    path param_value::as_path() const
+    {
+        if( f_value_type == k_string ) return path( *f_value.f_string );
+        return path();
     }
 
     void param_value::clear()
