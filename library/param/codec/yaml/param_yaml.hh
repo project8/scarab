@@ -44,6 +44,10 @@ namespace scarab
                 virtual ~param_output_yaml();
 
                 static bool write_file(const param& a_to_write, const std::string& a_filename);
+                static YAML::Node& check_param_type(const param& a_to_write, const YAML::Node& a_node);
+                static YAML::Node& param_node_handler( const param& a_to_write, const YAML::Node& a_node);
+                static YAML::Node& param_output_yaml::param_array_handler( const param& a_to_write, const YAML::Node& a_node );
+                static YAML::Node& param_output_yaml::param_value_handler( const param& a_to_write, const YAML::Node& a_node );
         };
 
 } /* namespace scarab */

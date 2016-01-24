@@ -32,6 +32,13 @@ namespace scarab
 
     param_node* param_input_yaml::read_file(const std::string& a_filename)
     {
+        /*try
+        {
+        }
+        catch()
+        {
+        }*/
+
         YAML::Node root_node = YAML::LoadFile(a_filename); //gets root node
         //check for errors in parsing file put load file line in try catch loop
 
@@ -90,51 +97,51 @@ namespace scarab
     }
 
     param_value* param_input_yaml::read_value(const YAML::Node& a_node)
+    {
+        try
         {
-          try
-          {
-              return new param_value(a_node.as<unsigned>());
-          }
-          catch(std::bad_cast& bc)
-          {
-              try
-              {
-                  return new param_value(a_node.as<bool>());
-              }
-              catch(std::bad_cast& bc)
-              {
-                  try
-                  {
-                      return new param_value(a_node.as<char>());
-                  }
-                  catch(std::bad_cast& bc)
-                  {
-                      try
-                      {
-                          return new param_value(a_node.as<double>());
-                      }
-                      catch(std::bad_cast& bc)
-                      {
-                          try
-                          {
-                              return new param_value(a_node.as<float>());
-                          }
-                          catch(std::bad_cast& bc)
-                          {
-                              try
-                              {
-                                  return new param_value(a_node.as<int>());
-                              }
-                              catch(std::bad_cast& bc)
-                              {
-
-                              }
-                          }
-                      }
-                  }
-              }
-          }
+            return new param_value(a_node.as<unsigned>());
         }
+        catch(std::bad_cast& bc)
+        {
+            try
+            {
+                return new param_value(a_node.as<bool>());
+            }
+            catch(std::bad_cast& bc)
+            {
+                try
+                {
+                    return new param_value(a_node.as<char>());
+                }
+                catch(std::bad_cast& bc)
+                {
+                    try
+                    {
+                        return new param_value(a_node.as<double>());
+                    }
+                    catch(std::bad_cast& bc)
+                    {
+                        try
+                        {
+                            return new param_value(a_node.as<float>());
+                        }
+                        catch(std::bad_cast& bc)
+                        {
+                            try
+                            {
+                                return new param_value(a_node.as<int>());
+                            }
+                            catch(std::bad_cast& bc)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     param_output_yaml::param_output_yaml()
     {
@@ -147,85 +154,108 @@ namespace scarab
     }
 
     bool param_output_yaml::write_file(const param& a_to_write, const std::string& a_filename)
+    {
+        if (a_filename.empty())
         {
-            if (a_filename.empty())
-            {
-                //ERROR( dlog, “Filename cannot be an empty string” );
-                return false;
-            }
-
-            FILE* file = fopen(a_filename.c_str(), "w");
-
-             if (file == NULL)
-                {
-                    //ERROR( dlog, "Unable to open file: " << a_filename );
-                    return false;
-                }
-
-             YAML::Node a_node;
-
-             if (a_to_write.is_null())
-             {
-                 &a_node = NULL;
-             }
-
-             if (a_to_write.is_node())
-             {
-                 param_node p_node = a_to_write;
-                 for (param_node::const_iterator counter = p_node.begin(); counter != p_node.end(); ++counter)
-                 {
-                     a_node[ counter->first ] = counter->second; //get the values of keys and value
-                     //make aliases for repeats
-                 }
-
-             }
-
-             if (a_to_write.is_array())
-             {
-                 param_array array = a_to_write;
-                 for (int count = 0; count != (int) array.size(); ++count)
-                 {
-                     a_node.push_back( array.value_at(count) );
-                 }
-             }
-
-             if (a_to_write.is_value())
-             {
-                param_value value = a_to_write;
-                string type = value.type();
-
-                 if (type.compare("string") == 0)
-                 {
-                    a_node = value.as_string();
-                 }
-
-                 if (type.compare("bool") == 0)
-                 {
-                     a_node = value.as_bool();
-                 }
-
-                 if (type.compare("uint") == 0)
-                 {
-                     a_node = value.as_uint();
-                 }
-
-                 if (type.compare("double") == 0)
-                 {
-                     a_node = value.as_double();
-                 }
-
-                 if (type.compare("uint") == 0)
-                 {
-                     a_node = value.as_int();
-                 }
-             }
-
-             std::ofstream fout(a_filename.c_str());
-             fout << a_node;
-             fclose(file);
-            return true;
+            //ERROR( dlog, “Filename cannot be an empty string” );
+            return false;
         }
 
+        FILE* file = fopen(a_filename.c_str(), "w");
+
+        if (file == NULL)
+        {
+            //ERROR( dlog, "Unable to open file: " << a_filename );
+            return false;
+        }
+
+        const YAML::Node a_node = param_output_yaml::check_param_type( a_to_write, a_node );
+
+        std::ofstream fout(a_filename.c_str());
+        fout << a_node;
+        fclose(file);
+        return true;
+    }
+
+   YAML::Node& param_output_yaml::check_param_type( const param& a_to_write, const YAML::Node& a_node )
+   {
+       if( a_to_write.is_null() )
+       {
+           &a_node = NULL;
+       }
+
+       if (a_to_write.is_node())
+       {
+           param_output_yaml::param_node_handler( a_to_write, a_node );
+       }
+
+       if( a_to_write.is_array() )
+       {
+           param_output_yaml::param_array_handler( a_to_write, a_node );
+       }
+
+       if( a_to_write.is_value() )
+       {
+           param_output_yaml::param_value_handler( a_to_write, a_node );
+       }
+   }
+
+   YAML::Node& param_output_yaml::param_node_handler( const param& a_to_write, const YAML::Node& a_node )
+     {
+       const param key;
+       const param value;
+       const param_node& p_node = static_cast< param_node& > ( a_to_write );
+       for (param_node::const_iterator counter = p_node.begin(); counter != p_node.end(); ++counter)
+       {
+           key = counter->first;
+           value = counter->second;
+           a_node[ param_output_yaml::check_param_type(key, a_node) ] = param_output_yaml::check_param_type( value, a_node );
+           //make aliases for repeats concatonate strings/stringbuffers for key
+       }
+
+       return a_node;
+     }
+
+   YAML::Node& param_output_yaml::param_array_handler( const param& a_to_write, const YAML::Node& a_node )
+   {
+       const param_array array = static_cast< param_array& > ( a_to_write );
+       for( int count = 0; count != (int) array.size(); ++count )
+       {
+           a_node.push_back( const param_output_yaml::check_param_type(*array.at(count), a_node) );
+       }
+
+       return a_node;
+   }
+
+   YAML::Node& param_output_yaml::param_value_handler( const param& a_to_write, const YAML::Node& a_node )
+   {
+       const param_value& value = static_cast< const param_value& >( a_to_write );
+       if( value.is_bool() )
+       {
+           return a_node = value.as_bool();
+       }
+
+       else if( value.is_uint() )
+       {
+           return a_node = value.as_uint();
+       }
+
+       else if( value.is_double() )
+       {
+           return a_node = value.as_double();
+       }
+
+       else if( value.is_int() )
+       {
+           return a_node = value.as_int();
+       }
+
+       else if( value.is_string() )
+       {
+           return a_node = value.as_string();
+       }
+
+   }
 }
 /* namespace scarab */
 
