@@ -9,6 +9,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/destroyer.hh
     ${dir}/digital.hh
     ${dir}/error.hh
+    ${dir}/factory.hh
     ${dir}/member_variables.hh
     ${dir}/mutex.hh
     ${dir}/path.hh
