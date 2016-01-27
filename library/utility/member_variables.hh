@@ -157,7 +157,7 @@
 
 #define mv_atomic_noset( x_type, x_variable )\
     public:\
-        const x_type& get_##x_variable() const\
+        x_type get_##x_variable() const\
         {\
             return f_##x_variable.load();\
         }\
@@ -166,16 +166,16 @@
 
 #define mv_atomic( x_type, x_variable )\
     public:\
-        void set_##x_variable( const x_type& p_variable )\
+        void set_##x_variable( x_type p_variable )\
         {\
             f_##x_variable.store( p_variable );\
             return;\
         }\
-        mv_accessible_noset( x_type, x_variable )
+        mv_atomic_noset( x_type, x_variable )
 
 #define mv_atomic_static_noset( x_type, x_variable )\
     public:\
-        static const x_type& get_##x_variable()\
+        static x_type get_##x_variable()\
         {\
             return s_##x_variable.load();\
         }\
@@ -184,11 +184,11 @@
 
 #define mv_atomic_static( x_type, x_variable )\
     public:\
-        static void set_##x_variable( const x_type& p_variable )\
+        static void set_##x_variable( x_type p_variable )\
         {\
             s_##x_variable.store( p_variable );\
             return;\
         }\
-        mv_accessible_static_noset( x_type, x_variable )
+        mv_atomic_static_noset( x_type, x_variable )
 
 #endif /* SCARAB_MEMBER_VARIABLES_HH_ */
