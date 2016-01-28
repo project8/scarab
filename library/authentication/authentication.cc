@@ -22,17 +22,18 @@
 #include <Windows.h>
 #endif
 
+using namespace boost::filesystem;
+using std::string;
+
 namespace scarab
 {
-    using namespace boost::filesystem;
-    using std::string;
 
 
     LOGGER( mtlog, "authentication" );
 
     authentication::authentication( const string& a_auth_filename, bool a_is_in_user_home ) :
                     param_node(),
-                    f_auth_filename(),
+                    f_auth_filename( a_auth_filename ),
                     f_is_loaded( false )
     {
         load( a_auth_filename, a_is_in_user_home );
@@ -45,6 +46,8 @@ namespace scarab
     bool authentication::load( const string& a_auth_file, bool a_is_in_user_home )
     {
         this->clear();
+
+        f_auth_filename = a_auth_file;
 
         path t_auth_file_path( a_auth_file );
 

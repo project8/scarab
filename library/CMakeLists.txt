@@ -9,8 +9,12 @@ cmake_minimum_required (VERSION 3.0)
 # setup #
 #########
 
+# load the version number from the Scarab/VERSION file
+file( STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/../VERSION scarab_version_from_file )
+string( REPLACE " " "." scarab_version ${scarab_version_from_file} )
+
 cmake_policy( SET CMP0048 NEW ) # version in project()
-project( Scarab VERSION 1.0.0 )
+project( Scarab VERSION ${scarab_version} )
 
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../cmake )
 
@@ -37,6 +41,10 @@ option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authenticati
 #######################
 
 if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+	# filesystem and system for param_value's use of boost::filesystem::path
+	# thread and date_time for concurrent_queue
+	set( boost_components filesystem system thread date_time )
+
     # RapidJSON
     include_directories( BEFORE 
         ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON
@@ -69,14 +77,17 @@ if( Scarab_BUILD_CODEC_YAML )
 endif( Scarab_BUILD_CODEC_YAML )
 
 if( Scarab_BUILD_AUTHENTICATION )
-    # Boost (1.46 required for filesystem version 3)
-    find_package( Boost 1.46.0 REQUIRED COMPONENTS filesystem system )
-    # make sure dynamic linking is assumed for all boost libraries
-    add_definitions( -DBOOST_ALL_DYN_LINK )
-    include_directories( ${Boost_INCLUDE_DIRS} )
-    # No compiled libraries are currently required
-    pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
+    list( APPEND boost_components filesystem system )
 endif( Scarab_BUILD_AUTHENTICATION )
+
+# Boost (1.46 required for filesystem version 3)
+list( REMOVE_DUPLICATES boost_components )
+find_package( Boost 1.46.0 REQUIRED COMPONENTS ${boost_components} )
+# make sure dynamic linking is assumed for all boost libraries
+add_definitions( -DBOOST_ALL_DYN_LINK )
+include_directories( ${Boost_INCLUDE_DIRS} )
+# No compiled libraries are currently required
+pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
     
 
 ########################
@@ -105,7 +116,7 @@ add_subdirectory( param )
 if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
-endif( Scarab_BUILD_CODEC_JSON )
+endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack )
@@ -124,6 +135,8 @@ endif( Scarab_BUILD_AUTHENTICATION )
 
 
 ##########
+
+#message(STATUS "Scarab sources: ${Scarab_SOURCES}" )
 
 pbuilder_library( Scarab Scarab_SOURCES "" )
 
