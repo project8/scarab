@@ -19,6 +19,7 @@ using std::stringstream;
 
 namespace scarab
 {
+    LOGGER( slog, "param_yaml" );
 
     param_input_yaml::param_input_yaml()
     {
@@ -169,7 +170,7 @@ namespace scarab
             return false;
         }
 
-        const YAML::Node a_node = param_output_yaml::check_param_type( a_to_write, a_node );
+        YAML::Node a_node = param_output_yaml::check_param_type( a_to_write );
 
         std::ofstream fout(a_filename.c_str());
         fout << a_node;
@@ -177,84 +178,95 @@ namespace scarab
         return true;
     }
 
-   YAML::Node& param_output_yaml::check_param_type( const param& a_to_write, const YAML::Node& a_node )
+   YAML::Node& param_output_yaml::check_param_type( const param& a_to_write )
    {
        if( a_to_write.is_null() )
        {
-           &a_node = NULL;
+           return YAML::Node();
        }
-
-       if (a_to_write.is_node())
+       else if (a_to_write.is_node())
        {
-           param_output_yaml::param_node_handler( a_to_write, a_node );
+           return param_output_yaml::param_node_handler( a_to_write );
        }
-
-       if( a_to_write.is_array() )
+       else if( a_to_write.is_array() )
        {
-           param_output_yaml::param_array_handler( a_to_write, a_node );
+           return param_output_yaml::param_array_handler( a_to_write );
        }
-
-       if( a_to_write.is_value() )
+       else if( a_to_write.is_value() )
        {
-           param_output_yaml::param_value_handler( a_to_write, a_node );
+           return param_output_yaml::param_value_handler( a_to_write );
        }
+       WARN( slog, "Unknown param type encountered" );
+       return YAML::Node();
    }
 
-   YAML::Node& param_output_yaml::param_node_handler( const param& a_to_write, const YAML::Node& a_node )
+   YAML::Node& param_output_yaml::param_node_handler( const param& a_to_write )
      {
-       const param key;
-       const param value;
+       YAML::Node t_node;
+
        const param_node& p_node = static_cast< param_node& > ( a_to_write );
        for (param_node::const_iterator counter = p_node.begin(); counter != p_node.end(); ++counter)
        {
-           key = counter->first;
-           value = counter->second;
-           a_node[ param_output_yaml::check_param_type(key, a_node) ] = param_output_yaml::check_param_type( value, a_node );
-           //make aliases for repeats concatonate strings/stringbuffers for key
+           t_node[ counter->first ] = param_output_yaml::check_param_type(*counter->second);
+
+
+           //make aliases for repeats
+           //use the multimap::find to get location of repeated value can't use multimap. use nested for loop
+           //if the key doesn't exist/repeats after this index, then add the key as is
+           //if the key repeats before this index, key.toStringBuffer
+           //add & to alias and concatonate with existing stringBuffer
+           //new string = string buffer
+           // set key
        }
 
-       return a_node;
+       return t_node;
      }
 
-   YAML::Node& param_output_yaml::param_array_handler( const param& a_to_write, const YAML::Node& a_node )
+   YAML::Node& param_output_yaml::param_array_handler( const param& a_to_write )
    {
+       YAML::Node t_node;
+
        const param_array array = static_cast< param_array& > ( a_to_write );
        for( int count = 0; count != (int) array.size(); ++count )
        {
-           a_node.push_back( const param_output_yaml::check_param_type(*array.at(count), a_node) );
+           t_node.push_back( param_output_yaml::check_param_type(*array.at(count)) );
        }
 
-       return a_node;
+       return t_node;
    }
 
-   YAML::Node& param_output_yaml::param_value_handler( const param& a_to_write, const YAML::Node& a_node )
+   YAML::Node& param_output_yaml::param_value_handler( const param& a_to_write )
    {
+       YAML::Node t_node;
+
        const param_value& value = static_cast< const param_value& >( a_to_write );
        if( value.is_bool() )
        {
-           return a_node = value.as_bool();
+           return t_node = value.as_bool();
        }
 
        else if( value.is_uint() )
        {
-           return a_node = value.as_uint();
+           return t_node = value.as_uint();
        }
 
        else if( value.is_double() )
        {
-           return a_node = value.as_double();
+           return t_node = value.as_double();
        }
 
        else if( value.is_int() )
        {
-           return a_node = value.as_int();
+           return t_node = value.as_int();
        }
 
        else if( value.is_string() )
        {
-           return a_node = value.as_string();
+           return t_node = value.as_string();
        }
 
+       WARN( slog, "Unkown value type encountered" );
+       return YAML::Node();
    }
 }
 /* namespace scarab */

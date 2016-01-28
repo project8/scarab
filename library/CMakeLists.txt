@@ -112,6 +112,11 @@ if( Scarab_BUILD_CODEC_MSGPACK )
     add_subdirectory( param/codec/msgpack )
 endif( Scarab_BUILD_CODEC_MSGPACK )
 
+if( Scarab_BUILD_CODEC_YAML )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/yaml )
+    add_subdirectory( param/codec/yaml )
+endif( Scarab_BUILD_CODEC_YAML )
+
 if( Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )
     add_subdirectory( authentication )
