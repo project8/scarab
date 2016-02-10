@@ -10,6 +10,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/digital.hh
     ${dir}/error.hh
     ${dir}/factory.hh
+    ${dir}/lock_guard.hh
     ${dir}/member_variables.hh
     ${dir}/mutex.hh
     ${dir}/path.hh
@@ -22,6 +23,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
 set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/digital.cc
     ${dir}/error.cc
+    ${dir}/lock_guard.cc
     ${dir}/mutex.cc
     ${dir}/path.cc
     ${dir}/time.cc

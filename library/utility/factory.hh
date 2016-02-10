@@ -10,7 +10,9 @@
 
 #include "singleton.hh"
 
+#include "lock_guard.hh"
 #include "logger.hh"
+#include "mutex.hh"
 
 #include <map>
 #include <string>
@@ -73,7 +75,7 @@ namespace scarab
 
         protected:
             FactoryMap* fMap;
-
+            mutex f_factory_mutex;
 
         protected:
             friend class singleton< factory >;
@@ -85,6 +87,7 @@ namespace scarab
     template< class XBaseType >
     XBaseType* factory< XBaseType >::create(const FactoryCIt& iter)
     {
+        lock_guard( this->f_factory_mutex );
         return iter->second->create();
     }
 
@@ -96,6 +99,7 @@ namespace scarab
         //{
         //    std::cout << "this factory has: " << iter->first << std::endl;
         //}
+        lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_class_name);
         if (it == fMap->end())
         {
@@ -109,6 +113,7 @@ namespace scarab
     template< class XBaseType >
     void factory< XBaseType >::register_class(const std::string& a_class_name, const base_registrar< XBaseType >* a_registrar)
     {
+        lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_class_name);
         if (it != fMap->end())
         {
@@ -121,7 +126,8 @@ namespace scarab
 
     template< class XBaseType >
     factory< XBaseType >::factory() :
-        fMap(new FactoryMap())
+        fMap(new FactoryMap()),
+        f_factory_mutex()
     {}
 
     template< class XBaseType >
@@ -133,12 +139,14 @@ namespace scarab
     template< class XBaseType >
     typename factory< XBaseType >::FactoryCIt factory< XBaseType >::begin() const
     {
+        lock_guard( this->f_factory_mutex );
         return fMap->begin();
     }
 
     template< class XBaseType >
     typename factory< XBaseType >::FactoryCIt factory< XBaseType >::end() const
     {
+        lock_guard( this->f_factory_mutex );
         return fMap->end();
     }
 
