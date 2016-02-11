@@ -18,6 +18,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/scarab_version.hh
     ${dir}/singleton.hh
     ${dir}/time.hh
+    ${dir}/typename.hh
     PARENT_SCOPE )
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
@@ -27,6 +28,7 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/mutex.cc
     ${dir}/path.cc
     ${dir}/time.cc
+    ${dir}/typename.cc
 )
 
 configure_file( ${dir}/scarab_version.cc.in ${CMAKE_CURRENT_BINARY_DIR}/scarab_version.cc )
