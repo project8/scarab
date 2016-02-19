@@ -26,7 +26,7 @@ namespace scarab
             param_input_yaml();
             virtual ~param_input_yaml();
 
-            static param_node* read_file(const std::string& a_filename);
+            static param* read_file(const std::string& a_filename);
             static param* read_node_type(const YAML::Node& a_node);
             static param_array* sequence_handler(const YAML::Node& a_node);
             static param_node* map_handler( const YAML::Node& a_node );
@@ -44,10 +44,10 @@ namespace scarab
                 virtual ~param_output_yaml();
 
                 static bool write_file(const param& a_to_write, const std::string& a_filename);
-                static YAML::Node& check_param_type(const param& a_to_write);
-                static YAML::Node& param_node_handler( const param& a_to_write);
-                static YAML::Node& param_output_yaml::param_array_handler( const param& a_to_write );
-                static YAML::Node& param_output_yaml::param_value_handler( const param& a_to_write );
+                static YAML::Node check_param_type(const param& a_to_write);
+                static YAML::Node param_node_handler( const param& a_to_write);
+                static YAML::Node param_array_handler( const param& a_to_write );
+                static YAML::Node param_value_handler( const param& a_to_write );
         };
 
 } /* namespace scarab */

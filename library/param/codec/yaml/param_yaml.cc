@@ -31,56 +31,63 @@ namespace scarab
 
     }
 
-    param_node* param_input_yaml::read_file(const std::string& a_filename)
+    param* param_input_yaml::read_file(const std::string& a_filename)
     {
-        /*try
+        try
         {
+            YAML::Node root_node = YAML::LoadFile(a_filename);
+            return param_input_yaml::read_node_type(root_node);
         }
-        catch()
+        catch( YAML::Exception& e )
         {
-        }*/
-
-        YAML::Node root_node = YAML::LoadFile(a_filename); //gets root node
-        //check for errors in parsing file put load file line in try catch loop
-
-        return param_input_yaml::read_node_type(root_node);
+            ERROR( slog, "YAML error: " << e.what() );
+        }
     }
 
     param* param_input_yaml::read_node_type(const YAML::Node& a_node)
     {
-        if (a_node.IsNull())
+        try
         {
-            return new param();
+            if (a_node.IsNull())
+            {
+                return new param();
+            }
+            if (a_node.IsScalar())
+            {
+                return param_input_yaml::read_value(a_node);
+            }
+            if (a_node.IsSequence())
+            {
+                return param_input_yaml::sequence_handler(a_node);
+            }
+            if (a_node.IsMap())
+            {
+                return param_input_yaml::map_handler(a_node);
+            }
+        }
+        catch( YAML::Exception& e)
+        {
+            ERROR( slog, "Yaml error: " << e.what() );
         }
 
-        if (a_node.IsScalar())
-        {
-            return param_input_yaml::read_value(a_node);
-        }
-
-        if (a_node.IsSequence())
-        {
-            return param_input_yaml::sequence_handler(a_node);
-        }
-
-        if (a_node.IsMap())
-        {
-
-            return param_input_yaml::map_handler(a_node);
-
-        }
     }
 
     param_array* param_input_yaml::sequence_handler(const YAML::Node& a_node)
     {
         param_array* t_config_array = new param_array();
 
-        for (YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter)
+        try
         {
-            YAML::Node scalar_value_node = counter;
-            t_config_array->push_back(param_input_yaml::read_node_type(scalar_value_node));
-
+            for (YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter)
+            {
+                 t_config_array->push_back(param_input_yaml::read_node_type(*counter));
+            }
         }
+        catch( YAML::Exception& e )
+        {
+            ERROR( slog, "YAML error: " << e.what() );
+        }
+
 
         return t_config_array;
     }
@@ -89,9 +96,16 @@ namespace scarab
     {
         param_node* t_config_object = new param_node();
 
-        for (YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter)
+        try
         {
-            t_config_object->replace ( counter->first.as<std::string>(), param_input_yaml::read_node_type( counter->second ) );
+            for (YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter)
+            {
+                t_config_object->replace ( counter->first.as<std::string>(), param_input_yaml::read_node_type( counter->second ) );
+            }
+        }
+        catch( YAML::Exception& e)
+        {
+            ERROR( slog, "Yaml error: " << e.what() );
         }
 
         return t_config_object;
@@ -135,7 +149,7 @@ namespace scarab
                             }
                             catch(std::bad_cast& bc)
                             {
-
+                                ERROR( slog, "Yaml error: Bad Cast" );
                             }
                         }
                     }
@@ -158,7 +172,7 @@ namespace scarab
     {
         if (a_filename.empty())
         {
-            //ERROR( dlog, “Filename cannot be an empty string” );
+            //ERROR( slog, “Filename cannot be an empty string” );
             return false;
         }
 
@@ -166,7 +180,7 @@ namespace scarab
 
         if (file == NULL)
         {
-            //ERROR( dlog, "Unable to open file: " << a_filename );
+            //ERROR( slog, "Unable to open file: " << a_filename );
             return false;
         }
 
@@ -178,7 +192,7 @@ namespace scarab
         return true;
     }
 
-   YAML::Node& param_output_yaml::check_param_type( const param& a_to_write )
+   YAML::Node param_output_yaml::check_param_type( const param& a_to_write )
    {
        if( a_to_write.is_null() )
        {
@@ -200,33 +214,24 @@ namespace scarab
        return YAML::Node();
    }
 
-   YAML::Node& param_output_yaml::param_node_handler( const param& a_to_write )
+   YAML::Node param_output_yaml::param_node_handler( const param& a_to_write )
      {
        YAML::Node t_node;
 
-       const param_node& p_node = static_cast< param_node& > ( a_to_write );
+       const param_node& p_node = static_cast< const param_node& > ( a_to_write );
        for (param_node::const_iterator counter = p_node.begin(); counter != p_node.end(); ++counter)
        {
            t_node[ counter->first ] = param_output_yaml::check_param_type(*counter->second);
-
-
-           //make aliases for repeats
-           //use the multimap::find to get location of repeated value can't use multimap. use nested for loop
-           //if the key doesn't exist/repeats after this index, then add the key as is
-           //if the key repeats before this index, key.toStringBuffer
-           //add & to alias and concatonate with existing stringBuffer
-           //new string = string buffer
-           // set key
        }
 
        return t_node;
      }
 
-   YAML::Node& param_output_yaml::param_array_handler( const param& a_to_write )
+   YAML::Node param_output_yaml::param_array_handler( const param& a_to_write )
    {
        YAML::Node t_node;
 
-       const param_array array = static_cast< param_array& > ( a_to_write );
+       const param_array array = static_cast< const param_array& > ( a_to_write );
        for( int count = 0; count != (int) array.size(); ++count )
        {
            t_node.push_back( param_output_yaml::check_param_type(*array.at(count)) );
@@ -235,7 +240,7 @@ namespace scarab
        return t_node;
    }
 
-   YAML::Node& param_output_yaml::param_value_handler( const param& a_to_write )
+   YAML::Node param_output_yaml::param_value_handler( const param& a_to_write )
    {
        YAML::Node t_node;
 

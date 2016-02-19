@@ -69,6 +69,8 @@ if( Scarab_BUILD_CODEC_MSGPACK )
 endif( Scarab_BUILD_CODEC_MSGPACK )
 
 if( Scarab_BUILD_CODEC_YAML )
+	set_option( USE_CPP11 TRUE )
+
     # Yaml-cpp
     add_subdirectory( param/codec/yaml/yaml-cpp )
     # I'm hard-coding the include directory and library because I ran into an error when I tried to include ${CMAKE_CURRENT_BINARY_DIR}/param/codec/yaml/yaml-cpp/yaml-cpp-config.cmake )
