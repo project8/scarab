@@ -18,7 +18,7 @@
 
 namespace scarab
 {
-    typedef uint64_t time_nsec_type;
+    typedef uint64_t time_nsec_type; // the maximum number of nanoseconds representable by a uint64_t is equivalent to 584.6 years
 }
 
 #ifndef NSEC_PER_SEC
