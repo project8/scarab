@@ -11,7 +11,7 @@
 #include <algorithm>
 //#include <cstdio>
 //#include <cstdlib>
-//#include <cstring>
+#include <cstring> // for strrchr
 #include <iomanip>
 #include <iterator>
 #ifdef __MACH__
