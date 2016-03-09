@@ -2,8 +2,8 @@
 # Author: N. Oblath
 # Created: Jan 4, 2016
 
-# Minimum cmake verison 3.0 required by the way CMake handles rpath information on Mac OSX.
-cmake_minimum_required (VERSION 3.0)
+# Minimum cmake verison 3.1 required for the variable CMAKE_CXX_STANDARD
+cmake_minimum_required (VERSION 3.1)
 
 #########
 # setup #
