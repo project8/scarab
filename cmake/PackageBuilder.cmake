@@ -3,7 +3,7 @@
 # Parts of this script are based on work done by Sebastian Voecking and Marco Haag in the Kasper package
 # Convenient macros and default variable settings for the Nymph-based build.
 #
-# Requires: CMake v3.0 or better (rpath treatment and version variables)
+# Requires: CMake v3.1 or better (CMAKE_CXX_STANDARD)
 
 # CMake policies
 cmake_policy( SET CMP0011 NEW )
