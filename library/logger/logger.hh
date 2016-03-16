@@ -65,7 +65,8 @@
 
 // INCLUDES
 
-#include <string>
+//#include <string>
+#include "string.h"//TODO I don't understand why I need this in addtion to the above, but strrchr isn't found if I don't
 #include <iostream>
 #include <sstream>
 
@@ -282,7 +283,7 @@ namespace scarab
         }
 #else
 #define __LOG_LOG_4(I,L,M,O) \
-	    { } 
+	    { }
 #endif
 
 
