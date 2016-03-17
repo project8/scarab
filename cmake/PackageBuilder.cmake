@@ -3,7 +3,7 @@
 # Parts of this script are based on work done by Sebastian Voecking and Marco Haag in the Kasper package
 # Convenient macros and default variable settings for the Nymph-based build.
 #
-# Requires: CMake v3.0 or better (rpath treatment and version variables)
+# Requires: CMake v3.1 or better (CMAKE_CXX_STANDARD)
 
 # CMake policies
 cmake_policy( SET CMP0011 NEW )
@@ -66,12 +66,10 @@ option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of execu
 option( USE_CPP11 "Flag for building with C++11" ON )
 if( USE_CPP11 )
     add_definitions( -DUSE_CPP11 )
-    list( APPEND GLOBAL_COMPILE_OPTIONS "-std=c++11" )
+    set( CMAKE_CXX_STANDARD 11 )
 else( USE_CPP11 )
     remove_definitions( -DUSE_CP11 )
-    if( DEFINED GLOBAL_COMPILE_OPTIONS )
-        list( REMOVE_ITEM GLOBAL_COMPILE_OPTIONS "-std=c++11" )
-    endif( DEFINED GLOBAL_COMPILE_OPTIONS )
+    set( CMAKE_CXX_STANDARD 98 )
 endif( USE_CPP11 )
 
 # build shared libraries
@@ -97,6 +95,11 @@ set( INC_PREFIX )
 # MACROS #
 ##########
 
+# Conveniece function for overriding the value of an option (aka a cached bool variable)
+macro( set_option VARIABLE VALUE )
+    set( ${VARIABLE} ${VALUE} CACHE BOOL "" FORCE )
+endmacro()
+
 # This should be called immediately after setting the project name
 macro( pbuilder_prepare_project )
     # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
@@ -112,43 +115,59 @@ macro( pbuilder_prepare_project )
         # Add the binary tree to the search path for include files so that the config file is found during the build
         include_directories( ${PROJECT_BINARY_DIR} )
     endif( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.hh.in )
+    
+    # if git is used, get the commit SHA1
+    find_package( Git )
+    if( GIT_FOUND )
+        execute_process( COMMAND ${GIT_EXECUTABLE} rev-parse -q HEAD  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE ${PROJECT_NAME}_GIT_COMMIT  OUTPUT_STRIP_TRAILING_WHITESPACE )
+        execute_process( COMMAND ${GIT_EXECUTABLE} describe --tags --long  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE ${PROJECT_NAME}_GIT_DESCRIBE  OUTPUT_STRIP_TRAILING_WHITESPACE )
+    endif( GIT_FOUND )
+    
 endmacro()
 
 macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
-    if( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
-        set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}" CACHE INTERNAL "Library name suffix for submodules" )
-    else( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
-        set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "" )
-    endif( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
-    #message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${PARENT_LIB_NAME_SUFFIX}" )
-    
-    if( NOT DEFINED PARENT_INC_DIR_PATH )
-        set( PARENT_INC_DIR_PATH "/${SM_NAME}" CACHE INTERNAL "Include directory path for submodules" )
-    else( NOT DEFINED PARENT_INC_DIR_PATH )
-        set( PARENT_INC_DIR_PATH "${PARENT_INC_DIR_PATH}/${SM_NAME}" CACHE INTERNAL "" )
-    endif( NOT DEFINED PARENT_INC_DIR_PATH )
-    #message( STATUS "PARENT_INC_DIR_PATH being set for SM ${SM_NAME}: ${PARENT_INC_DIR_PATH}" )
-    
-    set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX ${PARENT_LIB_NAME_SUFFIX} CACHE INTERNAL "Scoped library name suffix for submodules" )
-    set( ${SM_NAME}_PARENT_INC_DIR_PATH ${PARENT_INC_DIR_PATH} CACHE INTERNAL "Scoped include directory path for submodules" )
-    #message( STATUS "Just created ${SM_NAME}_PARENT_LIB_NAME_SUFFIX as ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
-    
-    add_subdirectory( ${SM_LOCATION} )
-    #message( STATUS "SM ${SM_NAME} variables for parent:" )
-    #message( STATUS "${SM_NAME}_LIBRARIES: ${${SM_NAME}_LIBRARIES}" )
-    #message( STATUS "${SM_NAME}_LIBRARY_DIR: ${${SM_NAME}_LIBRARY_DIR}" )
-    #message( STATUS "${SM_NAME}_INCLUDE_DIR: ${${SM_NAME}_INCLUDE_DIR}" )
-    #message( STATUS "${SM_NAME}_DEP_INCLUDE_DIRS: ${${SM_NAME}_DEP_INCLUDE_DIRS}" )
-    
-    pbuilder_add_submodule_libraries( ${${SM_NAME}_LIBRARIES} )
-    
-    include_directories( BEFORE ${${SM_NAME}_DEP_INCLUDE_DIRS} )
-    
-    unset( PARENT_LIB_NAME_SUFFIX CACHE )
-    unset( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX CACHE )
+    #message( STATUS "Checking submodule ${SM_NAME}_FOUND and ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
+    if( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
+        message( STATUS "Building submodule ${SM_NAME} at ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 
-    unset( PARENT_INC_DIR_PATH CACHE )
-    unset( ${SM_NAME}_PARENT_INC_DIR_PATH )
+        if( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
+            set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}" CACHE INTERNAL "Library name suffix for submodules" )
+        else( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
+            set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "" )
+        endif( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
+        #message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${PARENT_LIB_NAME_SUFFIX}" )
+        
+        if( NOT DEFINED PARENT_INC_DIR_PATH )
+            set( PARENT_INC_DIR_PATH "/${SM_NAME}" CACHE INTERNAL "Include directory path for submodules" )
+        else( NOT DEFINED PARENT_INC_DIR_PATH )
+            set( PARENT_INC_DIR_PATH "${PARENT_INC_DIR_PATH}/${SM_NAME}" CACHE INTERNAL "" )
+        endif( NOT DEFINED PARENT_INC_DIR_PATH )
+        #message( STATUS "PARENT_INC_DIR_PATH being set for SM ${SM_NAME}: ${PARENT_INC_DIR_PATH}" )
+        
+        set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX ${PARENT_LIB_NAME_SUFFIX} CACHE INTERNAL "Scoped library name suffix for submodules" )
+        set( ${SM_NAME}_PARENT_INC_DIR_PATH ${PARENT_INC_DIR_PATH} CACHE INTERNAL "Scoped include directory path for submodules" )
+        #message( STATUS "Just created ${SM_NAME}_PARENT_LIB_NAME_SUFFIX as ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+        
+        add_subdirectory( ${SM_LOCATION} )
+        message( STATUS "SM ${SM_NAME} cached variables:" )
+        message( STATUS "${SM_NAME}_FOUND: ${${SM_NAME}_FOUND}" )
+        message( STATUS "${SM_NAME}_LOCATION: ${${SM_NAME}_LOCATION}" )
+        message( STATUS "${SM_NAME}_LIBRARIES: ${${SM_NAME}_LIBRARIES}" )
+        message( STATUS "${SM_NAME}_LIBRARY_DIR: ${${SM_NAME}_LIBRARY_DIR}" )
+        message( STATUS "${SM_NAME}_INCLUDE_DIR: ${${SM_NAME}_INCLUDE_DIR}" )
+        message( STATUS "${SM_NAME}_DEP_INCLUDE_DIRS: ${${SM_NAME}_DEP_INCLUDE_DIRS}" )
+        
+        pbuilder_add_submodule_libraries( ${${SM_NAME}_LIBRARIES} )
+        
+        include_directories( BEFORE ${${SM_NAME}_DEP_INCLUDE_DIRS} )
+        
+        unset( PARENT_LIB_NAME_SUFFIX CACHE )
+        unset( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX CACHE )
+    
+        unset( PARENT_INC_DIR_PATH CACHE )
+        unset( ${SM_NAME}_PARENT_INC_DIR_PATH )
+        
+    endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 endmacro()
 
 macro( pbuilder_add_ext_libraries )
@@ -196,10 +215,12 @@ macro( pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
 
     message( STATUS "pbuilder: will build the following executables: ${${PROGRAMS}}" )
     foreach( program ${${PROGRAMS}} )
-        add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
-         target_compile_options( ${program} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
-        target_link_libraries( ${program} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES} )
-        pbuilder_install_executables( ${program} )
+        if( NOT TARGET ${program} )
+            add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
+             target_compile_options( ${program} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
+            target_link_libraries( ${program} ${FULL_PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES} )
+            pbuilder_install_executables( ${program} )
+        endif( NOT TARGET ${program} )
     endforeach( program )
 endmacro()
 
@@ -245,12 +266,14 @@ endmacro()
 
 macro( pbuilder_variables_for_parent )
     if( NOT ${PBUILDER_STANDALONE} )
+        set( ${PROJECT_NAME}_FOUND TRUE CACHE INTERNAL "" )
+        set( ${PROJECT_NAME}_LOCATION ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "" )
         get_property( LIBRARIES GLOBAL PROPERTY ${PROJECT_NAME}_LIBRARIES )
-        set( ${PROJECT_NAME}_LIBRARIES ${LIBRARIES} ${SUBMODULE_LIBRARIES} PARENT_SCOPE )
-        set( ${PROJECT_NAME}_LIBRARY_DIR ${LIB_INSTALL_DIR} PARENT_SCOPE )
-        set( ${PROJECT_NAME}_INCLUDE_DIR ${INCLUDE_INSTALL_DIR} PARENT_SCOPE )
+        set( ${PROJECT_NAME}_LIBRARIES ${LIBRARIES} ${SUBMODULE_LIBRARIES} CACHE INTERNAL "" )
+        set( ${PROJECT_NAME}_LIBRARY_DIR ${LIB_INSTALL_DIR} CACHE INTERNAL "" )
+        set( ${PROJECT_NAME}_INCLUDE_DIR ${INCLUDE_INSTALL_DIR} CACHE INTERNAL "" )
         get_property( DEP_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES )
         list( REMOVE_DUPLICATES DEP_INCLUDE_DIRS )
-        set( ${PROJECT_NAME}_DEP_INCLUDE_DIRS ${DEP_INCLUDE_DIRS} PARENT_SCOPE )
+        set( ${PROJECT_NAME}_DEP_INCLUDE_DIRS ${DEP_INCLUDE_DIRS} CACHE INTERNAL "" )
     endif( NOT ${PBUILDER_STANDALONE} )
 endmacro()

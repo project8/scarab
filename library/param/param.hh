@@ -16,6 +16,7 @@
 
 #include "error.hh"
 //#include "logger.hh"
+#include "path.hh"
 
 
 namespace scarab
@@ -117,7 +118,8 @@ namespace scarab
             uint64_t as_uint() const;
             int64_t as_int() const;
             double as_double() const;
-            std::string as_string() const;
+            const std::string& as_string() const;
+            path as_path() const;
 
             template< typename XValType >
             XValType get() const;
@@ -165,6 +167,7 @@ namespace scarab
                 k_invalid
             } f_value_type;
 
+            mutable std::string f_buffer;
     };
 
 
@@ -496,6 +499,42 @@ namespace scarab
     //************************************
 
 
+    template<>
+    inline bool param_value::get< bool >() const
+    {
+        return as_bool();
+    }
+
+    template<>
+    inline uint64_t param_value::get< uint64_t >() const
+    {
+        return as_uint();
+    }
+
+    template<>
+    inline int64_t param_value::get< int64_t >() const
+    {
+        return as_int();
+    }
+
+    template<>
+    inline double param_value::get< double >() const
+    {
+        return as_double();
+    }
+
+    template<>
+    inline std::string param_value::get< std::string >() const
+    {
+        return as_string();
+    }
+
+    template<>
+    inline scarab::path param_value::get< scarab::path >() const
+    {
+        return as_path();
+    }
+
     template< typename XValType >
     XValType param_value::get() const
     {
@@ -512,12 +551,6 @@ namespace scarab
             return t_return;
         }
         return XValType();
-    }
-
-    template<>
-    inline std::string param_value::get< std::string >() const
-    {
-        return as_string();
     }
 
 

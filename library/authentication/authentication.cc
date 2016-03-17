@@ -22,10 +22,11 @@
 #include <Windows.h>
 #endif
 
+using namespace boost::filesystem;
+using std::string;
+
 namespace scarab
 {
-    using namespace boost::filesystem;
-    using std::string;
 
 
     LOGGER( mtlog, "authentication" );

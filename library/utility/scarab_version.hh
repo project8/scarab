@@ -16,8 +16,6 @@
 
 namespace scarab
 {
-    using std::string;
-
     class SCARAB_API version_ifc
     {
         public:
@@ -28,23 +26,23 @@ namespace scarab
             virtual unsigned minor_version() const = 0;
             virtual unsigned patch_version() const = 0;
 
-            virtual const string& version_str() const = 0;
+            virtual const std::string& version_str() const = 0;
 
-            virtual const string& package() const = 0;
-            virtual const string& commit() const = 0;
+            virtual const std::string& package() const = 0;
+            virtual const std::string& commit() const = 0;
 
-            virtual const string& exe_name() const = 0;
-            virtual const string& hostname() const = 0;
-            virtual const string& username() const = 0;
+            virtual const std::string& exe_name() const = 0;
+            virtual const std::string& hostname() const = 0;
+            virtual const std::string& username() const = 0;
     };
 
-    class SCARAB_API version_semver : public version_ifc
+    class SCARAB_API version_semantic : public version_ifc
     {
         public:
-            version_semver();
-            version_semver( unsigned a_maj_ver, unsigned a_min_ver, unsigned a_patch_ver );
-            version_semver( const std::string& a_ver );
-            ~version_semver();
+            version_semantic();
+            version_semantic( unsigned a_maj_ver, unsigned a_min_ver, unsigned a_patch_ver );
+            version_semantic( const std::string& a_ver );
+            ~version_semantic();
             
             unsigned major_version() const;
             unsigned minor_version() const;
@@ -83,7 +81,7 @@ namespace scarab
     };
     
     
-    class SCARAB_API version : public version_semver
+    class SCARAB_API version : public version_semantic
     {
         public:
             version();
@@ -92,43 +90,43 @@ namespace scarab
 
 
 
-    inline unsigned version_semver::major_version() const
+    inline unsigned version_semantic::major_version() const
     {
         return f_major_ver;
     }
-    inline unsigned version_semver::minor_version() const
+    inline unsigned version_semantic::minor_version() const
     {
         return f_minor_ver;
     }
-    inline unsigned version_semver::patch_version() const
+    inline unsigned version_semantic::patch_version() const
     {
         return f_patch_ver;
     }
 
-    inline const std::string& version_semver::version_str() const
+    inline const std::string& version_semantic::version_str() const
     {
         return f_version;
     }
     
-    inline const std::string& version_semver::package() const
+    inline const std::string& version_semantic::package() const
     {
         return f_package;
     }
     
-    inline const std::string& version_semver::commit() const
+    inline const std::string& version_semantic::commit() const
     {
         return f_commit;
     }
 
-    inline const std::string& version_semver::exe_name() const
+    inline const std::string& version_semantic::exe_name() const
     {
         return f_exe_name;
     }
-    inline const std::string& version_semver::hostname() const
+    inline const std::string& version_semantic::hostname() const
     {
         return f_hostname;
     }
-    inline const std::string& version_semver::username() const
+    inline const std::string& version_semantic::username() const
     {
         return f_username;
     }

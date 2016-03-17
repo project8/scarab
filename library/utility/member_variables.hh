@@ -35,6 +35,14 @@
  *  - mv_assignable_static
  *  - mv_assignable_static_noset
  *
+ * For atomic variables
+ * Defines [type get_my_var() const] and void set_my_var( type ), both thread-safe
+ * The set_ function is not available if the _noset macros are used
+ *  - mv_atomic
+ *  - mv_atomic_noset
+ *  - mv_atomic_static
+ *  - mv_atomic_static_noset
+ *
  */
 
 #include <cstddef>
@@ -146,5 +154,41 @@
             return;\
         }\
         mv_assignable_static_noset( x_type, x_variable )
+
+#define mv_atomic_noset( x_type, x_variable )\
+    public:\
+        x_type get_##x_variable() const\
+        {\
+            return f_##x_variable.load();\
+        }\
+    protected:\
+        std::atomic< x_type > f_##x_variable;
+
+#define mv_atomic( x_type, x_variable )\
+    public:\
+        void set_##x_variable( x_type p_variable )\
+        {\
+            f_##x_variable.store( p_variable );\
+            return;\
+        }\
+        mv_atomic_noset( x_type, x_variable )
+
+#define mv_atomic_static_noset( x_type, x_variable )\
+    public:\
+        static x_type get_##x_variable()\
+        {\
+            return s_##x_variable.load();\
+        }\
+    protected:\
+        static std::atomic< x_type > s_##x_variable;
+
+#define mv_atomic_static( x_type, x_variable )\
+    public:\
+        static void set_##x_variable( x_type p_variable )\
+        {\
+            s_##x_variable.store( p_variable );\
+            return;\
+        }\
+        mv_atomic_static_noset( x_type, x_variable )
 
 #endif /* SCARAB_MEMBER_VARIABLES_HH_ */

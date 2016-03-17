@@ -43,7 +43,7 @@ namespace scarab
     template< typename dig_type, typename an_type >
     SCARAB_API an_type d2a( dig_type dig, const struct dig_calib_params* params )
     {
-        return ( *params ).v_offset + ( *params ).dac_gain * ( an_type )dig;
+        return params->v_offset + params->dac_gain * ( an_type )dig;
     }
 
     /*
@@ -52,8 +52,8 @@ namespace scarab
     template< typename an_type, typename dig_type >
     SCARAB_API dig_type a2d( an_type analog, const struct dig_calib_params* params )
     {
-        analog = ( analog - (*params).v_offset ) * (*params).inv_v_range * (an_type)((*params).levels);
-        if( analog > (an_type)((*params).levels - 1) ) analog = (*params).levels - 1;
+        analog = ( analog - params->v_offset ) * params->inv_v_range * (an_type)(params->levels);
+        if( analog > (an_type)(params->levels - 1) ) analog = params->levels - 1;
         else if( analog < 0. ) analog = 0.;
         return (dig_type)analog;
     }
