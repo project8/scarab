@@ -65,7 +65,7 @@
 
 // INCLUDES
 
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 
@@ -282,7 +282,7 @@ namespace scarab
         }
 #else
 #define __LOG_LOG_4(I,L,M,O) \
-	    { } 
+	    { }
 #endif
 
 
