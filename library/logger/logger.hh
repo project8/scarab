@@ -65,8 +65,7 @@
 
 // INCLUDES
 
-//#include <string>
-#include "string.h"//TODO I don't understand why I need this in addtion to the above, but strrchr isn't found if I don't
+#include <cstring>
 #include <iostream>
 #include <sstream>
 
