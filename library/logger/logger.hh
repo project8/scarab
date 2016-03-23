@@ -342,16 +342,16 @@ namespace scarab
 #define LOG(...)         macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
 #define LTRACE(...)       macro_dispatcher(__LOG_TRACE_, __VA_ARGS__)(__VA_ARGS__)
 #define LDEBUG(...)       macro_dispatcher(__LOG_DEBUG_, __VA_ARGS__)(__VA_ARGS__)
-#define LINFO(...)        macro_dispatcher(__LOG_LINFO(_, __VA_ARGS__)(__VA_ARGS__)
+#define LINFO(...)        macro_dispatcher(__LOG_INFO_, __VA_ARGS__)(__VA_ARGS__)
 #define LWARN(...)        macro_dispatcher(__LOG_WARN_, __VA_ARGS__)(__VA_ARGS__)
 #define LERROR(...)       macro_dispatcher(__LOG_ERROR_, __VA_ARGS__)(__VA_ARGS__)
-#define FATAL(...)       macro_dispatcher(__LOG_FATAL_, __VA_ARGS__)(__VA_ARGS__)
-#define ASSERT(...)      macro_dispatcher(__LOG_ASSERT_, __VA_ARGS__)(__VA_ARGS__)
+#define LFATAL(...)       macro_dispatcher(__LOG_FATAL_, __VA_ARGS__)(__VA_ARGS__)
+#define LASSERT(...)      macro_dispatcher(__LOG_ASSERT_, __VA_ARGS__)(__VA_ARGS__)
 
 #define LOG_ONCE(...)    macro_dispatcher(__LOG_LOG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LTRACE_ONCE(...)  macro_dispatcher(__LOG_TRACE_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LDEBUG_ONCE(...)  macro_dispatcher(__LOG_DEBUG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define LINFO_ONCE(...)   macro_dispatcher(__LOG_LINFO(_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LINFO_ONCE(...)   macro_dispatcher(__LOG_INFO_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LWARN_ONCE(...)   macro_dispatcher(__LOG_WARN_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LERROR_ONCE(...)  macro_dispatcher(__LOG_ERROR_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LFATAL_ONCE(...)  macro_dispatcher(__LOG_FATAL_ONCE_, __VA_ARGS__)(__VA_ARGS__)
@@ -372,8 +372,8 @@ namespace scarab
 #define LINFO(I,K)        std::cout << "LINFO(: " << K << std::endl;
 #define LWARN(I,K)        std::cout << "WARN: " << K << std::endl;
 #define LERROR(I,K)       std::cout << "ERROR: " << K << std::endl;
-#define FATAL(I,K)       std::cout << "FATAL: " << K << std::endl;
-#define ASSERT(I,K)      std::cout << "ASSERT: " << K << std::endl;
+#define LFATAL(I,K)       std::cout << "FATAL: " << K << std::endl;
+#define LASSERT(I,K)      std::cout << "ASSERT: " << K << std::endl;
 
 #define LOG_ONCE(I,K)    std::cout << "LOG: " << K << std::endl;
 #ifndef NDEBUG
