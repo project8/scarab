@@ -49,7 +49,7 @@ namespace scarab
             f_value_type( k_invalid ),
             f_buffer()
     {
-        //WARN( dlog, "param_value constructor: k_invalid" );
+        //LWARN( dlog, "param_value constructor: k_invalid" );
     }
 
     param_value::param_value( bool a_value ) :
@@ -58,7 +58,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_bool = a_value;
-        //WARN( dlog, "param_value constructor: bool --> bool" );
+        //LWARN( dlog, "param_value constructor: bool --> bool" );
     }
 
     param_value::param_value( uint8_t a_value ) :
@@ -67,7 +67,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_uint = a_value;
-        //WARN( dlog, "param_value constructor: uint8 --> uint" );
+        //LWARN( dlog, "param_value constructor: uint8 --> uint" );
     }
 
     param_value::param_value( uint16_t a_value ) :
@@ -76,7 +76,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_uint = a_value;
-        //WARN( dlog, "param_value constructor: uint16 --> uint" );
+        //LWARN( dlog, "param_value constructor: uint16 --> uint" );
     }
 
     param_value::param_value( uint32_t a_value ) :
@@ -85,7 +85,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_uint = a_value;
-        //WARN( dlog, "param_value constructor: uint32 --> uint" );
+        //LWARN( dlog, "param_value constructor: uint32 --> uint" );
     }
 
     param_value::param_value( uint64_t a_value ) :
@@ -94,7 +94,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_uint = a_value;
-        //WARN( dlog, "param_value constructor: uint64 --> uint" );
+        //LWARN( dlog, "param_value constructor: uint64 --> uint" );
     }
 
     param_value::param_value( int8_t a_value ) :
@@ -103,7 +103,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_int = a_value;
-        //WARN( dlog, "param_value constructor: int8 --> int" );
+        //LWARN( dlog, "param_value constructor: int8 --> int" );
     }
 
     param_value::param_value( int16_t a_value ) :
@@ -112,7 +112,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_int = a_value;
-        //WARN( dlog, "param_value constructor: int16 --> int" );
+        //LWARN( dlog, "param_value constructor: int16 --> int" );
     }
 
 
@@ -122,7 +122,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_int = a_value;
-        //WARN( dlog, "param_value constructor: int32 --> int" );
+        //LWARN( dlog, "param_value constructor: int32 --> int" );
     }
 
     param_value::param_value( int64_t a_value ) :
@@ -131,7 +131,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_int = a_value;
-        //WARN( dlog, "param_value constructor: int64 --> int" );
+        //LWARN( dlog, "param_value constructor: int64 --> int" );
     }
 
     param_value::param_value( float a_value ) :
@@ -140,7 +140,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_double = a_value;
-        //WARN( dlog, "param_value constructor: float --> double" );
+        //LWARN( dlog, "param_value constructor: float --> double" );
     }
 
     param_value::param_value( double a_value ) :
@@ -149,7 +149,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_double = a_value;
-        //WARN( dlog, "param_value constructor: double --> double" );
+        //LWARN( dlog, "param_value constructor: double --> double" );
     }
 
     param_value::param_value( const char* a_value ) :
@@ -158,7 +158,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_string = new string( a_value );
-        //WARN( dlog, "param_value constructor: char* --> k_string" );
+        //LWARN( dlog, "param_value constructor: char* --> k_string" );
     }
 
     param_value::param_value( const string& a_value ) :
@@ -167,7 +167,7 @@ namespace scarab
             f_buffer()
     {
         f_value.f_string = new string( a_value );
-        //WARN( dlog, "param_value constructor: string --> k_string" );
+        //LWARN( dlog, "param_value constructor: string --> k_string" );
     }
 
     param_value::param_value( const param_value& orig ) :
@@ -180,7 +180,7 @@ namespace scarab
         {
             f_value.f_string = new string( *orig.f_value.f_string );
         }
-        //WARN( dlog, "param_value copy constructor: " << type() );
+        //LWARN( dlog, "param_value copy constructor: " << type() );
     }
 
     param_value::~param_value()
@@ -468,35 +468,35 @@ namespace scarab
 
     void param_node::merge( const param_node& a_object )
     {
-        //DEBUG( dlog, "merging object with " << a_object.size() << " items:\n" << a_object );
+        //LDEBUG( dlog, "merging object with " << a_object.size() << " items:\n" << a_object );
         for( const_iterator it = a_object.f_contents.begin(); it != a_object.f_contents.end(); ++it )
         {
             if( ! has( it->first ) )
             {
-                //DEBUG( dlog, "do not have object <" << it->first << "> = <" << *it->second << ">" );
+                //LDEBUG( dlog, "do not have object <" << it->first << "> = <" << *it->second << ">" );
                 add( it->first, *it->second );
                 continue;
             }
             param& t_param = (*this)[ it->first ];
             if( t_param.is_value() )
             {
-                //DEBUG( dlog, "replacing the value of \"" << it->first << "\" <" << get_value( it->first ) << "> with <" << *it->second << ">" );
+                //LDEBUG( dlog, "replacing the value of \"" << it->first << "\" <" << get_value( it->first ) << "> with <" << *it->second << ">" );
                 replace( it->first, *it->second );
                 continue;
             }
             if( t_param.is_node() && it->second->is_node() )
             {
-                //DEBUG( dlog, "merging nodes")
+                //LDEBUG( dlog, "merging nodes")
                 t_param.as_node().merge( it->second->as_node() );
                 continue;
             }
             if( t_param.is_array() && it->second->is_array() )
             {
-                //DEBUG( dlog, "appending array" );
+                //LDEBUG( dlog, "appending array" );
                 t_param.as_array().append( it->second->as_array() );
                 continue;
             }
-            //DEBUG( dlog, "generic replace" );
+            //LDEBUG( dlog, "generic replace" );
             this->replace( it->first, *it->second );
         }
     }

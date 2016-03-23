@@ -73,9 +73,9 @@ namespace scarab
         public:
             void push( XDataType const& a_data )
             {
-                DEBUG( slog_cq, "Attempting to push to queue" );
+                LDEBUG( slog_cq, "Attempting to push to queue" );
                 scoped_lock lock( f_mutex );
-                DEBUG( slog_cq, "Pushing to concurrent queue; size: " << f_queue.size() );
+                LDEBUG( slog_cq, "Pushing to concurrent queue; size: " << f_queue.size() );
                 f_queue.push_back( a_data );
                 lock.unlock();
                 f_condition_var.notify_one();
@@ -121,7 +121,7 @@ namespace scarab
 
                 a_popped_value = f_queue.front();
                 f_queue.pop_front();
-                DEBUG( slog_cq, "Popping from concurrent queue; size: " << f_queue.size() );
+                LDEBUG( slog_cq, "Popping from concurrent queue; size: " << f_queue.size() );
                 return true;
             }
 
@@ -132,7 +132,7 @@ namespace scarab
                 boost::system_time const waitUntil = boost::get_system_time() + f_timeout;
                 if( ! f_condition_var.timed_wait( lock, waitUntil, queue_not_empty( f_queue ) ) )
                 {
-                    //DEBUG( mtlog_cq, "Queue wait has timed out" );
+                    //LDEBUG( mtlog_cq, "Queue wait has timed out" );
                     return false;
                 }
                 if( f_interrupt )
@@ -143,7 +143,7 @@ namespace scarab
 
                 a_popped_value = f_queue.front();
                 f_queue.pop_front();
-                DEBUG( slog_cq, "Popping from concurrent queue; size: " << f_queue.size() );
+                LDEBUG( slog_cq, "Popping from concurrent queue; size: " << f_queue.size() );
                 return true;
             }
 

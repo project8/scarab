@@ -120,7 +120,7 @@ namespace scarab
         size_t t_delim_pos_1 = a_ver.find( s_delimeter, 0 );
         if( t_delim_pos_1 == std::string::npos )
         {
-            ERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find first delimeter)" );
+            LERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find first delimeter)" );
             return false;
         }
         std::stringstream t_maj_ver_str;
@@ -129,7 +129,7 @@ namespace scarab
         size_t t_delim_pos_2 = a_ver.find( s_delimeter, t_delim_pos_1 + 1 );
         if( t_delim_pos_2 == std::string::npos )
         {
-            ERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find second delimeter)" );
+            LERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find second delimeter)" );
             return false;
         }
         std::stringstream t_min_ver_str;
@@ -171,7 +171,7 @@ namespace scarab
         }
         else
         {
-            WARN( slog, "Unable to get the username" );
+            LWARN( slog, "Unable to get the username" );
         }
 
         // Hostname
@@ -187,7 +187,7 @@ namespace scarab
         }
         else
         {
-            WARN( slog, "Unable to get the hostname" );
+            LWARN( slog, "Unable to get the hostname" );
         }
 #ifdef _WIN32
         WSACleanup();
@@ -214,9 +214,9 @@ namespace scarab
         //if( readlink( "/proc/self/exe", t_exe_buf, t_exe_bufsize ) < 0 )
 #endif
         {
-            WARN( slog, "Could not retrieve executable file name" );
+            LWARN( slog, "Could not retrieve executable file name" );
 #ifdef __APPLE__
-            WARN( slog, "Executable name buffer is too small; needs size %u\n" << t_bufsize );
+            LWARN( slog, "Executable name buffer is too small; needs size %u\n" << t_bufsize );
 #endif
         }
         f_exe_name = string( t_exe_buf );
