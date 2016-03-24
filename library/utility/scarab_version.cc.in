@@ -47,10 +47,17 @@ namespace scarab
 
     version_ifc::version_ifc()
     {}
+    
+    version_ifc::version_ifc( const version_ifc& )
+    {}
 
     version_ifc::~version_ifc()
     {}
-
+    
+    version_ifc& version_ifc::operator=( const version_ifc& )
+    {
+        return *this;
+    }
 
 
     char version_semantic::s_delimeter = '.';
@@ -101,9 +108,38 @@ namespace scarab
         parse( a_ver );
         update_exe_host_user();
     }
+    
+    version_semantic::version_semantic( const version_semantic& a_orig ) :
+            version_ifc(),
+            f_major_ver( a_orig.f_major_ver ),
+            f_minor_ver( a_orig. ),
+            f_patch_ver( a_orig. ),
+            f_version( a_orig.f_version ),
+            f_package( a_orig.f_package ),
+            f_commit( a_orig.f_commit ),
+            f_exe_name( a_orig.f_exe_name ),
+            f_hostname( a_orig.f_hostname ),
+            f_username( a_orig.f_username )
+    {
+    }
 
     version_semantic::~version_semantic()
     {
+    }
+    
+    version_semantic& version_semantic::operator=( const version_semantic& a_orig )
+    {
+        this->version_ifc::operator=( a_orig );
+        f_major_ver = a_orig.f_major_ver;
+        f_minor_ver = a_orig.f_minor_ver;
+        f_patch_ver = a_orig.f_patch_ver;
+        f_version = a_orig.f_version;
+        f_package = a_orig.f_package;
+        f_commit = a_orig.f_commit;
+        f_exe_name = a_orig.f_exe_name;
+        f_hostname = a_orig.f_hostname;
+        f_username = a_orig.f_username;
+        return *this;
     }
 
     bool version_semantic::parse( const std::string& a_ver )

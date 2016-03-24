@@ -20,7 +20,10 @@ namespace scarab
     {
         public:
             version_ifc();
+            version_ifc( const version_ifc& );
             virtual ~version_ifc();
+
+            version_ifc& operator=( const version_ifc& );
 
             virtual unsigned major_version() const = 0;
             virtual unsigned minor_version() const = 0;
@@ -42,8 +45,11 @@ namespace scarab
             version_semantic();
             version_semantic( unsigned a_maj_ver, unsigned a_min_ver, unsigned a_patch_ver );
             version_semantic( const std::string& a_ver );
+            version_semantic( const version_semantic& a_orig );
             ~version_semantic();
             
+            version_semantic& operator=( const version_semantic& a_orig );
+
             unsigned major_version() const;
             unsigned minor_version() const;
             unsigned patch_version() const;
