@@ -66,6 +66,11 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 # No compiled libraries are currently required
 pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
     
+# For gethostname in version_semantic
+if( WIN32 )
+    pbuilder_add_ext_libraries( "Ws2_32.lib" )
+endif( WIN32 )
+
 
 ########################
 # Build Scarab library #

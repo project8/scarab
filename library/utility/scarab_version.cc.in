@@ -112,8 +112,8 @@ namespace scarab
     version_semantic::version_semantic( const version_semantic& a_orig ) :
             version_ifc(),
             f_major_ver( a_orig.f_major_ver ),
-            f_minor_ver( a_orig. ),
-            f_patch_ver( a_orig. ),
+            f_minor_ver( a_orig.f_minor_ver ),
+            f_patch_ver( a_orig.f_patch_ver ),
             f_version( a_orig.f_version ),
             f_package( a_orig.f_package ),
             f_commit( a_orig.f_commit ),
