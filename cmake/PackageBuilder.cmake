@@ -91,6 +91,11 @@ set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 set( LIB_POSTFIX )
 set( INC_PREFIX )
 
+# in windows, disable the min and max macros
+if( WIN32 )
+    add_definitions( -DNOMINMAX )
+endif( WIN32 )
+
 ##########
 # MACROS #
 ##########
