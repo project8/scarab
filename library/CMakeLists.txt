@@ -27,7 +27,7 @@ pbuilder_prepare_project()
 # Scarab options #
 ##################
 
-option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" FALSE )
+option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" TRUE )
 
 option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the msgpack codec" FALSE )
 
@@ -72,6 +72,8 @@ if( Scarab_BUILD_CODEC_YAML )
 	set_option( USE_CPP11 TRUE )
 
     # Yaml-cpp
+    option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
+    option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
     add_subdirectory( param/codec/yaml/yaml-cpp )
     # I'm hard-coding the include directory and library because I ran into an error when I tried to include ${CMAKE_CURRENT_BINARY_DIR}/param/codec/yaml/yaml-cpp/yaml-cpp-config.cmake )
     include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
