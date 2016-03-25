@@ -29,7 +29,7 @@ namespace scarab
     LOGGER( slog, "scarab_version" );
 
     version::version() :
-            version_semver()
+            version_semantic()
     {
         f_major_ver = @Scarab_VERSION_MAJOR@;
         f_minor_ver = @Scarab_VERSION_MINOR@;
@@ -53,9 +53,9 @@ namespace scarab
 
 
 
-    char version_semver::s_delimeter = '.';
+    char version_semantic::s_delimeter = '.';
 
-    version_semver::version_semver() :
+    version_semantic::version_semantic() :
             version_ifc(),
             f_major_ver(),
             f_minor_ver(),
@@ -70,7 +70,7 @@ namespace scarab
         update_exe_host_user();
     }
 
-    version_semver::version_semver( unsigned a_maj_ver, unsigned a_min_ver, unsigned a_patch_ver ) :
+    version_semantic::version_semantic( unsigned a_maj_ver, unsigned a_min_ver, unsigned a_patch_ver ) :
             version_ifc(),
             f_major_ver( a_maj_ver ),
             f_minor_ver( a_min_ver ),
@@ -86,7 +86,7 @@ namespace scarab
         update_exe_host_user();
     }
 
-    version_semver::version_semver( const std::string& a_ver ) :
+    version_semantic::version_semantic( const std::string& a_ver ) :
             version_ifc(),
             f_major_ver( 0 ),
             f_minor_ver( 0 ),
@@ -102,11 +102,11 @@ namespace scarab
         update_exe_host_user();
     }
 
-    version_semver::~version_semver()
+    version_semantic::~version_semantic()
     {
     }
 
-    bool version_semver::parse( const std::string& a_ver )
+    bool version_semantic::parse( const std::string& a_ver )
     {
         if( a_ver == "unknown" )
         {
@@ -146,7 +146,7 @@ namespace scarab
         return true;
     }
 
-    bool version_semver::combine( unsigned a_maj_ver, unsigned a_min_ver, unsigned a_patch_ver )
+    bool version_semantic::combine( unsigned a_maj_ver, unsigned a_min_ver, unsigned a_patch_ver )
     {
         std::stringstream t_ver_str;
         t_ver_str << a_maj_ver << s_delimeter << a_min_ver << s_delimeter << a_patch_ver;
@@ -154,7 +154,7 @@ namespace scarab
         return true;
     }
 
-    bool version_semver::update_exe_host_user()
+    bool version_semantic::update_exe_host_user()
     {
         const size_t t_bufsize = 1024;
 
