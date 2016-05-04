@@ -96,57 +96,57 @@ namespace scarab
         {
             return param_output_msgpack::write_param_node( a_to_write.as_node(), a_writer );
         }
-        WARN( dlog_param_msgpack, "parameter not written: <" << a_to_write << ">" );
+        LWARN( dlog_param_msgpack, "parameter not written: <" << a_to_write << ">" );
         return false;
     }
     template< class XWriter >
     bool param_output_msgpack::write_param_null( const param& /*a_to_write*/, XWriter* a_writer )
     {
-        //WARN( dlog_param_msgpack, "writing null" );
+        //LWARN( dlog_param_msgpack, "writing null" );
         a_writer->Null();
         return true;
     }
     template< class XWriter >
     bool param_output_msgpack::write_param_value( const param_value& a_to_write, XWriter* a_writer )
     {
-        //WARN( dlog_param_msgpack, "writing value" );
+        //LWARN( dlog_param_msgpack, "writing value" );
         if( a_to_write.is_string() )
         {
             a_writer->String( a_to_write.as_string().c_str() );
-            //WARN( dlog_param_msgpack, "writing string to msgpack: " << a_to_write.as_string() );
+            //LWARN( dlog_param_msgpack, "writing string to msgpack: " << a_to_write.as_string() );
         }
         else if( a_to_write.is_bool() )
         {
             a_writer->Bool( a_to_write.as_bool() );
-            //WARN( dlog_param_msgpack, "writing bool to msgpack: " << a_to_write.as_bool() );
+            //LWARN( dlog_param_msgpack, "writing bool to msgpack: " << a_to_write.as_bool() );
         }
         else if( a_to_write.is_int() )
         {
             a_writer->Int64( a_to_write.as_int() );
-            //WARN( dlog_param_msgpack, "writing int to msgpack: " << a_to_write.as_int() );
+            //LWARN( dlog_param_msgpack, "writing int to msgpack: " << a_to_write.as_int() );
         }
         else if( a_to_write.is_uint() )
         {
             a_writer->Uint64( a_to_write.as_uint() );
-            //WARN( dlog_param_msgpack, "writing uint to msgpack: " << a_to_write.as_uint() );
+            //LWARN( dlog_param_msgpack, "writing uint to msgpack: " << a_to_write.as_uint() );
         }
         else if( a_to_write.is_double() )
         {
             a_writer->Double( a_to_write.as_double() );
-            //WARN( dlog_param_msgpack, "writing double to msgpack: " << a_to_write.as_double() );
+            //LWARN( dlog_param_msgpack, "writing double to msgpack: " << a_to_write.as_double() );
         }
         return true;
     }
     template< class XWriter >
     bool param_output_msgpack::write_param_array( const param_array& a_to_write, XWriter* a_writer )
     {
-        //WARN( dlog_param_msgpack, "writing array" );
+        //LWARN( dlog_param_msgpack, "writing array" );
         a_writer->StartArray();
         for( param_array::const_iterator it = a_to_write.begin(); it != a_to_write.end(); ++it )
         {
             if( ! param_output_msgpack::write_param( *(*it), a_writer ) )
             {
-                ERROR( dlog_param_msgpack, "Error while writing parameter array" );
+                LERROR( dlog_param_msgpack, "Error while writing parameter array" );
                 return false;
             }
         }
@@ -156,14 +156,14 @@ namespace scarab
     template< class XWriter >
     bool param_output_msgpack::write_param_node( const param_node& a_to_write, XWriter* a_writer )
     {
-        //WARN( dlog_param_msgpack, "writing node" );
+        //LWARN( dlog_param_msgpack, "writing node" );
         a_writer->StartObject();
         for( param_node::const_iterator it = a_to_write.begin(); it != a_to_write.end(); ++it )
         {
             a_writer->String( it->first.c_str() );
             if( ! param_output_msgpack::write_param( *(it->second), a_writer ) )
             {
-                ERROR( dlog_param_msgpack, "Error while writing parameter node" );
+                LERROR( dlog_param_msgpack, "Error while writing parameter node" );
                 return false;
             }
         }

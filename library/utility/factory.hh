@@ -103,7 +103,7 @@ namespace scarab
         FactoryCIt it = fMap->find(a_class_name);
         if (it == fMap->end())
         {
-            ERROR( slog_fact, "Did not find factory for <" << a_class_name << ">." );
+            LERROR( slog_fact, "Did not find factory for <" << a_class_name << ">." );
             return NULL;
         }
 
@@ -117,7 +117,7 @@ namespace scarab
         FactoryCIt it = fMap->find(a_class_name);
         if (it != fMap->end())
         {
-            ERROR( slog_fact, "Already have factory registered for <" << a_class_name << ">." );
+            LERROR( slog_fact, "Already have factory registered for <" << a_class_name << ">." );
             return;
         }
         fMap->insert(std::pair< std::string, const base_registrar< XBaseType >* >(a_class_name, a_registrar));

@@ -32,7 +32,7 @@ namespace scarab
         FILE* t_config_file = fopen( a_filename.c_str(), "r" );
         if( t_config_file == NULL )
         {
-            ERROR( dlog, "file <" << a_filename << "> did not open" );
+            LERROR( dlog, "file <" << a_filename << "> did not open" );
             return NULL;
         }
         rapidjson::FileStream t_file_stream( t_config_file );
@@ -59,13 +59,13 @@ namespace scarab
             }
             if( iChar == errorPos )
             {
-                ERROR( dlog, "error parsing config file :\n" <<
+                LERROR( dlog, "error parsing config file :\n" <<
                         '\t' << t_config_doc.GetParseError() << '\n' <<
                         "\tThe error was reported at line " << newlineCount << ", character " << errorPos - lastNewlinePos );
             }
             else
             {
-                ERROR( dlog, "error parsing config file :\n" <<
+                LERROR( dlog, "error parsing config file :\n" <<
                         '\t' << t_config_doc.GetParseError() <<
                         "\tend of file reached before error location was found" );
             }
@@ -82,7 +82,7 @@ namespace scarab
         rapidjson::Document t_config_doc;
         if( t_config_doc.Parse<0>( a_json_string.c_str() ).HasParseError() )
         {
-            ERROR( dlog, "error parsing string:\n" << t_config_doc.GetParseError() );
+            LERROR( dlog, "error parsing string:\n" << t_config_doc.GetParseError() );
             return NULL;
         }
         return param_input_json::read_document( t_config_doc );
@@ -130,40 +130,40 @@ namespace scarab
         }
         if( a_value.IsString() )
         {
-            //WARN( dlog, "reading string from json: " << a_value.GetString() );
+            //LWARN( dlog, "reading string from json: " << a_value.GetString() );
             return new param_value( a_value.GetString() );
         }
         if( a_value.IsBool() )
         {
-            //WARN( dlog, "reading bool from json: " << a_value.GetBool() );
+            //LWARN( dlog, "reading bool from json: " << a_value.GetBool() );
             return new param_value( a_value.GetBool() );
         }
         if( a_value.IsInt() )
         {
-            //WARN( dlog, "reading int from json: " << a_value.GetInt() );
+            //LWARN( dlog, "reading int from json: " << a_value.GetInt() );
             return new param_value( a_value.GetInt() );
         }
         if( a_value.IsUint() )
         {
-            //WARN( dlog, "reading uint from json: " << a_value.GetUint() );
+            //LWARN( dlog, "reading uint from json: " << a_value.GetUint() );
             return new param_value( a_value.GetUint() );
         }
         if( a_value.IsInt64() )
         {
-            //WARN( dlog, "reading int64 from json: " << a_value.GetInt64() );
+            //LWARN( dlog, "reading int64 from json: " << a_value.GetInt64() );
             return new param_value( a_value.GetInt64() );
         }
         if( a_value.IsUint64() )
         {
-            //WARN( dlog, "reading uint64 from json: " << a_value.GetUint64() );
+            //LWARN( dlog, "reading uint64 from json: " << a_value.GetUint64() );
             return new param_value( a_value.GetUint64() );
         }
         if( a_value.IsDouble() )
         {
-            //WARN( dlog, "reading double from json: " << a_value.GetDouble() );
+            //LWARN( dlog, "reading double from json: " << a_value.GetDouble() );
             return new param_value( a_value.GetDouble() );
         }
-        WARN( dlog, "(config_reader_json) unknown type; returning null value" );
+        LWARN( dlog, "(config_reader_json) unknown type; returning null value" );
         return new param();
     }
 
@@ -178,14 +178,14 @@ namespace scarab
     {
         if( a_filename.empty() )
         {
-            ERROR( dlog, "Filename cannot be an empty string" );
+            LERROR( dlog, "Filename cannot be an empty string" );
             return false;
         }
 
         FILE* file = fopen( a_filename.c_str(), "w" );
         if( file == NULL )
         {
-            ERROR( dlog, "Unable to open file: " << a_filename );
+            LERROR( dlog, "Unable to open file: " << a_filename );
             return false;
         }
 
@@ -205,7 +205,7 @@ namespace scarab
 
         if (! t_result )
         {
-            ERROR( dlog, "Error while writing file" );
+            LERROR( dlog, "Error while writing file" );
             return false;
         }
 
@@ -229,7 +229,7 @@ namespace scarab
 
         if (! t_result )
         {
-            ERROR( dlog, "Error while writing string" );
+            LERROR( dlog, "Error while writing string" );
             return false;
         }
 

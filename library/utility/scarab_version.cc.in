@@ -47,10 +47,17 @@ namespace scarab
 
     version_ifc::version_ifc()
     {}
+    
+    version_ifc::version_ifc( const version_ifc& )
+    {}
 
     version_ifc::~version_ifc()
     {}
-
+    
+    version_ifc& version_ifc::operator=( const version_ifc& )
+    {
+        return *this;
+    }
 
 
     char version_semantic::s_delimeter = '.';
@@ -101,9 +108,38 @@ namespace scarab
         parse( a_ver );
         update_exe_host_user();
     }
+    
+    version_semantic::version_semantic( const version_semantic& a_orig ) :
+            version_ifc(),
+            f_major_ver( a_orig.f_major_ver ),
+            f_minor_ver( a_orig.f_minor_ver ),
+            f_patch_ver( a_orig.f_patch_ver ),
+            f_version( a_orig.f_version ),
+            f_package( a_orig.f_package ),
+            f_commit( a_orig.f_commit ),
+            f_exe_name( a_orig.f_exe_name ),
+            f_hostname( a_orig.f_hostname ),
+            f_username( a_orig.f_username )
+    {
+    }
 
     version_semantic::~version_semantic()
     {
+    }
+    
+    version_semantic& version_semantic::operator=( const version_semantic& a_orig )
+    {
+        this->version_ifc::operator=( a_orig );
+        f_major_ver = a_orig.f_major_ver;
+        f_minor_ver = a_orig.f_minor_ver;
+        f_patch_ver = a_orig.f_patch_ver;
+        f_version = a_orig.f_version;
+        f_package = a_orig.f_package;
+        f_commit = a_orig.f_commit;
+        f_exe_name = a_orig.f_exe_name;
+        f_hostname = a_orig.f_hostname;
+        f_username = a_orig.f_username;
+        return *this;
     }
 
     bool version_semantic::parse( const std::string& a_ver )
@@ -120,7 +156,7 @@ namespace scarab
         size_t t_delim_pos_1 = a_ver.find( s_delimeter, 0 );
         if( t_delim_pos_1 == std::string::npos )
         {
-            ERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find first delimeter)" );
+            LERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find first delimeter)" );
             return false;
         }
         std::stringstream t_maj_ver_str;
@@ -129,7 +165,7 @@ namespace scarab
         size_t t_delim_pos_2 = a_ver.find( s_delimeter, t_delim_pos_1 + 1 );
         if( t_delim_pos_2 == std::string::npos )
         {
-            ERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find second delimeter)" );
+            LERROR( slog, "version string <" << a_ver << "> is not in the right format (did not find second delimeter)" );
             return false;
         }
         std::stringstream t_min_ver_str;
@@ -171,7 +207,7 @@ namespace scarab
         }
         else
         {
-            WARN( slog, "Unable to get the username" );
+            LWARN( slog, "Unable to get the username" );
         }
 
         // Hostname
@@ -187,7 +223,7 @@ namespace scarab
         }
         else
         {
-            WARN( slog, "Unable to get the hostname" );
+            LWARN( slog, "Unable to get the hostname" );
         }
 #ifdef _WIN32
         WSACleanup();
@@ -214,9 +250,9 @@ namespace scarab
         //if( readlink( "/proc/self/exe", t_exe_buf, t_exe_bufsize ) < 0 )
 #endif
         {
-            WARN( slog, "Could not retrieve executable file name" );
+            LWARN( slog, "Could not retrieve executable file name" );
 #ifdef __APPLE__
-            WARN( slog, "Executable name buffer is too small; needs size %u\n" << t_bufsize );
+            LWARN( slog, "Executable name buffer is too small; needs size %u\n" << t_bufsize );
 #endif
         }
         f_exe_name = string( t_exe_buf );

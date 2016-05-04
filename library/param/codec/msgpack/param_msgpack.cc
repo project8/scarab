@@ -36,7 +36,7 @@ namespace scarab
         msgpack::unpacked t_unpacked;
         msgpack::unpack( t_unpacked, a_msgpack_string.data(), a_msgpack_string.size()) ;
         msgpack::object t_deserialized = t_unpacked.get();
-        DEBUG( dlog, "msgpack deserialization result is: (size = " << t_deserialized.via.array.size << ")\n" << t_deserialized );
+        LDEBUG( dlog, "msgpack deserialization result is: (size = " << t_deserialized.via.array.size << ")\n" << t_deserialized );
 
         
         // convert it to a param node
@@ -50,14 +50,14 @@ namespace scarab
             t_config->replace( t_deserialized.via.array.ptr[2 * i_element].as<std::string>(),
                                param_input_msgpack::read_msgpack_element( t_deserialized.via.array.ptr[2 * i_element + 1] ) );
         }
-        DEBUG( dlog, "Unpacked string:\n" << *t_config );
+        LDEBUG( dlog, "Unpacked string:\n" << *t_config );
 
         return t_config;
     }
 
     param* param_input_msgpack::read_msgpack_element( const msgpack::object& a_msgpack_element )
     {
-        DEBUG( dlog, "Unpacking msgpack element of type: " << a_msgpack_element.type );
+        LDEBUG( dlog, "Unpacking msgpack element of type: " << a_msgpack_element.type );
         switch ( a_msgpack_element.type )
         {
             case 0: // NULL
@@ -100,15 +100,15 @@ namespace scarab
                     break;
                 }
             case 8: // BIN
-                WARN( dlog, "Cannot handle 'bin'" );
+                LWARN( dlog, "Cannot handle 'bin'" );
                 return NULL;
                 break;
             default:
-                WARN( dlog, "Type unrecognized: " << a_msgpack_element.type );
+                LWARN( dlog, "Type unrecognized: " << a_msgpack_element.type );
                 return NULL;
                 break;
         }
-        WARN( dlog, "Code should not reach this point" );
+        LWARN( dlog, "Code should not reach this point" );
         return NULL;
     }
 

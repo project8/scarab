@@ -3,6 +3,7 @@
 
 #include "scarab_api.hh"
 
+#include <cstdint>
 #include <string>
 
 #ifndef _WIN32
