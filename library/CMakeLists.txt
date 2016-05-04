@@ -61,7 +61,10 @@ endif( Scarab_BUILD_AUTHENTICATION )
 list( REMOVE_DUPLICATES boost_components )
 find_package( Boost 1.46.0 REQUIRED COMPONENTS ${boost_components} )
 # make sure dynamic linking is assumed for all boost libraries
-add_definitions( -DBOOST_ALL_DYN_LINK )
+#add_definitions( -DBOOST_ALL_DYN_LINK )
+set( Boost_USE_STATIC_LIBS OFF )
+set( Boost_USE_STATIC_RUNTIME OFF )
+set( Boost_ALL_DYN_LINK ON )
 include_directories( ${Boost_INCLUDE_DIRS} )
 # No compiled libraries are currently required
 pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
