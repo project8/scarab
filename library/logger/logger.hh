@@ -369,7 +369,7 @@ namespace scarab
 #define LTRACE(I,K)
 #define LDEBUG(I,K)
 #endif
-#define LINFO(I,K)        std::cout << "LINFO(: " << K << std::endl;
+#define LINFO(I,K)        std::cout << "INFO: " << K << std::endl;
 #define LWARN(I,K)        std::cout << "WARN: " << K << std::endl;
 #define LERROR(I,K)       std::cout << "ERROR: " << K << std::endl;
 #define LFATAL(I,K)       std::cout << "FATAL: " << K << std::endl;
@@ -383,7 +383,7 @@ namespace scarab
 #define LTRACE_ONCE(I,K)
 #define LDEBUG_ONCE(I,K)
 #endif
-#define LINFO_ONCE(I,K)   std::cout << "LINFO(: " << K << std::endl;
+#define LINFO_ONCE(I,K)   std::cout << "INFO: " << K << std::endl;
 #define LWARN_ONCE(I,K)   std::cout << "WARN: " << K << std::endl;
 #define LERROR_ONCE(I,K)  std::cout << "ERROR: " << K << std::endl;
 #define LFATAL_ONCE(I,K)  std::cout << "FATAL: " << K << std::endl;

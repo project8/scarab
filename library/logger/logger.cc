@@ -69,7 +69,7 @@ namespace scarab
                 {
                     case eTrace : return "TRACE"; break;
                     case eDebug : return "DEBUG"; break;
-                    case eInfo  : return "LINFO("; break;
+                    case eInfo  : return "INFO"; break;
                     case eWarn  : return "WARN"; break;
                     case eError : return "ERROR"; break;
                     case eFatal : return "FATAL"; break;
