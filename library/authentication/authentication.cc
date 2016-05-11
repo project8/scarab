@@ -68,7 +68,7 @@ namespace scarab
             }
             else
             {
-                ERROR( mtlog, "Unable to get the username; authentications not loaded" );
+                LERROR( mtlog, "Unable to get the username; authentications not loaded" );
                 return false;
             }
 
@@ -84,7 +84,7 @@ namespace scarab
                 char* t_pwd_buf = ( char* )malloc( (size_t)t_pwd_bufsize );
                 if( t_pwd_buf == NULL )
                 {
-                    ERROR( mtlog, "Unable to allocate the pwd buffer; authentications not loaded");
+                    LERROR( mtlog, "Unable to allocate the pwd buffer; authentications not loaded");
                     return false;
                 }
                 else
@@ -94,7 +94,7 @@ namespace scarab
                     getpwnam_r( t_username.c_str(), &t_pwd, t_pwd_buf, t_pwd_bufsize, &t_pwd_result );
                     if( t_pwd_result == NULL )
                     {
-                        ERROR( mtlog, "Unable to get the pwd data; authentications not loaded" );
+                        LERROR( mtlog, "Unable to get the pwd data; authentications not loaded" );
                         return false;
                     }
                     else
@@ -112,19 +112,19 @@ namespace scarab
         bool t_auth_file_present = false;
         if( ! t_auth_file_path.empty() )
         {
-            DEBUG( mtlog, "Looking for authentication file: <" << t_auth_file_path << ">" );
+            LDEBUG( mtlog, "Looking for authentication file: <" << t_auth_file_path << ">" );
             try
             {
                 t_auth_file_present = exists( t_auth_file_path ) && is_regular_file( t_auth_file_path );
                 if( ! t_auth_file_present )
                 {
-                    ERROR( mtlog, "File either doesn't exist (" << exists( t_auth_file_path ) << ") or isn't a regular file (" << is_regular_file( t_auth_file_path ) << ")" );
+                    LERROR( mtlog, "File either doesn't exist (" << exists( t_auth_file_path ) << ") or isn't a regular file (" << is_regular_file( t_auth_file_path ) << ")" );
                     return false;
                 }
             }
             catch( filesystem_error& e )
             {
-                ERROR( mtlog, "Unable to determine if the authentication file is a regular file: " << e.what() );
+                LERROR( mtlog, "Unable to determine if the authentication file is a regular file: " << e.what() );
                 return false;
             }
         }
@@ -135,21 +135,21 @@ namespace scarab
             param_node* t_read_file = param_input_json::read_file( t_auth_file_path.string() );
             if( t_read_file == NULL )
             {
-                ERROR( mtlog, "Unable to parse authentication file" );
+                LERROR( mtlog, "Unable to parse authentication file" );
                 return false;
             }
             else
             {
                 this->param_node::operator=( *t_read_file );
                 delete t_read_file;
-                DEBUG( mtlog, "Authentications:\n" << *this );
+                LDEBUG( mtlog, "Authentications:\n" << *this );
                 f_is_loaded = true;
                 return true;
             }
         }
         else
         {
-            WARN( mtlog, "Authentications not loaded" );
+            LWARN( mtlog, "Authentications not loaded" );
             return false;
         }
     }

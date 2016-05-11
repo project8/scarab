@@ -27,31 +27,58 @@ pbuilder_prepare_project()
 # Scarab options #
 ##################
 
-set( Scarab_BUILD_CODEC_JSON FALSE CACHE BOOL "Flag to enable building the JSON codec" )
+option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" TRUE )
 
-set( Scarab_BUILD_CODEC_MSGPACK FALSE CACHE BOOL "Flag to enable building the msgpack codec" )
+option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the msgpack codec" FALSE )
 
-set( Scarab_BUILD_AUTHENTICATION TRUE CACHE BOOL "Flag to enable building of the authentication class (requires boost::filesystem)" )
+option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" FALSE )
+
+option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
 
 
 #######################
 # Scarab dependencies #
 #######################
 
-# filesystem and system for param_value's use of boost::filesystem::path
-# thread and date_time for concurrent_queue
-set( boost_components filesystem system thread date_time )
+if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+	# filesystem and system for param_value's use of boost::filesystem::path
+	# thread and date_time for concurrent_queue
+	set( boost_components filesystem system thread date_time )
 
-if( Scarab_BUILD_CODEC_JSON )
     # RapidJSON
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json/RapidJSON )
-endif( Scarab_BUILD_CODEC_JSON )
+    include_directories( BEFORE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON/internal 
+    )
+    install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON/internal
+        DESTINATION ${INCLUDE_INSTALL_DIR}/RapidJSON 
+        FILES_MATCHING PATTERN "*.h" 
+    )
+endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     # msgpack-c
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack/msgpack-c )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include )
+    include_directories( BEFORE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c 
+        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include
+    )
+    install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include
+        DESTINATION ${INCLUDE_INSTALL_DIR}/msgpack-c 
+        FILES_MATCHING PATTERN "*.h*" 
+    )
 endif( Scarab_BUILD_CODEC_MSGPACK )
+
+if( Scarab_BUILD_CODEC_YAML )
+	set_option( USE_CPP11 TRUE )
+
+    # Yaml-cpp
+    option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
+    option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
+    add_subdirectory( param/codec/yaml/yaml-cpp )
+    # I'm hard-coding the include directory and library because I ran into an error when I tried to include ${CMAKE_CURRENT_BINARY_DIR}/param/codec/yaml/yaml-cpp/yaml-cpp-config.cmake )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
+    pbuilder_add_ext_libraries( yaml-cpp )
+endif( Scarab_BUILD_CODEC_YAML )
 
 if( Scarab_BUILD_AUTHENTICATION )
     list( APPEND boost_components filesystem system )
@@ -61,11 +88,19 @@ endif( Scarab_BUILD_AUTHENTICATION )
 list( REMOVE_DUPLICATES boost_components )
 find_package( Boost 1.46.0 REQUIRED COMPONENTS ${boost_components} )
 # make sure dynamic linking is assumed for all boost libraries
-add_definitions( -DBOOST_ALL_DYN_LINK )
+#add_definitions( -DBOOST_ALL_DYN_LINK )
+set( Boost_USE_STATIC_LIBS OFF )
+set( Boost_USE_STATIC_RUNTIME OFF )
+set( Boost_ALL_DYN_LINK ON )
 include_directories( ${Boost_INCLUDE_DIRS} )
 # No compiled libraries are currently required
 pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
     
+# For gethostname in version_semantic
+if( WIN32 )
+    pbuilder_add_ext_libraries( "Ws2_32.lib" )
+endif( WIN32 )
+
 
 ########################
 # Build Scarab library #
@@ -90,15 +125,20 @@ add_subdirectory( utility )
 add_subdirectory( logger )
 add_subdirectory( param )
 
-if( Scarab_BUILD_CODEC_JSON )
+if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
-endif( Scarab_BUILD_CODEC_JSON )
+endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack )
     add_subdirectory( param/codec/msgpack )
 endif( Scarab_BUILD_CODEC_MSGPACK )
+
+if( Scarab_BUILD_CODEC_YAML )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/yaml )
+    add_subdirectory( param/codec/yaml )
+endif( Scarab_BUILD_CODEC_YAML )
 
 if( Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )

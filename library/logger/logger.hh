@@ -98,11 +98,11 @@ namespace scarab
      *
      * <pre>
      * LOG(myLogger, level, "message");
-     * TRACE(myLogger, "message");
-     * DEBUG(myLogger, "message");
-     * INFO(myLogger, "message");
-     * WARN(myLogger, "message");
-     * ERROR(myLogger, "message");
+     * LTRACE(myLogger, "message");
+     * LDEBUG(myLogger, "message");
+     * LINFO(myLogger, "message");
+     * LWARN(myLogger, "message");
+     * LERROR(myLogger, "message");
      * FATAL(myLogger, "message");
      *
      * ASSERT(myLogger, assertion, "message");
@@ -110,7 +110,7 @@ namespace scarab
      * LOG_ONCE(myLogger, level, "message");
      * TRACE_ONCE(myLogger, "message");
      * DEBUG_ONCE(myLogger, "message");
-     * INFO_ONCE(myLogger, "message");
+     * LINFO(_ONCE(myLogger, "message");
      * WARN_ONCE(myLogger, "message");
      * ERROR_ONCE(myLogger, "message");
      * FATAL_ONCE(myLogger, "message");
@@ -197,7 +197,7 @@ namespace scarab
 
             /**
              * Log a message at TRACE level.
-             * Use the macro TRACE(logger, message).
+             * Use the macro LTRACE(logger, message).
              * @param message The message.
              * @param loc Source code location (set automatically by the corresponding macro).
              */
@@ -207,7 +207,7 @@ namespace scarab
             }
             /**
              * Log a message at DEBUG level.
-             * Use the macro DEBUG(logger, message).
+             * Use the macro LDEBUG(logger, message).
              * @param message The message.
              * @param loc Source code location (set automatically by the corresponding macro).
              */
@@ -217,7 +217,7 @@ namespace scarab
             }
             /**
              * Log a message at DEBUG level.
-             * Use the macro DEBUG(logger, message).
+             * Use the macro LDEBUG(logger, message).
              * @param message The message.
              * @param loc Source code location (set automatically by the corresponding macro).
              */
@@ -226,8 +226,8 @@ namespace scarab
                 Log(eInfo, message, loc);
             }
             /**
-             * Log a message at INFO level.
-             * Use the macro INFO(logger, message).
+             * Log a message at LINFO( level.
+             * Use the macro LINFO(logger, message).
              * @param message The message.
              * @param loc Source code location (set automatically by the corresponding macro).
              */
@@ -237,7 +237,7 @@ namespace scarab
             }
             /**
              * Log a message at ERROR level.
-             * Use the macro ERROR(logger, message).
+             * Use the macro LERROR(logger, message).
              * @param message The message.
              * @param loc Source code location (set automatically by the corresponding macro).
              */
@@ -340,21 +340,21 @@ namespace scarab
 #define LOGGER(I,K)      static scarab::logger I(K);
 
 #define LOG(...)         macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
-#define TRACE(...)       macro_dispatcher(__LOG_TRACE_, __VA_ARGS__)(__VA_ARGS__)
-#define DEBUG(...)       macro_dispatcher(__LOG_DEBUG_, __VA_ARGS__)(__VA_ARGS__)
-#define INFO(...)        macro_dispatcher(__LOG_INFO_, __VA_ARGS__)(__VA_ARGS__)
-#define WARN(...)        macro_dispatcher(__LOG_WARN_, __VA_ARGS__)(__VA_ARGS__)
-#define ERROR(...)       macro_dispatcher(__LOG_ERROR_, __VA_ARGS__)(__VA_ARGS__)
-#define FATAL(...)       macro_dispatcher(__LOG_FATAL_, __VA_ARGS__)(__VA_ARGS__)
-#define ASSERT(...)      macro_dispatcher(__LOG_ASSERT_, __VA_ARGS__)(__VA_ARGS__)
+#define LTRACE(...)       macro_dispatcher(__LOG_TRACE_, __VA_ARGS__)(__VA_ARGS__)
+#define LDEBUG(...)       macro_dispatcher(__LOG_DEBUG_, __VA_ARGS__)(__VA_ARGS__)
+#define LINFO(...)        macro_dispatcher(__LOG_INFO_, __VA_ARGS__)(__VA_ARGS__)
+#define LWARN(...)        macro_dispatcher(__LOG_WARN_, __VA_ARGS__)(__VA_ARGS__)
+#define LERROR(...)       macro_dispatcher(__LOG_ERROR_, __VA_ARGS__)(__VA_ARGS__)
+#define LFATAL(...)       macro_dispatcher(__LOG_FATAL_, __VA_ARGS__)(__VA_ARGS__)
+#define LASSERT(...)      macro_dispatcher(__LOG_ASSERT_, __VA_ARGS__)(__VA_ARGS__)
 
 #define LOG_ONCE(...)    macro_dispatcher(__LOG_LOG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define TRACE_ONCE(...)  macro_dispatcher(__LOG_TRACE_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define DEBUG_ONCE(...)  macro_dispatcher(__LOG_DEBUG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define INFO_ONCE(...)   macro_dispatcher(__LOG_INFO_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define WARN_ONCE(...)   macro_dispatcher(__LOG_WARN_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define ERROR_ONCE(...)  macro_dispatcher(__LOG_ERROR_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define FATAL_ONCE(...)  macro_dispatcher(__LOG_FATAL_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LTRACE_ONCE(...)  macro_dispatcher(__LOG_TRACE_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LDEBUG_ONCE(...)  macro_dispatcher(__LOG_DEBUG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LINFO_ONCE(...)   macro_dispatcher(__LOG_INFO_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LWARN_ONCE(...)   macro_dispatcher(__LOG_WARN_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LERROR_ONCE(...)  macro_dispatcher(__LOG_ERROR_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LFATAL_ONCE(...)  macro_dispatcher(__LOG_FATAL_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 
 #else /*_WIN32*/
 
@@ -363,30 +363,30 @@ namespace scarab
 
 #define LOG(I,K)         std::cout << "LOG: " << K << std::endl;
 #ifndef NDEBUG
-#define TRACE(I,K)       std::cout << "TRACE: " << K << std::endl;
-#define DEBUG(I,K)       std::cout << "DEBUG: " << K << std::endl;
+#define LTRACE(I,K)       std::cout << "TRACE: " << K << std::endl;
+#define LDEBUG(I,K)       std::cout << "DEBUG: " << K << std::endl;
 #else
-#define TRACE(I,K)
-#define DEBUG(I,K)
+#define LTRACE(I,K)
+#define LDEBUG(I,K)
 #endif
-#define INFO(I,K)        std::cout << "INFO: " << K << std::endl;
-#define WARN(I,K)        std::cout << "WARN: " << K << std::endl;
-#define ERROR(I,K)       std::cout << "ERROR: " << K << std::endl;
-#define FATAL(I,K)       std::cout << "FATAL: " << K << std::endl;
-#define ASSERT(I,K)      std::cout << "ASSERT: " << K << std::endl;
+#define LINFO(I,K)        std::cout << "INFO: " << K << std::endl;
+#define LWARN(I,K)        std::cout << "WARN: " << K << std::endl;
+#define LERROR(I,K)       std::cout << "ERROR: " << K << std::endl;
+#define LFATAL(I,K)       std::cout << "FATAL: " << K << std::endl;
+#define LASSERT(I,K)      std::cout << "ASSERT: " << K << std::endl;
 
 #define LOG_ONCE(I,K)    std::cout << "LOG: " << K << std::endl;
 #ifndef NDEBUG
-#define TRACE_ONCE(I,K)  std::cout << "TRACE: " << K << std::endl;
-#define DEBUG_ONCE(I,K)  std::cout << "DEBUG: " << K << std::endl;
+#define LTRACE_ONCE(I,K)  std::cout << "TRACE: " << K << std::endl;
+#define LDEBUG_ONCE(I,K)  std::cout << "DEBUG: " << K << std::endl;
 #else
-#define TRACE_ONCE(I,K)
-#define DEBUG_ONCE(I,K)
+#define LTRACE_ONCE(I,K)
+#define LDEBUG_ONCE(I,K)
 #endif
-#define INFO_ONCE(I,K)   std::cout << "INFO: " << K << std::endl;
-#define WARN_ONCE(I,K)   std::cout << "WARN: " << K << std::endl;
-#define ERROR_ONCE(I,K)  std::cout << "ERROR: " << K << std::endl;
-#define FATAL_ONCE(I,K)  std::cout << "FATAL: " << K << std::endl;
+#define LINFO_ONCE(I,K)   std::cout << "INFO: " << K << std::endl;
+#define LWARN_ONCE(I,K)   std::cout << "WARN: " << K << std::endl;
+#define LERROR_ONCE(I,K)  std::cout << "ERROR: " << K << std::endl;
+#define LFATAL_ONCE(I,K)  std::cout << "FATAL: " << K << std::endl;
 
 #endif
 

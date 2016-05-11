@@ -10,7 +10,9 @@ if( Scarab_ENABLE_TESTING )
     
     set( test_programs
         test_logger
+        test_yaml
     )
+    
     
     pbuilder_executables( test_programs lib_dependencies )
 

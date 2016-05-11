@@ -52,18 +52,18 @@ namespace scarab
             if( a_value.empty() )
             {
                 a_parent->add( a_addr, new param() );
-                DEBUG( dlog, "Parsed value as NULL" << *this );
+                LDEBUG( dlog, "Parsed value as NULL" << *this );
             }
             // if "true" or "false", then bool
             else if( a_value == "true" )
             {
                 a_parent->add( a_addr, new param_value( true ) );
-                DEBUG( dlog, "Parsed value (" << a_value << ") as bool(true)" << *this );
+                LDEBUG( dlog, "Parsed value (" << a_value << ") as bool(true)" << *this );
             }
             else if( a_value == "false" )
             {
                 a_parent->add( a_addr, new param_value( false ) );
-                DEBUG( dlog, "Parsed value (" << a_value << ") as bool(false):" << *this );
+                LDEBUG( dlog, "Parsed value (" << a_value << ") as bool(false):" << *this );
             }
             else
             {
@@ -83,26 +83,26 @@ namespace scarab
                     {
                         // value is a floating-point number, since it has a decimal point
                         a_parent->add( a_addr, new param_value( t_double ) );
-                        DEBUG( dlog, "Parsed value (" << a_value << ") as double(" << t_double << "):" << *this );
+                        LDEBUG( dlog, "Parsed value (" << a_value << ") as double(" << t_double << "):" << *this );
                     }
                     else if( a_value[ 0 ] == '-' )
                     {
                         // value is a signed integer if it's negative
                         a_parent->add( a_addr, new param_value( (int64_t)t_double ) );
-                        DEBUG( dlog, "Parsed value (" << a_value << ") as int(" << (int64_t)t_double << "):" << *this );
+                        LDEBUG( dlog, "Parsed value (" << a_value << ") as int(" << (int64_t)t_double << "):" << *this );
                     }
                     else
                     {
                         // value is assumed to be unsigned if it's positive
                         a_parent->add( a_addr, new param_value( (uint64_t)t_double ) );
-                        DEBUG( dlog, "Parsed value (" << a_value << ") as uint(" << (uint64_t)t_double << ");" << *this );
+                        LDEBUG( dlog, "Parsed value (" << a_value << ") as uint(" << (uint64_t)t_double << ");" << *this );
                     }
                 }
                 else
                 {
                     // value is not numeric; treat as a string
                     a_parent->add( a_addr, new param_value( a_value ) );
-                    DEBUG( dlog, "Parsed value (" << a_value << ") as a string:" << *this );
+                    LDEBUG( dlog, "Parsed value (" << a_value << ") as a string:" << *this );
                 }
             }
             return;
