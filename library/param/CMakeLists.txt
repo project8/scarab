@@ -5,11 +5,15 @@
 set( dir ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set( Scarab_HEADERS ${Scarab_HEADERS}
+    ${dir}/configurator.hh
     ${dir}/param.hh
     ${dir}/parsable.hh
+    ${dir}/parser.hh
     PARENT_SCOPE )
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
+    ${dir}/configurator.cc
     ${dir}/param.cc
     ${dir}/parsable.cc
+    ${dir}/parser.cc
     PARENT_SCOPE )
