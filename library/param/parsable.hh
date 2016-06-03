@@ -1,5 +1,5 @@
-#ifndef SCARAB_PARSER_HH_
-#define SCARAB_PARSER_HH_
+#ifndef SCARAB_PARSABLE_HH_
+#define SCARAB_PARSABLE_HH_
 
 #include "scarab_api.hh"
 
@@ -24,10 +24,8 @@ namespace scarab
         public:
             static const char f_value_separator = '=';
             static const char f_node_separator = '.';
-
-
     };
 
 } /* namespace scarab */
 
-#endif /* SCARAB_PARSER_HH_ */
+#endif /* SCARAB_PARSABLE_HH_ */
