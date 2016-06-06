@@ -27,6 +27,8 @@ namespace scarab
     configurator::configurator( int an_argc, char** an_argv, param_node* a_default ) :
             f_exe_name( "unknown" ),
             f_master_config( new param_node() ),
+            f_help_flag( false ),
+            f_version_flag( false ),
             f_param_buffer( NULL ),
             f_string_buffer()
     {
@@ -112,6 +114,18 @@ namespace scarab
         //cout << t_parser );
         //LDEBUG( slog, "adding command-line parser:\n" << t_parser << *f_master_config );
         f_master_config->merge( t_parser );
+
+        // check for help and version flags
+        if( f_master_config->has( "help" ) )
+        {
+            f_help_flag = true;
+            f_master_config->erase( "help" );
+        }
+        if( f_master_config->has( "version" ) )
+        {
+            f_version_flag = true;
+            f_master_config->erase( "version" );
+        }
 
         //std::cout << "fourth configuration complete" << std::endl;
         LINFO( slog, "Final configuration:\n" << *f_master_config );

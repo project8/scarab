@@ -259,6 +259,15 @@ namespace scarab
 
         return true;
     }
+    
+    std::string version_semantic::version_info_string() const
+    {
+        std::stringstream t_info_stream;
+        t_info_stream << "Built with " << f_package << " version " << f_version << '\n';
+        t_info_stream << "Git commit: " << f_commit;
+        std::string t_version_info( t_info_stream.str() );
+        return t_version_info;
+    }
 
 } /* SCARAB_VERSION_HH_ */
 
