@@ -37,6 +37,8 @@ namespace scarab
             virtual const std::string& exe_name() const = 0;
             virtual const std::string& hostname() const = 0;
             virtual const std::string& username() const = 0;
+
+            virtual std::string version_info_string() const = 0;
     };
 
     class SCARAB_API version_semantic : public version_ifc
@@ -50,11 +52,11 @@ namespace scarab
             
             version_semantic& operator=( const version_semantic& a_orig );
 
-            unsigned major_version() const;
-            unsigned minor_version() const;
-            unsigned patch_version() const;
+            virtual unsigned major_version() const;
+            virtual unsigned minor_version() const;
+            virtual unsigned patch_version() const;
             
-            const std::string& version_str() const;
+            virtual const std::string& version_str() const;
             
             virtual const std::string& package() const;
             virtual const std::string& commit() const;
@@ -63,6 +65,8 @@ namespace scarab
             virtual const std::string& hostname() const;
             virtual const std::string& username() const;
             
+            virtual std::string version_info_string() const;
+
         public:
             bool parse( const std::string& a_ver );
 
