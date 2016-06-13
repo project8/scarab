@@ -545,7 +545,7 @@ namespace scarab
         else if( f_value_type == k_string )
         {
             std::stringstream t_conv;
-            t_conv << k_string;
+            t_conv << *f_value.f_string;
             XValType t_return;
             t_conv >> t_return;
             return t_return;
