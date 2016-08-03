@@ -40,7 +40,8 @@ namespace scarab
         }
         catch (YAML::Exception& e)
         {
-            ERROR(slog, "YAML error: " << e.what());
+            LERROR(slog, "YAML error: " << e.what());
+            return nullptr;
         }
     }
 
@@ -67,7 +68,8 @@ namespace scarab
         }
         catch (YAML::Exception& e)
         {
-            ERROR(slog, "Yaml error: " << e.what());
+            LERROR(slog, "Yaml error: " << e.what());
+            return nullptr;
         }
 
     }
@@ -85,7 +87,8 @@ namespace scarab
         }
         catch (YAML::Exception& e)
         {
-            ERROR(slog, "YAML error: " << e.what());
+            LERROR(slog, "YAML error: " << e.what());
+            return nullptr;
         }
 
         return t_config_array;
@@ -104,7 +107,8 @@ namespace scarab
         }
         catch (YAML::Exception& e)
         {
-            ERROR(slog, "Yaml error: " << e.what());
+            LERROR(slog, "Yaml error: " << e.what());
+            return nullptr;
         }
 
         return t_config_object;
@@ -148,7 +152,8 @@ namespace scarab
                             }
                             catch (std::bad_cast& bc)
                             {
-                                ERROR(slog, "Yaml error: Bad Cast");
+                                LERROR(slog, "Yaml error: Bad Cast");
+                                return nullptr;
                             }
                         }
                     }
@@ -171,7 +176,7 @@ namespace scarab
     {
         if (a_filename.empty())
         {
-            //ERROR( slog, “Filename cannot be an empty string” );
+            LERROR( slog, “Filename cannot be an empty string” );
             return false;
         }
 
@@ -179,7 +184,7 @@ namespace scarab
 
         if (file == NULL)
         {
-            //ERROR( slog, "Unable to open file: " << a_filename );
+            LERROR( slog, "Unable to open file: " << a_filename );
             return false;
         }
 
@@ -209,7 +214,7 @@ namespace scarab
         {
             return param_output_yaml::param_value_handler(a_to_write);
         }
-        WARN(slog, "Unknown param type encountered");
+        LWARN(slog, "Unknown param type encountered");
         return YAML::Node();
     }
 
