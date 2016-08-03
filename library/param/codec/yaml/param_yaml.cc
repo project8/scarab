@@ -71,7 +71,7 @@ namespace scarab
             LERROR(slog, "Yaml error: " << e.what());
             return nullptr;
         }
-
+        return nullptr;
     }
 
     param_array* param_input_yaml::sequence_handler( const YAML::Node& a_node )
@@ -176,7 +176,7 @@ namespace scarab
     {
         if (a_filename.empty())
         {
-            LERROR( slog, “Filename cannot be an empty string” );
+            LERROR( slog, "Filename cannot be an empty string" );
             return false;
         }
 
@@ -274,7 +274,7 @@ namespace scarab
             return t_node = value.as_string();
         }
 
-        WARN(slog, "Unkown value type encountered");
+        LWARN(slog, "Unkown value type encountered");
         return YAML::Node();
     }
 }
