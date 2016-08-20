@@ -20,6 +20,9 @@ namespace scarab
 {
     LOGGER( dlog, "param" );
 
+
+    REGISTER_PARAM_INPUT_CODEC( param_input_json, "json" );
+
     param_input_json::param_input_json()
     {
     }
@@ -27,7 +30,7 @@ namespace scarab
     {
     }
 
-    param_node* param_input_json::read_file( const std::string& a_filename )
+    param* param_input_json::read_file( const std::string& a_filename, const param_node* a_options )
     {
         FILE* t_config_file = fopen( a_filename.c_str(), "r" );
         if( t_config_file == NULL )
@@ -77,7 +80,7 @@ namespace scarab
         return param_input_json::read_document( t_config_doc );
     }
 
-    param_node* param_input_json::read_string( const std::string& a_json_string )
+    param* param_input_json::read_string( const std::string& a_json_string, const param_node* a_options )
     {
         rapidjson::Document t_config_doc;
         if( t_config_doc.Parse<0>( a_json_string.c_str() ).HasParseError() )
@@ -168,13 +171,15 @@ namespace scarab
     }
 
 
+    REGISTER_PARAM_OUTPUT_CODEC( param_output_json, "json" );
+
     param_output_json::param_output_json()
     {}
 
     param_output_json::~param_output_json()
     {}
 
-    bool param_output_json::write_file( const param& a_to_write, const std::string& a_filename, json_writing_style a_style )
+    bool param_output_json::write_file( const param& a_to_write, const std::string& a_filename, const param_node* a_options )
     {
         if( a_filename.empty() )
         {
@@ -191,8 +196,22 @@ namespace scarab
 
         rapidjson::FileStream t_filestream( file );
 
+        json_writing_style t_style = k_compact;
+        if( a_options->has( "style" ) )
+        {
+            if( a_options->value_at( "style" )->is_uint() )
+            {
+                t_style = (json_writing_style)a_options->get_value< unsigned >( "style", k_compact );
+            }
+            else
+            {
+                string t_style_string( a_options->get_value( "style", "compact" ) );
+                if( t_style_string == string( "pretty" ) ) t_style = k_pretty;
+            }
+        }
+
         bool t_result = false;
-        if( a_style == k_compact )
+        if( t_style == k_compact )
         {
             rj_file_writer t_writer( t_filestream );
             t_result = param_output_json::write_param( a_to_write, &t_writer );
@@ -211,12 +230,27 @@ namespace scarab
 
         return true;
     }
-    bool param_output_json::write_string( const param& a_to_write, std::string& a_string, json_writing_style a_style )
+
+    bool param_output_json::write_string( const param& a_to_write, std::string& a_string, const param_node* a_options )
     {
         rapidjson::StringBuffer t_str_buff;
 
+        json_writing_style t_style = k_compact;
+        if( a_options->has( "style" ) )
+        {
+            if( a_options->value_at( "style" )->is_uint() )
+            {
+                t_style = (json_writing_style)a_options->get_value< unsigned >( "style", k_compact );
+            }
+            else
+            {
+                string t_style_string( a_options->get_value( "style", "compact" ) );
+                if( t_style_string == string( "pretty" ) ) t_style = k_pretty;
+            }
+        }
+
         bool t_result = false;
-        if( a_style == k_compact )
+        if( t_style == k_compact )
         {
             rj_string_writer t_writer( t_str_buff );
             t_result = param_output_json::write_param( a_to_write, &t_writer );

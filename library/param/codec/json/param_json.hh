@@ -8,6 +8,11 @@
 #ifndef SCARAB_PARAM_JSON_HH_
 #define SCARAB_PARAM_JSON_HH_
 
+#include "param_codec.hh"
+
+#include "logger.hh"
+#include "param.hh"
+
 #include "document.h"
 #include "filestream.h"
 #include "prettywriter.h"
@@ -18,8 +23,6 @@
 #include <sstream>
 #include <string>
 
-#include "logger.hh"
-#include "param.hh"
 
 namespace scarab
 {
@@ -29,23 +32,44 @@ namespace scarab
     //************** INPUT ******************
     //***************************************
 
-    class SCARAB_API param_input_json
+    /*!
+     @class param_input_json
+     @author N.S. Oblath
+
+     @brief Convert JSON to Param
+
+     @details
+     Options: None
+    */
+    class SCARAB_API param_input_json : public param_input_codec
     {
         public:
             param_input_json();
             virtual ~param_input_json();
 
-            static param_node* read_file( const std::string& a_filename );
-            static param_node* read_string( const std::string& a_json_str );
-            static param_node* read_document( const rapidjson::Document& a_document );
-            static param* read_value( const rapidjson::Value& a_value );
+            virtual param* read_file( const std::string& a_filename, const param_node* a_options = nullptr );
+            virtual param* read_string( const std::string& a_json_str, const param_node* a_options = nullptr );
+            param_node* read_document( const rapidjson::Document& a_document );
+            param* read_value( const rapidjson::Value& a_value );
     };
 
     //***************************************
     //************** OUTPUT *****************
     //***************************************
 
-    class SCARAB_API param_output_json
+    /*!
+     @class param_output_json
+     @author N.S. Oblath
+
+     @brief Convert Param to JSON
+
+     @details
+     Options:
+       - JSON Style
+           Pretty print: { "style": param_output_json::k_pretty } or { "style": "pretty" }
+           Compact (default): { "style": param_output_json::k_compact } or { "style": "compact" } or anything else
+    */
+    class SCARAB_API param_output_json : public param_output_codec
     {
         public:
             typedef rapidjson::Writer< rapidjson::FileStream, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<> > rj_file_writer;
@@ -55,26 +79,27 @@ namespace scarab
 
             enum json_writing_style
             {
-                k_compact,
-                k_pretty
+                k_compact = 0,
+                k_pretty = 1
             };
 
         public:
             param_output_json();
             virtual ~param_output_json();
 
-            static bool write_file( const param& a_to_write, const std::string& a_filename, json_writing_style a_style );
-            static bool write_string( const param& a_to_write, std::string& a_string, json_writing_style a_style );
+            virtual bool write_file( const param& a_to_write, const std::string& a_filename, const param_node* a_options = nullptr );
+            virtual bool write_string( const param& a_to_write, std::string& a_string, const param_node* a_options = nullptr );
+
             template< class XWriter >
-            static bool write_param( const param& a_to_write, XWriter* a_writer );
+            bool write_param( const param& a_to_write, XWriter* a_writer );
             template< class XWriter >
-            static bool write_param_null( const param& a_to_write, XWriter* a_writer );
+            bool write_param_null( const param& a_to_write, XWriter* a_writer );
             template< class XWriter >
-            static bool write_param_value( const param_value& a_to_write, XWriter* a_writer );
+            bool write_param_value( const param_value& a_to_write, XWriter* a_writer );
             template< class XWriter >
-            static bool write_param_array( const param_array& a_to_write, XWriter* a_writer );
+            bool write_param_array( const param_array& a_to_write, XWriter* a_writer );
             template< class XWriter >
-            static bool write_param_node( const param_node& a_to_write, XWriter* a_writer );
+            bool write_param_node( const param_node& a_to_write, XWriter* a_writer );
 
     };
 

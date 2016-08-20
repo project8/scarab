@@ -10,7 +10,7 @@
 #include "authentication.hh"
 
 #include "logger.hh"
-#include "param_json.hh"
+#include "param_codec.hh"
 
 #include <boost/filesystem.hpp>
 
@@ -132,15 +132,21 @@ namespace scarab
         // if so, load it
         if( t_auth_file_present )
         {
-            param_node* t_read_file = param_input_json::read_file( t_auth_file_path.string() );
+            param_translator t_translator;
+            param* t_read_file = t_translator.read_file( t_auth_file_path.string() );
             if( t_read_file == NULL )
             {
                 LERROR( mtlog, "Unable to parse authentication file" );
                 return false;
             }
+            else if( ! t_read_file->is_node() )
+            {
+                LERROR( mtlog, "Authentication file must translate to a node" );
+                return false;
+            }
             else
             {
-                this->param_node::operator=( *t_read_file );
+                this->param_node::operator=( t_read_file->as_node() );
                 delete t_read_file;
                 LDEBUG( mtlog, "Authentications:\n" << *this );
                 f_is_loaded = true;

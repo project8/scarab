@@ -8,8 +8,9 @@
 #define SCARAB_API_EXPORTS
 
 #include "param_yaml.hh"
-#include "param.hh"
+
 #include "logger.hh"
+#include "param.hh"
 
 #include <sstream>
 #include <fstream>
@@ -31,16 +32,30 @@ namespace scarab
 
     }
 
-    param* param_input_yaml::read_file( const std::string& a_filename )
+    param* param_input_yaml::read_file( const std::string& a_filename, const param_node* a_options )
     {
         try
         {
-            YAML::Node root_node = YAML::LoadFile(a_filename);
-            return param_input_yaml::read_node_type(root_node);
+            YAML::Node root_node = YAML::LoadFile( a_filename );
+            return param_input_yaml::read_node_type( root_node );
         }
-        catch (YAML::Exception& e)
+        catch( YAML::Exception& e )
         {
-            LERROR(slog, "YAML error: " << e.what());
+            LERROR( slog, "YAML error: " << e.what() );
+            return nullptr;
+        }
+    }
+
+    param* param_input_yaml::read_string( const std::string& a_string, const param_node* a_options )
+    {
+        try
+        {
+            YAML::Node root_node = YAML::Load( a_string );
+            return param_input_yaml::read_node_type( root_node );
+        }
+        catch( YAML::Exception& e )
+        {
+            LERROR( slog, "YAML error: " << e.what() );
             return nullptr;
         }
     }
@@ -162,6 +177,9 @@ namespace scarab
         }
     }
 
+
+    REGISTER_PARAM_OUTPUT_CODEC( param_output_yaml, "yaml" );
+
     param_output_yaml::param_output_yaml()
     {
 
@@ -172,7 +190,7 @@ namespace scarab
 
     }
 
-    bool param_output_yaml::write_file( const param& a_to_write, const std::string& a_filename )
+    bool param_output_yaml::write_file( const param& a_to_write, const std::string& a_filename, const param_node* a_options )
     {
         if (a_filename.empty())
         {
@@ -193,6 +211,16 @@ namespace scarab
         std::ofstream fout(a_filename.c_str());
         fout << a_node;
         fclose(file);
+        return true;
+    }
+
+    bool param_output_yaml::write_string( const param& a_to_write, std::string& a_string, const param_node* a_options )
+    {
+        YAML::Node a_node = param_output_yaml::check_param_type(a_to_write);
+
+        std::stringstream t_out;
+        t_out << a_node;
+        a_string = t_out.str();
         return true;
     }
 
