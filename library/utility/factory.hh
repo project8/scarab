@@ -22,10 +22,10 @@ namespace scarab
 {
     LOGGER( slog_fact, "factory" );
 
-    template< class XBaseType >
+    template< class XBaseType, typename ... XArgs >
     class factory;
 
-    template< class XBaseType >
+    template< class XBaseType, typename ... XArgs >
     class base_registrar
     {
         public:
@@ -33,42 +33,42 @@ namespace scarab
             virtual ~base_registrar() {}
 
         public:
-            friend class factory< XBaseType >;
+            friend class factory< XBaseType, XArgs... >;
 
         protected:
-            virtual XBaseType* create() const = 0;
+            virtual XBaseType* create( XArgs ... args ) const = 0;
 
     };
 
-    template< class XBaseType, class XDerivedType >
-    class registrar : public base_registrar< XBaseType >
+    template< class XBaseType, class XDerivedType, typename ... XArgs >
+    class registrar : public base_registrar< XBaseType, XArgs... >
     {
         public:
-            registrar(const std::string& a_class_name);
+            registrar( const std::string& a_class_name );
             virtual ~registrar();
 
         protected:
-            void register_class(const std::string& a_class_name) const;
+            void register_class( const std::string& a_class_name ) const;
 
-            XBaseType* create() const;
+            XBaseType* create( XArgs ... args ) const;
 
     };
 
 
-    template< class XBaseType >
-    class factory : public singleton< factory< XBaseType > >
+    template< class XBaseType, typename ... XArgs >
+    class factory : public singleton< factory< XBaseType, XArgs... > >
     {
         public:
-            typedef std::map< std::string, const base_registrar< XBaseType >* > FactoryMap;
+            typedef std::map< std::string, const base_registrar< XBaseType, XArgs... >* > FactoryMap;
             typedef typename FactoryMap::value_type FactoryEntry;
             typedef typename FactoryMap::iterator FactoryIt;
             typedef typename FactoryMap::const_iterator FactoryCIt;
 
         public:
-            XBaseType* create(const std::string& a_class_name);
-            XBaseType* create(const FactoryCIt& iter);
+            XBaseType* create(const std::string& a_class_name, XArgs ... args);
+            XBaseType* create(const FactoryCIt& iter, XArgs ... args);
 
-            void register_class(const std::string& a_class_name, const base_registrar< XBaseType >* base_registrar);
+            void register_class(const std::string& a_class_name, const base_registrar< XBaseType, XArgs... >* base_registrar);
 
             FactoryCIt begin() const;
             FactoryCIt end() const;
@@ -84,15 +84,15 @@ namespace scarab
             ~factory();
     };
 
-    template< class XBaseType >
-    XBaseType* factory< XBaseType >::create(const FactoryCIt& iter)
+    template< class XBaseType, typename ... XArgs >
+    XBaseType* factory< XBaseType, XArgs... >::create(const FactoryCIt& iter, XArgs ... args)
     {
         lock_guard( this->f_factory_mutex );
-        return iter->second->create();
+        return iter->second->create( args... );
     }
 
-    template< class XBaseType >
-    XBaseType* factory< XBaseType >::create(const std::string& a_class_name)
+    template< class XBaseType, typename ... XArgs >
+    XBaseType* factory< XBaseType, XArgs... >::create(const std::string& a_class_name, XArgs ... args)
     {
         //std::cout << "this factory (" << this << ") has " << fMap->size() << " entries" << std::endl;
         //for( FactoryCIt iter = fMap->begin(); iter != fMap->end(); ++iter )
@@ -100,8 +100,8 @@ namespace scarab
         //    std::cout << "this factory has: " << iter->first << std::endl;
         //}
         lock_guard( this->f_factory_mutex );
-        FactoryCIt it = fMap->find(a_class_name);
-        if (it == fMap->end())
+        FactoryCIt it = fMap->find( a_class_name );
+        if( it == fMap->end() )
         {
             LERROR( slog_fact, "Did not find factory for <" << a_class_name << ">." );
             return NULL;
@@ -110,8 +110,8 @@ namespace scarab
         return it->second->create();
     }
 
-    template< class XBaseType >
-    void factory< XBaseType >::register_class(const std::string& a_class_name, const base_registrar< XBaseType >* a_registrar)
+    template< class XBaseType, typename ... XArgs >
+    void factory< XBaseType, XArgs... >::register_class(const std::string& a_class_name, const base_registrar< XBaseType, XArgs... >* a_registrar)
     {
         lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_class_name);
@@ -120,31 +120,31 @@ namespace scarab
             LERROR( slog_fact, "Already have factory registered for <" << a_class_name << ">." );
             return;
         }
-        fMap->insert(std::pair< std::string, const base_registrar< XBaseType >* >(a_class_name, a_registrar));
+        fMap->insert(std::pair< std::string, const base_registrar< XBaseType, XArgs... >* >(a_class_name, a_registrar));
         //std::cout << "registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this << std::endl;
     }
 
-    template< class XBaseType >
-    factory< XBaseType >::factory() :
+    template< class XBaseType, typename ... XArgs >
+    factory< XBaseType, XArgs... >::factory() :
         fMap(new FactoryMap()),
         f_factory_mutex()
     {}
 
-    template< class XBaseType >
-    factory< XBaseType >::~factory()
+    template< class XBaseType, typename ... XArgs >
+    factory< XBaseType, XArgs... >::~factory()
     {
         delete fMap;
     }
 
-    template< class XBaseType >
-    typename factory< XBaseType >::FactoryCIt factory< XBaseType >::begin() const
+    template< class XBaseType, typename ... XArgs >
+    typename factory< XBaseType, XArgs... >::FactoryCIt factory< XBaseType, XArgs... >::begin() const
     {
         lock_guard( this->f_factory_mutex );
         return fMap->begin();
     }
 
-    template< class XBaseType >
-    typename factory< XBaseType >::FactoryCIt factory< XBaseType >::end() const
+    template< class XBaseType, typename ... XArgs >
+    typename factory< XBaseType, XArgs... >::FactoryCIt factory< XBaseType, XArgs... >::end() const
     {
         lock_guard( this->f_factory_mutex );
         return fMap->end();
@@ -155,28 +155,28 @@ namespace scarab
 
 
 
-    template< class XBaseType, class XDerivedType >
-    registrar< XBaseType, XDerivedType >::registrar(const std::string& a_class_name) :
-            base_registrar< XBaseType >()
+    template< class XBaseType, class XDerivedType, typename ... XArgs >
+    registrar< XBaseType, XDerivedType, XArgs... >::registrar( const std::string& a_class_name ) :
+            base_registrar< XBaseType, XArgs... >()
     {
-        register_class(a_class_name);
+        register_class( a_class_name );
     }
 
-    template< class XBaseType, class XDerivedType >
-    registrar< XBaseType, XDerivedType >::~registrar()
+    template< class XBaseType, class XDerivedType, typename ... XArgs >
+    registrar< XBaseType, XDerivedType, XArgs... >::~registrar()
     {}
 
-    template< class XBaseType, class XDerivedType >
-    void registrar< XBaseType, XDerivedType >::register_class(const std::string& a_class_name) const
+    template< class XBaseType, class XDerivedType, typename ... XArgs >
+    void registrar< XBaseType, XDerivedType, XArgs... >::register_class( const std::string& a_class_name ) const
     {
-        factory< XBaseType >::get_instance()->register_class(a_class_name, this);
+        factory< XBaseType, XArgs... >::get_instance()->register_class( a_class_name, this );
         return;
     }
 
-    template< class XBaseType, class XDerivedType >
-    XBaseType* registrar< XBaseType, XDerivedType >::create() const
+    template< class XBaseType, class XDerivedType, typename ... XArgs >
+    XBaseType* registrar< XBaseType, XDerivedType, XArgs... >::create( XArgs... args ) const
     {
-        return dynamic_cast< XBaseType* >(new XDerivedType());
+        return dynamic_cast< XBaseType* >( new XDerivedType( args... ) );
     }
 
 } /* namespace scarab */
