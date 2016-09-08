@@ -6,6 +6,7 @@ set( dir ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/configurator.hh
+    ${dir}/global_config.hh
     ${dir}/param.hh
     ${dir}/param_codec.hh
     ${dir}/parsable.hh
@@ -14,6 +15,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/configurator.cc
+    ${dir}/global_config.cc
     ${dir}/param.cc
     ${dir}/param_codec.cc
     ${dir}/parsable.cc
