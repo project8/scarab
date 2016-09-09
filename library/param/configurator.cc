@@ -8,6 +8,7 @@
 #include "configurator.hh"
 
 #include "logger.hh"
+#include "param_codec.hh"
 #include "param_json.hh"
 #include "parser.hh"
 #include "path.hh"
@@ -75,12 +76,17 @@ namespace scarab
             path t_config_filename = scarab::expand_path( t_parser.get_value( t_name_config ) );
             if( ! t_config_filename.empty() )
             {
-                param_node* t_config_from_file = param_input_json::read_file( t_config_filename.native() );
+                param_translator t_translator;
+                param* t_config_from_file = t_translator.read_file( t_config_filename.native() );
                 if( t_config_from_file == NULL )
                 {
                     throw error() << "[configurator] error parsing config file";
                 }
-                f_master_config->merge( *t_config_from_file );
+                if( ! t_config_from_file->is_node() )
+                {
+                    throw error() << "[configurator] configuration file must consist of an object/node";
+                }
+                f_master_config->merge( t_config_from_file->as_node() );
                 delete t_config_from_file;
             }
         }
@@ -95,8 +101,13 @@ namespace scarab
             string t_config_json = t_parser.get_value( t_name_json );
             if( ! t_config_json.empty() )
             {
-                param_node* t_config_from_json = param_input_json::read_string( t_config_json );
-                f_master_config->merge( *t_config_from_json );
+                param_input_json t_input_json;
+                param* t_config_from_json = t_input_json.read_string( t_config_json );
+                if( ! t_config_from_json->is_node() )
+                {
+                    throw error() << "[configurator] command line json must be an object";
+                }
+                f_master_config->merge( t_config_from_json->as_node() );
                 delete t_config_from_json;
             }
         }

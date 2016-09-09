@@ -8,13 +8,13 @@ namespace scarab
 
     error::error() :
             ::std::exception(),
-            f_error( "" )
+            f_error()
     {
     }
 
     error::error( const error& an_error ) :
             std::exception(),
-            f_error( an_error.f_error.str() )
+            f_error( an_error.f_error )
     {
     }
 
@@ -24,7 +24,7 @@ namespace scarab
 
     const char* error::what() const throw ()
     {
-        return f_error.str().c_str();
+        return f_error.c_str();
     }
 
 }
