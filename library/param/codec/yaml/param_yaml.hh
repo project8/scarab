@@ -43,7 +43,7 @@ namespace scarab
             param* read_node_type( const YAML::Node& a_node );
             param_array* sequence_handler( const YAML::Node& a_node );
             param_node* map_handler( const YAML::Node& a_node );
-            param_value* read_value( const YAML::Node& a_node );
+            param_value* scalar_handler( const YAML::Node& a_node );
     };
 
     //***************************************
