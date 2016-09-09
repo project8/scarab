@@ -5,6 +5,7 @@
 set( dir ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set( Scarab_HEADERS ${Scarab_HEADERS}
+    ${dir}/cancelable.hh
     ${dir}/concurrent_queue.hh
     ${dir}/destroyer.hh
     ${dir}/digital.hh
@@ -22,6 +23,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     PARENT_SCOPE )
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
+    ${dir}/cancelable.cc
     ${dir}/digital.cc
     ${dir}/error.cc
     ${dir}/lock_guard.cc

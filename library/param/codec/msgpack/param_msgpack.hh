@@ -33,8 +33,8 @@ namespace scarab
             param_input_msgpack();
             virtual ~param_input_msgpack();
 
-            //static param_node* read_file( const std::string& a_filename );
-            static param_node* read_string( const std::string& a_msgpack_str );
+            static param* read_file( const std::string& a_filename );
+            static param* read_string( const std::string& a_msgpack_str );
             static param* read_msgpack_element( const msgpack::object& a_msgpack_array );
             //static param_node* read_document( const rapidjson::Document& a_document );
             //static param* read_value( const rapidjson::Value& a_value );
