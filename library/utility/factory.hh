@@ -193,15 +193,18 @@ namespace scarab
     template< class XBaseType, typename ... XArgs >
     void factory< XBaseType, XArgs... >::register_class(const std::string& a_class_name, const base_registrar< XBaseType, XArgs... >* a_registrar)
     {
+        // A local (static) logger is created inside this function to avoid static initialization order problems
+        LOGGER( slog_factory_reg, "factory-register");
+
         lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_class_name);
         if (it != fMap->end())
         {
-            LERROR( slog_fact, "Already have factory registered for <" << a_class_name << ">." );
+            LERROR( slog_factory_reg, "Already have factory registered for <" << a_class_name << ">." );
             return;
         }
         fMap->insert(std::pair< std::string, const base_registrar< XBaseType, XArgs... >* >(a_class_name, a_registrar));
-        //std::cout << "registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this << std::endl;
+        LDEBUG( slog_factory_reg, "Registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this );
     }
 
     template< class XBaseType, typename ... XArgs >
@@ -292,15 +295,18 @@ namespace scarab
     template< class XBaseType >
     void factory< XBaseType, void >::register_class(const std::string& a_class_name, const base_registrar< XBaseType >* a_registrar)
     {
+        // A local (static) logger is created inside this function to avoid static initialization order problems
+        LOGGER( slog_factory_reg, "factory-register");
+
         lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_class_name);
         if (it != fMap->end())
         {
-            LERROR( slog_fact, "Already have factory registered for <" << a_class_name << ">." );
+            LERROR( slog_factory_reg, "Already have factory registered for <" << a_class_name << ">." );
             return;
         }
         fMap->insert(std::pair< std::string, const base_registrar< XBaseType >* >(a_class_name, a_registrar));
-        //std::cout << "registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this << std::endl;
+        LDEBUG( slog_factory_reg, "Registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this );
     }
 
     template< class XBaseType >

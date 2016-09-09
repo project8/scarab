@@ -20,7 +20,6 @@ namespace scarab
 {
     LOGGER( dlog, "param" );
 
-
     REGISTER_PARAM_INPUT_CODEC( param_input_json, "json" );
 
     param_input_json::param_input_json()

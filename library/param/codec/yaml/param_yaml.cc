@@ -22,6 +22,8 @@ namespace scarab
 {
     LOGGER( slog, "param_yaml" );
 
+    REGISTER_PARAM_INPUT_CODEC( param_input_yaml, "yaml" );
+
     param_input_yaml::param_input_yaml()
     {
 
