@@ -3,37 +3,47 @@
  *
  *  Created on: Jan 19, 2016
  *      Author: bidishasen97
+ *
+ *      Usage: test_yaml [filename]
  */
 
+#include "param.hh"
 #include "param_yaml.hh"
 #include "logger.hh"
 
 using namespace scarab;
 
-LOGGER( tlog, "test_yaml" );
+LOGGER( slog, "test_yaml" );
 
-int main()
+int main( int argc, char** argv )
 {
-    //read file
-    const param* a_param_location = param_input_yaml::read_file("example.yaml");
-    if( a_param_location == NULL )
+    if( argc < 2 )
     {
-        ERROR( tlog, "File did not read!" );
+        LERROR( slog, "Please provide a YAML file to read" );
         return -1;
     }
+
+    //read file
+    param_input_yaml t_input;
+    param* t_param_location = t_input.read_file( argv[1] );
+    if( t_param_location == nullptr )
+    {
+        LERROR( slog, "File did not read!" );
+        return -1;
+    }
+
+    LINFO( slog, "File read and parsed: \n" << *t_param_location );
 
     //write file
-    bool did_write_file = param_output_yaml::write_file(*a_param_location, "new.yaml");
+    param_output_yaml t_output;
+    bool t_did_write_file = t_output.write_file( *t_param_location, "test_output.yaml" );
 
-    if( did_write_file )
+    if( ! t_did_write_file )
     {
-        INFO( tlog, "File written successfully" );
-        return 0;
-    }
-    else
-    {
-        ERROR( tlog, "File did not write!" );
+        LERROR( slog, "File did not write!" );
         return -1;
     }
 
+    LINFO( slog, "File written successfully" );
+    return 0;
 }
