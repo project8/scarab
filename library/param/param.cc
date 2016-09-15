@@ -18,7 +18,7 @@ using std::stringstream;
 
 namespace scarab
 {
-    //LOGGER( dlog, "param" );
+    //LOGGER( slog, "param" );
 
     SCARAB_API unsigned param::s_indent_level = 0;
 
@@ -247,7 +247,22 @@ namespace scarab
         else if( f_value_type == k_double ) return f_value.f_double != 0.;
         else if( f_value_type == k_string )
         {
-            return ! f_value.f_string->empty();
+            if( f_value.f_string->empty() ) return false;
+
+            std::string t_str_val;
+            bool t_is_numeric = true;
+            for( std::string::const_iterator t_val_it = f_value.f_string->begin(); t_val_it != f_value.f_string->end(); ++t_val_it )
+            {
+                t_is_numeric = t_is_numeric && ::isdigit( *t_val_it );
+                t_str_val.push_back( ::tolower( *t_val_it ) );
+            }
+
+            if( t_is_numeric ) return std::stoi( t_str_val );
+
+            std::istringstream t_iss_val( t_str_val );
+            bool t_bool_val;
+            t_iss_val >> std::boolalpha >> t_bool_val;
+            return t_bool_val;
         }
         return false;
     }
