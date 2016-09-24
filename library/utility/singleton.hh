@@ -9,6 +9,10 @@
 namespace scarab
 {
 
+#define allow_singleton_access( class_name ) \
+    friend class scarab::singleton< class_name >; \
+    friend class scarab::destroyer< class_name >;
+
     template< class XType >
     class singleton
     {

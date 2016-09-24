@@ -87,8 +87,7 @@ namespace scarab
             mutex f_factory_mutex;
 
         protected:
-            friend class singleton< factory >;
-            friend class destroyer< factory >;
+            allow_singleton_access( factory );
             factory();
             ~factory();
     };

@@ -29,7 +29,7 @@ namespace scarab
     {
     }
 
-    param* param_input_json::read_file( const std::string& a_filename, const param_node* a_options )
+    param* param_input_json::read_file( const std::string& a_filename, const param_node* )
     {
         FILE* t_config_file = fopen( a_filename.c_str(), "r" );
         if( t_config_file == NULL )
@@ -79,7 +79,7 @@ namespace scarab
         return param_input_json::read_document( t_config_doc );
     }
 
-    param* param_input_json::read_string( const std::string& a_json_string, const param_node* a_options )
+    param* param_input_json::read_string( const std::string& a_json_string, const param_node* )
     {
         rapidjson::Document t_config_doc;
         if( t_config_doc.Parse<0>( a_json_string.c_str() ).HasParseError() )
