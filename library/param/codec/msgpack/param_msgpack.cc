@@ -32,11 +32,6 @@ namespace scarab
 
     param* param_input_msgpack::read_string( const std::string& a_msgpack_string )
     {
-        return nullptr;
-    }
-
-    param* param_input_msgpack::read_string( const std::string& a_msgpack_string )
-    {
         // deserialize the buffer
         msgpack::unpacked t_unpacked;
         msgpack::unpack( t_unpacked, a_msgpack_string.data(), a_msgpack_string.size()) ;
