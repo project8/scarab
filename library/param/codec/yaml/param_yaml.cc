@@ -30,7 +30,7 @@ namespace scarab
     param_input_yaml::~param_input_yaml()
     {}
 
-    param* param_input_yaml::read_file( const std::string& a_filename, const param_node* a_options )
+    param* param_input_yaml::read_file( const std::string& a_filename, const param_node* )
     {
         try
         {
@@ -44,7 +44,7 @@ namespace scarab
         }
     }
 
-    param* param_input_yaml::read_string( const std::string& a_string, const param_node* a_options )
+    param* param_input_yaml::read_string( const std::string& a_string, const param_node* )
     {
         try
         {
@@ -156,7 +156,7 @@ namespace scarab
     param_output_yaml::~param_output_yaml()
     {}
 
-    bool param_output_yaml::write_file( const param& a_to_write, const std::string& a_filename, const param_node* a_options )
+    bool param_output_yaml::write_file( const param& a_to_write, const std::string& a_filename, const param_node* )
     {
         if( a_filename.empty() )
         {
@@ -181,7 +181,7 @@ namespace scarab
         return true;
     }
 
-    bool param_output_yaml::write_string( const param& a_to_write, std::string& a_string, const param_node* a_options )
+    bool param_output_yaml::write_string( const param& a_to_write, std::string& a_string, const param_node* )
     {
         YAML::Node a_node = param_output_yaml::check_param_type( a_to_write );
 

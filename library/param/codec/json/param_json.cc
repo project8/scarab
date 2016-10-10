@@ -196,7 +196,7 @@ namespace scarab
         rapidjson::FileStream t_filestream( file );
 
         json_writing_style t_style = k_compact;
-        if( a_options->has( "style" ) )
+        if( a_options != nullptr && a_options->has( "style" ) )
         {
             if( a_options->value_at( "style" )->is_uint() )
             {
@@ -235,7 +235,7 @@ namespace scarab
         rapidjson::StringBuffer t_str_buff;
 
         json_writing_style t_style = k_compact;
-        if( a_options->has( "style" ) )
+        if( a_options != nullptr && a_options->has( "style" ) )
         {
             if( a_options->value_at( "style" )->is_uint() )
             {
