@@ -121,7 +121,12 @@ namespace scarab
     {
         public:
             enum ELevel {
-                eTrace, eDebug, eInfo, eWarn, eError, eFatal
+                eTrace = 0,
+                eDebug = 1,
+                eInfo = 2,
+                eWarn = 3,
+                eError = 4,
+                eFatal = 5
             };
 
         public:
