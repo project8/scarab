@@ -157,16 +157,22 @@ namespace scarab
 
             /**
              * Check whether a certain log-level is enabled.
-             * @param level The log level as string representation.
+             * @param level The log level
              * @return
              */
             bool IsLevelEnabled(ELevel level) const;
 
             /**
-             * Set a loggers minimum logging level
-             * @param level string identifying the log level
+             * Set a logger's minimum logging level
+             * @param level The log level
              */
             void SetLevel(ELevel level) const;
+
+            /**
+             * Set all loggers' minimum logging level
+             * @param level The log level
+             */
+            void SetGlobalLevel(ELevel level) const;
 
             /**
              * Set whether colored text will be used
@@ -339,7 +345,7 @@ namespace scarab
 
 #define LOGGER(I,K)      static scarab::logger I(K);
 
-#define LOG(...)         macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
+#define LOG(...)          macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
 #define LTRACE(...)       macro_dispatcher(__LOG_TRACE_, __VA_ARGS__)(__VA_ARGS__)
 #define LDEBUG(...)       macro_dispatcher(__LOG_DEBUG_, __VA_ARGS__)(__VA_ARGS__)
 #define LINFO(...)        macro_dispatcher(__LOG_INFO_, __VA_ARGS__)(__VA_ARGS__)
@@ -348,7 +354,7 @@ namespace scarab
 #define LFATAL(...)       macro_dispatcher(__LOG_FATAL_, __VA_ARGS__)(__VA_ARGS__)
 #define LASSERT(...)      macro_dispatcher(__LOG_ASSERT_, __VA_ARGS__)(__VA_ARGS__)
 
-#define LOG_ONCE(...)    macro_dispatcher(__LOG_LOG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+#define LOG_ONCE(...)     macro_dispatcher(__LOG_LOG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LTRACE_ONCE(...)  macro_dispatcher(__LOG_TRACE_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LDEBUG_ONCE(...)  macro_dispatcher(__LOG_DEBUG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LINFO_ONCE(...)   macro_dispatcher(__LOG_INFO_ONCE_, __VA_ARGS__)(__VA_ARGS__)
