@@ -47,9 +47,23 @@ namespace scarab
         //cout << f_master_config );
         //cout << t_parser );
 
+        string t_name_logger( "logger" );
         string t_name_exe( "executable" ); // the name used to specify the executable in parser
         string t_name_config( "config" );
         string t_name_json( "json" );
+
+        if( t_parser.has( t_name_logger ) )
+        {
+            scarab::param_node* t_log_node = t_parser.node_at( t_name_logger );
+            if( t_log_node != nullptr )
+            {
+                if( t_log_node->has( "verbosity" ) )
+                {
+                    logger::ELevel t_level = (logger::ELevel)t_log_node->get_value< unsigned >( "verbosity" );
+                    slog.SetGlobalLevel( t_level );
+                }
+            }
+        }
 
         // name of executable
         //f_exe_name = t_parser.get_value( t_name_exe, f_exe_name );
