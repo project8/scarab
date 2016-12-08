@@ -58,7 +58,7 @@ namespace scarab
             {
                 time(&logger::Private::sRawTime);
 
-				sProcessedTime = gmtime(&logger::Private::sRawTime);
+				sProcessedTime = localtime(&logger::Private::sRawTime);
 				return strftime(logger::Private::sTimeBuff, 512,
 					logger::Private::sDateTimeFormat,
 					logger::Private::sProcessedTime);
