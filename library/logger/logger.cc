@@ -19,6 +19,7 @@
 #else
 #include <sys/time.h>
 #endif
+#include <set>
 #include <time.h>
 
 #include "logger.hh"
@@ -35,11 +36,19 @@ namespace scarab
     const string& WarnColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_YELLOW COLOR_SUFFIX); return *color;}
     const string& InfoColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_GREEN  COLOR_SUFFIX); return *color;}
     const string& DebugColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_CYAN   COLOR_SUFFIX); return *color;}
+    const string& TraceColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_WHITE  COLOR_SUFFIX); return *color;}
     const string& OtherColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_WHITE  COLOR_SUFFIX); return *color;}
 
     struct logger::Private
     {
             static mutex sMutex;
+
+            typedef std::set< logger* > LoggerSet;
+            static LoggerSet* AllLoggers()
+            {
+                static LoggerSet* sAllLoggers = new LoggerSet();
+                return sAllLoggers;
+            }
 
             static char sDateTimeFormat[16];
 			static time_t sRawTime;
@@ -49,7 +58,7 @@ namespace scarab
             {
                 time(&logger::Private::sRawTime);
 
-				sProcessedTime = gmtime(&logger::Private::sRawTime);
+				sProcessedTime = localtime(&logger::Private::sRawTime);
 				return strftime(logger::Private::sTimeBuff, 512,
 					logger::Private::sDateTimeFormat,
 					logger::Private::sProcessedTime);
@@ -81,7 +90,7 @@ namespace scarab
             {
                 switch(level)
                 {
-                    case eTrace : return DebugColor(); break;
+                    case eTrace : return TraceColor(); break;
                     case eDebug : return DebugColor(); break;
                     case eInfo  : return InfoColor(); break;
                     case eWarn  : return WarnColor(); break;
@@ -166,6 +175,7 @@ namespace scarab
         fPrivate->fColored = true;
         sprintf(logger::Private::sDateTimeFormat,  "%%T");
         SetLevel(eDebug);
+        logger::Private::AllLoggers()->insert(this);
     }
 
     logger::logger(const std::string& name) : fPrivate(new Private())
@@ -174,6 +184,7 @@ namespace scarab
         fPrivate->fColored = true;
 		sprintf(logger::Private::sDateTimeFormat, "%%T");
 		SetLevel(eDebug);
+		logger::Private::AllLoggers()->insert(this);
     }
 
     logger::~logger()
@@ -193,6 +204,15 @@ namespace scarab
 #else
         fPrivate->fThreshold = level;
 #endif
+    }
+
+    void logger::SetGlobalLevel(ELevel level) const
+    {
+        for( std::set< logger* >::iterator logIt = logger::Private::AllLoggers()->begin(); logIt != logger::Private::AllLoggers()->end(); ++logIt)
+        {
+            (*logIt)->SetLevel(level);
+        }
+        return;
     }
 
     void logger::SetColored(bool flag)
