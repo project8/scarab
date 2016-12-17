@@ -39,12 +39,14 @@ namespace scarab
 
     inline void cancelable::cancel()
     {
+        if( f_canceled.load() ) return;
         f_canceled.store( true );
         this->do_cancellation();
     }
 
     inline void cancelable::reset_cancel()
     {
+        if( ! f_canceled.load() ) return;
         f_canceled.store( false );
         this->do_reset_cancellation();
     }
