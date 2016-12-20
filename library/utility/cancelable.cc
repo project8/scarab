@@ -7,8 +7,11 @@
 
 #include "cancelable.hh"
 
+#include "logger.hh"
+
 namespace scarab
 {
+    LOGGER( slog, "cancelable" );
 
     cancelable::cancelable() :
             f_canceled( false )
@@ -22,6 +25,7 @@ namespace scarab
     void cancelable::do_cancellation()
     {
         // override in derived class
+        LDEBUG( slog, "cancelable::do_cancellation" );
         return;
     }
 
