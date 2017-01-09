@@ -20,7 +20,9 @@
 
 namespace scarab
 {
-    typedef boost::filesystem::path path;
+    namespace fs = ::boost::filesystem;
+
+    typedef fs::path path;
 
     path SCARAB_API expand_path( const std::string& a_path );
 
