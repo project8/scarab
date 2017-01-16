@@ -31,7 +31,7 @@ option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" TRUE )
 
 option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the msgpack codec" FALSE )
 
-option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" FALSE )
+option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" TRUE )
 
 option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
 
