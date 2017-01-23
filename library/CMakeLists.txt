@@ -74,6 +74,7 @@ if( Scarab_BUILD_CODEC_YAML )
     # Yaml-cpp
     option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
     option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
+    option( BUILD_SHARED_LIBS "yaml-cpp option setting" ON )
     add_subdirectory( param/codec/yaml/yaml-cpp )
     # I'm hard-coding the include directory and library because I ran into an error when I tried to include ${CMAKE_CURRENT_BINARY_DIR}/param/codec/yaml/yaml-cpp/yaml-cpp-config.cmake )
     include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
