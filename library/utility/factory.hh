@@ -176,7 +176,7 @@ namespace scarab
         //std::cout << "this factory (" << this << ") has " << fMap->size() << " entries" << std::endl;
         //for( FactoryCIt iter = fMap->begin(); iter != fMap->end(); ++iter )
         //{
-        //    std::cout << "this factory has: " << iter->first << std::endl;
+        //    std::cout << "this factory has: " << iter->first << " at " << iter->second << std::endl;
         //}
         lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find( a_class_name );
@@ -203,7 +203,7 @@ namespace scarab
             return;
         }
         fMap->insert(std::pair< std::string, const base_registrar< XBaseType, XArgs... >* >(a_class_name, a_registrar));
-        LDEBUG( slog_factory_reg, "Registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this );
+        LDEBUG( slog_factory_reg, "Registered a factory for class " << a_class_name << " at " << (*fMap)[ a_class_name ] << ", factory #" << fMap->size()-1 << " for " << this );
     }
 
     template< class XBaseType, typename ... XArgs >
@@ -278,7 +278,7 @@ namespace scarab
         //std::cout << "this factory (" << this << ") has " << fMap->size() << " entries" << std::endl;
         //for( FactoryCIt iter = fMap->begin(); iter != fMap->end(); ++iter )
         //{
-        //    std::cout << "this factory has: " << iter->first << std::endl;
+        //    std::cout << "this factory has: " << iter->first << " at " << iter->second << std::endl;
         //}
         lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find( a_class_name );
