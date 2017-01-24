@@ -74,10 +74,12 @@ namespace scarab
             typedef typename FactoryMap::const_iterator FactoryCIt;
 
         public:
-            XBaseType* create(const std::string& a_class_name, XArgs ... args);
-            XBaseType* create(const FactoryCIt& iter, XArgs ... args);
+            XBaseType* create( const std::string& a_class_name, XArgs ... args );
+            XBaseType* create( const FactoryCIt& iter, XArgs ... args );
 
-            void register_class(const std::string& a_class_name, const base_registrar< XBaseType, XArgs... >* base_registrar);
+            void register_class( const std::string& a_class_name, const base_registrar< XBaseType, XArgs... >* base_registrar );
+            bool has_class( const std::string& a_class_name ) const;
+            void remove_class( const std::string& a_class_name );
 
             FactoryCIt begin() const;
             FactoryCIt end() const;
@@ -137,10 +139,12 @@ namespace scarab
             typedef typename FactoryMap::const_iterator FactoryCIt;
 
         public:
-            XBaseType* create(const std::string& a_class_name);
-            XBaseType* create(const FactoryCIt& iter);
+            XBaseType* create( const std::string& a_class_name );
+            XBaseType* create( const FactoryCIt& iter );
 
-            void register_class(const std::string& a_class_name, const base_registrar< XBaseType >* base_registrar);
+            void register_class( const std::string& a_class_name, const base_registrar< XBaseType >* base_registrar );
+            bool has_class( const std::string& a_class_name ) const;
+            void remove_class( const std::string& a_class_name );
 
             FactoryCIt begin() const;
             FactoryCIt end() const;
@@ -164,19 +168,19 @@ namespace scarab
     // factory
 
     template< class XBaseType, typename ... XArgs >
-    XBaseType* factory< XBaseType, XArgs... >::create(const FactoryCIt& iter, XArgs ... args)
+    XBaseType* factory< XBaseType, XArgs... >::create( const FactoryCIt& iter, XArgs ... args )
     {
         lock_guard( this->f_factory_mutex );
         return iter->second->create( args... );
     }
 
     template< class XBaseType, typename ... XArgs >
-    XBaseType* factory< XBaseType, XArgs... >::create(const std::string& a_class_name, XArgs ... args)
+    XBaseType* factory< XBaseType, XArgs... >::create( const std::string& a_class_name, XArgs ... args )
     {
         //std::cout << "this factory (" << this << ") has " << fMap->size() << " entries" << std::endl;
         //for( FactoryCIt iter = fMap->begin(); iter != fMap->end(); ++iter )
         //{
-        //    std::cout << "this factory has: " << iter->first << std::endl;
+        //    std::cout << "this factory has: " << iter->first << " at " << iter->second << std::endl;
         //}
         lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find( a_class_name );
@@ -190,7 +194,7 @@ namespace scarab
     }
 
     template< class XBaseType, typename ... XArgs >
-    void factory< XBaseType, XArgs... >::register_class(const std::string& a_class_name, const base_registrar< XBaseType, XArgs... >* a_registrar)
+    void factory< XBaseType, XArgs... >::register_class( const std::string& a_class_name, const base_registrar< XBaseType, XArgs... >* a_registrar )
     {
         // A local (static) logger is created inside this function to avoid static initialization order problems
         LOGGER( slog_factory_reg, "factory-register");
@@ -203,7 +207,22 @@ namespace scarab
             return;
         }
         fMap->insert(std::pair< std::string, const base_registrar< XBaseType, XArgs... >* >(a_class_name, a_registrar));
-        LDEBUG( slog_factory_reg, "Registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this );
+        LDEBUG( slog_factory_reg, "Registered a factory for class " << a_class_name << " at " << (*fMap)[ a_class_name ] << ", factory #" << fMap->size()-1 << " for " << this );
+    }
+
+    template< class XBaseType, typename ... XArgs >
+    bool factory< XBaseType, XArgs... >::has_class(const std::string& a_class_name ) const
+    {
+        return fMap->find( a_class_name ) != fMap->end();
+    }
+
+    template< class XBaseType, typename ... XArgs >
+    void factory< XBaseType, XArgs... >::remove_class(const std::string& a_class_name )
+    {
+        LDEBUG( slog_fact, "Removing factory for class " << a_class_name << " from " << this );
+        FactoryIt iter = fMap->find( a_class_name );
+        if( iter != fMap->end() ) fMap->erase( iter );
+        return;
     }
 
     template< class XBaseType, typename ... XArgs >
@@ -266,19 +285,19 @@ namespace scarab
     // factory
 
     template< class XBaseType >
-    XBaseType* factory< XBaseType, void >::create(const FactoryCIt& iter)
+    XBaseType* factory< XBaseType, void >::create( const FactoryCIt& iter )
     {
         lock_guard( this->f_factory_mutex );
         return iter->second->create();
     }
 
     template< class XBaseType >
-    XBaseType* factory< XBaseType, void >::create(const std::string& a_class_name)
+    XBaseType* factory< XBaseType, void >::create( const std::string& a_class_name )
     {
         //std::cout << "this factory (" << this << ") has " << fMap->size() << " entries" << std::endl;
         //for( FactoryCIt iter = fMap->begin(); iter != fMap->end(); ++iter )
         //{
-        //    std::cout << "this factory has: " << iter->first << std::endl;
+        //    std::cout << "this factory has: " << iter->first << " at " << iter->second << std::endl;
         //}
         lock_guard( this->f_factory_mutex );
         FactoryCIt it = fMap->find( a_class_name );
@@ -292,7 +311,7 @@ namespace scarab
     }
 
     template< class XBaseType >
-    void factory< XBaseType, void >::register_class(const std::string& a_class_name, const base_registrar< XBaseType >* a_registrar)
+    void factory< XBaseType, void >::register_class( const std::string& a_class_name, const base_registrar< XBaseType >* a_registrar )
     {
         // A local (static) logger is created inside this function to avoid static initialization order problems
         LOGGER( slog_factory_reg, "factory-register");
@@ -306,6 +325,21 @@ namespace scarab
         }
         fMap->insert(std::pair< std::string, const base_registrar< XBaseType >* >(a_class_name, a_registrar));
         LDEBUG( slog_factory_reg, "Registered a factory for class " << a_class_name << ", factory #" << fMap->size()-1 << " for " << this );
+    }
+
+    template< class XBaseType >
+    bool factory< XBaseType, void >::has_class(const std::string& a_class_name ) const
+    {
+        return fMap->find( a_class_name ) != fMap->end();
+    }
+
+    template< class XBaseType >
+    void factory< XBaseType, void >::remove_class(const std::string& a_class_name )
+    {
+        LDEBUG( slog_fact, "Removing factory for class " << a_class_name << " from " << this );
+        FactoryIt iter = fMap->find( a_class_name );
+        if( iter != fMap->end() ) fMap->erase( iter );
+        return;
     }
 
     template< class XBaseType >

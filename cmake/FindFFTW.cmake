@@ -3,6 +3,7 @@
 # This module defines
 # FFTW_INCLUDE_DIR, where to locate fftw3.h file
 # FFTW_LIBRARIES, the libraries to link against to use fftw3
+# FFTW_LIBRARY_DIRS, the directories containing the FFTW libraries.
 # FFTW_FOUND.  If false, you cannot build anything that requires fftw3.
 # FFTW_LIBRARY, where to find the libfftw3 library.
 # FFTW_THREADS_FOUND, If true, can use multithreaded FFTW routines.
@@ -23,6 +24,10 @@ find_path(FFTW_INCLUDE_DIR fftw3.h
   DOC "Specify the directory containing fftw3.h"
 )
 
+if(NOT FFTW_INCLUDE_DIR)
+  message(WARNING "Did not find fftw3.h")
+endif(NOT FFTW_INCLUDE_DIR)
+
 find_library(FFTW_LIBRARY NAMES fftw3 fftw3-3 PATHS
   $ENV{FFTW_DIR}/lib
   $ENV{FFTW3} $ENV{FFTW3}/lib $ENV{FFTW3}/.libs
@@ -32,6 +37,14 @@ find_library(FFTW_LIBRARY NAMES fftw3 fftw3-3 PATHS
   /opt/fftw3/lib
   DOC "Specify the fftw3 library here."
 )
+
+set(FFTW_LIBRARY_DIRS)
+if(FFTW_LIBRARY)
+  get_filename_component(FFTW_LIBRARY_DIR ${FFTW_LIBRARY} DIRECTORY)
+  list(APPEND FFTW_LIBRARY_DIRS ${FFTW_LIBRARY_DIR})
+else(FFTW_LIBRARY)
+  message(WARNING "Did not find FFTW library")
+endif(FFTW_LIBRARY)
 
 find_library(FFTW_THREADS_LIBRARY NAMES fftw3_threads fftw3-3_threads PATHS
   $ENV{FFTW_DIR}/lib
@@ -47,7 +60,7 @@ find_library(FFTW_THREADS_LIBRARY NAMES fftw3_threads fftw3-3_threads PATHS
 if(FFTW_THREADS_LIBRARY)
   find_package(Threads)
   if(CMAKE_USE_PTHREADS_INIT)
-    set(FFTW_THREADS_LIBRARY ${FFTW_THREADS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+    set(FFTW_THREADS_LIBRARY ${FFTW_THREADS_LIBRARY})
   else()
     message(WARNING "Found FFTW threads but no pthreads! Will not use FFTW threads.")
     unset(FFTW_THREADS_LIBRARY)
@@ -64,16 +77,18 @@ if(FFTW_INCLUDE_DIR AND FFTW_LIBRARY)
   
   if(FFTW_THREADS_LIBRARY)
     set(FFTW_THREADS_FOUND TRUE)
+    get_filename_component(FFTW_LIBRARY_THREADS_DIR ${FFTW_THREADS_LIBRARY} DIRECTORY)
+    list(APPEND FFTW_LIBRARY_DIRS ${FFTW_LIBRARY_THREADS_DIR})
     if(NOT FFTW_FIND_QUIETLY)
       message(STATUS "Found fftw3 threads and pthreads libraries at ${FFTW_THREADS_LIBRARY}")
     endif()
   endif()
 endif()
 
-mark_as_advanced(FFTW_FOUND FFTW_LIBRARY FFTW_INCLUDE_DIR FFTW_THREADS_FOUND)
+mark_as_advanced(FFTW_FOUND FFTW_LIBRARY FFTW_INCLUDE_DIR FFTW_INCLUDE_DIRS FFTW_THREADS_FOUND)
 if (FFTW_THREADS_LIBRARY)
   mark_as_advanced(FFTW_THREADS_LIBRARY)
-  set(FFTW_LIBRARIES ${FFTW_LIBRARY} ${FFTW_THREADS_LIBRARY})
+  set(FFTW_LIBRARIES ${FFTW_LIBRARY} ${FFTW_THREADS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 else()
   set(FFTW_LIBRARIES ${FFTW_LIBRARY})
 endif()
