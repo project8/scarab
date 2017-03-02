@@ -77,13 +77,19 @@ option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of execu
 
 # flag for using C++11
 option( USE_CPP11 "Flag for building with C++11" ON )
-if( USE_CPP11 )
+option( USE_CPP14 "Flag for building with C++14" OFF )
+if( USE_CPP14 )
+    add_definitions( -DUSE_CPP14 )
+    add_definitions( -DUSE_CPP11 )
+    set( CMAKE_CXX_STANDARD 14 )
+elseif( USE_CPP11 )
     add_definitions( -DUSE_CPP11 )
     set( CMAKE_CXX_STANDARD 11 )
-else( USE_CPP11 )
-    remove_definitions( -DUSE_CP11 )
+else()
+    remove_definitions( -DUSE_CPP11 )
+    remove_definitions( -DUSE_CPP14 )
     set( CMAKE_CXX_STANDARD 98 )
-endif( USE_CPP11 )
+endif()
 
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
