@@ -9,8 +9,10 @@
 
 #include "path.hh"
 
+//#include <iostream>
+
 using std::string;
-using boost::filesystem::canonical;
+using boost::filesystem::absolute;
 
 namespace scarab
 {
@@ -24,11 +26,12 @@ namespace scarab
         if( t_expansion_result.we_wordc > 0 )
         {
             t_exp_path = string( t_expansion_result.we_wordv[0] );
+            //std::cout << "#### expanded path: " << t_exp_path << std::endl;
         }
         wordfree( &t_expansion_result );
 #endif
         // do canonical expansion; return the absolute path
-        return canonical( path( t_exp_path ) );
+        return absolute( t_exp_path );
     }
 
 }
