@@ -13,10 +13,9 @@
 #include "logger.hh"
 #include "param.hh"
 
-#include "document.h"
-#include "filestream.h"
-#include "prettywriter.h"
-#include "stringbuffer.h"
+#include "rapidjson/fwd.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/writer.h"
 
 #include <deque>
 #include <map>
@@ -72,10 +71,10 @@ namespace scarab
     class SCARAB_API param_output_json : public param_output_codec
     {
         public:
-            typedef rapidjson::Writer< rapidjson::FileStream, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<> > rj_file_writer;
-            typedef rapidjson::PrettyWriter< rapidjson::FileStream, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<> > rj_pretty_file_writer;
-            typedef rapidjson::Writer< rapidjson::StringBuffer, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<> > rj_string_writer;
-            typedef rapidjson::PrettyWriter< rapidjson::StringBuffer, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<> > rj_pretty_string_writer;
+            typedef rapidjson::Writer< rapidjson::FileWriteStream > rj_file_writer;
+            typedef rapidjson::PrettyWriter< rapidjson::FileWriteStream > rj_pretty_file_writer;
+            typedef rapidjson::Writer< rapidjson::StringBuffer > rj_string_writer;
+            typedef rapidjson::PrettyWriter< rapidjson::StringBuffer > rj_pretty_string_writer;
 
             enum json_writing_style
             {
