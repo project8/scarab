@@ -46,14 +46,16 @@ if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
 	set( boost_components filesystem system thread date_time )
 
     # RapidJSON
-    include_directories( BEFORE 
-        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON
-        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON/internal 
-    )
-    install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/RapidJSON/internal
-        DESTINATION ${INCLUDE_INSTALL_DIR}/RapidJSON 
-        FILES_MATCHING PATTERN "*.h" 
-    )
+    option( RAPIDJSON_BUILD_DOC "Build rapidjson documentation." OFF )
+    option( RAPIDJSON_BUILD_EXAMPLES "Build rapidjson examples." OFF )
+    option( RAPIDJSON_BUILD_TESTS "Build rapidjson perftests and unittests." OFF )
+    option( RAPIDJSON_BUILD_THIRDPARTY_GTEST "Use gtest installation in `thirdparty/gtest` by default if available" OFF )
+    option( RAPIDJSON_BUILD_CXX11 "Build rapidjson with C++11 (gcc/clang)" ON )
+    option( RAPIDJSON_BUILD_ASAN "Build rapidjson with address sanitizer (gcc/clang)" OFF )
+    option( RAPIDJSON_BUILD_UBSAN "Build rapidjson with undefined behavior sanitizer (gcc/clang)" OFF )
+    
+    add_subdirectory( param/codec/json/rapidjson )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/rapidjson/include/ )
 endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CODEC_MSGPACK )

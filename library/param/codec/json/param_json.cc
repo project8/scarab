@@ -15,6 +15,12 @@ using std::stringstream;
 
 #include "logger.hh"
 
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/stringbuffer.h"
+
+
 
 namespace scarab
 {
@@ -37,7 +43,9 @@ namespace scarab
             LERROR( dlog, "file <" << a_filename << "> did not open" );
             return NULL;
         }
-        rapidjson::FileStream t_file_stream( t_config_file );
+
+        char t_buffer[ 65536 ];
+        rapidjson::FileReadStream t_file_stream( t_config_file, t_buffer, sizeof(t_buffer) );
 
         rapidjson::Document t_config_doc;
         if( t_config_doc.ParseStream<0>( t_file_stream ).HasParseError() )
@@ -193,7 +201,8 @@ namespace scarab
             return false;
         }
 
-        rapidjson::FileStream t_filestream( file );
+        char t_buffer[ 65536 ];
+        rapidjson::FileWriteStream t_filestream( file, t_buffer, sizeof(t_buffer) );
 
         json_writing_style t_style = k_compact;
         if( a_options != nullptr && a_options->has( "style" ) )
