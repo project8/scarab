@@ -53,6 +53,9 @@ if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     option( RAPIDJSON_BUILD_CXX11 "Build rapidjson with C++11 (gcc/clang)" ON )
     option( RAPIDJSON_BUILD_ASAN "Build rapidjson with address sanitizer (gcc/clang)" OFF )
     option( RAPIDJSON_BUILD_UBSAN "Build rapidjson with undefined behavior sanitizer (gcc/clang)" OFF )
+    set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
+    
+    add_definitions( -DRAPIDJSON_FILE_BUFFER_SIZE=${RAPIDJSON_FILE_BUFFER_SIZE} )
     
     add_subdirectory( param/codec/json/rapidjson )
     include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/rapidjson/include/ )
