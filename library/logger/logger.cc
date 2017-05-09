@@ -34,11 +34,12 @@ using namespace std;
 
 namespace scarab
 {
-    const string& EndColor() {static string* color = new string(COLOR_PREFIX COLOR_NORMAL COLOR_SUFFIX); return *color;}
+    const string& EndColor()   {static string* color = new string(COLOR_PREFIX COLOR_NORMAL COLOR_SUFFIX); return *color;}
     const string& FatalColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_RED    COLOR_SUFFIX); return *color;}
     const string& ErrorColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_RED    COLOR_SUFFIX); return *color;}
-    const string& WarnColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_YELLOW COLOR_SUFFIX); return *color;}
-    const string& InfoColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_GREEN  COLOR_SUFFIX); return *color;}
+    const string& WarnColor()  {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_YELLOW COLOR_SUFFIX); return *color;}
+    const string& InfoColor()  {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_GREEN  COLOR_SUFFIX); return *color;}
+    const string& ProgColor()  {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_BLUE   COLOR_SUFFIX); return *color;}
     const string& DebugColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_CYAN   COLOR_SUFFIX); return *color;}
     const string& TraceColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_WHITE  COLOR_SUFFIX); return *color;}
     const string& OtherColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_WHITE  COLOR_SUFFIX); return *color;}
@@ -83,6 +84,7 @@ namespace scarab
                     case eTrace : return "TRACE"; break;
                     case eDebug : return "DEBUG"; break;
                     case eInfo  : return "INFO"; break;
+                    case eProg  : return "PROG"; break;
                     case eWarn  : return "WARN"; break;
                     case eError : return "ERROR"; break;
                     case eFatal : return "FATAL"; break;
@@ -97,6 +99,7 @@ namespace scarab
                     case eTrace : return TraceColor(); break;
                     case eDebug : return DebugColor(); break;
                     case eInfo  : return InfoColor(); break;
+                    case eProg  : return ProgColor(); break;
                     case eWarn  : return WarnColor(); break;
                     case eError : return ErrorColor(); break;
                     case eFatal : return FatalColor(); break;
@@ -215,10 +218,12 @@ namespace scarab
 
     void logger::SetLevel(ELevel level) const
     {
-#if defined(NDEBUG)
-        fPrivate->fThreshold = level >= eInfo ? level : eInfo;
+#if defined(NDEBUG) && defined(STANDARD)
+                fPrivate->fThreshold = level >= eInfo ? level : eInfo;
+#elif defined(NDEBUG)
+                fPrivate->fThreshold = level >= eProg ? level : eProg;
 #else
-        fPrivate->fThreshold = level;
+                fPrivate->fThreshold = level;
 #endif
     }
 
