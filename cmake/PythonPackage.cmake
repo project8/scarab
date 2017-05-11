@@ -2,7 +2,8 @@
 # Author: B. H. LaRoque
 #
 # expands on package builder to script support for python modules
-include (PackageBuilder)
+
+# NOTE that PackageBuilder must be inculded for these macros to work
 
 # macro to get python develop dependencies
 # TODO for now this is a copy/paste of what I'm already doing, should make it sarter
