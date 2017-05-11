@@ -19,6 +19,7 @@ project( Scarab VERSION ${scarab_version} )
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../cmake )
 
 include( PackageBuilder )
+include( PythonPackage )
 
 pbuilder_prepare_project()
 
@@ -34,6 +35,8 @@ option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the msgpack codec" F
 option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" TRUE )
 
 option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
+
+option( Scarab_BUILD_PYTHON "Flag to enable building python wrapper (requires boost::python)" FALSE )
 
 
 #######################
@@ -89,6 +92,12 @@ endif( Scarab_BUILD_CODEC_YAML )
 if( Scarab_BUILD_AUTHENTICATION )
     list( APPEND boost_components filesystem system )
 endif( Scarab_BUILD_AUTHENTICATION )
+
+if ( Scarab_BUILD_PYTHON  )
+    list( APPEND boost_components python )
+    python_package_find_python( 2.7 )
+    python_package_add_module(scarab_py.cc)
+endif( Scarab_BUILD_PYTHON )
 
 # Boost (1.46 required for filesystem version 3)
 list( REMOVE_DUPLICATES boost_components )
