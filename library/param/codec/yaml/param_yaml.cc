@@ -234,7 +234,7 @@ namespace scarab
         const param_array array = static_cast< const param_array& >( a_to_write );
         for ( int count = 0; count != (int) array.size(); ++count )
         {
-            t_node.push_back(param_output_yaml::check_param_type( *array.at( count ) ) );
+            t_node.push_back(param_output_yaml::check_param_type( array.at( count ) ) );
         }
 
         return t_node;
