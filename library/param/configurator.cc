@@ -54,15 +54,11 @@ namespace scarab
 
         if( t_parser.has( t_name_logger ) )
         {
-            scarab::param_node* t_log_node = t_parser.node_at( t_name_logger );
-            if( t_log_node != nullptr )
+            try
             {
-                if( t_log_node->has( "verbosity" ) )
-                {
-                    logger::ELevel t_level = (logger::ELevel)t_log_node->get_value< unsigned >( "verbosity" );
-                    slog.SetGlobalLevel( t_level );
-                }
+                slog.SetGlobalLevel( (logger::ELevel)t_parser[t_name_logger]["verbosity"]().get< unsigned >() );
             }
+            catch( std::exception& e ) {}
         }
 
         // name of executable

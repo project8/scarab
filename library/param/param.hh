@@ -15,6 +15,7 @@
 #include <string>
 
 #include "error.hh"
+#include "error.hh"
 //#include "logger.hh"
 #include "path.hh"
 
@@ -56,18 +57,18 @@ namespace scarab
             /// Assumes that the parameter is a value, and returns a reference to itself.
             param_value& operator()();
 
-            /// Assumes that the parameter is an array, and returns a reference to the KTParam at aIndex.
-            /// Behavior is undefined if aIndex is out-of-range.
+            /// Assumes that the parameter is an array, and returns a reference to the param at a_index.
+            /// Behavior is undefined if a_index is out-of-range.
             const param& operator[]( unsigned a_index ) const;
-            /// Assumes that the parameter is an array, and returns a reference to the KTParam at aIndex.
-            /// Behavior is undefined if aIndex is out-of-range.
+            /// Assumes that the parameter is an array, and returns a reference to the param at a_index.
+            /// Behavior is undefined if a_index is out-of-range.
             param& operator[]( unsigned a_index );
 
-            /// Assumes that the parameter is a node, and returns a reference to the KTParam corresponding to aName.
-            /// Throws an KTException if aName is not present.
+            /// Assumes that the parameter is a node, and returns a reference to the param corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
             const param& operator[]( const std::string& a_name ) const;
-            /// Assumes that the parameter is a node, and returns a reference to the KTParam corresponding to aName.
-            /// Adds a new Value if aName is not present.
+            /// Assumes that the parameter is a node, and returns a reference to the param corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
             param& operator[]( const std::string& a_name );
 
             virtual std::string to_string() const;
@@ -202,50 +203,50 @@ namespace scarab
             /// if smaller than the current size, extra elements are deleted
             void resize( unsigned a_size );
 
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Throws an error if a_name is not present or is not of type ParamValue
+            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Throws an error if a_name is not present or is not of type param_value
             std::string get_value( unsigned a_index ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Throws an error if a_name is not present or is not of type ParamValue
+            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Throws an error if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( unsigned a_index ) const;
 
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Returns a_default if a_name is not present or is not of type ParamValue
+            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns a_default if a_name is not present or is not of type param_value
             std::string get_value( unsigned a_index, const std::string& a_default ) const;
             std::string get_value( unsigned a_index, const char* a_default ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Returns a_default if a_name is not present or is not of type ParamValue
+            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns a_default if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( unsigned a_index, XValType a_default ) const;
 
-            /// Returns a pointer to the param corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            const param* at( unsigned a_index ) const;
-            /// Returns a pointer to the param corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            param* at( unsigned a_index );
+            /// Returns the param corresponding to a_name.
+            /// Throws a scarab::error if a_index is out-of-range.
+            const param& at( unsigned a_index ) const;
+            /// Returns the param corresponding to a_name.
+            /// Throws a scarab::error if a_index is out-of-range.
+            param& at( unsigned a_index );
 
-            /// Returns a pointer to the param_value (static-ly cast) corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            const param_value* value_at( unsigned a_index ) const;
-            /// Returns a pointer to the param_value (static-ly cast) corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            param_value* value_at( unsigned a_index );
+            /// Returns the param_value corresponding to a_name.
+            /// Throws a scarab::error if a_index is not present
+            const param_value& value_at( unsigned a_index ) const;
+            /// Returns the param_value corresponding to a_name.
+            /// Throws a scarab::error if a_index is out-of-range.
+            param_value& value_at( unsigned a_index );
 
-            /// Returns a pointer to the param_array (static-ly cast) corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            const param_array* array_at( unsigned a_index ) const;
-            /// Returns a pointer to the param_array (static-ly cast) corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            param_array* array_at( unsigned a_index );
+            /// Returns the param_array corresponding to a_name.
+            /// Throws a scarab::error if a_index is out-of-range.
+            const param_array& array_at( unsigned a_index ) const;
+            /// Returns the param_array corresponding to a_name.
+            /// Throws a scarab::error if a_index is out-of-range.
+            param_array& array_at( unsigned a_index );
 
-            /// Returns a pointer to the param_node (static-ly cast) corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            const param_node* node_at( unsigned a_index ) const;
-            /// Returns a pointer to the param_node (static-ly cast) corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            param_node* node_at( unsigned a_index );
+            /// Returns the param_node corresponding to a_name.
+            /// Throws a scarab::error if a_index is not present
+            const param_node& node_at( unsigned a_index ) const;
+            /// Returns the param_node corresponding to a_name.
+            /// Throws a scarab::error if a_index is out-of-range.
+            param_node& node_at( unsigned a_index );
 
             /// Returns a reference to the param at a_index.
             /// Behavior is undefined if a_index is out-of-range.
@@ -254,11 +255,11 @@ namespace scarab
             /// Behavior is undefined if a_index is out-of-range.
             param& operator[]( unsigned a_index );
 
-            const param* front() const;
-            param* front();
+            const param& front() const;
+            param& front();
 
-            const param* back() const;
-            param* back();
+            const param& back() const;
+            param& back();
 
             // assign a copy of a_value to the array at a_index
             void assign( unsigned a_index, const param& a_value );
@@ -324,38 +325,50 @@ namespace scarab
             bool has( const std::string& a_name ) const;
             unsigned count( const std::string& a_name ) const;
 
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Throws an error if a_name is not present or is not of type ParamValue
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
+            /// Throws an error if a_name is not present or is not of type param_value
             std::string get_value( const std::string& a_name ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Throws an error if a_name is not present or is not of type ParamValue
+            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Throws an error if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( const std::string& a_name ) const;
 
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Returns a_default if a_name is not present or is not of type ParamValue
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
+            /// Returns a_default if a_name is not present or is not of type param_value
             std::string get_value( const std::string& a_name, const std::string& a_default ) const;
             std::string get_value( const std::string& a_name, const char* a_default ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type ParamValue
-            /// Returns a_default if a_name is not present or is not of type ParamValue
+            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns a_default if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( const std::string& a_name, XValType a_default ) const;
 
-            /// Returns a pointer to the param corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            const param* at( const std::string& a_name ) const;
-            /// Returns a pointer to the param corresponding to a_name.
-            /// Returns NULL if a_name is not present.
-            param* at( const std::string& a_name );
+            /// Returns the param corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            const param& at( const std::string& a_name ) const;
+            /// Returns the param corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            param& at( const std::string& a_name );
 
-            const param_value* value_at( const std::string& a_name ) const;
-            param_value* value_at( const std::string& a_name );
+            /// Returns the param_value corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            const param_value& value_at( const std::string& a_name ) const;
+            /// Returns the param_value corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            param_value& value_at( const std::string& a_name );
 
-            const param_array* array_at( const std::string& a_name ) const;
-            param_array* array_at( const std::string& a_name );
+            /// Returns the param_array corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            const param_array& array_at( const std::string& a_name ) const;
+            /// Returns the param_array corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            param_array& array_at( const std::string& a_name );
 
-            const param_node* node_at( const std::string& a_name ) const;
-            param_node* node_at( const std::string& a_name );
+            /// Returns the param_node corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            const param_node& node_at( const std::string& a_name ) const;
+            /// Returns the param_node corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            param_node& node_at( const std::string& a_name );
 
             /// Returns a reference to the param corresponding to a_name.
             /// Throws an error if a_name is not present.
@@ -424,38 +437,38 @@ namespace scarab
 
     inline param_value& param::as_value()
     {
-        param_value* t_cast_ptr = dynamic_cast< param_value* >( this );
-        return *t_cast_ptr;
+        if( this->is_value() ) return *static_cast< param_value* >( this);
+        throw error() << "Param object is not a value";
     }
 
     inline param_array& param::as_array()
     {
-        param_array* t_cast_ptr = dynamic_cast< param_array* >( this );
-        return *t_cast_ptr;
+        if( this->is_value() ) return *static_cast< param_array* >( this);
+        throw error() << "Param object is not an array";
     }
 
     inline param_node& param::as_node()
     {
-        param_node* t_cast_ptr = dynamic_cast< param_node* >( this );
-        return *t_cast_ptr;
+        if( this->is_value() ) return *static_cast< param_node* >( this);
+        throw error() << "Param object is not a node";
     }
 
     inline const param_value& param::as_value() const
     {
-        const param_value* t_cast_ptr = dynamic_cast< const param_value* >( this );
-        return *t_cast_ptr;
+        if( this->is_value() ) return *static_cast< const param_value* >( this);
+        throw error() << "Param object is not a value";
     }
 
     inline const param_array& param::as_array() const
     {
-        const param_array* t_cast_ptr = dynamic_cast< const param_array* >( this );
-        return *t_cast_ptr;
+        if( this->is_value() ) return *static_cast< const param_array* >( this);
+        throw error() << "Param object is not an array";
     }
 
     inline const param_node& param::as_node() const
     {
-        const param_node* t_cast_ptr = dynamic_cast< const param_node* >( this );
-        return *t_cast_ptr;
+        if( this->is_value() ) return *static_cast< const param_node* >( this);
+        throw error() << "Param object is not a node";
     }
 
     inline const param_value& param::operator()() const
@@ -713,17 +726,13 @@ namespace scarab
     template< typename XValType >
     XValType param_array::get_value( unsigned a_index ) const
     {
-        const param_value* value = value_at( a_index );
-        if( value == NULL ) throw error() << "No value is present at index <" << a_index << ">";
-        return value->get< XValType >();
+        return value_at( a_index ).get< XValType >();
     }
 
     template< typename XValType >
     XValType param_array::get_value( unsigned a_index, XValType a_default ) const
     {
-        const param_value* value = value_at( a_index );
-        if( value == NULL ) return a_default;
-        return value->get< XValType >();
+        return a_index < size() ? value_at( a_index ).get< XValType >() : a_default;
     }
 
     inline param* param_array::clone() const
@@ -752,16 +761,12 @@ namespace scarab
 
     inline std::string param_array::get_value( unsigned a_index ) const
     {
-        const param_value* value = value_at( a_index );
-        if( value == NULL ) throw scarab::error() << "No value at <" << a_index << "> is present at this node";
-        return value->to_string();
+        return value_at( a_index ).to_string();
     }
 
     inline std::string param_array::get_value( unsigned a_index, const std::string& a_default ) const
     {
-        const param_value* value = value_at( a_index );
-        if( value == NULL ) return a_default;
-        return value->to_string();
+        return a_index < size() ? value_at( a_index ).to_string() : a_default;
     }
 
     inline std::string param_array::get_value( unsigned a_index, const char* a_default ) const
@@ -769,48 +774,40 @@ namespace scarab
         return get_value( a_index, std::string( a_default ) );
     }
 
-    inline const param* param_array::at( unsigned a_index ) const
+    inline const param& param_array::at( unsigned a_index ) const
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return f_contents[ a_index ];
+        return *f_contents.at( a_index );
     }
-    inline param* param_array::at( unsigned a_index )
+    inline param& param_array::at( unsigned a_index )
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return f_contents[ a_index ];
+        return *f_contents.at( a_index );
     }
 
-    inline const param_value* param_array::value_at( unsigned a_index ) const
+    inline const param_value& param_array::value_at( unsigned a_index ) const
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return &f_contents[ a_index ]->as_value();
+        return at( a_index ).as_value();
     }
-    inline param_value* param_array::value_at( unsigned a_index )
+    inline param_value& param_array::value_at( unsigned a_index )
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return &f_contents[ a_index ]->as_value();
+        return at( a_index ).as_value();
     }
 
-    inline const param_array* param_array::array_at( unsigned a_index ) const
+    inline const param_array& param_array::array_at( unsigned a_index ) const
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return &f_contents[ a_index ]->as_array();
+        return at( a_index ).as_array();
     }
-    inline param_array* param_array::array_at( unsigned a_index )
+    inline param_array& param_array::array_at( unsigned a_index )
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return &f_contents[ a_index ]->as_array();
+        return at( a_index ).as_array();
     }
 
-    inline const param_node* param_array::node_at( unsigned a_index ) const
+    inline const param_node& param_array::node_at( unsigned a_index ) const
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return &f_contents[ a_index ]->as_node();
+        return at( a_index ).as_node();
     }
-    inline param_node* param_array::node_at( unsigned a_index )
+    inline param_node& param_array::node_at( unsigned a_index )
     {
-        if( a_index >= f_contents.size() ) return NULL;
-        return &f_contents[ a_index ]->as_node();
+        return at( a_index ).as_node();
     }
 
     inline const param& param_array::operator[]( unsigned a_index ) const
@@ -822,22 +819,22 @@ namespace scarab
         return *f_contents[ a_index ];
     }
 
-    inline const param* param_array::front() const
+    inline const param& param_array::front() const
     {
-        return f_contents.front();
+        return *f_contents.front();
     }
-    inline param* param_array::front()
+    inline param& param_array::front()
     {
-        return f_contents.front();
+        return *f_contents.front();
     }
 
-    inline const param* param_array::back() const
+    inline const param& param_array::back() const
     {
-        return f_contents.back();
+        return *f_contents.back();
     }
-    inline param* param_array::back()
+    inline param& param_array::back()
     {
-        return f_contents.back();
+        return *f_contents.back();
     }
 
     // assign a copy of a_value to the array at a_index
@@ -953,17 +950,13 @@ namespace scarab
     template< typename XValType >
     inline XValType param_node::get_value( const std::string& a_name ) const
     {
-        const param_value* value = value_at( a_name );
-        if( value == NULL ) throw error() << "No value with name <" << a_name << "> is present at this node";
-        return value->get< XValType >();
+        return value_at( a_name ).get< XValType >();
     }
 
     template< typename XValType >
     inline XValType param_node::get_value( const std::string& a_name, XValType a_default ) const
     {
-        const param_value* value = value_at( a_name );
-        if( value == NULL ) return a_default;
-        return value->get< XValType >();
+        return has( a_name ) ? value_at( a_name ).get< XValType >() : a_default;
     }
 
     inline param* param_node::clone() const
@@ -991,7 +984,6 @@ namespace scarab
         return f_contents.empty();
     }
 
-
     inline bool param_node::has( const std::string& a_name ) const
     {
         return f_contents.count( a_name ) > 0;
@@ -1004,16 +996,12 @@ namespace scarab
 
     inline std::string param_node::get_value( const std::string& a_name ) const
     {
-        const param_value* value = value_at( a_name );
-        if( value == NULL ) throw error() << "No value with name <" << a_name << "> is present at this node:\n" << *this;
-        return value->to_string();
+        return value_at( a_name ).to_string();
     }
 
     inline std::string param_node::get_value( const std::string& a_name, const std::string& a_default ) const
     {
-        const param_value* value = value_at( a_name );
-        if( value == NULL ) return a_default;
-        return value->to_string();
+        return has( a_name ) ? value_at( a_name ).to_string() : a_default;
     }
 
     inline std::string param_node::get_value( const std::string& a_name, const char* a_default ) const
@@ -1021,94 +1009,49 @@ namespace scarab
         return get_value( a_name, std::string( a_default ) );
     }
 
-    inline const param* param_node::at( const std::string& a_name ) const
+    inline const param& param_node::at( const std::string& a_name ) const
     {
-        const_iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return it->second;
+        return *f_contents.at( a_name );
     }
 
-    inline param* param_node::at( const std::string& a_name )
+    inline param& param_node::at( const std::string& a_name )
     {
-        iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return it->second;
+        return *f_contents.at( a_name );
     }
 
-    inline const param_value* param_node::value_at( const std::string& a_name ) const
+    inline const param_value& param_node::value_at( const std::string& a_name ) const
     {
-        const_iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return &it->second->as_value();
+        return at( a_name ).as_value();
     }
 
-    inline param_value* param_node::value_at( const std::string& a_name )
+    inline param_value& param_node::value_at( const std::string& a_name )
     {
-        iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return &it->second->as_value();
+        return at( a_name ).as_value();
     }
 
-    inline const param_array* param_node::array_at( const std::string& a_name ) const
+    inline const param_array& param_node::array_at( const std::string& a_name ) const
     {
-        const_iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return &it->second->as_array();
+        return at( a_name ).as_array();
     }
 
-    inline param_array* param_node::array_at( const std::string& a_name )
+    inline param_array& param_node::array_at( const std::string& a_name )
     {
-        iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return &it->second->as_array();
+        return at( a_name ).as_array();
     }
 
-    inline const param_node* param_node::node_at( const std::string& a_name ) const
+    inline const param_node& param_node::node_at( const std::string& a_name ) const
     {
-        const_iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return &it->second->as_node();
+        return at( a_name ).as_node();
     }
 
-    inline param_node* param_node::node_at( const std::string& a_name )
+    inline param_node& param_node::node_at( const std::string& a_name )
     {
-        iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            return NULL;
-        }
-        return &it->second->as_node();
+        return at( a_name ).as_node();
     }
 
     inline const param& param_node::operator[]( const std::string& a_name ) const
     {
-        const_iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            throw error() << "No value present corresponding to name <" << a_name << ">\n";
-        }
-        return *(it->second);
+        return *f_contents.at( a_name );
     }
 
     inline param& param_node::operator[]( const std::string& a_name )
