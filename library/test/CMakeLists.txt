@@ -11,6 +11,7 @@ if( Scarab_ENABLE_TESTING )
     set( test_programs
         test_configurator
         test_logger
+        test_terminate
         test_yaml
     )
     
