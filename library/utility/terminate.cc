@@ -12,11 +12,11 @@
 //#include <boost/core/demangle.hpp>
 
 #include <execinfo.h>
-#include <signal.h>
+//#include <signal.h>
 #include <string.h>
 
-#include <iostream>
-#include <cstdlib>
+//#include <cstdlib>
+#include <mutex>
 #include <stdexcept>
 
 namespace {
@@ -31,14 +31,17 @@ namespace scarab
     // Option 1: Use the terminate() function
     void terminate()
     {
-        static bool tried_throw = false;
+        static std::mutex t_using_terminate;
+        std::unique_lock< std::mutex > t_terminate_locked( t_using_terminate );
+
+        static bool t_tried_throw = false;
 
         try
         {
             // try once to re-throw currently active exception
-            if( ! tried_throw )
+            if( ! t_tried_throw )
             {
-                tried_throw = true;
+                t_tried_throw = true;
                 throw;
             }
         }
@@ -48,25 +51,25 @@ namespace scarab
         }
         catch (...)
         {
-            LERROR( slog, "Caught unknown/unhandled exception." );
+            LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." );
         }
 
-        void* array[50];
-        int size = backtrace(array, 50);
+        void* t_bt_array[50];
+        int size = backtrace( t_bt_array, 50 );
 
         LERROR( slog, "Backtrace from terminate() returned "
                 << size << " frames\n" );
 
-        char** messages = backtrace_symbols(array, size);
+        char** t_messages = backtrace_symbols( t_bt_array, size );
 
-        std::stringstream bt_str;
-        for (int i = 0; i < size && messages != NULL; ++i)
+        std::stringstream t_bt_str;
+        for( int i = 0; i < size && t_messages != nullptr; ++i )
         {
-            bt_str << "[bt]: (" << i << ") " << messages[i] << '\n';
+            t_bt_str << "[bt]: (" << i << ") " << t_messages[i] << '\n';
         }
-        LERROR( slog, "Backtrace:\n" << bt_str.str() );
+        LERROR( slog, "Backtrace:\n" << t_bt_str.str() );
 
-        free(messages);
+        free( t_messages );
 
         abort();
     }
