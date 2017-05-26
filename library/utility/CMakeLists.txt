@@ -11,6 +11,8 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/digital.hh
     ${dir}/error.hh
     ${dir}/factory.hh
+    ${dir}/lock_guard.hh
+    ${dir}/macros.hh
     ${dir}/member_variables.hh
     ${dir}/path.hh
     ${dir}/scarab_api.hh
