@@ -12,6 +12,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/error.hh
     ${dir}/factory.hh
     ${dir}/lock_guard.hh
+    ${dir}/macros.hh
     ${dir}/member_variables.hh
     ${dir}/mutex.hh
     ${dir}/path.hh
