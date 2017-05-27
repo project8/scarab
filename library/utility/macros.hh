@@ -8,6 +8,8 @@
 #ifndef SCARAB_UTILITY_MACROS_HH_
 #define SCARAB_UTILITY_MACROS_HH_
 
+#define PASTE2( x, y ) x##y
+#define PASTE( x, y ) PASTE2( x, y )
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
