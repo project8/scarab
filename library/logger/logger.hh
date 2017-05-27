@@ -9,6 +9,8 @@
 #ifndef SCARAB_LOGGER_HH_
 #define SCARAB_LOGGER_HH_
 
+#include "macros.hh"
+
 /**
  * @file
  * @brief Contains the logger class and macros, based on Kasper's KLogger class.
@@ -21,24 +23,6 @@
 
 #ifndef LOGGER_UTILITY_MACROS_
 #define LOGGER_UTILITY_MACROS_
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-#define __FILE_LINE__      __FILE__ "(" TOSTRING(__LINE__) ")"
-#define __FILENAME_LINE__  (strrchr(__FILE__, '/') ? strrchr(__FILE_LINE__, '/') + 1 : __FILE_LINE__)
-
-#if defined(_MSC_VER)
-#if _MSC_VER >= 1300
-#define __FUNC__ __FUNCSIG__
-#endif
-#else
-#if defined(__GNUC__)
-#define __FUNC__ __PRETTY_FUNCTION__
-#endif
-#endif
-#if !defined(__FUNC__)
-#define __FUNC__ ""
-#endif
 
 #define va_num_args(...) va_num_args_impl(__VA_ARGS__, 5,4,3,2,1)
 #define va_num_args_impl(_1,_2,_3,_4,_5,N,...) N
