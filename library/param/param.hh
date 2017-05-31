@@ -15,9 +15,15 @@
 #include <string>
 
 #include "error.hh"
-#include "error.hh"
 //#include "logger.hh"
 #include "path.hh"
+
+
+#include <boost/iterator/iterator_adaptor.hpp>
+#include <boost/type_traits/is_convertible.hpp>
+#include <boost/utility/enable_if.hpp>
+
+#include <boost/iterator/indirect_iterator.hpp>
 
 
 namespace scarab
@@ -75,6 +81,82 @@ namespace scarab
 
             static unsigned s_indent_level;
     };
+
+/*
+    template< class x_value, class x_iiterator >
+    class param_iterator : public boost::iterator_adaptor< param_iterator< x_value, x_iiterator >, x_iiterator, x_value, boost::random_access_traversal_tag >
+    {
+        private:
+            // used for the conversion constructor below
+            struct enabler {};
+
+        public:
+            param_iterator() :
+                    param_iterator::iterator_adaptor_()
+            {}
+            param_iterator( const x_iiterator& other ) :
+                    param_iterator::iterator_adaptor_( other )
+            {}
+
+            // converts from iterator to const_iterator, but the enable_if business prevents converting from const_iterator to iterator
+            template< class x_other_value, class x_other_iiterator >
+            param_iterator( const param_iterator< x_other_value, x_other_iiterator > & other, typename boost::enable_if< boost::is_convertible< x_other_value, x_value >, enabler >::type = enabler() ) :
+                    param_iterator::iterator_adaptor_( other.base )
+            {}
+
+        private:
+            friend class boost::iterator_core_access;
+
+            x_value& dereference() const
+            {
+                return *this->base_reference();
+            }
+    };
+*/
+    //typedef param_iterator< param, std::vector< param* >::iterator > param_array_iterator;
+    //typedef param_iterator< const param, std::vector< param* >::const_iterator > param_array_const_iterator;
+
+    typedef boost::indirect_iterator< std::deque< param* >::iterator, param > param_array_iterator;
+    typedef boost::indirect_iterator< std::deque< param* >::const_iterator, const param > param_array_const_iterator;
+
+    template< class x_key, class x_value, class x_iiterator >
+    class map_deref_iterator : public boost::iterator_adaptor< map_deref_iterator< x_key, x_value, x_iiterator >, x_iiterator, std::pair< x_key, x_value* >, boost::bidirectional_traversal_tag >
+    {
+        private:
+            // used for the conversion constructor below
+            struct enabler {};
+
+        public:
+            map_deref_iterator() :
+                    map_deref_iterator::iterator_adaptor_()
+            {}
+            map_deref_iterator( const x_iiterator& other ) :
+                    map_deref_iterator::iterator_adaptor_( other )
+            {}
+
+            // converts from iterator to const_iterator, but the enable_if business prevents converting from const_iterator to iterator
+            template< class x_other_value, class x_other_iiterator >
+            map_deref_iterator( const param_iterator< x_key, x_other_value, x_other_iiterator > & other, typename boost::enable_if< boost::is_convertible< x_key, x_other_value, x_value >, enabler >::type = enabler() ) :
+                    map_deref_iterator::iterator_adaptor_( other.base )
+            {}
+
+            const x_key& first()
+            {
+                return this->base()->first;
+            }
+
+            x_value& second()
+            {
+                return *this->base()->second;
+            }
+
+        private:
+            friend class boost::iterator_core_access;
+
+    };
+
+    typedef map_deref_iterator< std::string, param, std::map< std::string, param* >::iterator > param_node_iterator;
+    typedef map_deref_iterator< std::string, const param, std::map< std::string, param* >::const_iterator > param_node_const_iterator;
 
 
     class SCARAB_API param_value : public param
