@@ -5,6 +5,7 @@
 set( dir ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set( Scarab_HEADERS ${Scarab_HEADERS}
+    ${dir}/_member_variables.hh
     ${dir}/cancelable.hh
     ${dir}/concurrent_queue.hh
     ${dir}/destroyer.hh
@@ -12,12 +13,14 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/error.hh
     ${dir}/factory.hh
     ${dir}/lock_guard.hh
+    ${dir}/macros.hh
     ${dir}/member_variables.hh
     ${dir}/mutex.hh
     ${dir}/path.hh
     ${dir}/scarab_api.hh
     ${dir}/scarab_version.hh
     ${dir}/singleton.hh
+    ${dir}/terminate.hh
     ${dir}/time.hh
     ${dir}/typename.hh
     PARENT_SCOPE )
@@ -29,6 +32,7 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/lock_guard.cc
     ${dir}/mutex.cc
     ${dir}/path.cc
+    ${dir}/terminate.cc
     ${dir}/time.cc
     ${dir}/typename.cc
 )
