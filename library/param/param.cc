@@ -392,9 +392,9 @@ namespace scarab
         if( ! a_subset.is_array() ) return false;
         const param_array& t_subset_array = a_subset.as_array();
         if( t_subset_array.size() > f_contents.size() ) return false;
-        const_iterator t_this_it = f_contents.begin();
-        const_iterator t_that_it = t_subset_array.begin();
-        while( t_that_it != t_subset_array.end() ) // loop condition is on a_subset because it's smaller or equal to this
+        contents::const_iterator t_this_it = f_contents.begin();
+        contents::const_iterator t_that_it = t_subset_array.f_contents.begin();
+        while( t_that_it != t_subset_array.f_contents.end() ) // loop condition is on a_subset because it's smaller or equal to this
         {
             if( ! (*t_this_it)->has_subset( **t_that_it ) ) return false;
             ++t_this_it;
@@ -422,7 +422,7 @@ namespace scarab
             indentation += "    ";
         out << '\n' << indentation << "[\n";
         param::s_indent_level++;
-        for( const_iterator it = begin(); it != end(); ++it )
+        for( contents::const_iterator it = f_contents.begin(); it != f_contents.end(); ++it )
         {
             out << indentation << "    " << **it << '\n';
         }
@@ -447,7 +447,7 @@ namespace scarab
             param( orig ),
             f_contents()
     {
-        for( const_iterator it = orig.f_contents.begin(); it != orig.f_contents.end(); ++it )
+        for( contents::const_iterator it = orig.f_contents.begin(); it != orig.f_contents.end(); ++it )
         {
             add( it->first, it->second->clone() );
         }
@@ -461,7 +461,7 @@ namespace scarab
     param_node& param_node::operator=( const param_node& rhs )
     {
         clear();
-        for( const_iterator it = rhs.f_contents.begin(); it != rhs.f_contents.end(); ++it )
+        for( contents::const_iterator it = rhs.f_contents.begin(); it != rhs.f_contents.end(); ++it )
         {
             this->replace( it->first, *it->second );
         }
@@ -473,7 +473,7 @@ namespace scarab
         if( ! a_subset.is_node() ) return false;
         const param_node& t_subset_node = a_subset.as_node();
         if( t_subset_node.size() > f_contents.size() ) return false;
-        for( const_iterator t_subset_it = t_subset_node.begin(); t_subset_it != t_subset_node.end(); ++t_subset_it )
+        for( contents::const_iterator t_subset_it = t_subset_node.f_contents.begin(); t_subset_it != t_subset_node.f_contents.end(); ++t_subset_it )
         {
             if( ! has( t_subset_it->first ) ) return false;
             if( ! f_contents.at( t_subset_it->first )->has_subset( *t_subset_it->second ) ) return false;
@@ -484,7 +484,7 @@ namespace scarab
     void param_node::merge( const param_node& a_object )
     {
         //LDEBUG( dlog, "merging object with " << a_object.size() << " items:\n" << a_object );
-        for( const_iterator it = a_object.f_contents.begin(); it != a_object.f_contents.end(); ++it )
+        for( contents::const_iterator it = a_object.f_contents.begin(); it != a_object.f_contents.end(); ++it )
         {
             if( ! has( it->first ) )
             {
@@ -524,7 +524,7 @@ namespace scarab
             indentation += "    ";
         out << '\n' << indentation << "{\n";
         param::s_indent_level++;
-        for( const_iterator it = begin(); it != end(); ++it )
+        for( contents::const_iterator it = f_contents.begin(); it != f_contents.end(); ++it )
         {
             out << indentation << "    " << it->first << " : " << *(it->second) << '\n';
         }
