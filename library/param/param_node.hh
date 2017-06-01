@@ -46,17 +46,7 @@ namespace scarab
             {
                 return this->base()->first;
             }
-            /*
-            x_value& second()
-            {
-                return *this->base()->second;
-            }
 
-            const x_value& second() const
-            {
-                return *this->base()->second;
-            }
-*/
         private:
             friend class boost::iterator_core_access;
 

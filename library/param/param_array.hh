@@ -25,40 +25,6 @@ namespace scarab
 
     typedef std::deque< param* > param_array_contents;
 
-/*
-    template< class x_value, class x_iiterator >
-    class param_iterator : public boost::iterator_adaptor< param_iterator< x_value, x_iiterator >, x_iiterator, x_value, boost::random_access_traversal_tag >
-    {
-        private:
-            // used for the conversion constructor below
-            struct enabler {};
-
-        public:
-            param_iterator() :
-                    param_iterator::iterator_adaptor_()
-            {}
-            param_iterator( const x_iiterator& other ) :
-                    param_iterator::iterator_adaptor_( other )
-            {}
-
-            // converts from iterator to const_iterator, but the enable_if business prevents converting from const_iterator to iterator
-            template< class x_other_value, class x_other_iiterator >
-            param_iterator( const param_iterator< x_other_value, x_other_iiterator > & other, typename boost::enable_if< boost::is_convertible< x_other_value, x_value >, enabler >::type = enabler() ) :
-                    param_iterator::iterator_adaptor_( other.base )
-            {}
-
-        private:
-            friend class boost::iterator_core_access;
-
-            x_value& dereference() const
-            {
-                return **this->base();
-            }
-    };
-
-    typedef param_iterator< param, param_array_contents::iterator > param_array_iterator;
-    typedef param_iterator< const param, param_array_contents::const_iterator > param_array_const_iterator;
-*/
     typedef boost::indirect_iterator< param_array_contents::iterator, param > param_array_iterator;
     typedef boost::indirect_iterator< param_array_contents::const_iterator, const param > param_array_const_iterator;
 
