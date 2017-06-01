@@ -221,7 +221,7 @@ namespace scarab
         const param_node& p_node = static_cast< const param_node& >(a_to_write);
         for( param_node::const_iterator counter = p_node.begin(); counter != p_node.end(); ++counter )
         {
-            t_node[counter->first] = param_output_yaml::check_param_type( *counter->second );
+            t_node[counter.name()] = param_output_yaml::check_param_type( *counter );
         }
 
         return t_node;

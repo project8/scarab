@@ -116,6 +116,210 @@ namespace scarab
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
 
+    template<>
+    inline bool param_value::get< bool >() const
+    {
+        return as_bool();
+    }
+
+    template<>
+    inline uint64_t param_value::get< uint64_t >() const
+    {
+        return as_uint();
+    }
+
+    template<>
+    inline int64_t param_value::get< int64_t >() const
+    {
+        return as_int();
+    }
+
+    template<>
+    inline double param_value::get< double >() const
+    {
+        return as_double();
+    }
+
+    template<>
+    inline std::string param_value::get< std::string >() const
+    {
+        return as_string();
+    }
+
+    template<>
+    inline scarab::path param_value::get< scarab::path >() const
+    {
+        return as_path();
+    }
+
+    template< typename XValType >
+    XValType param_value::get() const
+    {
+        if( f_value_type == k_bool ) return static_cast< XValType >( as_bool() );
+        else if( f_value_type == k_uint ) return static_cast< XValType >( as_uint() );
+        else if( f_value_type == k_int ) return static_cast< XValType >( as_int() );
+        else if( f_value_type == k_double ) return static_cast< XValType >( as_double() );
+        else if( f_value_type == k_string )
+        {
+            std::stringstream t_conv;
+            t_conv << *f_value.f_string;
+            XValType t_return;
+            t_conv >> t_return;
+            return t_return;
+        }
+        return XValType();
+    }
+
+
+    inline param* param_value::clone() const
+    {
+        //std::cout << "param_value::clone" << std::endl;
+        return new param_value( *this );
+    }
+
+    inline bool param_value::is_null() const
+    {
+        return false;
+    }
+
+    inline bool param_value::is_value() const
+    {
+        return true;
+    }
+
+    inline bool param_value::is_bool() const
+    {
+        return f_value_type == k_bool;
+    }
+
+    inline bool param_value::is_uint() const
+    {
+        return f_value_type == k_uint;
+    }
+
+    inline bool param_value::is_int() const
+    {
+        return f_value_type == k_int;
+    }
+
+    inline bool param_value::is_double() const
+    {
+        return f_value_type == k_double;
+    }
+
+    inline bool param_value::is_string() const
+    {
+        return f_value_type == k_string;
+    }
+
+    inline void param_value::set( bool a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_bool;
+        f_value.f_bool = a_value;
+        return;
+    }
+
+    inline void param_value::set( uint8_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_uint;
+        f_value.f_uint = a_value;
+        return;
+    }
+
+    inline void param_value::set( uint16_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_uint;
+        f_value.f_uint = a_value;
+        return;
+    }
+
+    inline void param_value::set( uint32_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_uint;
+        f_value.f_uint = a_value;
+        return;
+    }
+
+    inline void param_value::set( uint64_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_uint;
+        f_value.f_uint = a_value;
+        return;
+    }
+
+    inline void param_value::set( int8_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_int;
+        f_value.f_int = a_value;
+        return;
+    }
+
+    inline void param_value::set( int16_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_int;
+        f_value.f_int = a_value;
+        return;
+    }
+
+    inline void param_value::set( int32_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_int;
+        f_value.f_int = a_value;
+        return;
+    }
+
+    inline void param_value::set( int64_t a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_int;
+        f_value.f_int = a_value;
+        return;
+    }
+
+    inline void param_value::set( float a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_double;
+        f_value.f_double = a_value;
+        return;
+    }
+
+    inline void param_value::set( double a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_double;
+        f_value.f_double = a_value;
+        return;
+    }
+
+    inline void param_value::set( const std::string& a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_string;
+        f_value.f_string = new std::string( a_value );
+        return;
+    }
+
+    inline void param_value::set( const char* a_value )
+    {
+        if( f_value_type == k_string ) delete f_value.f_string;
+        f_value_type = k_string;
+        f_value.f_string = new std::string( a_value );
+        return;
+    }
+
+    inline std::string param_value::to_string() const
+    {
+        return as_string();
+    }
 } /* namespace scarab */
 
 #endif /* SCARAB_PARAM_VALUE_HH_ */

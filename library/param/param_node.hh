@@ -62,7 +62,7 @@ namespace scarab
 
             x_value& dereference() const
             {
-                return **this->base()->second;
+                return *this->base()->second;
             }
 
     };
