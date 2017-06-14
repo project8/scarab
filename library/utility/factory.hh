@@ -60,6 +60,7 @@ namespace scarab
 
             XBaseType* create( XArgs ... args ) const;
 
+            std::string f_class_name;
     };
 
     // factory
@@ -126,6 +127,7 @@ namespace scarab
 
             XBaseType* create() const;
 
+            std::string f_class_name;
     };
 
 
@@ -255,14 +257,17 @@ namespace scarab
 
     template< class XBaseType, class XDerivedType, typename ... XArgs >
     registrar< XBaseType, XDerivedType, XArgs... >::registrar( const std::string& a_class_name ) :
-            base_registrar< XBaseType, XArgs... >()
+            base_registrar< XBaseType, XArgs... >(),
+            f_class_name( a_class_name )
     {
         register_class( a_class_name );
     }
 
     template< class XBaseType, class XDerivedType, typename ... XArgs >
     registrar< XBaseType, XDerivedType, XArgs... >::~registrar()
-    {}
+    {
+        factory< XBaseType, XArgs... >::get_instance()->remove_class( f_class_name );
+    }
 
     template< class XBaseType, class XDerivedType, typename ... XArgs >
     void registrar< XBaseType, XDerivedType, XArgs... >::register_class( const std::string& a_class_name ) const
@@ -372,14 +377,17 @@ namespace scarab
 
     template< class XBaseType, class XDerivedType >
     registrar< XBaseType, XDerivedType, void >::registrar( const std::string& a_class_name ) :
-            base_registrar< XBaseType >()
+            base_registrar< XBaseType >(),
+            f_class_name( a_class_name )
     {
         register_class( a_class_name );
     }
 
     template< class XBaseType, class XDerivedType >
     registrar< XBaseType, XDerivedType, void >::~registrar()
-    {}
+    {
+        factory< XBaseType >::get_instance()->remove_class( f_class_name );
+    }
 
     template< class XBaseType, class XDerivedType >
     void registrar< XBaseType, XDerivedType, void >::register_class( const std::string& a_class_name ) const

@@ -44,7 +44,7 @@ namespace scarab
             return NULL;
         }
 
-        char t_buffer[ 65536 ];
+        char t_buffer[ RAPIDJSON_FILE_BUFFER_SIZE ];
         rapidjson::FileReadStream t_file_stream( t_config_file, t_buffer, sizeof(t_buffer) );
 
         rapidjson::Document t_config_doc;
@@ -201,7 +201,7 @@ namespace scarab
             return false;
         }
 
-        char t_buffer[ 65536 ];
+        char t_buffer[ RAPIDJSON_FILE_BUFFER_SIZE ];
         rapidjson::FileWriteStream t_filestream( file, t_buffer, sizeof(t_buffer) );
 
         json_writing_style t_style = k_compact;
