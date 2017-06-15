@@ -153,7 +153,7 @@ namespace scarab
         }
 
         //std::cout << "fourth configuration complete" << std::endl;
-        LINFO( slog, "Final configuration:\n" << *f_master_config );
+        LPROG( slog, "Final configuration:\n" << *f_master_config );
     }
 
     configurator::~configurator()
