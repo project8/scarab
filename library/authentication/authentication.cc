@@ -16,8 +16,8 @@
 
 #ifndef _WIN32
 #include <sys/types.h>
-#include <pwd.h>
-#include <unistd.h> // for getlogin_r, sysconf
+#include <pwd.h> // for struct passwd
+#include <unistd.h> // for getpwuid, sysconf
 #else
 #include <Windows.h>
 #endif
@@ -54,58 +54,58 @@ namespace scarab
         if( a_is_in_user_home )
         {
             // get the username
-            string t_username;
             const size_t t_uname_bufsize = 1024;
             char t_username_buf[ t_uname_bufsize ];
 #ifndef _WIN32
-            if( getlogin_r( t_username_buf, t_uname_bufsize ) == 0 )
-#else
-            DWORD t_bufsize_win = t_uname_bufsize;
-            if( GetUserName( t_username_buf, &t_bufsize_win ) )
-#endif
+            //if( getlogin_r( t_username_buf, t_uname_bufsize ) == 0 )
+            passwd* t_passwd = getpwuid( getuid() );
+            if( t_passwd != nullptr )
             {
-                t_username = string( t_username_buf );
+                strcpy( t_username_buf, t_passwd->pw_name );
             }
             else
             {
+                LERROR( mtlog, "Error reported while getting passwd info: " << strerror( errno ) );
+#else
+            DWORD t_bufsize_win = t_uname_bufsize;
+            if( ! GetUserName( t_username_buf, &t_bufsize_win ) )
+            {
+#endif
                 LERROR( mtlog, "Unable to get the username; authentications not loaded" );
                 return false;
             }
 
+            string t_username = string( t_username_buf );
+
             // get the user home directory
-            if( ! t_username.empty() )
-            {
-                string t_username = string( t_username_buf );
-
 #ifndef _WIN32
-                long t_pwd_bufsize = sysconf( _SC_GETPW_R_SIZE_MAX );
-                if ( t_pwd_bufsize == -1 )  t_pwd_bufsize = 16384; // Should be more than enough
+            long t_pwd_bufsize = sysconf( _SC_GETPW_R_SIZE_MAX );
+            if ( t_pwd_bufsize == -1 )  t_pwd_bufsize = 16384; // Should be more than enough
 
-                char* t_pwd_buf = ( char* )malloc( (size_t)t_pwd_bufsize );
-                if( t_pwd_buf == NULL )
+            char* t_pwd_buf = ( char* )malloc( (size_t)t_pwd_bufsize );
+            if( t_pwd_buf == NULL )
+            {
+                LERROR( mtlog, "Unable to allocate the pwd buffer; authentications not loaded");
+                return false;
+            }
+            else
+            {
+                struct passwd t_pwd;
+                struct passwd* t_pwd_result;
+                getpwnam_r( t_username.c_str(), &t_pwd, t_pwd_buf, t_pwd_bufsize, &t_pwd_result );
+                if( t_pwd_result == NULL )
                 {
-                    LERROR( mtlog, "Unable to allocate the pwd buffer; authentications not loaded");
+                    LERROR( mtlog, "Unable to get the pwd data; authentications not loaded" );
                     return false;
                 }
                 else
                 {
-                    struct passwd t_pwd;
-                    struct passwd* t_pwd_result;
-                    getpwnam_r( t_username.c_str(), &t_pwd, t_pwd_buf, t_pwd_bufsize, &t_pwd_result );
-                    if( t_pwd_result == NULL )
-                    {
-                        LERROR( mtlog, "Unable to get the pwd data; authentications not loaded" );
-                        return false;
-                    }
-                    else
-                    {
-                        t_auth_file_path = string( t_pwd.pw_dir ) / f_auth_filename;
-                    }
+                    t_auth_file_path = string( t_pwd.pw_dir ) / f_auth_filename;
                 }
-#else
-                t_auth_file_path = path( getenv( "HOMEDRIVE" ) ) / path( getenv( "HOMEPATH" ) ) / f_auth_filename;
-#endif
             }
+#else
+            t_auth_file_path = path( getenv( "HOMEDRIVE" ) ) / path( getenv( "HOMEPATH" ) ) / f_auth_filename;
+#endif
         }
 
         // is the file there?
