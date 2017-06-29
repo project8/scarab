@@ -17,10 +17,10 @@
 
 #include "logger.hh"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread.hpp>
-
+#include <chrono>
+#include <condition_variable>
 #include <deque>
+#include <mutex>
 
 namespace scarab
 {
@@ -44,13 +44,13 @@ namespace scarab
                 }
             };
 
-            typedef boost::unique_lock< boost::mutex > scoped_lock;
+            typedef std::unique_lock< std::mutex > cq_lock;
 
         public:
             concurrent_queue() :
                 f_queue(),
                 f_interrupt( false ),
-                f_timeout( boost::posix_time::milliseconds( 1000 ) ),
+                f_timeout( std::chrono::milliseconds( 1000 ) ),
                 f_mutex(),
                 f_condition_var()
             {
@@ -65,16 +65,16 @@ namespace scarab
             queue f_queue;
             bool f_interrupt;
 
-            boost::posix_time::time_duration f_timeout; /// Timeout duration in milliseconds
+            std::chrono::milliseconds f_timeout; /// Timeout duration in milliseconds
 
-            mutable boost::mutex f_mutex;
-            boost::condition_variable f_condition_var;
+            mutable std::mutex f_mutex;
+            std::condition_variable f_condition_var;
 
         public:
             void push( XDataType const& a_data )
             {
                 LDEBUG( slog_cq, "Attempting to push to queue" );
-                scoped_lock lock( f_mutex );
+                cq_lock lock( f_mutex );
                 LDEBUG( slog_cq, "Pushing to concurrent queue; size: " << f_queue.size() );
                 f_queue.push_back( a_data );
                 lock.unlock();
@@ -84,19 +84,19 @@ namespace scarab
 
             bool empty() const
             {
-                scoped_lock lock( f_mutex );
+                cq_lock lock( f_mutex );
                 return f_queue.empty();
             }
 
             bool size() const
             {
-                scoped_lock lock( f_mutex );
+                cq_lock lock( f_mutex );
                 return f_queue.size();
             }
 
             bool try_pop( XDataType& a_popped_value )
             {
-                scoped_lock lock( f_mutex );
+                cq_lock lock( f_mutex );
                 f_interrupt = false;
                 if( f_queue.empty() )
                 {
@@ -110,7 +110,7 @@ namespace scarab
 
             bool wait_and_pop( XDataType& a_popped_value )
             {
-                scoped_lock lock( f_mutex );
+                cq_lock lock( f_mutex );
                 f_interrupt = false;
                 f_condition_var.wait( lock, queue_not_empty( f_queue ) );
                 if( f_interrupt )
@@ -127,10 +127,10 @@ namespace scarab
 
             bool timed_wait_and_pop( XDataType& a_popped_value )
             {
-                scoped_lock lock( f_mutex );
+                cq_lock lock( f_mutex );
                 f_interrupt = false;
-                boost::system_time const waitUntil = boost::get_system_time() + f_timeout;
-                if( ! f_condition_var.timed_wait( lock, waitUntil, queue_not_empty( f_queue ) ) )
+                std::chrono::steady_clock::time_point const waitUntil = std::chrono::steady_clock::now() + f_timeout;
+                if( ! f_condition_var.wait_until( lock, waitUntil, queue_not_empty( f_queue ) ) )
                 {
                     //LDEBUG( mtlog_cq, "Queue wait has timed out" );
                     return false;
@@ -156,12 +156,12 @@ namespace scarab
 
             inline unsigned get_timeout() const
             {
-                return f_timeout.total_milliseconds();
+                return f_timeout.count();
             }
 
             inline void set_timeout( unsigned a_duration )
             {
-                f_timeout = boost::posix_time::milliseconds( a_duration );
+                f_timeout = std::chrono::milliseconds( a_duration );
                 return;
             }
     };
