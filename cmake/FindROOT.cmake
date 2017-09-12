@@ -52,7 +52,7 @@ execute_process(
     OUTPUT_VARIABLE ROOFIT_EXISTS)
 set(IS_ROOFIT ${ROOFIT_EXISTS})
 
-set(rootlibs Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread MultiProc) # 
+set(rootlibs Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread MultiProc)
 if(IS_ROOFIT)
   list(APPEND rootlibs  RooStats RooFit RooFitCore)
 endif()
