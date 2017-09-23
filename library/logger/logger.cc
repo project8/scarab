@@ -19,6 +19,7 @@
 #else
 #include <sys/time.h>
 #endif
+#include <mutex>
 #include <set>
 #include <time.h>
 
@@ -27,8 +28,6 @@
 #endif
 
 #include "logger.hh"
-
-#include "mutex.hh"
 
 using namespace std;
 
@@ -46,7 +45,7 @@ namespace scarab
 
     struct logger::Private
     {
-            static mutex sMutex;
+            static std::mutex sMutex;
 
             typedef std::set< logger* > LoggerSet;
             static LoggerSet* AllLoggers()

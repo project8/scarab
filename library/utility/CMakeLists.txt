@@ -12,10 +12,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/digital.hh
     ${dir}/error.hh
     ${dir}/factory.hh
-    ${dir}/lock_guard.hh
-    ${dir}/macros.hh
     ${dir}/member_variables.hh
-    ${dir}/mutex.hh
     ${dir}/path.hh
     ${dir}/scarab_api.hh
     ${dir}/scarab_version.hh
@@ -29,8 +26,6 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/cancelable.cc
     ${dir}/digital.cc
     ${dir}/error.cc
-    ${dir}/lock_guard.cc
-    ${dir}/mutex.cc
     ${dir}/path.cc
     ${dir}/terminate.cc
     ${dir}/time.cc
