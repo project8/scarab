@@ -191,7 +191,7 @@ namespace scarab
             fPrivate->fLogger = logName;
         }
         fPrivate->fColored = true;
-        sprintf(logger::Private::sDateTimeFormat,  "%%m/%%d/%%y %%T");
+        sprintf(logger::Private::sDateTimeFormat,  "%%y-%%m-%%d %%T");
         SetLevel(eDebug);
         logger::Private::AllLoggers()->insert(this);
     }
@@ -200,7 +200,7 @@ namespace scarab
     {
         fPrivate->fLogger = name.c_str();
         fPrivate->fColored = true;
-		sprintf(logger::Private::sDateTimeFormat, "%%m/%%d/%%y %%T");
+		sprintf(logger::Private::sDateTimeFormat, "%%y-%%m-%%d %%T");
 		SetLevel(eDebug);
 		logger::Private::AllLoggers()->insert(this);
     }
