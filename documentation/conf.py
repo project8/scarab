@@ -47,7 +47,7 @@ call(['ls', './user_doxygen_out/xml'])
 #   1: directory in which to make the documentation (recommendation: leave as '.')
 #   2: list of directories in which to look for source files
 #   3: list of directories to exclude from the search for source files
-call(['python', 'make_source.py', '.', ['../library'], ['../library/param/codec/json/rapidjson', '../library/param/codec/msgpack/msgpack-c', '../library/param/codec/yaml/yaml-cpp'])
+call(['python', 'make_source.py', '.', ['../library'], ['../library/param/codec/json/rapidjson', '../library/param/codec/msgpack/msgpack-c', '../library/param/codec/yaml/yaml-cpp']])
 call(['echo', '====== make source complete ====='])
 
 call(['cat', 'index.rst'])
