@@ -1,6 +1,8 @@
 # Based on: https://github.com/seqan/seqan3-doc/blob/user/source/make_source.py
 # Copied Jan 3, 2018
+# Heavily modified by B. LaRoque and N. Oblath
 
+# Original version:
 #  written by Jongkyu Kim (j.kim@fu-berlin.de)
 
 import os
@@ -118,13 +120,9 @@ def generateRSTs(in_names, outDir, excl_names):
 
 ###################
 
-# usage: python make_source.py <path_to_where_doc_rst_files_live> <paths_to_each_directory_containing_source_with_doxygen>
+# usage: make_source.build(path_to_where_doc_rst_files_live, [paths to each directory containing source with doxygen], [paths to directories to exclude])
 
 # you should run this file early from within your conf.py
-
-outDir = sys.argv[1]
-inDirs = sys.argv[2]
-exclDirs = sys.argv[3]
-
-generateIndex(outDir)
-generateRSTs(inDirs, outDir, exclDirs)
+def build(outDir, inDirs, exclDirs):
+    generateIndex(outDir)
+    generateRSTs(inDirs, outDir, exclDirs)

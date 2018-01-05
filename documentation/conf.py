@@ -13,16 +13,19 @@
 # serve to show the default.
 
 # Customize the following:
-#  * the location of make_source.py (line 48, the path of make_source.py)
-#  * the targets for make_source.py (line 48, arguments 2)
-#  * the exclusions for make_source.py (line 48, argument 3)
-#  * the project, copyright, and author variables (lines 96-98)
-#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 243 and beyond)
+#  * the location of scarab's documentation directory (line 27; uncomment if it's commented out)
+#  * the targets for ms.build (line 53, arguments 2)
+#  * the exclusions for ms.build (line 53, argument 3)
+#  * the project, copyright, and author variables (lines 99-101)
+#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 246 and beyond)
 
 import sys
 import os
 import shlex
 from subprocess import call, check_output
+
+#sys.path.append('/path/to/scarab/documentation')
+import make_source as ms
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -42,12 +45,12 @@ call(['mv', './user_doxygen_out/html', './_static'])
 call(['echo', '... doxygen_out/xml ...'])
 call(['ls', './user_doxygen_out/xml'])
 
-# make source
+# build source
 # arguments:
 #   1: directory in which to make the documentation (recommendation: leave as '.')
 #   2: list of directories in which to look for source files
 #   3: list of directories to exclude from the search for source files
-call(['python', 'make_source.py', '.', ['../library'], ['../library/param/codec/json/rapidjson', '../library/param/codec/msgpack/msgpack-c', '../library/param/codec/yaml/yaml-cpp']])
+ms.build('.', ['../library'], ['../library/param/codec/json/rapidjson', '../library/param/codec/msgpack/msgpack-c', '../library/param/codec/yaml/yaml-cpp'])
 call(['echo', '====== make source complete ====='])
 
 call(['cat', 'index.rst'])
