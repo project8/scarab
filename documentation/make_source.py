@@ -84,11 +84,13 @@ def generateFileRST(outDir, moduleName, fileName) :
     # add to ToC
     addTOCEntry(os.path.join(os.path.dirname(out_file_path), 'index.rst'), os.path.basename(out_file_path).rsplit('.rst')[0], caption=False)
 
-def generateRSTs(in_names, outDir):
+def generateRSTs(in_names, outDir, excl_names):
     print('[make_source] Generating RSTs: {} {}'.format(in_names, outDir))
     listModules = []
     listFiles = []
     for fileName in in_names:
+        if os.path.normpath(fileName) in (os.path.normpath(a_path) for a_path in excl_names):
+            continue
         if os.path.isdir(fileName):
             listModules.append(fileName)
         elif fileName.endswith(('.hh', '.cc')):
@@ -110,7 +112,7 @@ def generateRSTs(in_names, outDir):
         #print("module: {} {}".format(a_module, '-'*30))
         a_name = a_module.split('../', 1)[-1]
         mkAPISubdir(os.path.join(api_dir, a_name), a_name)
-        generateRSTs([os.path.join(a_module, f) for f in os.listdir(a_module)], outDir)
+        generateRSTs([os.path.join(a_module, f) for f in os.listdir(a_module)], outDir, excl_names)
 
 
 
@@ -121,7 +123,8 @@ def generateRSTs(in_names, outDir):
 # you should run this file early from within your conf.py
 
 outDir = sys.argv[1]
-inDirs = sys.argv[2:]
+inDirs = sys.argv[2]
+exclDirs = sys.argv[3]
 
 generateIndex(outDir)
-generateRSTs(inDirs, outDir)
+generateRSTs(inDirs, outDir, exclDirs)

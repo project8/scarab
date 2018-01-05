@@ -14,9 +14,10 @@
 
 # Customize the following:
 #  * the location of make_source.py (line 48, the path of make_source.py)
-#  * the targets for make_source.py (line 48, arguments 2 and beyond)
-#  * the project, copyright, and author variables (lines 94-96)
-#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 241 and beyond)
+#  * the targets for make_source.py (line 48, arguments 2)
+#  * the exclusions for make_source.py (line 48, argument 3)
+#  * the project, copyright, and author variables (lines 96-98)
+#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 243 and beyond)
 
 import sys
 import os
@@ -44,8 +45,9 @@ call(['ls', './user_doxygen_out/xml'])
 # make source
 # arguments:
 #   1: directory in which to make the documentation (recommendation: leave as '.')
-#   2ff:  directories in which to look for source files
-call(['python', 'make_source.py', '.', '../library'])
+#   2: list of directories in which to look for source files
+#   3: list of directories to exclude from the search for source files
+call(['python', 'make_source.py', '.', ['../library'], ['../library/param/codec/json/rapidjson', '../library/param/codec/msgpack/msgpack-c', '../library/param/codec/yaml/yaml-cpp'])
 call(['echo', '====== make source complete ====='])
 
 call(['cat', 'index.rst'])
