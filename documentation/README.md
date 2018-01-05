@@ -43,7 +43,7 @@ The software stack used to generate the documentation is:
 
 ### In your project repo
 1. Merge your changes to the master branch with a new release; this should trigger a new build of the documentation, which you should then go and check.
-1. If it doesn't already exist, create an orphan branch in your repo called `gh-pages`.
+1. If it doesn't already exist, create an orphan branch in your repo called `gh-pages` and clear it of all files.
 1. Populate the `gh-pages` branch with an empty file called `.nojekyll` and the following in `index.html`:
     ```
     <html>
@@ -53,6 +53,6 @@ The software stack used to generate the documentation is:
     </html>
     ```
     with your RTD project name replacing `scarab`.
-1. In the settings for your repo, under GitHub Pages, in the Source drop-down menu, select gh-pages.
-1. Check that if you go to `www.project8.org/[github repo name]` it redirects to the RTD documentation.
-    
+1. Commit and push `gh-pages` to GitHub.
+1. In the settings for your repo, under GitHub Pages, make sure that the Source drop-down menu has `gh-pages` selected.
+1. Check that if you go to `http://www.project8.org/[github repo name]` it redirects to the RTD documentation.
