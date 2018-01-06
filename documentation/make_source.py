@@ -50,7 +50,7 @@ class site_builder:
         f.writelines(the_lines)
         f.close()
     
-    def mkAPISubdir(dirname, title, caption=True):
+    def mkAPISubdir(self, dirname, title, caption=True):
         if caption is True:
             caption = title
     
