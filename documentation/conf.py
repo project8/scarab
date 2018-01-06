@@ -26,7 +26,7 @@ from subprocess import call, check_output
 
 # replace the contents of sys.path.append() with the path to make_source.py, which is probably in the documentation directory of scarab
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-import make_source as ms
+import make_source
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -46,6 +46,7 @@ call(['mv', './user_doxygen_out/html', './_static'])
 call(['echo', '... doxygen_out/xml ...'])
 call(['ls', './user_doxygen_out/xml'])
 
+ms = make_source.site_builder()
 # build source
 # arguments:
 #   1: directory in which to make the documentation (recommendation: leave as '.')
