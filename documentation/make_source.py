@@ -10,11 +10,11 @@ import sys
 
 class site_builder:
     def __init__(self):
-        cat_name = "API Reference"
-        index_temp = "./_index.rst"
-        index_final = "index.rst"
-        api_sub_dir = "API_Ref"
-        toc_end = ".. end of toc\n"
+        self.cat_name = "API Reference"
+        self.index_temp = "./_index.rst"
+        self.index_final = "index.rst"
+        self.api_sub_dir = "API_Ref"
+        self.toc_end = ".. end of toc\n"
 
     def generateIndex(self, outDir):
         print('[make_source] Generating index')
