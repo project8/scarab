@@ -24,7 +24,8 @@ import os
 import shlex
 from subprocess import call, check_output
 
-#sys.path.append('/path/to/scarab/documentation')
+print os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 import make_source as ms
 
 # If extensions (or modules to document with autodoc) are in another directory,
