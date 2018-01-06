@@ -13,11 +13,11 @@
 # serve to show the default.
 
 # Customize the following:
-#  * the location of scarab's documentation directory (line 28; uncomment if it's commented out)
-#  * the targets for ms.build (line 54, arguments 2)
-#  * the exclusions for ms.build (line 54, argument 3)
-#  * the project, copyright, and author variables (lines 100-102)
-#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 247 and beyond)
+#  * the location of scarab's documentation directory (sys.path.append(...); uncomment if it's commented out)
+#  * the targets for ms.build (arguments 2)
+#  * the exclusions for ms.build (argument 3)
+#  * the project, copyright, and author variables
+#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents
 
 import sys
 import os
