@@ -13,18 +13,18 @@
 # serve to show the default.
 
 # Customize the following:
-#  * the location of scarab's documentation directory (line 27; uncomment if it's commented out)
-#  * the targets for ms.build (line 53, arguments 2)
-#  * the exclusions for ms.build (line 53, argument 3)
-#  * the project, copyright, and author variables (lines 99-101)
-#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 246 and beyond)
+#  * the location of scarab's documentation directory (line 28; uncomment if it's commented out)
+#  * the targets for ms.build (line 54, arguments 2)
+#  * the exclusions for ms.build (line 54, argument 3)
+#  * the project, copyright, and author variables (lines 100-102)
+#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 247 and beyond)
 
 import sys
 import os
 import shlex
 from subprocess import call, check_output
 
-print os.path.dirname(os.path.realpath(__file__))
+# replace the contents of sys.path.append() with the path to make_source.py, which is probably in the documentation directory of scarab
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 import make_source as ms
 

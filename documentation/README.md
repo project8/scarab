@@ -23,9 +23,10 @@ The software stack used to generate the documentation is:
 1. Copy into it the files `_index.rst`, `conf.py`, `Doxyfile`, and `requirements.txt`.  You do not need to copy `make_source.py`.
 1. If you have rst documentation files, put them in the documentation directory; otherwise it's recommended to create a placeholder rst file for use or descriptive documentation.
 1. Put the filename(s) for any rst documentation files (minus .rst extension) in `_index.rst` after the initial lines defining the table of contents.
+1. Customize `conf.py` with the location of `make_source.py`, which is typically the documentation folder of scarab.
 1. Customize `_index.rst`, `conf.py`, and `Doxyfile` with the name and description of your project.
-1. Customize `conf.py` (at `call(['python', 'make_source.py', '.', ...`) and `Doxyfile` (at `INPUT = `) with the source locations that should be included.
-1. Customize `Doxyfile` (at `EXCLUDE = `) with any source locations that should be excluded.
+1. Customize `conf.py` (at `ms.build(...)`) and `Doxyfile` (at `INPUT = `) with the source locations that should be included.
+1. Customize `conf.py` (at `ms.build(...)`) and `Doxyfile` (at `EXCLUDE = `) with any source locations that should be excluded.
 1. If you have a favicon file, put it in the documentation directory and specify it in `conf.py`; otherwise comment out the `html_favicon` variable in that file.
 1. Recommendation: don't merge these changes into the master branch just yet; test the creation of the documentation (described below) first.
 
