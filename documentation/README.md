@@ -38,7 +38,7 @@ The software stack used to generate the documentation is:
     1. Specify the location of the requirements.txt file under "Requirements file".
     1. Specify the location of conf.py under "Python configuration file".
     1. Specify the branch where your documentation currently resides as "Default branch".
-1. Under Admin:Maintainers, add at least one other maintainer so we can maintain access if you're unavailable.
+1. Under Admin:Maintainers, add Noah as an additional maintainer so we can maintain access if you're unavailable.
 1. Under Builds you should see the `latest` build building.  Once it's done, check the documentation to make sure it worked.  If it worked great, carry on. If not, go back and fix whatever's wrong.
 1. Under Admin:Advanced Settings, switch the "Default branch" to `master`.
 
