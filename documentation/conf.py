@@ -13,15 +13,20 @@
 # serve to show the default.
 
 # Customize the following:
-#  * the location of make_source.py (line 48, the path of make_source.py)
-#  * the targets for make_source.py (line 48, arguments 2 and beyond)
-#  * the project, copyright, and author variables (lines 94-96)
-#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents (line 241 and beyond)
+#  * the location of scarab's documentation directory (sys.path.append(...); uncomment if it's commented out)
+#  * the targets for ms.build (arguments 2)
+#  * the exclusions for ms.build (argument 3)
+#  * the project, copyright, and author variables
+#  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents
 
 import sys
 import os
 import shlex
 from subprocess import call, check_output
+
+# replace the contents of sys.path.append() with the path to make_source.py, which is probably in the documentation directory of scarab
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+import make_source
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -41,11 +46,13 @@ call(['mv', './user_doxygen_out/html', './_static'])
 call(['echo', '... doxygen_out/xml ...'])
 call(['ls', './user_doxygen_out/xml'])
 
-# make source
+ms = make_source.site_builder()
+# build source
 # arguments:
 #   1: directory in which to make the documentation (recommendation: leave as '.')
-#   2ff:  directories in which to look for source files
-call(['python', 'make_source.py', '.', '../library'])
+#   2: list of directories in which to look for source files
+#   3: list of directories to exclude from the search for source files
+ms.build('.', ['../library'], ['../library/param/codec/json/rapidjson', '../library/param/codec/msgpack/msgpack-c', '../library/param/codec/yaml/yaml-cpp'])
 call(['echo', '====== make source complete ====='])
 
 call(['cat', 'index.rst'])

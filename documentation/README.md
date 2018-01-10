@@ -23,9 +23,10 @@ The software stack used to generate the documentation is:
 1. Copy into it the files `_index.rst`, `conf.py`, `Doxyfile`, and `requirements.txt`.  You do not need to copy `make_source.py`.
 1. If you have rst documentation files, put them in the documentation directory; otherwise it's recommended to create a placeholder rst file for use or descriptive documentation.
 1. Put the filename(s) for any rst documentation files (minus .rst extension) in `_index.rst` after the initial lines defining the table of contents.
+1. Customize `conf.py` with the location of `make_source.py`, which is typically the documentation folder of scarab.
 1. Customize `_index.rst`, `conf.py`, and `Doxyfile` with the name and description of your project.
-1. Customize `conf.py` (at `call(['python', 'make_source.py', '.', ...`) and `Doxyfile` (at `INPUT = `) with the source locations that should be included.
-1. Customize `Doxyfile` (at `EXCLUDE = `) with any source locations that should be excluded.
+1. Customize `conf.py` (at `ms.build(...)`) and `Doxyfile` (at `INPUT = `) with the source locations that should be included.
+1. Customize `conf.py` (at `ms.build(...)`) and `Doxyfile` (at `EXCLUDE = `) with any source locations that should be excluded.
 1. If you have a favicon file, put it in the documentation directory and specify it in `conf.py`; otherwise comment out the `html_favicon` variable in that file.
 1. Recommendation: don't merge these changes into the master branch just yet; test the creation of the documentation (described below) first.
 
@@ -37,13 +38,13 @@ The software stack used to generate the documentation is:
     1. Specify the location of the requirements.txt file under "Requirements file".
     1. Specify the location of conf.py under "Python configuration file".
     1. Specify the branch where your documentation currently resides as "Default branch".
-1. Under Admin:Maintainers, add at least one other maintainer so we can maintain access if you're unavailable.
+1. Under Admin:Maintainers, add Noah as an additional maintainer so we can maintain access if you're unavailable.
 1. Under Builds you should see the `latest` build building.  Once it's done, check the documentation to make sure it worked.  If it worked great, carry on. If not, go back and fix whatever's wrong.
 1. Under Admin:Advanced Settings, switch the "Default branch" to `master`.
 
 ### In your project repo
 1. Merge your changes to the master branch with a new release; this should trigger a new build of the documentation, which you should then go and check.
-1. If it doesn't already exist, create an orphan branch in your repo called `gh-pages`.
+1. If it doesn't already exist, create an orphan branch in your repo called `gh-pages` and clear it of all files.
 1. Populate the `gh-pages` branch with an empty file called `.nojekyll` and the following in `index.html`:
     ```
     <html>
@@ -53,6 +54,6 @@ The software stack used to generate the documentation is:
     </html>
     ```
     with your RTD project name replacing `scarab`.
-1. In the settings for your repo, under GitHub Pages, in the Source drop-down menu, select gh-pages.
-1. Check that if you go to `www.project8.org/[github repo name]` it redirects to the RTD documentation.
-    
+1. Commit and push `gh-pages` to GitHub.
+1. In the settings for your repo, under GitHub Pages, make sure that the Source drop-down menu has `gh-pages` selected.
+1. Check that if you go to `http://www.project8.org/[github repo name]` it redirects to the RTD documentation.

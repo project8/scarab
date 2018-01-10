@@ -585,7 +585,7 @@ RECURSIVE = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE = ../library/param/codec
+EXCLUDE = ../library/param/codec/json/rapidjson ../library/param/codec/msgpack/msgpack-c ../library/param/codec/yaml/yaml-cpp
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
