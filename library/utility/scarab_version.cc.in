@@ -18,8 +18,10 @@
 #elif __APPLE__
 #include <mach-o/dyld.h> // for extracting the exe name
 #include <unistd.h> // for gethostname and getlogin_r
+#include <pwd.h> // for struct passwd
 #elif __linux
 #include <unistd.h> // for readlink, gethostname and getlogin_r
+#include <pwd.h> // for struct passwd
 #endif
 
 using std::string;
@@ -195,18 +197,26 @@ namespace scarab
         const size_t t_bufsize = 1024;
 
         // Username
-        char t_username_buf[ t_bufsize ];
 #ifdef _WIN32
+        char t_username_buf[ t_bufsize ];
         DWORD t_bufsize_win = t_bufsize;
         if( GetUserName( t_username_buf, &t_bufsize_win ) )
-#else
-        if( getlogin_r( t_username_buf, t_bufsize ) == 0 )
-#endif
         {
             f_username = string( t_username_buf );
         }
         else
         {
+#else
+        //if( getlogin_r( t_username_buf, t_bufsize ) == 0 )
+        passwd* t_passwd = getpwuid( getuid() );
+        if( t_passwd != nullptr )
+        {
+            f_username = string( t_passwd->pw_name );
+        }
+        else
+        {
+            LWARN( slog, "Error reported while getting passwd info: " << strerror( errno ) );
+#endif
             LWARN( slog, "Unable to get the username" );
         }
 

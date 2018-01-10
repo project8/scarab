@@ -10,9 +10,7 @@
 
 #include "singleton.hh"
 
-#include "lock_guard.hh"
 #include "logger.hh"
-#include "mutex.hh"
 
 #include <map>
 #include <string>
@@ -87,7 +85,7 @@ namespace scarab
 
         protected:
             FactoryMap* fMap;
-            mutex f_factory_mutex;
+            std::mutex f_factory_mutex;
 
         protected:
             allow_singleton_access( factory );
@@ -153,7 +151,7 @@ namespace scarab
 
         protected:
             FactoryMap* fMap;
-            mutex f_factory_mutex;
+            std::mutex f_factory_mutex;
 
         protected:
             friend class singleton< factory >;
@@ -172,7 +170,7 @@ namespace scarab
     template< class XBaseType, typename ... XArgs >
     XBaseType* factory< XBaseType, XArgs... >::create( const FactoryCIt& iter, XArgs ... args )
     {
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         return iter->second->create( args... );
     }
 
@@ -184,7 +182,7 @@ namespace scarab
         //{
         //    std::cout << "this factory has: " << iter->first << " at " << iter->second << std::endl;
         //}
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find( a_class_name );
         if( it == fMap->end() )
         {
@@ -201,7 +199,7 @@ namespace scarab
         // A local (static) logger is created inside this function to avoid static initialization order problems
         LOGGER( slog_factory_reg, "factory-register");
 
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_class_name);
         if (it != fMap->end())
         {
@@ -242,14 +240,14 @@ namespace scarab
     template< class XBaseType, typename ... XArgs >
     typename factory< XBaseType, XArgs... >::FactoryCIt factory< XBaseType, XArgs... >::begin() const
     {
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         return fMap->begin();
     }
 
     template< class XBaseType, typename ... XArgs >
     typename factory< XBaseType, XArgs... >::FactoryCIt factory< XBaseType, XArgs... >::end() const
     {
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         return fMap->end();
     }
 
@@ -292,7 +290,7 @@ namespace scarab
     template< class XBaseType >
     XBaseType* factory< XBaseType, void >::create( const FactoryCIt& iter )
     {
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         return iter->second->create();
     }
 
@@ -304,7 +302,7 @@ namespace scarab
         //{
         //    std::cout << "this factory has: " << iter->first << " at " << iter->second << std::endl;
         //}
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find( a_class_name );
         if( it == fMap->end() )
         {
@@ -321,7 +319,7 @@ namespace scarab
         // A local (static) logger is created inside this function to avoid static initialization order problems
         LOGGER( slog_factory_reg, "factory-register");
 
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_class_name);
         if (it != fMap->end())
         {
@@ -362,14 +360,14 @@ namespace scarab
     template< class XBaseType >
     typename factory< XBaseType, void >::FactoryCIt factory< XBaseType, void >::begin() const
     {
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         return fMap->begin();
     }
 
     template< class XBaseType >
     typename factory< XBaseType, void >::FactoryCIt factory< XBaseType, void >::end() const
     {
-        lock_guard( this->f_factory_mutex );
+        std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         return fMap->end();
     }
 

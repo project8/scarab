@@ -169,7 +169,7 @@ namespace scarab
         a_writer->StartArray();
         for( param_array::const_iterator it = a_to_write.begin(); it != a_to_write.end(); ++it )
         {
-            if( ! param_output_json::write_param( *(*it), a_writer ) )
+            if( ! param_output_json::write_param( *it, a_writer ) )
             {
                 LERROR( dlog_param_json, "Error while writing parameter array" );
                 return false;
@@ -185,8 +185,8 @@ namespace scarab
         a_writer->StartObject();
         for( param_node::const_iterator it = a_to_write.begin(); it != a_to_write.end(); ++it )
         {
-            a_writer->String( it->first.c_str() );
-            if( ! param_output_json::write_param( *(it->second), a_writer ) )
+            a_writer->String( it.name().c_str() );
+            if( ! param_output_json::write_param( *it, a_writer ) )
             {
                 LERROR( dlog_param_json, "Error while writing parameter node" );
                 return false;
