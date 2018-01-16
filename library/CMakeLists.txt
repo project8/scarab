@@ -97,6 +97,9 @@ if( WIN32 )
     pbuilder_add_ext_libraries( "Ws2_32.lib" )
 endif( WIN32 )
 
+# date library
+include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/date )
+
 
 ########################
 # Build Scarab library #

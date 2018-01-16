@@ -19,6 +19,7 @@ if( Scarab_ENABLE_TESTING )
         test_configurator
         test_logger
         test_terminate
+        test_time
         test_yaml
     )
     
