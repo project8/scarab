@@ -76,8 +76,12 @@ if( Scarab_BUILD_AUTHENTICATION )
     list( APPEND boost_components filesystem system )
 endif( Scarab_BUILD_AUTHENTICATION )
 
+# making sure boost_components is not empty and remove duplicate
+if (boost_components)
+    list( REMOVE_DUPLICATES boost_components )
+endif ( boost_components)
+
 # Boost (1.46 required for filesystem version 3)
-list( REMOVE_DUPLICATES boost_components )
 find_package( Boost 1.46.0 REQUIRED COMPONENTS ${boost_components} )
 # make sure dynamic linking is assumed for all boost libraries
 #add_definitions( -DBOOST_ALL_DYN_LINK )
