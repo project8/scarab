@@ -19,12 +19,12 @@ The software stack used to generate the documentation is:
 
 ### In your project repo
 1. Create a documentation directory.
-1. Copy into it the files `index.rst`, `conf.py`, and `Doxyfile`.  You do not need to copy `requirements.txt`.
+1. Copy into it the files `index.rst` and `conf.py`.  You do not need to copy `requirements.txt` or `Doxyfile`.
 1. Create a `doxfiles` or `DoxFiles` directory in your documentation directory, and copy `doxfiles/mainpage.dox` into it.
 1. If you have rst documentation files, put them in the documentation directory; otherwise it's recommended to create a placeholder rst file for use or descriptive documentation.
 1. Put the filename(s) for any rst documentation files (minus .rst extension) in `_index.rst` after the initial lines defining the table of contents.
-1. Customize `index.rst`, `conf.py`, and `Doxyfile` with the name and description of your project.
-1. Customize `Doxyfile` with the relevant directories in your project (typically the `INPUT_FILES`, `EXCLUDE`, and `INCLUDE_PATH` parameters).
+1. Customize `index.rst` and `conf.py` with the name and description of your project.
+1. Customize `conf.py` with the relevant directories in your project (`DOXYGEN_INPUT`, `DOXYGEN_EXCLUDE`, and `PREPROC_INCLUDE_PATH`).
 1. If you have a favicon file, put it in the documentation directory and specify it in `conf.py`; otherwise comment out the `html_favicon` variable in that file.
 1. Recommendation: don't merge these changes into the master branch just yet; test the creation of the documentation (described below) first.
 
