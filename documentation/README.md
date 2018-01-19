@@ -10,7 +10,7 @@ Subdirectories here contain instructions (in their README.md files) and an examp
 Depending on the repo, scarab may or may not be expected to be an available submodule.
 The cpp subdirectory also contains the actual documentation for scarab (it is an used as the example for other cpp packages)
 
-# Generic buildin notes
+# Generic building notes
 For a complete understanding of how documentation is built on RTD, you should go look at their documentation.
 For our purposes, it is usually reasonable to consider the following steps:
 

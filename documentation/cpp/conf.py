@@ -13,20 +13,12 @@
 # serve to show the default.
 
 # Customize the following:
-#  * the location of scarab's documentation directory (sys.path.append(...); uncomment if it's commented out)
-#  * the targets for ms.build (arguments 2)
-#  * the exclusions for ms.build (argument 3)
 #  * the project, copyright, and author variables
 #  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents
 
 import sys
 import os
-import shlex
 from subprocess import call, check_output
-
-# replace the contents of sys.path.append() with the path to make_source.py, which is probably in the documentation directory of scarab
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-import make_source
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -39,30 +31,13 @@ try:
     this_version = check_output(['git', 'describe', '--abbrev=0', '--tags'])
 except:
     pass
+os.environ['PROJECT_NUMBER'] = this_version
 
 # doxygen
 call(['doxygen', 'Doxyfile'])
 call(['mv', './user_doxygen_out/html', './_static'])
-call(['echo', '... doxygen_out/xml ...'])
-call(['ls', './user_doxygen_out/xml'])
-
-ms = make_source.site_builder()
-# build source
-# arguments:
-#   1: directory in which to make the documentation (recommendation: leave as '.')
-#   2: list of directories in which to look for source files
-#   3: list of directories to exclude from the search for source files
-ms.build('.', ['../library'], ['../library/param/codec/json/rapidjson', '../library/param/codec/msgpack/msgpack-c', '../library/param/codec/yaml/yaml-cpp'])
-call(['echo', '====== make source complete ====='])
-
-call(['cat', 'index.rst'])
-call(['echo', "===== files ====="])
-call(['ls'])
-call(['echo', 'Api index ==='])
-call(['cat', 'API_Ref/index.rst'])
 
 
-breathe_projects = { "myproject" : "./user_doxygen_out/xml/" }
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
   html_theme = 'default'
@@ -70,7 +45,6 @@ else:
   import sphinx_rtd_theme
   html_theme = "sphinx_rtd_theme"
   html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-breathe_default_project = "myproject"
 
 
 # -- General configuration ------------------------------------------------
@@ -81,7 +55,7 @@ breathe_default_project = "myproject"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['breathe']
+extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
