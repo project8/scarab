@@ -13,6 +13,7 @@
 # serve to show the default.
 
 # Customize the following:
+#  * the doxygen-related environment variables
 #  * the project, copyright, and author variables
 #  * the arguments used to assign variables htmlhelp_basename, latex_documents, man_pages, and texinfo_documents
 
@@ -26,16 +27,23 @@ from subprocess import call, check_output
 #sys.path.insert(0, os.path.abspath('.'))
 
 # version
-this_version = 'none'
+this_version = 'v?.?.?'
 try:
     this_version = check_output(['git', 'describe', '--abbrev=0', '--tags'])
 except:
     pass
+
+# environment variables used by Doxygen
+os.environ['PROJECT_NAME'] = 'Scarab'
 os.environ['PROJECT_NUMBER'] = this_version
+os.environ['PROJECT_BRIEF_DESC'] = 'Project 8 C++ Utility Library'
+os.environ['PROJECT_LOGO'] = 'scarab_logo_small.png'
 
 os.environ['DOXYGEN_INPUT'] = 'doxfiles ../../library'
+os.environ['DOXYGEN_EXCLUDE'] = '../../library/param/codec/json/rapidjson ../../library/param/codec/msgpack/msgpack-c ../../library/param/codec/yaml/yaml-cpp'
+os.environ['PREPROC_INCLUDE_PATH'] = ''
 
-# doxygen
+# Doxygen
 call(['doxygen', 'Doxyfile'])
 call(['mv', './user_doxygen_out/html', './_static'])
 
