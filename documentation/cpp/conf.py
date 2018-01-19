@@ -33,6 +33,8 @@ except:
     pass
 os.environ['PROJECT_NUMBER'] = this_version
 
+os.environ['DOXYGEN_INPUT'] = 'doxfiles ../../library'
+
 # doxygen
 call(['doxygen', 'Doxyfile'])
 call(['mv', './user_doxygen_out/html', './_static'])
