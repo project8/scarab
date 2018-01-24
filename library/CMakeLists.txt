@@ -29,7 +29,7 @@ pbuilder_prepare_project()
 
 option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" TRUE )
 
-option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" TRUE )
+option( Scarab_BUILD_CODEC_YAML "Flag to enable building the YAML codec" TRUE )
 
 option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
 
