@@ -19,7 +19,7 @@ The software stack used to generate the documentation is:
 
 ### In your project repo
 1. Create a documentation directory.
-1. Copy into it the file `conf.py` and `index.rst`.
+1. Copy into it the file `conf.py` and `index.rst` and the entire directory `_templates`.
 1. If you have rst documentation files, put them in the documentation directory; otherwise it's recommended to create a placeholder rst file for use or descriptive documentation.
 1. Put the filename(s) for any rst documentation files (minus .rst extension) in `index.rst` after the initial lines defining the table of contents (above the line `better_apidoc_out/modules`).
 1. Customize `index.rst` and `conf.py` with the name and description of your project.
