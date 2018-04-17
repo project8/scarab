@@ -380,6 +380,7 @@ namespace scarab
     param_array& param_array::operator=( const param_array& rhs )
     {
         clear();
+        resize(rhs.size());
         for( unsigned ind = 0; ind < rhs.f_contents.size(); ++ind )
         {
             this->assign( ind, rhs[ ind ].clone() );
