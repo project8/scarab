@@ -2,7 +2,7 @@
  * mt_authentication.hh
  *
  *  Created on: Jun 15, 2015
- *      Author: nsoblath
+ *      Author: N.S. Oblath
  */
 
 #ifndef SCARAB_AUTHENTICATION_HH_
@@ -18,11 +18,11 @@ namespace scarab
     class SCARAB_API authentication : public param_node
     {
         public:
-            authentication( const std::string& a_auth_file, bool a_is_in_user_home = true );
+            authentication( const std::string& a_auth_file );
             ~authentication();
 
         public:
-            bool load( const std::string& a_auth_file, bool a_is_in_user_home = true );
+            bool load( const std::string& a_auth_file );
 
         public:
             mv_referrable( std::string, auth_filename );
