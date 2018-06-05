@@ -29,11 +29,12 @@ namespace scarab
         double inv_v_range;
         double dac_gain;
         bool bits_right_aligned;
+        unsigned n_channels; // added by penny slocum June 5, 2018.
     };
 
 
 
-    SCARAB_API void get_calib_params( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, bool bits_r_aligned, dig_calib_params *params );
+  SCARAB_API void get_calib_params( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, bool bits_r_aligned, dig_calib_params *params );
     SCARAB_API void get_calib_params2( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, double dac_gain, bool bits_r_aligned, dig_calib_params *params );
 
 
