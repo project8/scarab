@@ -98,10 +98,6 @@ if( Scarab_BUILD_CODEC_YAML )
     pbuilder_add_ext_libraries( yaml-cpp )
 endif( Scarab_BUILD_CODEC_YAML )
 
-if( Scarab_BUILD_AUTHENTICATION )
-    list( APPEND boost_components filesystem system )
-endif( Scarab_BUILD_AUTHENTICATION )
-
 list( APPEND boost_components filesystem system )
 
 # making sure boost_components is not empty and remove duplicate
@@ -171,7 +167,6 @@ if( Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )
     add_subdirectory( authentication )
 endif( Scarab_BUILD_AUTHENTICATION )
-
 
 ##########
 
