@@ -37,12 +37,26 @@ option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authenticati
 
 option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
 
+if (NOT Scarab_BUILD_PARAM)
+    set( Scarab_BUILD_AUTHENTICATION OFF)
+    set( Scarab_BUILD_CODEC_JSON OFF)
+    set( Scarab_BUILD_CODEC_YAML OFF)
+    set( Scarab_BUILD_CODEC_MSGPACK OFF)
+endif (NOT Scarab_BUILD_PARAM)
+
+if (Scarab_BUILD_AUTHENTICATION)
+    set(Scarab_BUILD_CODEC_JSON ON)
+endif (Scarab_BUILD_AUTHENTICATION)
+
+if (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML)
+    set( Scarab_BUILD_PARAM ON)
+endif ( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML)
 
 #######################
 # Scarab dependencies #
 #######################
 
-if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+if( Scarab_BUILD_CODEC_JSON )
 	# filesystem and system for param_value's use of boost::filesystem::path
 	# thread and date_time for concurrent_queue
 	set( boost_components filesystem system thread date_time )
@@ -61,7 +75,7 @@ if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     
     add_subdirectory( param/codec/json/rapidjson )
     include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/rapidjson/include/ )
-endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     # msgpack-c
