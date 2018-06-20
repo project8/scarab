@@ -37,13 +37,6 @@ option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authenticati
 
 option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
 
-if (NOT Scarab_BUILD_PARAM)
-    set( Scarab_BUILD_AUTHENTICATION OFF)
-    set( Scarab_BUILD_CODEC_JSON OFF)
-    set( Scarab_BUILD_CODEC_YAML OFF)
-    set( Scarab_BUILD_CODEC_MSGPACK OFF)
-endif (NOT Scarab_BUILD_PARAM)
-
 if (Scarab_BUILD_AUTHENTICATION)
     set(Scarab_BUILD_CODEC_JSON ON)
 endif (Scarab_BUILD_AUTHENTICATION)
@@ -106,11 +99,6 @@ if( Scarab_BUILD_AUTHENTICATION )
     list( APPEND boost_components filesystem system )
 endif( Scarab_BUILD_AUTHENTICATION )
 
-if( Scarab_BUILD_PARAM )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
-    add_subdirectory( param )
-endif( Scarab_BUILD_PARAM )
-
 list( APPEND boost_components filesystem system )
 
 # making sure boost_components is not empty and remove duplicate
@@ -156,10 +144,15 @@ set( Scarab_SOURCES )
 add_subdirectory( utility )
 add_subdirectory( logger )
 
-if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+if( Scarab_BUILD_PARAM )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
+    add_subdirectory( param )
+endif( Scarab_BUILD_PARAM )
+
+if( Scarab_BUILD_CODEC_JSON )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
-endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack )
