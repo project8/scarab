@@ -65,9 +65,12 @@ if( Scarab_BUILD_CODEC_JSON )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
     
     add_definitions( -DRAPIDJSON_FILE_BUFFER_SIZE=${RAPIDJSON_FILE_BUFFER_SIZE} )
+    add_definitions( -DUSE_CODEC_JSON )
     
     add_subdirectory( param/codec/json/rapidjson )
     include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/rapidjson/include/ )
+else( Scarab_BUILD_CODEC_JSON )
+    remove_definitions( -DUSE_CODEC_JSON )
 endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
