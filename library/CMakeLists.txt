@@ -35,6 +35,8 @@ option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" TRUE )
 
 option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
 
+option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
+
 
 #######################
 # Scarab dependencies #
@@ -90,6 +92,13 @@ if( Scarab_BUILD_AUTHENTICATION )
     list( APPEND boost_components filesystem system )
 endif( Scarab_BUILD_AUTHENTICATION )
 
+if( Scarab_BUILD_PARAM )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
+    add_subdirectory( param )
+endif( Scarab_BUILD_PARAM )
+
+list( APPEND boost_components filesystem system )
+
 # making sure boost_components is not empty and remove duplicate
 if (boost_components)
     list( REMOVE_DUPLICATES boost_components )
@@ -123,7 +132,6 @@ endif( WIN32 )
 include_directories( BEFORE
     ${PROJECT_SOURCE_DIR}/utility
     ${PROJECT_SOURCE_DIR}/logger
-    ${PROJECT_SOURCE_DIR}/param
 )
 
 ##########
@@ -133,7 +141,6 @@ set( Scarab_SOURCES )
 
 add_subdirectory( utility )
 add_subdirectory( logger )
-add_subdirectory( param )
 
 if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
