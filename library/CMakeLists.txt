@@ -106,10 +106,6 @@ if( Scarab_BUILD_AUTHENTICATION )
     list( APPEND boost_components filesystem system )
 endif( Scarab_BUILD_AUTHENTICATION )
 
-if( Scarab_BUILD_PARAM )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
-    add_subdirectory( param )
-endif( Scarab_BUILD_PARAM )
 
 list( APPEND boost_components filesystem system )
 
@@ -156,10 +152,10 @@ set( Scarab_SOURCES )
 add_subdirectory( utility )
 add_subdirectory( logger )
 
-if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+if( Scarab_BUILD_CODEC_JSON )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
-endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack )
@@ -175,6 +171,11 @@ if( Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )
     add_subdirectory( authentication )
 endif( Scarab_BUILD_AUTHENTICATION )
+
+if( Scarab_BUILD_PARAM )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
+    add_subdirectory( param )
+endif( Scarab_BUILD_PARAM )
 
 
 ##########
