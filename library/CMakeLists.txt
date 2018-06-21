@@ -27,23 +27,23 @@ pbuilder_prepare_project()
 # Scarab options #
 ##################
 
-option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" TRUE )
+option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec (requires Scarab_BUILD_PARAM)" TRUE )
 
-option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the msgpack codec" FALSE )
+option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the MSGPACK codec (requires Scarab_BUILD_PARAM)" FALSE )
 
-option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" TRUE )
+option( Scarab_BUILD_CODEC_YAML "Flag to enable building the YAML codec (requires Scarab_BUILD_PARAM)" TRUE )
 
-option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
+option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires Scarab_BUILD_CODEC_JSON)" TRUE )
 
 option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
 
-if (Scarab_BUILD_AUTHENTICATION)
-    set(Scarab_BUILD_CODEC_JSON ON)
-endif (Scarab_BUILD_AUTHENTICATION)
+if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML) AND NOT Scarab_BUILD_PARAM )
+    message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs requires Param.  If you want a Codec, turn on Param.  If you want Param off, turn the Codecs off." )
+endif( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML) AND NOT Scarab_BUILD_PARAM )
 
-if (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML)
-    set( Scarab_BUILD_PARAM ON)
-endif ( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML)
+if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
+    message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the JSON Codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
+endif( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
 
 #######################
 # Scarab dependencies #
