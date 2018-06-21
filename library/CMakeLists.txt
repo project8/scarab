@@ -27,20 +27,29 @@ pbuilder_prepare_project()
 # Scarab options #
 ##################
 
-option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec" TRUE )
+option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec (requires Scarab_BUILD_PARAM)" TRUE )
 
-option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the msgpack codec" FALSE )
+option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the MSGPACK codec (requires Scarab_BUILD_PARAM)" FALSE )
 
-option( Scarab_BUILD_CODEC_YAML "Flag to enable building the yaml codec" TRUE )
+option( Scarab_BUILD_CODEC_YAML "Flag to enable building the YAML codec (requires Scarab_BUILD_PARAM)" TRUE )
 
-option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires boost::filesystem)" TRUE )
+option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires Scarab_BUILD_CODEC_JSON)" TRUE )
 
+option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
+
+if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML) AND NOT Scarab_BUILD_PARAM )
+    message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs requires Param.  If you want a Codec, turn on Param.  If you want Param off, turn the Codecs off." )
+endif( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML) AND NOT Scarab_BUILD_PARAM )
+
+if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
+    message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the JSON Codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
+endif( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
 
 #######################
 # Scarab dependencies #
 #######################
 
-if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+if( Scarab_BUILD_CODEC_JSON )
 	# filesystem and system for param_value's use of boost::filesystem::path
 	# thread and date_time for concurrent_queue
 	set( boost_components filesystem system thread date_time )
@@ -56,10 +65,13 @@ if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
     
     add_definitions( -DRAPIDJSON_FILE_BUFFER_SIZE=${RAPIDJSON_FILE_BUFFER_SIZE} )
+    add_definitions( -DUSE_CODEC_JSON )
     
     add_subdirectory( param/codec/json/rapidjson )
     include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/rapidjson/include/ )
-endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+else( Scarab_BUILD_CODEC_JSON )
+    remove_definitions( -DUSE_CODEC_JSON )
+endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     # msgpack-c
@@ -86,9 +98,7 @@ if( Scarab_BUILD_CODEC_YAML )
     pbuilder_add_ext_libraries( yaml-cpp )
 endif( Scarab_BUILD_CODEC_YAML )
 
-if( Scarab_BUILD_AUTHENTICATION )
-    list( APPEND boost_components filesystem system )
-endif( Scarab_BUILD_AUTHENTICATION )
+list( APPEND boost_components filesystem system )
 
 # making sure boost_components is not empty and remove duplicate
 if (boost_components)
@@ -123,7 +133,6 @@ endif( WIN32 )
 include_directories( BEFORE
     ${PROJECT_SOURCE_DIR}/utility
     ${PROJECT_SOURCE_DIR}/logger
-    ${PROJECT_SOURCE_DIR}/param
 )
 
 ##########
@@ -133,12 +142,16 @@ set( Scarab_SOURCES )
 
 add_subdirectory( utility )
 add_subdirectory( logger )
-add_subdirectory( param )
 
-if( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+if( Scarab_BUILD_PARAM )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
+    add_subdirectory( param )
+endif( Scarab_BUILD_PARAM )
+
+if( Scarab_BUILD_CODEC_JSON )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
-endif( Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_AUTHENTICATION )
+endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_MSGPACK )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack )
@@ -154,7 +167,6 @@ if( Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )
     add_subdirectory( authentication )
 endif( Scarab_BUILD_AUTHENTICATION )
-
 
 ##########
 
