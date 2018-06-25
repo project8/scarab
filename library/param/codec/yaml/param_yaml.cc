@@ -64,22 +64,18 @@ namespace scarab
         {
             if( a_node.IsNull() )
             {
-                LDEBUG( slog, "YAML null" << a_node );
                 return new param();
             }
             if( a_node.IsScalar() )
             {
-                LDEBUG( slog, "YAML scalar" << a_node );
                 return param_input_yaml::scalar_handler(a_node);
             }
             if( a_node.IsSequence() )
             {
-                LDEBUG( slog, "YAML sequence" << a_node );
                 return param_input_yaml::sequence_handler(a_node);
             }
             if( a_node.IsMap() )
             {
-                LDEBUG( slog, "YAML map" << a_node );
                 return param_input_yaml::map_handler(a_node);
             }
         }

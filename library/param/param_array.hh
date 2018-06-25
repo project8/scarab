@@ -316,6 +316,7 @@ namespace scarab
     inline void param_array::erase( unsigned a_index )
     {
         delete f_contents[ a_index ];
+        f_contents[ a_index ] = NULL;
         return;
     }
     inline param* param_array::remove( unsigned a_index )

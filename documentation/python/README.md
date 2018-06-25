@@ -19,9 +19,9 @@ The software stack used to generate the documentation is:
 
 ### In your project repo
 1. Create a documentation directory.
-1. Copy into it the file `conf.py` and `index.rst`.
+1. Copy into it the file `conf.py` and `index.rst` and the entire directory `_templates`.
 1. If you have rst documentation files, put them in the documentation directory; otherwise it's recommended to create a placeholder rst file for use or descriptive documentation.
-1. Put the filename(s) for any rst documentation files (minus .rst extension) in `_index.rst` after the initial lines defining the table of contents (above the line `better_apidoc_out/modules`.
+1. Put the filename(s) for any rst documentation files (minus .rst extension) in `index.rst` after the initial lines defining the table of contents (above the line `better_apidoc_out/modules`).
 1. Customize `index.rst` and `conf.py` with the name and description of your project.
 1. Customize (if needed) the logic used to assign the `version` and `release` variables in `conf.py`. (Default is to derive values from git tags)
 1. If you have a favicon file, put it in the documentation directory and specify it in `conf.py`; otherwise comment out the `html_favicon` variable in that file.
@@ -44,6 +44,7 @@ The software stack used to generate the documentation is:
             ...
         )
     ```
+1. RTD is going to try and install your project and the automatic documentation of API docs expects to be able to import the package and inspect the contents. You need to ensure that the above works, which means either installing your dependencies or making them optional (at least for importing the package, obviously they can be required at runtime). In practice, you should see if your docs build and deploy and if not debug based on the output available on readthedocs.org site.
 
 ### On readthedocs
 1. Create an RTD project for your software project by importing from GitHub (this will automatically create a webhook directed to RTD).
