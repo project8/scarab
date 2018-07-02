@@ -16,13 +16,24 @@ if( Scarab_ENABLE_TESTING )
     
     set( test_programs
         test__member_variables
-        test_configurator
         test_logger
         test_terminate
         test_time
-        test_yaml
     )
     
+    if( Scarab_BUILD_PARAM )
+        set( test_programs
+            ${test_programs}
+            test_configurator
+        )
+    endif( Scarab_BUILD_PARAM )
+
+    if( Scarab_BUILD_CODEC_YAML )
+        set( test_programs
+            ${test_programs}
+            test_yaml
+        )
+    endif( Scarab_BUILD_CODEC_YAML )
     
     pbuilder_executables( test_programs lib_dependencies )
 

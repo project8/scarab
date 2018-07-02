@@ -9,9 +9,12 @@
 
 #include "logger.hh"
 #include "param_codec.hh"
-#include "param_json.hh"
 #include "parser.hh"
 #include "path.hh"
+
+#ifdef USE_CODEC_JSON
+#include "param_json.hh"
+#endif
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -105,6 +108,7 @@ namespace scarab
         //cout << f_master_config );
         //cout << t_parser );
 
+#ifdef USE_CODEC_JSON
         // third configuration: command line json
         if( t_parser.has( t_name_json ) )
         {
@@ -121,6 +125,7 @@ namespace scarab
                 delete t_config_from_json;
             }
         }
+#endif
 
         //std::cout << "third configuration complete" << std::endl;
         //cout << f_master_config );
