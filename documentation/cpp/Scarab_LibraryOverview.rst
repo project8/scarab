@@ -28,11 +28,6 @@ Build Options
   * Build the YAML codec
   * Requires Scarab_BUILD_PARAM
 
-* Scarab_BUILD_CODEC_MSGPACK
-
-  * Build the MSGPACK codec
-  * Requires Scarab_BUILD_PARAM
-
 * Scarab_BUILD_AUTHENTICATION
 
   * Build the authentication class 

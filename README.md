@@ -2,5 +2,13 @@ Scarab includes a variety of utilities primarily aimed at the C++ packages devel
 
 It contains three main components:
 * cmake: common CMake modules and scripts
-* githooks: versioning control scripts (not currently used)
+  * PackageBuilder framework
+  * Find-module scripts for Eigen3, FFTW, ROOT, and Sphinx
+* Documentation
+  * C++ system
+  * Python system
 * library: C++ library of common utilities
+  * Param system
+  * Logger
+  * Authentication class
+  * A variety of utilities

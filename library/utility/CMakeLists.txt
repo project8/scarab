@@ -18,6 +18,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/scarab_api.hh
     ${dir}/scarab_version.hh
     ${dir}/singleton.hh
+    ${dir}/terminate.hh
     ${dir}/time.hh
     ${dir}/typename.hh
     PARENT_SCOPE )
@@ -27,6 +28,7 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/digital.cc
     ${dir}/error.cc
     ${dir}/path.cc
+    ${dir}/terminate.cc
     ${dir}/time.cc
     ${dir}/typename.cc
 )
