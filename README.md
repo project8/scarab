@@ -1,9 +1,12 @@
 Scarab includes a variety of utilities primarily aimed at the C++ packages developed by the Project 8 collaboration.
 
-It contains two main components:
+It contains three main components:
 * cmake: common CMake modules and scripts
   * PackageBuilder framework
   * Find-module scripts for Eigen3, FFTW, ROOT, and Sphinx
+* Documentation
+  * C++ system
+  * Python system
 * library: C++ library of common utilities
   * Param system
   * Logger
