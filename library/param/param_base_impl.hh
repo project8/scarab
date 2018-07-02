@@ -1,5 +1,5 @@
 /*
- * param.hh
+ * param_base_impl.hh
  *
  *  Created on: Jan 14, 2014
  *      Author: nsoblath
@@ -10,6 +10,9 @@
 
 #include "param_base.hh"
 
+#include "param_array.hh"
+#include "param_node.hh"
+#include "param_value.hh"
 
 namespace scarab
 {

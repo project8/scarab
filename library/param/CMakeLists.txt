@@ -21,8 +21,11 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
 set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/configurator.cc
     ${dir}/global_config.cc
-    ${dir}/param.cc
+    ${dir}/param_array.cc
+    ${dir}/param_base.cc
     ${dir}/param_codec.cc
+    ${dir}/param_node.cc
+    ${dir}/param_value.cc
     ${dir}/parsable.cc
     ${dir}/parser.cc
     PARENT_SCOPE )
