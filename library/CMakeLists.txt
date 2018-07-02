@@ -29,8 +29,6 @@ pbuilder_prepare_project()
 
 option( Scarab_BUILD_CODEC_JSON "Flag to enable building the JSON codec (requires Scarab_BUILD_PARAM)" TRUE )
 
-option( Scarab_BUILD_CODEC_MSGPACK "Flag to enable building the MSGPACK codec (requires Scarab_BUILD_PARAM)" FALSE )
-
 option( Scarab_BUILD_CODEC_YAML "Flag to enable building the YAML codec (requires Scarab_BUILD_PARAM)" TRUE )
 
 option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authentication class (requires Scarab_BUILD_CODEC_JSON)" TRUE )
@@ -73,18 +71,6 @@ else( Scarab_BUILD_CODEC_JSON )
     remove_definitions( -DUSE_CODEC_JSON )
 endif( Scarab_BUILD_CODEC_JSON )
 
-if( Scarab_BUILD_CODEC_MSGPACK )
-    # msgpack-c
-    include_directories( BEFORE 
-        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c 
-        ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include
-    )
-    install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/msgpack/msgpack-c/include
-        DESTINATION ${INCLUDE_INSTALL_DIR}/msgpack-c 
-        FILES_MATCHING PATTERN "*.h*" 
-    )
-endif( Scarab_BUILD_CODEC_MSGPACK )
-
 if( Scarab_BUILD_CODEC_YAML )
 	set_option( USE_CPP11 TRUE )
 
@@ -121,6 +107,9 @@ if( WIN32 )
     pbuilder_add_ext_libraries( "Ws2_32.lib" )
 endif( WIN32 )
 
+# date library
+include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/date )
+
 
 ########################
 # Build Scarab library #
@@ -152,11 +141,6 @@ if( Scarab_BUILD_CODEC_JSON )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
 endif( Scarab_BUILD_CODEC_JSON )
-
-if( Scarab_BUILD_CODEC_MSGPACK )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/msgpack )
-    add_subdirectory( param/codec/msgpack )
-endif( Scarab_BUILD_CODEC_MSGPACK )
 
 if( Scarab_BUILD_CODEC_YAML )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/yaml )

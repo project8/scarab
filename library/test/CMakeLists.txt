@@ -17,6 +17,8 @@ if( Scarab_ENABLE_TESTING )
     set( test_programs
         test__member_variables
         test_logger
+        test_terminate
+        test_time
     )
     
     if( Scarab_BUILD_PARAM )

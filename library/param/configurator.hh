@@ -48,24 +48,13 @@ namespace scarab
     template< typename XReturnType >
     XReturnType configurator::get( const std::string& a_name ) const
     {
-        f_param_buffer = const_cast< scarab::param* >( f_master_config->at( a_name ) );
-        if( f_param_buffer != NULL && f_param_buffer->is_value() )
-        {
-            return f_param_buffer->as_value().get< XReturnType >();
-        }
-        throw error() << "configurator does not have a value for <" << a_name << ">";
+        return f_master_config->get_value< XReturnType >( a_name );
     }
 
     template< typename XReturnType >
     XReturnType configurator::get( const std::string& a_name, XReturnType a_default ) const
     {
-        f_param_buffer = const_cast< scarab::param* >( f_master_config->at( a_name ) );
-        if( f_param_buffer != NULL && f_param_buffer->is_value() )
-        {
-            return f_param_buffer->as_value().get< XReturnType >();
-        }
-        return a_default;
-
+        return f_master_config->get_value< XReturnType >( a_name, a_default );
     }
 
     inline bool configurator::help_flag() const

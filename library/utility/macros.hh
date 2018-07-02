@@ -26,5 +26,4 @@
 #endif
 #endif
 
-
 #endif /* SCARAB_UTILITY_MACROS_HH_ */
