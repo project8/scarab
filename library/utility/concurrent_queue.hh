@@ -88,7 +88,7 @@ namespace scarab
                 return f_queue.empty();
             }
 
-            bool size() const
+            uint size() const
             {
                 cq_lock lock( f_mutex );
                 return f_queue.size();
