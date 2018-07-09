@@ -156,32 +156,34 @@ namespace scarab
         //LWARN( dlog, "param_value copy constructor: " << type() );
     }
 
+    param_value::param_value( param_value&& orig ) :
+            param( std::move( orig ) ),
+            f_value( std::move( orig.f_value ) ),
+            f_value_type( std::move( orig.f_value_type ) ),
+            f_buffer()
+    {
+    }
+
     param_value::~param_value()
     {
-        if( f_value_type == k_string )
-        {
-            delete f_value.f_string;
-        }
     }
 
     param_value& param_value::operator=( const param_value& rhs )
     {
         if( &rhs == this ) return *this;
 
-        if( f_value_type == k_string )
-        {
-            delete f_value.f_string;
-        }
-
-        if( rhs.f_value_type == k_string )
-        {
-            f_value.f_string = new string( *rhs.f_value.f_string );
-        }
-        else
-        {
-            f_value = rhs.f_value;
-        }
+        f_value = rhs.f_value;
         f_value_type = rhs.f_value_type;
+
+        return *this;
+    }
+
+    param_value& param_value::operator=( param_value&& rhs )
+    {
+        if( &rhs == this ) return *this;
+
+        f_value = std::move( rhs.f_value );
+        f_value_type = std::move( rhs.f_value_type );
 
         return *this;
     }

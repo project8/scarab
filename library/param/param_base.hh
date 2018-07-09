@@ -10,6 +10,7 @@
 
 #include "error.hh"
 
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -23,10 +24,12 @@ namespace scarab
     {
         public:
             param();
-            param(const param& orig);
+            param( const param& orig );
+            param( param&& orig );
             virtual ~param();
 
-            virtual param* clone() const;
+            virtual std::unique_ptr< param > clone() const;
+            virtual std::unique_ptr< param > move_clone();
 
             virtual bool is_null() const;
             virtual bool is_value() const;

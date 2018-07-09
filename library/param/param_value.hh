@@ -38,11 +38,14 @@ namespace scarab
             param_value( const std::string& a_value );
             param_value( const char* a_value );
             param_value( const param_value& orig );
+            param_value( param_value&& orig );
             virtual ~param_value();
 
             param_value& operator=( const param_value& rhs );
+            param_value& operator=( param_value&& rhs );
 
-            virtual param* clone() const;
+            virtual std::unique_ptr< param > clone() const;
+            virtual std::unique_ptr< param > move_clone();
 
             bool empty() const;
 
@@ -98,7 +101,7 @@ namespace scarab
                 uint64_t f_uint;
                 int64_t f_int;
                 double f_double;
-                std::string* f_string;
+                std::unique_ptr< std::string > f_string;
             } f_value;
 
             enum ValueTypes
@@ -171,10 +174,15 @@ namespace scarab
     }
 
 
-    inline param* param_value::clone() const
+    inline std::unique_ptr< param > param_value::clone() const
     {
         //std::cout << "param_value::clone" << std::endl;
         return new param_value( *this );
+    }
+
+    inline std::unique_ptr< param > param_value::move_clone()
+    {
+        return new param_value( std::move(*this) );
     }
 
     inline bool param_value::is_null() const
