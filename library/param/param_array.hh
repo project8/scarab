@@ -23,7 +23,7 @@ namespace scarab
     class param_value;
     class param_node;
 
-    typedef std::deque< param* > param_array_contents;
+    typedef std::deque< std::unique_ptr< param > > param_array_contents;
 
     typedef boost::indirect_iterator< param_array_contents::iterator, param > param_array_iterator;
     typedef boost::indirect_iterator< param_array_contents::const_iterator, const param > param_array_const_iterator;
@@ -41,11 +41,14 @@ namespace scarab
         public:
             param_array();
             param_array( const param_array& orig );
+            param_array( param_array&& orig );
             virtual ~param_array();
 
             param_array& operator=( const param_array& rhs );
+            param_array& operator=( param_array&& rhs );
 
-            virtual param* clone() const;
+            virtual std::unique_ptr< param > clone() const;
+            virtual std::unique_ptr< param > move_clone();
 
             virtual bool is_null() const;
             virtual bool is_array() const;
@@ -120,18 +123,18 @@ namespace scarab
             // assign a copy of a_value to the array at a_index
             void assign( unsigned a_index, const param& a_value );
             // directly assign a_value_ptr to the array at a_index
-            void assign( unsigned a_index, param* a_value_ptr );
+            void assign( unsigned a_index, param&& a_value_ptr );
 
             void push_back( const param& a_value );
-            void push_back( param* a_value_ptr );
+            void push_back( param&& a_value );
 
             void push_front( const param& a_value );
-            void push_front( param* a_value_ptr );
+            void push_front( param&& a_value );
 
             void append( const param_array& an_array );
 
             void erase( unsigned a_index );
-            param* remove( unsigned a_index );
+            std::unique_ptr< param > remove( unsigned a_index );
             void clear();
 
             iterator begin();
@@ -165,9 +168,14 @@ namespace scarab
         return a_index < size() ? value_at( a_index ).get< XValType >() : a_default;
     }
 
-    inline param* param_array::clone() const
+    inline std::unique_ptr< param > param_array::clone() const
     {
-        return new param_array( *this );
+        return std::unique_ptr< param_array >( new param_array( *this ) );
+    }
+
+    inline std::unique_ptr< param > param_array::move_clone()
+    {
+        return std::unique_ptr< param_array >( new param_array( std::move( *this ) ) );
     }
 
     inline bool param_array::is_null() const
@@ -187,6 +195,12 @@ namespace scarab
     inline bool param_array::empty() const
     {
         return f_contents.empty();
+    }
+
+    inline void param_array::resize( unsigned a_size )
+    {
+        f_contents.resize( a_size );
+        return;
     }
 
     inline std::string param_array::get_value( unsigned a_index ) const
@@ -275,10 +289,10 @@ namespace scarab
         return;
     }
     // directly assign a_value_ptr to the array at a_index
-    inline void param_array::assign( unsigned a_index, param* a_value_ptr )
+    inline void param_array::assign( unsigned a_index, param&& a_value )
     {
         erase( a_index );
-        f_contents[ a_index ] = a_value_ptr;
+        f_contents[ a_index ] = a_value.move_clone();
         return;
     }
 
@@ -287,9 +301,9 @@ namespace scarab
         f_contents.push_back( a_value.clone() );
         return;
     }
-    inline void param_array::push_back( param* a_value_ptr )
+    inline void param_array::push_back( param&& a_value )
     {
-        f_contents.push_back( a_value_ptr );
+        f_contents.push_back( a_value.move_clone() );
         return;
     }
 
@@ -298,9 +312,9 @@ namespace scarab
         f_contents.push_front( a_value.clone() );
         return;
     }
-    inline void param_array::push_front( param* a_value_ptr )
+    inline void param_array::push_front( param&& a_value )
     {
-        f_contents.push_front( a_value_ptr );
+        f_contents.push_front( a_value.move_clone() );
         return;
     }
 
@@ -315,22 +329,16 @@ namespace scarab
 
     inline void param_array::erase( unsigned a_index )
     {
-        delete f_contents[ a_index ];
-        f_contents[ a_index ] = NULL;
+        f_contents[ a_index ].reset();
         return;
     }
-    inline param* param_array::remove( unsigned a_index )
+    inline std::unique_ptr< param > param_array::remove( unsigned a_index )
     {
-        param* t_current = f_contents[ a_index ];
-        f_contents[ a_index ] = NULL;
+        std::unique_ptr< param > t_current( std::move(f_contents[ a_index ]) );
         return t_current;
     }
     inline void param_array::clear()
     {
-        for( unsigned ind = 0; ind < f_contents.size(); ++ind )
-        {
-            delete f_contents[ ind ];
-        }
         f_contents.clear();
         return;
     }

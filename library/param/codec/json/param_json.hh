@@ -46,10 +46,10 @@ namespace scarab
             param_input_json();
             virtual ~param_input_json();
 
-            virtual param* read_file( const std::string& a_filename, const param_node* a_options = nullptr );
-            virtual param* read_string( const std::string& a_json_str, const param_node* a_options = nullptr );
-            param_node* read_document( const rapidjson::Document& a_document );
-            param* read_value( const rapidjson::Value& a_value );
+            virtual std::unique_ptr< param > read_file( const std::string& a_filename, const param_node& a_options = param_node() );
+            virtual std::unique_ptr< param > read_string( const std::string& a_json_str, const param_node& a_options = param_node() );
+            std::unique_ptr< param > read_document( const rapidjson::Document& a_document );
+            std::unique_ptr< param > read_value( const rapidjson::Value& a_value );
     };
 
     //***************************************
@@ -86,8 +86,8 @@ namespace scarab
             param_output_json();
             virtual ~param_output_json();
 
-            virtual bool write_file( const param& a_to_write, const std::string& a_filename, const param_node* a_options = nullptr );
-            virtual bool write_string( const param& a_to_write, std::string& a_string, const param_node* a_options = nullptr );
+            virtual bool write_file( const param& a_to_write, const std::string& a_filename, const param_node& a_options = param_node() );
+            virtual bool write_string( const param& a_to_write, std::string& a_string, const param_node& a_options = param_node() );
 
             template< class XWriter >
             bool write_param( const param& a_to_write, XWriter* a_writer );

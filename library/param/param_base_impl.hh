@@ -17,16 +17,26 @@
 namespace scarab
 {
 
+    inline param& param::operator=( const param& )
+    {
+        return *this;
+    }
+
+    inline param& param::operator=( param&& )
+    {
+        return *this;
+    }
+
     inline std::unique_ptr< param > param::clone() const
     {
         //std::cout << "param::clone()" << std::endl;
-        return new param( *this );
+        return std::unique_ptr< param >( new param( *this ) );
     }
 
     inline std::unique_ptr< param > param::move_clone()
     {
         //std::cout << "param::clone()" << std::endl;
-        return new param( std::move(*this) );
+        return std::unique_ptr< param >( new param( std::move(*this) ) );
     }
 
     inline bool param::is_null() const

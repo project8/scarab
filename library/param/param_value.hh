@@ -12,6 +12,8 @@
 
 #include "path.hh"
 
+#include <boost/variant.hpp>
+
 #include <stdint.h>
 
 
@@ -95,6 +97,8 @@ namespace scarab
             void clear();
 
         private:
+            boost::variant< bool, uint64_t, int64_t, double, std::string > f_value;
+            /*
             union Values
             {
                 bool f_bool;
@@ -102,8 +106,10 @@ namespace scarab
                 int64_t f_int;
                 double f_double;
                 std::unique_ptr< std::string > f_string;
+                Values() {f_bool = false;}
+                ~Values() {}
             } f_value;
-
+             */
             enum ValueTypes
             {
                 k_bool,
@@ -115,6 +121,162 @@ namespace scarab
             } f_value_type;
 
             mutable std::string f_buffer;
+
+            //*********************
+            // Visitor Classes
+            //*********************
+
+            class as_bool_visitor : public boost::static_visitor<>
+            {
+                public:
+                    typedef bool result_type;
+                    bool operator()( bool a_value ) const
+                    {
+                        return a_value;
+                    }
+                    bool operator()( const std::string& a_value ) const
+                    {
+                        if( a_value.empty() ) return false;
+
+                        std::string t_str_val;
+                        bool t_is_numeric = true;
+                        for( std::string::const_iterator t_val_it = a_value.begin(); t_val_it != a_value.end(); ++t_val_it )
+                        {
+                            t_is_numeric = t_is_numeric && ::isdigit( *t_val_it );
+                            t_str_val.push_back( ::tolower( *t_val_it ) );
+                        }
+
+                        if( t_is_numeric ) return std::stoi( t_str_val );
+
+                        std::istringstream t_iss_val( t_str_val );
+                        bool t_bool_val;
+                        t_iss_val >> std::boolalpha >> t_bool_val;
+                        return t_bool_val;
+                    }
+                    template< typename T >
+                    bool operator()( T a_value ) const
+                    {
+                        return a_value != 0;
+                    }
+            };
+
+            class as_uint_visitor : public boost::static_visitor<>
+            {
+                public:
+                    typedef uint64_t result_type;
+                    uint64_t operator()( const std::string& a_value ) const
+                    {
+                        std::stringstream t_conv;
+                        t_conv << a_value;
+                        uint64_t t_return;
+                        t_conv >> t_return;
+                        return t_return;
+                    }
+                    template< typename T >
+                    uint64_t operator()( T a_value ) const
+                    {
+                        return (uint64_t)a_value;
+                    }
+            };
+
+            class as_int_visitor : public boost::static_visitor<>
+            {
+                public:
+                    typedef int64_t result_type;
+                    int64_t operator()( const std::string& a_value ) const
+                    {
+                        std::stringstream t_conv;
+                        t_conv << a_value;
+                        int64_t t_return;
+                        t_conv >> t_return;
+                        return t_return;
+                    }
+                    template< typename T >
+                    int64_t operator()( T a_value ) const
+                    {
+                        return (int64_t)a_value;
+                    }
+            };
+
+            class as_double_visitor : public boost::static_visitor<>
+            {
+                public:
+                    typedef double result_type;
+                    double operator()( const std::string& a_value ) const
+                    {
+                        std::stringstream t_conv;
+                        t_conv << a_value;
+                        double t_return;
+                        t_conv >> t_return;
+                        return t_return;
+                    }
+                    template< typename T >
+                    double operator()( T a_value ) const
+                    {
+                        return (double)a_value;
+                    }
+            };
+
+            class as_string_visitor : public boost::static_visitor<>
+            {
+                public:
+                    typedef const std::string& result_type;
+                    const std::string& operator()( bool a_value ) const
+                    {
+                        f_buffer = a_value ? "true" : "false";
+                        return f_buffer;
+                    }
+                    const std::string& operator()( const std::string& a_value ) const
+                    {
+                        return a_value;
+                    }
+                    template< typename T >
+                    const std::string& operator()( T a_value ) const
+                    {
+                        std::stringstream t_conv;
+                        t_conv << a_value;
+                        t_conv >> f_buffer;
+                        return f_buffer;
+                    }
+                private:
+                    mutable std::string f_buffer;
+            };
+
+            class as_path_visitor : public boost::static_visitor<>
+            {
+                public:
+                    typedef scarab::path result_type;
+                    scarab::path operator()( const std::string& a_value ) const
+                    {
+                        return scarab::path( a_value );
+                    }
+                    template< typename T >
+                    scarab::path operator()( T ) const
+                    {
+                        return scarab::path();
+                    }
+            };
+
+            class clear_visitor : public boost::static_visitor<>
+            {
+                public:
+                    typedef void result_type;
+                    void operator()( bool& a_value ) const
+                    {
+                        a_value = false;
+                    }
+                    void operator()( std::string& a_value ) const
+                    {
+                        a_value.clear();
+                    }
+                    template< typename T >
+                    void operator()( T& a_value ) const
+                    {
+                        a_value = 0;
+                    }
+            };
+
+
     };
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
@@ -165,7 +327,7 @@ namespace scarab
         else if( f_value_type == k_string )
         {
             std::stringstream t_conv;
-            t_conv << *f_value.f_string;
+            t_conv << boost::get< std::string >( f_value );
             XValType t_return;
             t_conv >> t_return;
             return t_return;
@@ -177,12 +339,12 @@ namespace scarab
     inline std::unique_ptr< param > param_value::clone() const
     {
         //std::cout << "param_value::clone" << std::endl;
-        return new param_value( *this );
+        return std::unique_ptr< param_value >( new param_value( *this ) );
     }
 
     inline std::unique_ptr< param > param_value::move_clone()
     {
-        return new param_value( std::move(*this) );
+        return std::unique_ptr< param_value >( new param_value( std::move(*this) ) );
     }
 
     inline bool param_value::is_null() const
@@ -220,107 +382,124 @@ namespace scarab
         return f_value_type == k_string;
     }
 
+    inline bool param_value::as_bool() const
+    {
+        return boost::apply_visitor( as_bool_visitor(), f_value );
+    }
+
+    inline uint64_t param_value::as_uint() const
+    {
+        return boost::apply_visitor( as_uint_visitor(), f_value );
+    }
+
+    inline int64_t param_value::as_int() const
+    {
+        return boost::apply_visitor( as_int_visitor(), f_value );
+    }
+
+    inline double param_value::as_double() const
+    {
+        return boost::apply_visitor( as_double_visitor(), f_value );
+    }
+
+    inline const std::string& param_value::as_string() const
+    {
+        return boost::apply_visitor( as_string_visitor(), f_value );
+    }
+
+    inline path param_value::as_path() const
+    {
+        return boost::apply_visitor( as_path_visitor(), f_value );
+    }
+
     inline void param_value::set( bool a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_bool;
-        f_value.f_bool = a_value;
+        f_value = a_value;
         return;
     }
 
     inline void param_value::set( uint8_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_uint;
-        f_value.f_uint = a_value;
+        f_value = uint64_t(a_value);
         return;
     }
 
     inline void param_value::set( uint16_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_uint;
-        f_value.f_uint = a_value;
+        f_value = uint64_t(a_value);
         return;
     }
 
     inline void param_value::set( uint32_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_uint;
-        f_value.f_uint = a_value;
+        f_value = uint64_t(a_value);
         return;
     }
 
     inline void param_value::set( uint64_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_uint;
-        f_value.f_uint = a_value;
+        f_value = a_value;
         return;
     }
 
     inline void param_value::set( int8_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_int;
-        f_value.f_int = a_value;
+        f_value = int64_t(a_value);
         return;
     }
 
     inline void param_value::set( int16_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_int;
-        f_value.f_int = a_value;
+        f_value = int64_t(a_value);
         return;
     }
 
     inline void param_value::set( int32_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_int;
-        f_value.f_int = a_value;
+        f_value = int64_t(a_value);
         return;
     }
 
     inline void param_value::set( int64_t a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_int;
-        f_value.f_int = a_value;
+        f_value = a_value;
         return;
     }
 
     inline void param_value::set( float a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_double;
-        f_value.f_double = a_value;
+        f_value = a_value;
         return;
     }
 
     inline void param_value::set( double a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_double;
-        f_value.f_double = a_value;
+        f_value = a_value;
         return;
     }
 
     inline void param_value::set( const std::string& a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_string;
-        f_value.f_string = new std::string( a_value );
+        f_value = a_value;
         return;
     }
 
     inline void param_value::set( const char* a_value )
     {
-        if( f_value_type == k_string ) delete f_value.f_string;
         f_value_type = k_string;
-        f_value.f_string = new std::string( a_value );
+        f_value = std::string( a_value );
         return;
     }
 
@@ -328,6 +507,13 @@ namespace scarab
     {
         return as_string();
     }
+
+    inline void param_value::clear()
+    {
+        boost::apply_visitor( clear_visitor(), f_value );
+        return;
+    }
+
 } /* namespace scarab */
 
 #endif /* SCARAB_PARAM_VALUE_HH_ */

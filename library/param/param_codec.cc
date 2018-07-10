@@ -11,7 +11,6 @@
 
 #include "factory.hh"
 #include "logger.hh"
-#include "param.hh"
 #include "path.hh"
 
 LOGGER( slog, "param_codec" );
@@ -45,14 +44,10 @@ namespace scarab
     {
     }
 
-    param* param_translator::read_file( const std::string& a_filename, const param_node* a_options  )
+    std::unique_ptr< param > param_translator::read_file( const std::string& a_filename, const param_node& a_options  )
     {
-        std::string t_encoding;
-        if( a_options != nullptr && a_options->has( "encoding" ) )
-        {
-            t_encoding = a_options->get_value( "encoding" );
-        }
-        else
+        std::string t_encoding = a_options.get_value( "encoding", "" );
+        if( t_encoding.empty() )
         {
             path t_path = expand_path( a_filename );
             t_encoding = t_path.extension().native().substr( 1 ); // remove the '.' at the beginning
@@ -68,14 +63,10 @@ namespace scarab
         return t_codec->read_file( a_filename, a_options );
     }
 
-    param* param_translator::read_string( const std::string& a_string, const param_node* a_options  )
+    std::unique_ptr< param > param_translator::read_string( const std::string& a_string, const param_node& a_options  )
     {
-        std::string t_encoding;
-        if( a_options != nullptr && a_options->has( "encoding" ) )
-        {
-            t_encoding = a_options->get_value( "encoding" );
-        }
-        else
+        std::string t_encoding = a_options.get_value( "encoding", "" );
+        if( t_encoding.empty() )
         {
             LERROR( slog, "Encoding-type option must be provided");
             return nullptr;
@@ -91,14 +82,10 @@ namespace scarab
         return t_codec->read_string( a_string, a_options );
     }
 
-    bool param_translator::write_file( const param& a_param, const std::string& a_filename, const param_node* a_options  )
+    bool param_translator::write_file( const param& a_param, const std::string& a_filename, const param_node& a_options  )
     {
-        std::string t_encoding;
-        if( a_options != nullptr && a_options->has( "encoding" ) )
-        {
-            t_encoding = a_options->get_value( "encoding" );
-        }
-        else
+        std::string t_encoding = a_options.get_value( "encoding", "" );
+        if( t_encoding.empty() )
         {
             path t_path = expand_path( a_filename );
             t_encoding = t_path.extension().native().substr( 1 ); // remove the '.' at the beginning
@@ -114,14 +101,10 @@ namespace scarab
         return t_codec->write_file( a_param, a_filename, a_options );
     }
 
-    bool param_translator::write_string( const param& a_param, std::string& a_string, const param_node* a_options  )
+    bool param_translator::write_string( const param& a_param, std::string& a_string, const param_node& a_options  )
     {
-        std::string t_encoding;
-        if( a_options != nullptr && a_options->has( "encoding" ) )
-        {
-            t_encoding = a_options->get_value( "encoding" );
-        }
-        else
+        std::string t_encoding = a_options.get_value( "encoding", "" );
+        if( t_encoding.empty() )
         {
             LERROR( slog, "Encoding-type option must be provided");
             return false;

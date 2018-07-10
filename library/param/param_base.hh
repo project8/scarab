@@ -28,6 +28,9 @@ namespace scarab
             param( param&& orig );
             virtual ~param();
 
+            param& operator=( const param& rhs );
+            param& operator=( param&& );
+
             virtual std::unique_ptr< param > clone() const;
             virtual std::unique_ptr< param > move_clone();
 
