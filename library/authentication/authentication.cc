@@ -65,7 +65,7 @@ namespace scarab
         if( t_auth_file_present )
         {
             param_translator t_translator;
-            param* t_read_file = t_translator.read_file( t_auth_file_path.string() );
+            std::unique_ptr< param > t_read_file( t_translator.read_file( t_auth_file_path.string() ) );
             if( t_read_file == NULL )
             {
                 LERROR( mtlog, "Unable to parse authentication file" );
@@ -78,8 +78,7 @@ namespace scarab
             }
             else
             {
-                this->param_node::operator=( t_read_file->as_node() );
-                delete t_read_file;
+                this->param_node::operator=( std::move(t_read_file->as_node()) );
                 LDEBUG( mtlog, "Authentications:\n" << *this );
                 f_is_loaded = true;
                 return true;

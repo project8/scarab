@@ -27,16 +27,16 @@ namespace scarab
         return *this;
     }
 
-    inline std::unique_ptr< param > param::clone() const
+    inline param_ptr_t param::clone() const
     {
         //std::cout << "param::clone()" << std::endl;
-        return std::unique_ptr< param >( new param( *this ) );
+        return param_ptr_t( new param( *this ) );
     }
 
-    inline std::unique_ptr< param > param::move_clone()
+    inline param_ptr_t param::move_clone()
     {
         //std::cout << "param::clone()" << std::endl;
-        return std::unique_ptr< param >( new param( std::move(*this) ) );
+        return param_ptr_t( new param( std::move(*this) ) );
     }
 
     inline bool param::is_null() const

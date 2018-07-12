@@ -30,7 +30,7 @@ namespace scarab
     param_input_yaml::~param_input_yaml()
     {}
 
-    param* param_input_yaml::read_file( const std::string& a_filename, const param_node* )
+    std::unique_ptr< param > param_input_yaml::read_file( const std::string& a_filename, const param_node& )
     {
         try
         {
@@ -40,11 +40,11 @@ namespace scarab
         catch( YAML::Exception& e )
         {
             LERROR( slog, "YAML error: " << e.what() );
-            return nullptr;
+            return std::unique_ptr< param >();
         }
     }
 
-    param* param_input_yaml::read_string( const std::string& a_string, const param_node* )
+    std::unique_ptr< param > param_input_yaml::read_string( const std::string& a_string, const param_node& )
     {
         try
         {
@@ -54,17 +54,17 @@ namespace scarab
         catch( YAML::Exception& e )
         {
             LERROR( slog, "YAML error: " << e.what() );
-            return nullptr;
+            return std::unique_ptr< param >();
         }
     }
 
-    param* param_input_yaml::read_node_type( const YAML::Node& a_node )
+    std::unique_ptr< param > param_input_yaml::read_node_type( const YAML::Node& a_node )
     {
         try
         {
             if( a_node.IsNull() )
             {
-                return new param();
+                return std::unique_ptr< param >( new param() );
             }
             if( a_node.IsScalar() )
             {
@@ -86,60 +86,60 @@ namespace scarab
         }
         LDEBUG( slog, "YAML unknown" );
         throw error() << "Unknown YAML encountered";
-        return nullptr;
+        return std::unique_ptr< param >();
     }
 
-    param_array* param_input_yaml::sequence_handler( const YAML::Node& a_node )
+    std::unique_ptr< param_array > param_input_yaml::sequence_handler( const YAML::Node& a_node )
     {
         try
         {
-            param_array* t_config_array = new param_array();
+            std::unique_ptr< param_array > t_array_as_param;
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_config_array->push_back( param_input_yaml::read_node_type( *counter ) );
+                t_array_as_param->push_back( std::move(*param_input_yaml::read_node_type( *counter )) );
             }
 
-            return t_config_array;
+            return t_array_as_param;
         }
         catch( YAML::Exception& e )
         {
             LERROR( slog, "YAML error in sequence_handler: " << e.what() );
-            return nullptr;
+            return std::unique_ptr< param_array >();
         }
     }
 
-    param_node* param_input_yaml::map_handler( const YAML::Node& a_node )
+    std::unique_ptr< param_node > param_input_yaml::map_handler( const YAML::Node& a_node )
     {
         try
         {
-            param_node* t_config_object = new param_node();
+            std::unique_ptr< param_node > t_map_as_param;
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_config_object->replace( counter->first.as< std::string >(), param_input_yaml::read_node_type( counter->second ) );
+                t_map_as_param->replace( counter->first.as< std::string >(), std::move(*param_input_yaml::read_node_type( counter->second )) );
             }
 
-            return t_config_object;
+            return t_map_as_param;
         }
         catch( YAML::Exception& e )
         {
             LERROR( slog, "YAML error in map_handler: " << e.what() );
-            return nullptr;
+            return std::unique_ptr< param_node >();
         }
     }
 
-    param_value* param_input_yaml::scalar_handler( const YAML::Node& a_node )
+    std::unique_ptr< param_value > param_input_yaml::scalar_handler( const YAML::Node& a_node )
     {
         try
         {
             // YAML::Node stores values as strings (in YAML::detail::node_data), so don't worry about trying different value types
-            return new param_value( a_node.Scalar() );
+            return std::unique_ptr< param_value >( new param_value( a_node.Scalar() ) );
         }
         catch ( YAML::Exception& e )
         {
             LERROR( slog, "YAML error in scalar_handler: " << e.what() )
-            return nullptr;
+            return std::unique_ptr< param_value >();
         }
     }
 
@@ -152,7 +152,7 @@ namespace scarab
     param_output_yaml::~param_output_yaml()
     {}
 
-    bool param_output_yaml::write_file( const param& a_to_write, const std::string& a_filename, const param_node* )
+    bool param_output_yaml::write_file( const param& a_to_write, const std::string& a_filename, const param_node& )
     {
         if( a_filename.empty() )
         {
@@ -177,7 +177,7 @@ namespace scarab
         return true;
     }
 
-    bool param_output_yaml::write_string( const param& a_to_write, std::string& a_string, const param_node* )
+    bool param_output_yaml::write_string( const param& a_to_write, std::string& a_string, const param_node& )
     {
         YAML::Node a_node = param_output_yaml::check_param_type( a_to_write );
 

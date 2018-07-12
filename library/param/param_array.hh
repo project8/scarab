@@ -47,8 +47,8 @@ namespace scarab
             param_array& operator=( const param_array& rhs );
             param_array& operator=( param_array&& rhs );
 
-            virtual std::unique_ptr< param > clone() const;
-            virtual std::unique_ptr< param > move_clone();
+            virtual param_ptr_t clone() const;
+            virtual param_ptr_t move_clone();
 
             virtual bool is_null() const;
             virtual bool is_array() const;
@@ -134,7 +134,7 @@ namespace scarab
             void append( const param_array& an_array );
 
             void erase( unsigned a_index );
-            std::unique_ptr< param > remove( unsigned a_index );
+            param_ptr_t remove( unsigned a_index );
             void clear();
 
             iterator begin();
@@ -168,12 +168,12 @@ namespace scarab
         return a_index < size() ? value_at( a_index ).get< XValType >() : a_default;
     }
 
-    inline std::unique_ptr< param > param_array::clone() const
+    inline param_ptr_t param_array::clone() const
     {
         return std::unique_ptr< param_array >( new param_array( *this ) );
     }
 
-    inline std::unique_ptr< param > param_array::move_clone()
+    inline param_ptr_t param_array::move_clone()
     {
         return std::unique_ptr< param_array >( new param_array( std::move( *this ) ) );
     }
@@ -332,9 +332,9 @@ namespace scarab
         f_contents[ a_index ].reset();
         return;
     }
-    inline std::unique_ptr< param > param_array::remove( unsigned a_index )
+    inline param_ptr_t param_array::remove( unsigned a_index )
     {
-        std::unique_ptr< param > t_current( std::move(f_contents[ a_index ]) );
+        param_ptr_t t_current( f_contents[ a_index ] );
         return t_current;
     }
     inline void param_array::clear()

@@ -20,6 +20,9 @@ namespace scarab
     class param_array;
     class param_node;
 
+    class param;
+    typedef std::unique_ptr< param > param_ptr_t;
+
     class SCARAB_API param
     {
         public:
@@ -31,8 +34,8 @@ namespace scarab
             param& operator=( const param& rhs );
             param& operator=( param&& );
 
-            virtual std::unique_ptr< param > clone() const;
-            virtual std::unique_ptr< param > move_clone();
+            virtual param_ptr_t clone() const;
+            virtual param_ptr_t move_clone();
 
             virtual bool is_null() const;
             virtual bool is_value() const;

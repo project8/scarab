@@ -25,8 +25,8 @@ int main( int argc, char** argv )
 
     //read file
     param_input_yaml t_input;
-    param* t_param_location = t_input.read_file( argv[1] );
-    if( t_param_location == nullptr )
+    std::unique_ptr< param > t_param_location( t_input.read_file( argv[1] ) );
+    if( ! t_param_location )
     {
         LERROR( slog, "File did not read!" );
         return -1;

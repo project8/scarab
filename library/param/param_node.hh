@@ -79,8 +79,8 @@ namespace scarab
             param_node& operator=( const param_node& rhs );
             param_node& operator=( param_node&& rhs );
 
-            virtual std::unique_ptr< param > clone() const;
-            virtual std::unique_ptr< param > move_clone();
+            virtual param_ptr_t clone() const;
+            virtual param_ptr_t move_clone();
 
             virtual bool is_null() const;
             virtual bool is_node() const;
@@ -161,7 +161,7 @@ namespace scarab
             void merge( const param_node& a_object );
 
             void erase( const std::string& a_name );
-            std::unique_ptr< param > remove( const std::string& a_name );
+            param_ptr_t remove( const std::string& a_name );
             void clear();
 
             iterator begin();
@@ -190,13 +190,13 @@ namespace scarab
         return has( a_name ) ? value_at( a_name ).get< XValType >() : a_default;
     }
 
-    inline std::unique_ptr< param > param_node::clone() const
+    inline param_ptr_t param_node::clone() const
     {
         //std::cout << "param_node::clone" << std::endl;
         return std::unique_ptr< param_node >( new param_node( *this ) );
     }
 
-    inline std::unique_ptr< param > param_node::move_clone()
+    inline param_ptr_t param_node::move_clone()
     {
         return std::unique_ptr< param_node >( new param_node( std::move(*this) ) );
     }
@@ -339,16 +339,16 @@ namespace scarab
         return;
     }
 
-    inline std::unique_ptr< param > param_node::remove( const std::string& a_name )
+    inline param_ptr_t param_node::remove( const std::string& a_name )
     {
         contents::iterator it = f_contents.find( a_name );
         if( it != f_contents.end() )
         {
-            std::unique_ptr< param > removed( std::move(it->second) );
+            param_ptr_t removed( it->second );
             f_contents.erase( it );
             return removed;
         }
-        return std::unique_ptr< param >();
+        return param_ptr_t();
     }
 
     inline void param_node::clear()

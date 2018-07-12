@@ -37,13 +37,13 @@ namespace scarab
             param_input_yaml();
             virtual ~param_input_yaml();
 
-            virtual param* read_file( const std::string& a_filename, const param_node* a_options = nullptr );
-            virtual param* read_string( const std::string& a_json_str, const param_node* a_options = nullptr );
+            virtual std::unique_ptr< param > read_file( const std::string& a_filename, const param_node& a_options = param_node() );
+            virtual std::unique_ptr< param > read_string( const std::string& a_json_str, const param_node& a_options = param_node() );
 
-            param* read_node_type( const YAML::Node& a_node );
-            param_array* sequence_handler( const YAML::Node& a_node );
-            param_node* map_handler( const YAML::Node& a_node );
-            param_value* scalar_handler( const YAML::Node& a_node );
+            std::unique_ptr< param > read_node_type( const YAML::Node& a_node );
+            std::unique_ptr< param_array > sequence_handler( const YAML::Node& a_node );
+            std::unique_ptr< param_node > map_handler( const YAML::Node& a_node );
+            std::unique_ptr< param_value > scalar_handler( const YAML::Node& a_node );
     };
 
     //***************************************
@@ -65,8 +65,8 @@ namespace scarab
             param_output_yaml();
             virtual ~param_output_yaml();
 
-            virtual bool write_file( const param& a_to_write, const std::string& a_filename, const param_node* a_options = nullptr );
-            virtual bool write_string( const param& a_to_write, std::string& a_string, const param_node* a_options = nullptr );
+            virtual bool write_file( const param& a_to_write, const std::string& a_filename, const param_node& a_options = param_node() );
+            virtual bool write_string( const param& a_to_write, std::string& a_string, const param_node& a_options = param_node() );
 
             YAML::Node check_param_type( const param& a_to_write );
             YAML::Node param_node_handler( const param& a_to_write );

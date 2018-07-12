@@ -46,8 +46,8 @@ namespace scarab
             param_value& operator=( const param_value& rhs );
             param_value& operator=( param_value&& rhs );
 
-            virtual std::unique_ptr< param > clone() const;
-            virtual std::unique_ptr< param > move_clone();
+            virtual param_ptr_t clone() const;
+            virtual param_ptr_t move_clone();
 
             bool empty() const;
 
@@ -336,15 +336,15 @@ namespace scarab
     }
 
 
-    inline std::unique_ptr< param > param_value::clone() const
+    inline param_ptr_t param_value::clone() const
     {
         //std::cout << "param_value::clone" << std::endl;
-        return std::unique_ptr< param_value >( new param_value( *this ) );
+        return param_ptr_t( new param_value( *this ) );
     }
 
-    inline std::unique_ptr< param > param_value::move_clone()
+    inline param_ptr_t param_value::move_clone()
     {
-        return std::unique_ptr< param_value >( new param_value( std::move(*this) ) );
+        return param_ptr_t( new param_value( std::move(*this) ) );
     }
 
     inline bool param_value::is_null() const
