@@ -334,7 +334,7 @@ namespace scarab
     }
     inline param_ptr_t param_array::remove( unsigned a_index )
     {
-        param_ptr_t t_current( f_contents[ a_index ] );
+        param_ptr_t t_current( std::move( f_contents[ a_index ] ) );
         return t_current;
     }
     inline void param_array::clear()

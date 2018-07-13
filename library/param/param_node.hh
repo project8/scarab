@@ -344,7 +344,7 @@ namespace scarab
         contents::iterator it = f_contents.find( a_name );
         if( it != f_contents.end() )
         {
-            param_ptr_t removed( it->second );
+            param_ptr_t removed( std::move( it->second ) );
             f_contents.erase( it );
             return removed;
         }
