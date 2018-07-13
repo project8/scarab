@@ -67,13 +67,13 @@ namespace scarab
 
     inline param_array& param::as_array()
     {
-        if( this->is_value() ) return *static_cast< param_array* >( this);
+        if( this->is_array() ) return *static_cast< param_array* >( this);
         throw error() << "Param object is not an array";
     }
 
     inline param_node& param::as_node()
     {
-        if( this->is_value() ) return *static_cast< param_node* >( this);
+        if( this->is_node() ) return *static_cast< param_node* >( this);
         throw error() << "Param object is not a node";
     }
 
@@ -85,13 +85,13 @@ namespace scarab
 
     inline const param_array& param::as_array() const
     {
-        if( this->is_value() ) return *static_cast< const param_array* >( this);
+        if( this->is_array() ) return *static_cast< const param_array* >( this);
         throw error() << "Param object is not an array";
     }
 
     inline const param_node& param::as_node() const
     {
-        if( this->is_value() ) return *static_cast< const param_node* >( this);
+        if( this->is_node() ) return *static_cast< const param_node* >( this);
         throw error() << "Param object is not a node";
     }
 
