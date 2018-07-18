@@ -145,15 +145,19 @@ namespace scarab
             /// Adds a new value if a_name is not present.
             param& operator[]( const std::string& a_name );
 
-            /// creates a copy of a_value
+            /// Areates a copy of a_value
             bool add( const std::string& a_name, const param& a_value );
-            /// directly adds (without copying) a_value_ptr
+            /// Adds a_value with move semantics
             bool add( const std::string& a_name, param&& a_value );
+            /// Adds a_value_ptr by directly adding the pointer
+            bool add( const std::string& a_name, param_ptr_t a_value_ptr );
 
-            /// creates a copy of a_value
+            /// Creates a copy of a_value; overwrites if the key exits
             void replace( const std::string& a_name, const param& a_value );
-            /// directly adds (without copying) a_value_ptr
+            /// Adds a_value with move semantics; overwrites if the key exists
             void replace( const std::string& a_name, param&& a_value );
+            /// Adds a_value_ptr by directly adding the pointer; overwrites if the key exists
+            void replace( const std::string& a_name, param_ptr_t a_value_ptr );
 
             /// Merges the contents of a_object into this object.
             /// If names in the contents of a_object exist in this object,
@@ -317,6 +321,17 @@ namespace scarab
         return false;
     }
 
+    inline bool param_node::add( const std::string& a_name, param_ptr_t a_value_ptr )
+    {
+        contents::iterator it = f_contents.find( a_name );
+        if( it == f_contents.end() )
+        {
+            f_contents.insert( contents_type( a_name, std::move(a_value_ptr) ) );
+            return true;
+        }
+        return false;
+    }
+
     inline void param_node::replace( const std::string& a_name, const param& a_value )
     {
         f_contents[ a_name ] = a_value.clone();
@@ -326,6 +341,12 @@ namespace scarab
     inline void param_node::replace( const std::string& a_name, param&& a_value )
     {
         f_contents[ a_name ] = a_value.move_clone();
+        return;
+    }
+
+    inline void param_node::replace( const std::string& a_name, param_ptr_t a_value_ptr )
+    {
+        f_contents[ a_name ] = std::move(a_value_ptr);
         return;
     }
 
