@@ -32,22 +32,45 @@ namespace scarab
     {
         for( contents::const_iterator it = orig.f_contents.begin(); it != orig.f_contents.end(); ++it )
         {
-            add( it->first, it->second->clone() );
+            f_contents[it->first] = it->second->clone();
         }
+    }
+
+    param_node::param_node( param_node&& orig ) :
+            param( std::move(orig) ),
+            f_contents()
+    {
+        for( contents::const_iterator it = orig.f_contents.begin(); it != orig.f_contents.end(); ++it )
+        {
+            f_contents[it->first] = it->second->move_clone();
+        }
+        orig.clear();
     }
 
     param_node::~param_node()
     {
-        clear();
     }
 
     param_node& param_node::operator=( const param_node& rhs )
     {
+        this->param::operator=( rhs );
         clear();
         for( contents::const_iterator it = rhs.f_contents.begin(); it != rhs.f_contents.end(); ++it )
         {
-            this->replace( it->first, *it->second );
+            f_contents[it->first] = it->second->clone();
         }
+        return *this;
+    }
+
+    param_node& param_node::operator=( param_node&& rhs )
+    {
+        this->param::operator=( std::move(rhs) );
+        clear();
+        for( contents::const_iterator it = rhs.f_contents.begin(); it != rhs.f_contents.end(); ++it )
+        {
+            f_contents[it->first] = it->second->move_clone();
+        }
+        rhs.clear();
         return *this;
     }
 

@@ -36,25 +36,21 @@ namespace scarab
         private:
             std::string f_exe_name; // the name of the executable being used
 
-            scarab::param_node* f_master_config;
+            scarab::param_node f_master_config;
             bool f_help_flag;
             bool f_version_flag;
-
-            mutable scarab::param* f_param_buffer;
-
-            std::string f_string_buffer;
     };
 
     template< typename XReturnType >
     XReturnType configurator::get( const std::string& a_name ) const
     {
-        return f_master_config->get_value< XReturnType >( a_name );
+        return f_master_config.get_value< XReturnType >( a_name );
     }
 
     template< typename XReturnType >
     XReturnType configurator::get( const std::string& a_name, XReturnType a_default ) const
     {
-        return f_master_config->get_value< XReturnType >( a_name, a_default );
+        return f_master_config.get_value< XReturnType >( a_name, a_default );
     }
 
     inline bool configurator::help_flag() const
@@ -74,12 +70,12 @@ namespace scarab
 
     inline scarab::param_node& configurator::config()
     {
-        return *f_master_config;
+        return f_master_config;
     }
 
     inline const scarab::param_node& configurator::config() const
     {
-        return *f_master_config;
+        return f_master_config;
     }
 
 

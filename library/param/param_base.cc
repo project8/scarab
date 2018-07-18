@@ -28,6 +28,10 @@ namespace scarab
     {
     }
 
+    param::param( param&& )
+    {
+    }
+
     param::~param()
     {
     }

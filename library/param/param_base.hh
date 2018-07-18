@@ -10,6 +10,7 @@
 
 #include "error.hh"
 
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -19,14 +20,22 @@ namespace scarab
     class param_array;
     class param_node;
 
+    class param;
+    typedef std::unique_ptr< param > param_ptr_t;
+
     class SCARAB_API param
     {
         public:
             param();
-            param(const param& orig);
+            param( const param& orig );
+            param( param&& orig );
             virtual ~param();
 
-            virtual param* clone() const;
+            param& operator=( const param& rhs );
+            param& operator=( param&& );
+
+            virtual param_ptr_t clone() const;
+            virtual param_ptr_t move_clone();
 
             virtual bool is_null() const;
             virtual bool is_value() const;
