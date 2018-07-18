@@ -30,11 +30,9 @@ namespace scarab
 
     configurator::configurator( int an_argc, char** an_argv, param_node* a_default ) :
             f_exe_name( "unknown" ),
-            f_master_config( new param_node() ),
+            f_master_config(),
             f_help_flag( false ),
-            f_version_flag( false ),
-            f_param_buffer( NULL ),
-            f_string_buffer()
+            f_version_flag( false )
     {
         parser t_parser( an_argc, an_argv );
         //std::cout << "options parsed" << std::endl;
@@ -43,7 +41,7 @@ namespace scarab
         // first configuration: defaults
         if ( a_default != NULL )
         {
-            f_master_config->merge( *a_default );
+            f_master_config.merge( *a_default );
         }
 
         //std::cout << "first configuration complete" << std::endl;
@@ -90,7 +88,7 @@ namespace scarab
             if( ! t_config_filename.empty() )
             {
                 param_translator t_translator;
-                param* t_config_from_file = t_translator.read_file( t_config_filename.native() );
+                std::unique_ptr< param > t_config_from_file( t_translator.read_file( t_config_filename.native() ));
                 if( t_config_from_file == NULL )
                 {
                     throw error() << "[configurator] error parsing config file";
@@ -99,8 +97,7 @@ namespace scarab
                 {
                     throw error() << "[configurator] configuration file must consist of an object/node";
                 }
-                f_master_config->merge( t_config_from_file->as_node() );
-                delete t_config_from_file;
+                f_master_config.merge( t_config_from_file->as_node() );
             }
         }
 
@@ -116,13 +113,12 @@ namespace scarab
             if( ! t_config_json.empty() )
             {
                 param_input_json t_input_json;
-                param* t_config_from_json = t_input_json.read_string( t_config_json );
+                std::unique_ptr< param > t_config_from_json( t_input_json.read_string( t_config_json ) );
                 if( ! t_config_from_json->is_node() )
                 {
                     throw error() << "[configurator] command line json must be an object";
                 }
-                f_master_config->merge( t_config_from_json->as_node() );
-                delete t_config_from_json;
+                f_master_config.merge( t_config_from_json->as_node() );
             }
         }
 #endif
@@ -139,27 +135,26 @@ namespace scarab
         //std::cout << "removed config and json from parsed options" << std::endl;
         //cout << t_parser );
         //LDEBUG( slog, "adding command-line parser:\n" << t_parser << *f_master_config );
-        f_master_config->merge( t_parser );
+        f_master_config.merge( t_parser );
 
         // check for help and version flags
-        if( f_master_config->has( "help" ) )
+        if( f_master_config.has( "help" ) )
         {
             f_help_flag = true;
-            f_master_config->erase( "help" );
+            f_master_config.erase( "help" );
         }
-        if( f_master_config->has( "version" ) )
+        if( f_master_config.has( "version" ) )
         {
             f_version_flag = true;
-            f_master_config->erase( "version" );
+            f_master_config.erase( "version" );
         }
 
         //std::cout << "fourth configuration complete" << std::endl;
-        LPROG( slog, "Final configuration:\n" << *f_master_config );
+        LPROG( slog, "Final configuration:\n" << f_master_config );
     }
 
     configurator::~configurator()
     {
-        delete f_master_config;
     }
 
 } /* namespace scarab */

@@ -19,7 +19,7 @@ namespace scarab
             ~parsable();
 
         private:
-            void add_next( param_node* a_parent, const std::string& a_addr, const std::string& a_value );
+            void add_next( param_node& a_parent, const std::string& a_addr, const std::string& a_value );
 
         public:
             static const char f_value_separator = '=';

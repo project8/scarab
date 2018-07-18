@@ -29,23 +29,47 @@ namespace scarab
     {
         for( unsigned ind = 0; ind < f_contents.size(); ++ind )
         {
-            this->assign( ind, orig[ ind ].clone() );
+            f_contents[ind] = orig.f_contents[ ind ]->clone();
         }
+    }
+
+    param_array::param_array( param_array&& orig ) :
+            param( std::move(orig) ),
+            f_contents( orig.f_contents.size() )
+    {
+        for( unsigned ind = 0; ind < f_contents.size(); ++ind )
+        {
+            f_contents[ind] = orig.f_contents[ ind ]->move_clone();
+        }
+        orig.clear();
     }
 
     param_array::~param_array()
     {
-        clear();
     }
 
     param_array& param_array::operator=( const param_array& rhs )
     {
+        this->param::operator=( rhs );
         clear();
-        resize(rhs.size());
+        resize( rhs.size()) ;
         for( unsigned ind = 0; ind < rhs.f_contents.size(); ++ind )
         {
-            this->assign( ind, rhs[ ind ].clone() );
+            f_contents[ind] = rhs.f_contents[ ind ]->clone();
         }
+        return *this;
+    }
+
+    param_array& param_array::operator=( param_array&& rhs )
+    {
+        this->param::operator=( std::move(rhs) );
+        clear();
+        resize( rhs.size()) ;
+        for( unsigned ind = 0; ind < rhs.f_contents.size(); ++ind )
+        {
+            f_contents[ind] = rhs.f_contents[ ind ]->move_clone();
+        }
+        rhs.clear();
         return *this;
     }
 
@@ -63,17 +87,6 @@ namespace scarab
             ++t_that_it;
         }
         return true;
-    }
-
-    void param_array::resize( unsigned a_size )
-    {
-        unsigned curr_size = f_contents.size();
-        for( unsigned ind = a_size; ind < curr_size; ++ind )
-        {
-            delete f_contents[ ind ];
-        }
-        f_contents.resize( a_size );
-        return;
     }
 
     std::string param_array::to_string() const

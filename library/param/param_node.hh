@@ -57,7 +57,7 @@ namespace scarab
 
     };
 
-    typedef std::map< std::string, param* > param_node_contents;
+    typedef std::map< std::string, std::unique_ptr< param > > param_node_contents;
 
     typedef map_deref_iterator< std::string, param, param_node_contents::iterator > param_node_iterator;
     typedef map_deref_iterator< std::string, const param, param_node_contents::const_iterator > param_node_const_iterator;
@@ -73,11 +73,14 @@ namespace scarab
 
             param_node();
             param_node( const param_node& orig );
+            param_node( param_node&& orig );
             virtual ~param_node();
 
             param_node& operator=( const param_node& rhs );
+            param_node& operator=( param_node&& rhs );
 
-            virtual param* clone() const;
+            virtual param_ptr_t clone() const;
+            virtual param_ptr_t move_clone();
 
             virtual bool is_null() const;
             virtual bool is_node() const;
@@ -142,15 +145,19 @@ namespace scarab
             /// Adds a new value if a_name is not present.
             param& operator[]( const std::string& a_name );
 
-            /// creates a copy of a_value
+            /// Areates a copy of a_value
             bool add( const std::string& a_name, const param& a_value );
-            /// directly adds (without copying) a_value_ptr
-            bool add( const std::string& a_name, param* a_value_ptr );
+            /// Adds a_value with move semantics
+            bool add( const std::string& a_name, param&& a_value );
+            /// Adds a_value_ptr by directly adding the pointer
+            bool add( const std::string& a_name, param_ptr_t a_value_ptr );
 
-            /// creates a copy of a_value
+            /// Creates a copy of a_value; overwrites if the key exits
             void replace( const std::string& a_name, const param& a_value );
-            /// directly adds (without copying) a_value_ptr
-            void replace( const std::string& a_name, param* a_value_ptr );
+            /// Adds a_value with move semantics; overwrites if the key exists
+            void replace( const std::string& a_name, param&& a_value );
+            /// Adds a_value_ptr by directly adding the pointer; overwrites if the key exists
+            void replace( const std::string& a_name, param_ptr_t a_value_ptr );
 
             /// Merges the contents of a_object into this object.
             /// If names in the contents of a_object exist in this object,
@@ -158,7 +165,7 @@ namespace scarab
             void merge( const param_node& a_object );
 
             void erase( const std::string& a_name );
-            param* remove( const std::string& a_name );
+            param_ptr_t remove( const std::string& a_name );
             void clear();
 
             iterator begin();
@@ -187,10 +194,15 @@ namespace scarab
         return has( a_name ) ? value_at( a_name ).get< XValType >() : a_default;
     }
 
-    inline param* param_node::clone() const
+    inline param_ptr_t param_node::clone() const
     {
         //std::cout << "param_node::clone" << std::endl;
-        return new param_node( *this );
+        return std::unique_ptr< param_node >( new param_node( *this ) );
+    }
+
+    inline param_ptr_t param_node::move_clone()
+    {
+        return std::unique_ptr< param_node >( new param_node( std::move(*this) ) );
     }
 
     inline bool param_node::is_null() const
@@ -298,12 +310,23 @@ namespace scarab
         return false;
     }
 
-    inline bool param_node::add( const std::string& a_name, param* a_value )
+    inline bool param_node::add( const std::string& a_name, param&& a_value )
     {
         contents::iterator it = f_contents.find( a_name );
         if( it == f_contents.end() )
         {
-            f_contents.insert( contents_type( a_name, a_value ) );
+            f_contents.insert( contents_type( a_name, a_value.move_clone() ) );
+            return true;
+        }
+        return false;
+    }
+
+    inline bool param_node::add( const std::string& a_name, param_ptr_t a_value_ptr )
+    {
+        contents::iterator it = f_contents.find( a_name );
+        if( it == f_contents.end() )
+        {
+            f_contents.insert( contents_type( a_name, std::move(a_value_ptr) ) );
             return true;
         }
         return false;
@@ -311,15 +334,19 @@ namespace scarab
 
     inline void param_node::replace( const std::string& a_name, const param& a_value )
     {
-        erase( a_name );
         f_contents[ a_name ] = a_value.clone();
         return;
     }
 
-    inline void param_node::replace( const std::string& a_name, param* a_value )
+    inline void param_node::replace( const std::string& a_name, param&& a_value )
     {
-        erase( a_name );
-        f_contents[ a_name ] = a_value;
+        f_contents[ a_name ] = a_value.move_clone();
+        return;
+    }
+
+    inline void param_node::replace( const std::string& a_name, param_ptr_t a_value_ptr )
+    {
+        f_contents[ a_name ] = std::move(a_value_ptr);
         return;
     }
 
@@ -328,30 +355,25 @@ namespace scarab
         contents::iterator it = f_contents.find( a_name );
         if( it != f_contents.end() )
         {
-            delete it->second;
             f_contents.erase( it );
         }
         return;
     }
 
-    inline param* param_node::remove( const std::string& a_name )
+    inline param_ptr_t param_node::remove( const std::string& a_name )
     {
         contents::iterator it = f_contents.find( a_name );
         if( it != f_contents.end() )
         {
-            param* removed = it->second;
+            param_ptr_t removed( std::move( it->second ) );
             f_contents.erase( it );
             return removed;
         }
-        return NULL;
+        return param_ptr_t();
     }
 
     inline void param_node::clear()
     {
-        for( contents::iterator it = f_contents.begin(); it != f_contents.end(); ++it )
-        {
-            delete it->second;
-        }
         f_contents.clear();
         return;
     }
