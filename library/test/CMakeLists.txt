@@ -18,6 +18,7 @@ if( Scarab_ENABLE_TESTING )
         test__member_variables
         test_logger
         test_param_array
+        test_param_by_pointer
         test_param_node
         test_param_value
         test_terminate
