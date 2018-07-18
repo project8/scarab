@@ -30,7 +30,7 @@ namespace scarab
     param_input_yaml::~param_input_yaml()
     {}
 
-    std::unique_ptr< param > param_input_yaml::read_file( const std::string& a_filename, const param_node& )
+    param_ptr_t param_input_yaml::read_file( const std::string& a_filename, const param_node& )
     {
         try
         {
@@ -58,13 +58,13 @@ namespace scarab
         }
     }
 
-    std::unique_ptr< param > param_input_yaml::read_node_type( const YAML::Node& a_node )
+    param_ptr_t param_input_yaml::read_node_type( const YAML::Node& a_node )
     {
         try
         {
             if( a_node.IsNull() )
             {
-                return std::unique_ptr< param >( new param() );
+                return param_ptr_t( new param() );
             }
             if( a_node.IsScalar() )
             {
@@ -93,11 +93,11 @@ namespace scarab
     {
         try
         {
-            std::unique_ptr< param_array > t_array_as_param;
+            std::unique_ptr< param_array > t_array_as_param( new param_array() );
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_array_as_param->push_back( std::move(*param_input_yaml::read_node_type( *counter )) );
+                t_array_as_param->push_back( std::move(param_input_yaml::read_node_type( *counter )) );
             }
 
             return t_array_as_param;
@@ -113,11 +113,11 @@ namespace scarab
     {
         try
         {
-            std::unique_ptr< param_node > t_map_as_param;
+            std::unique_ptr< param_node > t_map_as_param( new param_node() );
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_map_as_param->replace( counter->first.as< std::string >(), std::move(*param_input_yaml::read_node_type( counter->second )) );
+                t_map_as_param->replace( counter->first.as< std::string >(), std::move(param_input_yaml::read_node_type( counter->second )) );
             }
 
             return t_map_as_param;

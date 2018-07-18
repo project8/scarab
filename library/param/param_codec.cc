@@ -44,7 +44,7 @@ namespace scarab
     {
     }
 
-    std::unique_ptr< param > param_translator::read_file( const std::string& a_filename, const param_node& a_options  )
+    param_ptr_t param_translator::read_file( const std::string& a_filename, const param_node& a_options  )
     {
         std::string t_encoding = a_options.get_value( "encoding", "" );
         if( t_encoding.empty() )
@@ -63,7 +63,7 @@ namespace scarab
         return t_codec->read_file( a_filename, a_options );
     }
 
-    std::unique_ptr< param > param_translator::read_string( const std::string& a_string, const param_node& a_options  )
+    param_ptr_t param_translator::read_string( const std::string& a_string, const param_node& a_options  )
     {
         std::string t_encoding = a_options.get_value( "encoding", "" );
         if( t_encoding.empty() )

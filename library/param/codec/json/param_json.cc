@@ -35,7 +35,7 @@ namespace scarab
     {
     }
 
-    std::unique_ptr< param > param_input_json::read_file( const std::string& a_filename, const param_node& )
+    param_ptr_t param_input_json::read_file( const std::string& a_filename, const param_node& )
     {
         FILE* t_config_file = fopen( a_filename.c_str(), "r" );
         if( t_config_file == NULL )
@@ -87,7 +87,7 @@ namespace scarab
         return param_input_json::read_document( t_config_doc );
     }
 
-    std::unique_ptr< param > param_input_json::read_string( const std::string& a_json_string, const param_node& )
+    param_ptr_t param_input_json::read_string( const std::string& a_json_string, const param_node& )
     {
         rapidjson::Document t_config_doc;
         if( t_config_doc.Parse<0>( a_json_string.c_str() ).HasParseError() )
@@ -98,7 +98,7 @@ namespace scarab
         return param_input_json::read_document( t_config_doc );
     }
 
-    std::unique_ptr< param > param_input_json::read_document( const rapidjson::Document& a_doc )
+    param_ptr_t param_input_json::read_document( const rapidjson::Document& a_doc )
     {
         std::unique_ptr< param_node > t_doc_as_param( new param_node() );
         for( rapidjson::Value::ConstMemberIterator jsonIt = a_doc.MemberBegin();
@@ -110,7 +110,7 @@ namespace scarab
         return t_doc_as_param;
     }
 
-    std::unique_ptr< param > param_input_json::read_value( const rapidjson::Value& a_value )
+    param_ptr_t param_input_json::read_value( const rapidjson::Value& a_value )
     {
         if( a_value.IsNull() )
         {

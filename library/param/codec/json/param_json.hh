@@ -46,10 +46,10 @@ namespace scarab
             param_input_json();
             virtual ~param_input_json();
 
-            virtual std::unique_ptr< param > read_file( const std::string& a_filename, const param_node& a_options = param_node() );
-            virtual std::unique_ptr< param > read_string( const std::string& a_json_str, const param_node& a_options = param_node() );
-            std::unique_ptr< param > read_document( const rapidjson::Document& a_document );
-            std::unique_ptr< param > read_value( const rapidjson::Value& a_value );
+            virtual param_ptr_t read_file( const std::string& a_filename, const param_node& a_options = param_node() );
+            virtual param_ptr_t read_string( const std::string& a_json_str, const param_node& a_options = param_node() );
+            param_ptr_t read_document( const rapidjson::Document& a_document );
+            param_ptr_t read_value( const rapidjson::Value& a_value );
     };
 
     //***************************************

@@ -37,10 +37,10 @@ namespace scarab
             param_input_yaml();
             virtual ~param_input_yaml();
 
-            virtual std::unique_ptr< param > read_file( const std::string& a_filename, const param_node& a_options = param_node() );
-            virtual std::unique_ptr< param > read_string( const std::string& a_json_str, const param_node& a_options = param_node() );
+            virtual param_ptr_t read_file( const std::string& a_filename, const param_node& a_options = param_node() );
+            virtual param_ptr_t read_string( const std::string& a_json_str, const param_node& a_options = param_node() );
 
-            std::unique_ptr< param > read_node_type( const YAML::Node& a_node );
+            param_ptr_t read_node_type( const YAML::Node& a_node );
             std::unique_ptr< param_array > sequence_handler( const YAML::Node& a_node );
             std::unique_ptr< param_node > map_handler( const YAML::Node& a_node );
             std::unique_ptr< param_value > scalar_handler( const YAML::Node& a_node );

@@ -32,6 +32,13 @@ if( Scarab_ENABLE_TESTING )
         )
     endif( Scarab_BUILD_PARAM )
 
+    if( Scarab_BUILD_CODEC_JSON )
+        set( test_programs
+            ${test_programs}
+            test_json
+        )
+    endif( Scarab_BUILD_CODEC_JSON )
+    
     if( Scarab_BUILD_CODEC_YAML )
         set( test_programs
             ${test_programs}
