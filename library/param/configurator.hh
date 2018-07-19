@@ -16,7 +16,7 @@ namespace scarab
     class configurator
     {
         public:
-            configurator( int an_argc, char** an_argv, scarab::param_node* a_default = NULL );
+            configurator( int an_argc, char** an_argv, scarab::param_node& a_default = scarab::param_node() );
             virtual ~configurator();
 
             const std::string& exe_name() const;
