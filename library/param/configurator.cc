@@ -11,6 +11,7 @@
 #include "param_codec.hh"
 #include "parser.hh"
 #include "path.hh"
+#include "param_node.hh"
 
 #ifdef USE_CODEC_JSON
 #include "param_json.hh"
@@ -28,7 +29,7 @@ namespace scarab
 {
     LOGGER( slog, "configurator" );
 
-    configurator::configurator( int an_argc, char** an_argv, const param_node& a_default ) :
+    configurator::configurator( int an_argc, char** an_argv, const scarab::param_node& a_default ) :
             f_exe_name( "unknown" ),
             f_master_config(),
             f_help_flag( false ),
