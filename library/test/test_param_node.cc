@@ -55,21 +55,21 @@ int main()
     param_node node;
 
     LINFO( testlog, "Adding a value" );
-    node.add( "five", param_value(5) );
+    node.add( "five", 5 );
 
     LINFO( testlog, "Adding an array" );
     param_array subarray1;
-    subarray1.push_back( param_value(500) );
+    subarray1.push_back( 500 );
     node.add( "subarray1", subarray1 );
 
     param_array subarray2;
-    subarray2.push_back( param_value("5000") );
+    subarray2.push_back( "5000" );
     node.add( "subarray2", std::move(subarray2) );
 
     LINFO( testlog, "Printing contents:" << node );
 
-    LINFO( testlog, subarray1 );
-    LINFO( testlog, subarray2 );
+    LINFO( testlog, "After copy, should be full: " << subarray1 );
+    LINFO( testlog, "After move, should be empty: " << subarray2 );
 
     LINFO( testlog, "Access:" );
     LINFO( testlog, node.get_value< int >("five") );

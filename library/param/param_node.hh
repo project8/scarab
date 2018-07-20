@@ -21,6 +21,9 @@ namespace scarab
     class param_value;
     class param_array;
 
+    // This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
+    // In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
+    // Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
     template< class x_key, class x_value, class x_iiterator >
     class map_deref_iterator : public boost::iterator_adaptor< map_deref_iterator< x_key, x_value, x_iiterator >, x_iiterator, x_value, boost::bidirectional_traversal_tag >
     {
@@ -145,12 +148,18 @@ namespace scarab
             /// Adds a new value if a_name is not present.
             param& operator[]( const std::string& a_name );
 
-            /// Areates a copy of a_value
+            /// Adds a copy of a_value
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
             bool add( const std::string& a_name, const param& a_value );
             /// Adds a_value with move semantics
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
             bool add( const std::string& a_name, param&& a_value );
             /// Adds a_value_ptr by directly adding the pointer
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
             bool add( const std::string& a_name, param_ptr_t a_value_ptr );
+            /// Adds a_value as a param_value; allows implicit construction with raw types (int, string, etc)
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
+            bool add( const std::string& a_name, param_value&& a_value );
 
             /// Creates a copy of a_value; overwrites if the key exits
             void replace( const std::string& a_name, const param& a_value );
@@ -158,6 +167,8 @@ namespace scarab
             void replace( const std::string& a_name, param&& a_value );
             /// Adds a_value_ptr by directly adding the pointer; overwrites if the key exists
             void replace( const std::string& a_name, param_ptr_t a_value_ptr );
+            /// Adds a_value as a param_value; allows implicit construction with raw types (int, string, etc); overwrites if the key exists
+            void replace( const std::string& a_name, param_value&& a_value );
 
             /// Merges the contents of a_object into this object.
             /// If names in the contents of a_object exist in this object,
@@ -332,6 +343,17 @@ namespace scarab
         return false;
     }
 
+    inline bool param_node::add( const std::string& a_name, param_value&& a_value )
+    {
+        contents::iterator it = f_contents.find( a_name );
+        if( it == f_contents.end() )
+        {
+            f_contents.insert( contents_type( a_name, a_value.move_clone() ) );
+            return true;
+        }
+        return false;
+    }
+
     inline void param_node::replace( const std::string& a_name, const param& a_value )
     {
         f_contents[ a_name ] = a_value.clone();
@@ -347,6 +369,12 @@ namespace scarab
     inline void param_node::replace( const std::string& a_name, param_ptr_t a_value_ptr )
     {
         f_contents[ a_name ] = std::move(a_value_ptr);
+        return;
+    }
+
+    inline void param_node::replace( const std::string& a_name, param_value&& a_value )
+    {
+        f_contents[ a_name ] = a_value.move_clone();
         return;
     }
 
