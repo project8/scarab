@@ -24,12 +24,12 @@
 
 ]
 
-2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(71):
+2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(71): After move, should be full:
 {
     five-hundred : 500
 }
 
-2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(72):
+2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(72): After move, should be empty:
 [
 ]
 
@@ -38,7 +38,6 @@
 2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(76): 5
 2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(77): 500
 2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(78): 5000
-201
  *
  */
 
@@ -56,27 +55,27 @@ int main()
     param_array array;
 
     LINFO( testlog, "Adding a value" );
-    array.push_back( param_value(5) );
+    array.push_back( 5 );
 
     LINFO( testlog, "Adding an array" );
     param_node subnode;
-    subnode.add( "five-hundred", param_value(500) );
+    subnode.add( "five-hundred", 500 );
     array.push_back( subnode );
 
     param_array subarray;
-    subarray.push_back( param_value("5000") );
+    subarray.push_back( "5000" );
     array.push_back( std::move(subarray) );
 
     LINFO( testlog, "Printing contents:" << array );
 
-    LINFO( testlog, subnode );
-    LINFO( testlog, subarray );
+    LINFO( testlog, "After copy, should be full: " << subnode );
+    LINFO( testlog, "After move, should be empty: " << subarray );
 
     LINFO( testlog, "Access:" );
-    LINFO( testlog, array.get_value< int >(0) );
+    LINFO( testlog, array.get_value(0, 99999) );
     LINFO( testlog, array[0]() );
     LINFO( testlog, array[1]["five-hundred"]() );
-    LINFO( testlog, array[2][0]() );
+    LINFO( testlog, array[2].get_value( 0, "value doesn't exist" ) );
 
     return 0;
 }

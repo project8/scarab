@@ -21,6 +21,9 @@ namespace scarab
     class param_value;
     class param_array;
 
+    // This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
+    // In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
+    // Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
     template< class x_key, class x_value, class x_iiterator >
     class map_deref_iterator : public boost::iterator_adaptor< map_deref_iterator< x_key, x_value, x_iiterator >, x_iiterator, x_value, boost::bidirectional_traversal_tag >
     {
@@ -94,63 +97,33 @@ namespace scarab
             unsigned count( const std::string& a_name ) const;
 
             /// Returns the result of param_value::get if a_name is present and is of type param_value
-            /// Throws an error if a_name is not present or is not of type param_value
-            std::string get_value( const std::string& a_name ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
-            /// Throws an error if a_name is not present or is not of type param_value
-            template< typename XValType >
-            XValType get_value( const std::string& a_name ) const;
-
-            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Returns a_default if a_name is not present or is not of type param_value
             std::string get_value( const std::string& a_name, const std::string& a_default ) const;
             std::string get_value( const std::string& a_name, const char* a_default ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Returns a_default if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( const std::string& a_name, XValType a_default ) const;
 
-            /// Returns the param corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param& at( const std::string& a_name ) const;
-            /// Returns the param corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param& at( const std::string& a_name );
-
-            /// Returns the param_value corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param_value& value_at( const std::string& a_name ) const;
-            /// Returns the param_value corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param_value& value_at( const std::string& a_name );
-
-            /// Returns the param_array corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param_array& array_at( const std::string& a_name ) const;
-            /// Returns the param_array corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param_array& array_at( const std::string& a_name );
-
-            /// Returns the param_node corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param_node& node_at( const std::string& a_name ) const;
-            /// Returns the param_node corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param_node& node_at( const std::string& a_name );
-
             /// Returns a reference to the param corresponding to a_name.
-            /// Throws an error if a_name is not present.
+            /// Throws an std::out_of_range if a_name is not present.
             const param& operator[]( const std::string& a_name ) const;
             /// Returns a reference to the param corresponding to a_name.
-            /// Adds a new value if a_name is not present.
+            /// Throws an std::out_of_range if a_name is not present.
             param& operator[]( const std::string& a_name );
 
-            /// Areates a copy of a_value
+            /// Adds a copy of a_value
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
             bool add( const std::string& a_name, const param& a_value );
             /// Adds a_value with move semantics
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
             bool add( const std::string& a_name, param&& a_value );
             /// Adds a_value_ptr by directly adding the pointer
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
             bool add( const std::string& a_name, param_ptr_t a_value_ptr );
+            /// Adds a_value as a param_value; allows implicit construction with raw types (int, string, etc)
+            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
+            bool add( const std::string& a_name, param_value&& a_value );
 
             /// Creates a copy of a_value; overwrites if the key exits
             void replace( const std::string& a_name, const param& a_value );
@@ -158,6 +131,8 @@ namespace scarab
             void replace( const std::string& a_name, param&& a_value );
             /// Adds a_value_ptr by directly adding the pointer; overwrites if the key exists
             void replace( const std::string& a_name, param_ptr_t a_value_ptr );
+            /// Adds a_value as a param_value; allows implicit construction with raw types (int, string, etc); overwrites if the key exists
+            void replace( const std::string& a_name, param_value&& a_value );
 
             /// Merges the contents of a_object into this object.
             /// If names in the contents of a_object exist in this object,
@@ -183,15 +158,9 @@ namespace scarab
 
 
     template< typename XValType >
-    inline XValType param_node::get_value( const std::string& a_name ) const
-    {
-        return value_at( a_name ).get< XValType >();
-    }
-
-    template< typename XValType >
     inline XValType param_node::get_value( const std::string& a_name, XValType a_default ) const
     {
-        return has( a_name ) ? value_at( a_name ).get< XValType >() : a_default;
+        return has( a_name ) ? operator[]( a_name ).as_value().as< XValType >() : a_default;
     }
 
     inline param_ptr_t param_node::clone() const
@@ -234,59 +203,14 @@ namespace scarab
         return f_contents.count( a_name );
     }
 
-    inline std::string param_node::get_value( const std::string& a_name ) const
-    {
-        return value_at( a_name ).to_string();
-    }
-
     inline std::string param_node::get_value( const std::string& a_name, const std::string& a_default ) const
     {
-        return has( a_name ) ? value_at( a_name ).to_string() : a_default;
+        return has( a_name ) ? operator[]( a_name ).to_string() : a_default;
     }
 
     inline std::string param_node::get_value( const std::string& a_name, const char* a_default ) const
     {
         return get_value( a_name, std::string( a_default ) );
-    }
-
-    inline const param& param_node::at( const std::string& a_name ) const
-    {
-        return *f_contents.at( a_name );
-    }
-
-    inline param& param_node::at( const std::string& a_name )
-    {
-        return *f_contents.at( a_name );
-    }
-
-    inline const param_value& param_node::value_at( const std::string& a_name ) const
-    {
-        return at( a_name ).as_value();
-    }
-
-    inline param_value& param_node::value_at( const std::string& a_name )
-    {
-        return at( a_name ).as_value();
-    }
-
-    inline const param_array& param_node::array_at( const std::string& a_name ) const
-    {
-        return at( a_name ).as_array();
-    }
-
-    inline param_array& param_node::array_at( const std::string& a_name )
-    {
-        return at( a_name ).as_array();
-    }
-
-    inline const param_node& param_node::node_at( const std::string& a_name ) const
-    {
-        return at( a_name ).as_node();
-    }
-
-    inline param_node& param_node::node_at( const std::string& a_name )
-    {
-        return at( a_name ).as_node();
     }
 
     inline const param& param_node::operator[]( const std::string& a_name ) const
@@ -296,7 +220,7 @@ namespace scarab
 
     inline param& param_node::operator[]( const std::string& a_name )
     {
-        return *f_contents[ a_name ];
+        return *f_contents.at( a_name );
     }
 
     inline bool param_node::add( const std::string& a_name, const param& a_value )
@@ -332,6 +256,17 @@ namespace scarab
         return false;
     }
 
+    inline bool param_node::add( const std::string& a_name, param_value&& a_value )
+    {
+        contents::iterator it = f_contents.find( a_name );
+        if( it == f_contents.end() )
+        {
+            f_contents.insert( contents_type( a_name, a_value.move_clone() ) );
+            return true;
+        }
+        return false;
+    }
+
     inline void param_node::replace( const std::string& a_name, const param& a_value )
     {
         f_contents[ a_name ] = a_value.clone();
@@ -347,6 +282,12 @@ namespace scarab
     inline void param_node::replace( const std::string& a_name, param_ptr_t a_value_ptr )
     {
         f_contents[ a_name ] = std::move(a_value_ptr);
+        return;
+    }
+
+    inline void param_node::replace( const std::string& a_name, param_value&& a_value )
+    {
+        f_contents[ a_name ] = a_value.move_clone();
         return;
     }
 

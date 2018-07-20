@@ -97,7 +97,7 @@ namespace scarab
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_array_as_param->push_back( std::move(param_input_yaml::read_node_type( *counter )) );
+                t_array_as_param->push_back( param_input_yaml::read_node_type( *counter ) );
             }
 
             return t_array_as_param;
@@ -117,7 +117,7 @@ namespace scarab
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_map_as_param->replace( counter->first.as< std::string >(), std::move(param_input_yaml::read_node_type( counter->second )) );
+                t_map_as_param->replace( counter->first.as< std::string >(), param_input_yaml::read_node_type( counter->second ) );
             }
 
             return t_map_as_param;
@@ -214,7 +214,7 @@ namespace scarab
     {
         YAML::Node t_node;
 
-        const param_node& p_node = static_cast< const param_node& >(a_to_write);
+        const param_node& p_node = a_to_write.as_node();
         for( param_node::const_iterator counter = p_node.begin(); counter != p_node.end(); ++counter )
         {
             t_node[counter.name()] = param_output_yaml::check_param_type( *counter );
@@ -227,10 +227,10 @@ namespace scarab
     {
         YAML::Node t_node;
 
-        const param_array array = static_cast< const param_array& >( a_to_write );
+        const param_array& array = a_to_write.as_array();
         for ( int count = 0; count != (int) array.size(); ++count )
         {
-            t_node.push_back(param_output_yaml::check_param_type( array.at( count ) ) );
+            t_node.push_back(param_output_yaml::check_param_type( array[count] ) );
         }
 
         return t_node;
