@@ -51,18 +51,18 @@ namespace scarab
             // we've found the value; now check if it's a number or a string
             if( a_value.empty() )
             {
-                a_parent.add( a_addr, std::move(param()) );
+                a_parent.add( a_addr, param() );
                 LDEBUG( dlog, "Parsed value as NULL" << *this );
             }
             // if "true" or "false", then bool
             else if( a_value == "true" )
             {
-                a_parent.add( a_addr, std::move(param_value( true )) );
+                a_parent.add( a_addr, true );
                 LDEBUG( dlog, "Parsed value (" << a_value << ") as bool(true)" << *this );
             }
             else if( a_value == "false" )
             {
-                a_parent.add( a_addr, std::move(param_value( false )) );
+                a_parent.add( a_addr, false );
                 LDEBUG( dlog, "Parsed value (" << a_value << ") as bool(false):" << *this );
             }
             else
@@ -82,26 +82,26 @@ namespace scarab
                         a_value.find( 'E' ) != std::string::npos )
                     {
                         // value is a floating-point number, since it has a decimal point
-                        a_parent.add( a_addr, std::move(param_value( t_double )) );
+                        a_parent.add( a_addr, t_double );
                         LDEBUG( dlog, "Parsed value (" << a_value << ") as double(" << t_double << "):" << *this );
                     }
                     else if( a_value[ 0 ] == '-' )
                     {
                         // value is a signed integer if it's negative
-                        a_parent.add( a_addr, std::move(param_value( (int64_t)t_double )) );
+                        a_parent.add( a_addr, (int64_t)t_double );
                         LDEBUG( dlog, "Parsed value (" << a_value << ") as int(" << (int64_t)t_double << "):" << *this );
                     }
                     else
                     {
                         // value is assumed to be unsigned if it's positive
-                        a_parent.add( a_addr, std::move(param_value( (uint64_t)t_double )) );
+                        a_parent.add( a_addr, (uint64_t)t_double );
                         LDEBUG( dlog, "Parsed value (" << a_value << ") as uint(" << (uint64_t)t_double << ");" << *this );
                     }
                 }
                 else
                 {
                     // value is not numeric; treat as a string
-                    a_parent.add( a_addr, std::move(param_value( a_value )) );
+                    a_parent.add( a_addr, a_value );
                     LDEBUG( dlog, "Parsed value (" << a_value << ") as a string:" << *this );
                 }
             }
