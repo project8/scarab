@@ -110,6 +110,9 @@ endif( WIN32 )
 # date library
 include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/date )
 
+# cli11 library
+include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/cli11.hpp )
+
 
 ########################
 # Build Scarab library #
