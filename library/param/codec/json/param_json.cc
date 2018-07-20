@@ -207,7 +207,7 @@ namespace scarab
         json_writing_style t_style = k_compact;
         if( a_options.has( "style" ) )
         {
-            if( a_options.value_at( "style" ).is_uint() )
+            if( a_options["style"]().is_uint() )
             {
                 t_style = (json_writing_style)a_options.get_value< unsigned >( "style", k_compact );
             }
@@ -246,7 +246,7 @@ namespace scarab
         json_writing_style t_style = k_compact;
         if( a_options.has( "style" ) )
         {
-            if( a_options.value_at( "style" ).is_uint() )
+            if( a_options["style"]().is_uint() )
             {
                 t_style = (json_writing_style)a_options.get_value< unsigned >( "style", k_compact );
             }

@@ -55,7 +55,7 @@ namespace scarab
         {
             try
             {
-                slog.SetGlobalLevel( (logger::ELevel)t_parser[t_name_logger]["verbosity"]().get< unsigned >() );
+                slog.SetGlobalLevel( (logger::ELevel)t_parser[t_name_logger]["verbosity"]().as_uint() );
             }
             catch( std::exception& e ) {}
         }
@@ -82,7 +82,7 @@ namespace scarab
         // second configuration: config file
         if( t_parser.has( t_name_config ) )
         {
-            path t_config_filename = scarab::expand_path( t_parser.get_value( t_name_config ) );
+            path t_config_filename = scarab::expand_path( t_parser[ t_name_config ]().as_string() );
             if( ! t_config_filename.empty() )
             {
                 param_translator t_translator;
@@ -107,7 +107,7 @@ namespace scarab
         // third configuration: command line json
         if( t_parser.has( t_name_json ) )
         {
-            string t_config_json = t_parser.get_value( t_name_json );
+            string t_config_json = t_parser[ t_name_json ]().as_string();
             if( ! t_config_json.empty() )
             {
                 param_input_json t_input_json;

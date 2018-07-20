@@ -72,7 +72,7 @@ int main()
     LINFO( testlog, "After move, should be empty: " << subarray2 );
 
     LINFO( testlog, "Access:" );
-    LINFO( testlog, node.get_value< int >("five") );
+    LINFO( testlog, node.get_value("five", 99999) );
     LINFO( testlog, node["five"]() );
     LINFO( testlog, node["subarray1"][0]() );
     LINFO( testlog, node["subarray2"][0]() );
