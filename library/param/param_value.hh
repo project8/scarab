@@ -73,7 +73,7 @@ namespace scarab
             path as_path() const;
 
             template< typename XValType >
-            XValType get() const;
+            XValType as() const;
 
             void set( bool a_value );
             void set( uint8_t a_value );
@@ -375,43 +375,43 @@ namespace scarab
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
 
     template<>
-    inline bool param_value::get< bool >() const
+    inline bool param_value::as< bool >() const
     {
         return as_bool();
     }
 
     template<>
-    inline uint64_t param_value::get< uint64_t >() const
+    inline uint64_t param_value::as< uint64_t >() const
     {
         return as_uint();
     }
 
     template<>
-    inline int64_t param_value::get< int64_t >() const
+    inline int64_t param_value::as< int64_t >() const
     {
         return as_int();
     }
 
     template<>
-    inline double param_value::get< double >() const
+    inline double param_value::as< double >() const
     {
         return as_double();
     }
 
     template<>
-    inline std::string param_value::get< std::string >() const
+    inline std::string param_value::as< std::string >() const
     {
         return as_string();
     }
 
     template<>
-    inline scarab::path param_value::get< scarab::path >() const
+    inline scarab::path param_value::as< scarab::path >() const
     {
         return as_path();
     }
 
     template< typename XValType >
-    XValType param_value::get() const
+    XValType param_value::as() const
     {
         return boost::apply_visitor( get_visitor< XValType >(), f_value );
     }

@@ -97,14 +97,6 @@ namespace scarab
             unsigned count( const std::string& a_name ) const;
 
             /// Returns the result of param_value::get if a_name is present and is of type param_value
-            /// Throws an error if a_name is not present or is not of type param_value
-            std::string get_value( const std::string& a_name ) const;
-            /// Returns the result of param_value::get if a_name is present and is of type param_value
-            /// Throws an error if a_name is not present or is not of type param_value
-            template< typename XValType >
-            XValType get_value( const std::string& a_name ) const;
-
-            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Returns a_default if a_name is not present or is not of type param_value
             std::string get_value( const std::string& a_name, const std::string& a_default ) const;
             std::string get_value( const std::string& a_name, const char* a_default ) const;
@@ -113,39 +105,11 @@ namespace scarab
             template< typename XValType >
             XValType get_value( const std::string& a_name, XValType a_default ) const;
 
-            /// Returns the param corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param& at( const std::string& a_name ) const;
-            /// Returns the param corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param& at( const std::string& a_name );
-
-            /// Returns the param_value corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param_value& value_at( const std::string& a_name ) const;
-            /// Returns the param_value corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param_value& value_at( const std::string& a_name );
-
-            /// Returns the param_array corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param_array& array_at( const std::string& a_name ) const;
-            /// Returns the param_array corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param_array& array_at( const std::string& a_name );
-
-            /// Returns the param_node corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            const param_node& node_at( const std::string& a_name ) const;
-            /// Returns the param_node corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
-            param_node& node_at( const std::string& a_name );
-
             /// Returns a reference to the param corresponding to a_name.
-            /// Throws an error if a_name is not present.
+            /// Throws an std::out_of_range if a_name is not present.
             const param& operator[]( const std::string& a_name ) const;
             /// Returns a reference to the param corresponding to a_name.
-            /// Adds a new value if a_name is not present.
+            /// Throws an std::out_of_range if a_name is not present.
             param& operator[]( const std::string& a_name );
 
             /// Adds a copy of a_value
@@ -194,15 +158,9 @@ namespace scarab
 
 
     template< typename XValType >
-    inline XValType param_node::get_value( const std::string& a_name ) const
-    {
-        return value_at( a_name ).get< XValType >();
-    }
-
-    template< typename XValType >
     inline XValType param_node::get_value( const std::string& a_name, XValType a_default ) const
     {
-        return has( a_name ) ? value_at( a_name ).get< XValType >() : a_default;
+        return has( a_name ) ? operator[]( a_name ).as_value().as< XValType >() : a_default;
     }
 
     inline param_ptr_t param_node::clone() const
@@ -245,59 +203,14 @@ namespace scarab
         return f_contents.count( a_name );
     }
 
-    inline std::string param_node::get_value( const std::string& a_name ) const
-    {
-        return value_at( a_name ).to_string();
-    }
-
     inline std::string param_node::get_value( const std::string& a_name, const std::string& a_default ) const
     {
-        return has( a_name ) ? value_at( a_name ).to_string() : a_default;
+        return has( a_name ) ? operator[]( a_name ).to_string() : a_default;
     }
 
     inline std::string param_node::get_value( const std::string& a_name, const char* a_default ) const
     {
         return get_value( a_name, std::string( a_default ) );
-    }
-
-    inline const param& param_node::at( const std::string& a_name ) const
-    {
-        return *f_contents.at( a_name );
-    }
-
-    inline param& param_node::at( const std::string& a_name )
-    {
-        return *f_contents.at( a_name );
-    }
-
-    inline const param_value& param_node::value_at( const std::string& a_name ) const
-    {
-        return at( a_name ).as_value();
-    }
-
-    inline param_value& param_node::value_at( const std::string& a_name )
-    {
-        return at( a_name ).as_value();
-    }
-
-    inline const param_array& param_node::array_at( const std::string& a_name ) const
-    {
-        return at( a_name ).as_array();
-    }
-
-    inline param_array& param_node::array_at( const std::string& a_name )
-    {
-        return at( a_name ).as_array();
-    }
-
-    inline const param_node& param_node::node_at( const std::string& a_name ) const
-    {
-        return at( a_name ).as_node();
-    }
-
-    inline param_node& param_node::node_at( const std::string& a_name )
-    {
-        return at( a_name ).as_node();
     }
 
     inline const param& param_node::operator[]( const std::string& a_name ) const
@@ -307,7 +220,7 @@ namespace scarab
 
     inline param& param_node::operator[]( const std::string& a_name )
     {
-        return *f_contents[ a_name ];
+        return *f_contents.at( a_name );
     }
 
     inline bool param_node::add( const std::string& a_name, const param& a_value )
