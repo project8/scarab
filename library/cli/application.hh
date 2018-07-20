@@ -15,7 +15,7 @@
 
 namespace scarab
 {
-    typedef CLI::App application;
+    typedef CLI::App command;
 
     /*!
      @class application
@@ -45,7 +45,7 @@ namespace scarab
     return 0;
 }
      */
-    class main_application : public application
+    class application : public command
     {
         public:
             application();

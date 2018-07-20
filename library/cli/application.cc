@@ -7,6 +7,8 @@
 
 #include "application.hh"
 
+#include "param_codec.hh"
+
 #include "logger.hh"
 
 namespace scarab
@@ -14,13 +16,18 @@ namespace scarab
     LOGGER( applog, "application" );
 
     application::application() :
-            CLI::App(),
+            command(),
             f_master_config(),
             f_default_config(),
             f_config_filename()
     {
-        // TODO: add option -c,--config to set the config_filename
+        add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
         // TODO: add logger option (including member variable)
+
+        auto t_version_callback = [](int count){
+            // TODO: implement version callback
+        };
+        add_flag_function( "-v,--version", t_version_callback, "Print the version message and exit" );
     }
 
     application::~application()
@@ -51,7 +58,7 @@ namespace scarab
         {
             try
             {
-                slog.SetGlobalLevel( (logger::ELevel)t_parser[t_name_logger]["verbosity"]().get< unsigned >() );
+                slog.SetGlobalLevel( (logger::ELevel)t_parser[t_name_logger]["verbosity"]().as_uint() );
             }
             catch( std::exception& e ) {}
         }
@@ -77,26 +84,21 @@ namespace scarab
         }
         f_exe_name = string( t_exe_buf );
 
-        // TODO: convert this to use the local variable
-
         // second configuration: config file
-        if( t_parser.has( t_name_config ) )
+        path t_config_filepath = scarab::expand_path( f_config_filename );
+        if( ! t_config_filepath.empty() )
         {
-            path t_config_filename = scarab::expand_path( t_parser.get_value( t_name_config ) );
-            if( ! t_config_filename.empty() )
+            param_translator t_translator;
+            std::unique_ptr< param > t_config_from_file( t_translator.read_file( t_config_filepath.native() ));
+            if( t_config_from_file == NULL )
             {
-                param_translator t_translator;
-                std::unique_ptr< param > t_config_from_file( t_translator.read_file( t_config_filename.native() ));
-                if( t_config_from_file == NULL )
-                {
-                    throw error() << "[configurator] error parsing config file";
-                }
-                if( ! t_config_from_file->is_node() )
-                {
-                    throw error() << "[configurator] configuration file must consist of an object/node";
-                }
-                f_master_config.merge( t_config_from_file->as_node() );
+                throw error() << "[application] error parsing config file";
             }
+            if( ! t_config_from_file->is_node() )
+            {
+                throw error() << "[application] configuration file must consist of an object/node";
+            }
+            f_master_config.merge( t_config_from_file->as_node() );
         }
 
         //std::cout << "second configuration complete" << std::endl;
