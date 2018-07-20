@@ -62,19 +62,19 @@ namespace scarab
             /// if smaller than the current size, extra elements are deleted
             void resize( unsigned a_size );
 
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Throws an error if a_name is not present or is not of type param_value
             std::string get_value( unsigned a_index ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Throws an error if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( unsigned a_index ) const;
 
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Returns a_default if a_name is not present or is not of type param_value
             std::string get_value( unsigned a_index, const std::string& a_default ) const;
             std::string get_value( unsigned a_index, const char* a_default ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Returns a_default if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( unsigned a_index, XValType a_default ) const;

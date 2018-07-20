@@ -99,7 +99,7 @@ namespace scarab
             /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Throws an error if a_name is not present or is not of type param_value
             std::string get_value( const std::string& a_name ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Throws an error if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( const std::string& a_name ) const;
@@ -108,7 +108,7 @@ namespace scarab
             /// Returns a_default if a_name is not present or is not of type param_value
             std::string get_value( const std::string& a_name, const std::string& a_default ) const;
             std::string get_value( const std::string& a_name, const char* a_default ) const;
-            /// Returns the result of ParamValue::get if a_name is present and is of type param_value
+            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Returns a_default if a_name is not present or is not of type param_value
             template< typename XValType >
             XValType get_value( const std::string& a_name, XValType a_default ) const;

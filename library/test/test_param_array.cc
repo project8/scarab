@@ -24,12 +24,12 @@
 
 ]
 
-2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(71):
+2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(71): After move, should be full:
 {
     five-hundred : 500
 }
 
-2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(72):
+2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(72): After move, should be empty:
 [
 ]
 
@@ -38,7 +38,6 @@
 2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(76): 5
 2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(77): 500
 2018-07-18 01:33:38 [ INFO] (tid 0x7fff9c9dc380) t_param_array.cc(78): 5000
-201
  *
  */
 
@@ -76,7 +75,7 @@ int main()
     LINFO( testlog, array.get_value< int >(0) );
     LINFO( testlog, array[0]() );
     LINFO( testlog, array[1]["five-hundred"]() );
-    LINFO( testlog, array[2][0]() );
+    LINFO( testlog, array[2].get_value( 0, "value doesn't exist" ) );
 
     return 0;
 }

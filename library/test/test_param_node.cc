@@ -24,12 +24,12 @@
 
 }
 
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(35):
+2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(35): After copy, should be full:
 [
     500
 ]
 
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(36):
+2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(36): After move, should be empty:
 [
 ]
 
