@@ -105,7 +105,7 @@ namespace scarab
                 jsonIt != a_doc.MemberEnd();
                 ++jsonIt)
         {
-            t_doc_as_param->replace( jsonIt->name.GetString(), std::move(*param_input_json::read_value( jsonIt->value )) );
+            t_doc_as_param->replace( jsonIt->name.GetString(), param_input_json::read_value( jsonIt->value ) );
         }
         return t_doc_as_param;
     }
@@ -123,7 +123,7 @@ namespace scarab
                     jsonIt != a_value.MemberEnd();
                     ++jsonIt)
             {
-                t_obj_as_param->replace( jsonIt->name.GetString(), std::move(*param_input_json::read_value( jsonIt->value )) );
+                t_obj_as_param->replace( jsonIt->name.GetString(), param_input_json::read_value( jsonIt->value ) );
             }
             return t_obj_as_param;
         }

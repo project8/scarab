@@ -97,7 +97,7 @@ namespace scarab
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_array_as_param->push_back( std::move(param_input_yaml::read_node_type( *counter )) );
+                t_array_as_param->push_back( param_input_yaml::read_node_type( *counter ) );
             }
 
             return t_array_as_param;
@@ -117,7 +117,7 @@ namespace scarab
 
             for( YAML::const_iterator counter = a_node.begin(); counter != a_node.end(); ++counter )
             {
-                t_map_as_param->replace( counter->first.as< std::string >(), std::move(param_input_yaml::read_node_type( counter->second )) );
+                t_map_as_param->replace( counter->first.as< std::string >(), param_input_yaml::read_node_type( counter->second ) );
             }
 
             return t_map_as_param;
