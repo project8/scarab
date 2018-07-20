@@ -63,14 +63,6 @@ namespace scarab
             void resize( unsigned a_size );
 
             /// Returns the result of param_value::get if a_name is present and is of type param_value
-            /// Throws an error if a_name is not present or is not of type param_value
-            std::string get_value( unsigned a_index ) const;
-            /// Returns the result of param_value::get if a_name is present and is of type param_value
-            /// Throws an error if a_name is not present or is not of type param_value
-            template< typename XValType >
-            XValType get_value( unsigned a_index ) const;
-
-            /// Returns the result of param_value::get if a_name is present and is of type param_value
             /// Returns a_default if a_name is not present or is not of type param_value
             std::string get_value( unsigned a_index, const std::string& a_default ) const;
             std::string get_value( unsigned a_index, const char* a_default ) const;
@@ -79,39 +71,11 @@ namespace scarab
             template< typename XValType >
             XValType get_value( unsigned a_index, XValType a_default ) const;
 
-            /// Returns the param corresponding to a_name.
-            /// Throws a scarab::error if a_index is out-of-range.
-            const param& at( unsigned a_index ) const;
-            /// Returns the param corresponding to a_name.
-            /// Throws a scarab::error if a_index is out-of-range.
-            param& at( unsigned a_index );
-
-            /// Returns the param_value corresponding to a_name.
-            /// Throws a scarab::error if a_index is not present
-            const param_value& value_at( unsigned a_index ) const;
-            /// Returns the param_value corresponding to a_name.
-            /// Throws a scarab::error if a_index is out-of-range.
-            param_value& value_at( unsigned a_index );
-
-            /// Returns the param_array corresponding to a_name.
-            /// Throws a scarab::error if a_index is out-of-range.
-            const param_array& array_at( unsigned a_index ) const;
-            /// Returns the param_array corresponding to a_name.
-            /// Throws a scarab::error if a_index is out-of-range.
-            param_array& array_at( unsigned a_index );
-
-            /// Returns the param_node corresponding to a_name.
-            /// Throws a scarab::error if a_index is not present
-            const param_node& node_at( unsigned a_index ) const;
-            /// Returns the param_node corresponding to a_name.
-            /// Throws a scarab::error if a_index is out-of-range.
-            param_node& node_at( unsigned a_index );
-
             /// Returns a reference to the param at a_index.
-            /// Behavior is undefined if a_index is out-of-range.
+            /// Throws a std::out_of_range if a_index is out-of-range.
             const param& operator[]( unsigned a_index ) const;
             /// Returns a reference to the param at a_index.
-            /// Behavior is undefined if a_index is out-of-range.
+            /// Throws a std::out_of_range if a_index is out-of-range.
             param& operator[]( unsigned a_index );
 
             const param& front() const;
@@ -165,15 +129,9 @@ namespace scarab
 
 
     template< typename XValType >
-    XValType param_array::get_value( unsigned a_index ) const
-    {
-        return value_at( a_index ).get< XValType >();
-    }
-
-    template< typename XValType >
     XValType param_array::get_value( unsigned a_index, XValType a_default ) const
     {
-        return a_index < size() ? value_at( a_index ).get< XValType >() : a_default;
+        return a_index < size() ? operator[]( a_index ).as_value().as< XValType >() : a_default;
     }
 
     inline param_ptr_t param_array::clone() const
@@ -211,14 +169,9 @@ namespace scarab
         return;
     }
 
-    inline std::string param_array::get_value( unsigned a_index ) const
-    {
-        return value_at( a_index ).to_string();
-    }
-
     inline std::string param_array::get_value( unsigned a_index, const std::string& a_default ) const
     {
-        return a_index < size() ? value_at( a_index ).to_string() : a_default;
+        return a_index < size() ? operator[]( a_index ).to_string() : a_default;
     }
 
     inline std::string param_array::get_value( unsigned a_index, const char* a_default ) const
@@ -226,49 +179,13 @@ namespace scarab
         return get_value( a_index, std::string( a_default ) );
     }
 
-    inline const param& param_array::at( unsigned a_index ) const
-    {
-        return *f_contents.at( a_index );
-    }
-    inline param& param_array::at( unsigned a_index )
-    {
-        return *f_contents.at( a_index );
-    }
-
-    inline const param_value& param_array::value_at( unsigned a_index ) const
-    {
-        return at( a_index ).as_value();
-    }
-    inline param_value& param_array::value_at( unsigned a_index )
-    {
-        return at( a_index ).as_value();
-    }
-
-    inline const param_array& param_array::array_at( unsigned a_index ) const
-    {
-        return at( a_index ).as_array();
-    }
-    inline param_array& param_array::array_at( unsigned a_index )
-    {
-        return at( a_index ).as_array();
-    }
-
-    inline const param_node& param_array::node_at( unsigned a_index ) const
-    {
-        return at( a_index ).as_node();
-    }
-    inline param_node& param_array::node_at( unsigned a_index )
-    {
-        return at( a_index ).as_node();
-    }
-
     inline const param& param_array::operator[]( unsigned a_index ) const
     {
-        return *f_contents[ a_index ];
+        return *f_contents.at( a_index );
     }
     inline param& param_array::operator[]( unsigned a_index )
     {
-        return *f_contents[ a_index ];
+        return *f_contents.at( a_index );
     }
 
     inline const param& param_array::front() const

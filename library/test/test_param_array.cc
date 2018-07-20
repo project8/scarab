@@ -72,7 +72,7 @@ int main()
     LINFO( testlog, "After move, should be empty: " << subarray );
 
     LINFO( testlog, "Access:" );
-    LINFO( testlog, array.get_value< int >(0) );
+    LINFO( testlog, array.get_value(0, 99999) );
     LINFO( testlog, array[0]() );
     LINFO( testlog, array[1]["five-hundred"]() );
     LINFO( testlog, array[2].get_value( 0, "value doesn't exist" ) );
