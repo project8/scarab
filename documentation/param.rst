@@ -14,3 +14,9 @@ Types
 Basic Interface
 ---------------
 
+Building a Structure
+####################
+
+
+Accessing a Structure
+#####################
