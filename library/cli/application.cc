@@ -7,6 +7,8 @@
 
 #include "application.hh"
 
+#include "nonoption_parser.hh"
+
 #include "param_codec.hh"
 
 #include "logger.hh"
@@ -22,7 +24,9 @@ namespace scarab
             f_master_config(),
             f_default_config(),
             f_config_filename(),
-            f_global_verbosity( 1 )
+            f_global_verbosity( 1 ),
+            f_nonoption_kw_args(),
+            f_nonoption_ord_args()
     {
         add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
         add_option( "--verbosity", f_global_verbosity, "Global logger verosity" );
@@ -40,10 +44,6 @@ namespace scarab
 
     void application::pre_callback()
     {
-        parser t_parser( an_argc, an_argv );
-        //std::cout << "options parsed" << std::endl;
-        //cout << t_parser );
-
         // first configuration: defaults
         f_master_config.merge( f_default_config );
 
@@ -103,28 +103,15 @@ namespace scarab
         //cout << f_master_config );
         //cout << t_parser );
 
+        nonoption_parser t_no_parser( remaining() );
+        f_nonoption_kw_args = t_no_parser.kw_args();
+        f_nonoption_ord_args = t_no_parser.ord_args();
 
-        // TODO: convert this to use the App::remaining feature
-
-        //std::cout << "removed config and json from parsed options" << std::endl;
-        //cout << t_parser );
-        //LDEBUG( slog, "adding command-line parser:\n" << t_parser << *f_master_config );
-        f_master_config.merge( t_parser );
-
-        // check for help and version flags
-        if( f_master_config.has( "help" ) )
-        {
-            f_help_flag = true;
-            f_master_config.erase( "help" );
-        }
-        if( f_master_config.has( "version" ) )
-        {
-            f_version_flag = true;
-            f_master_config.erase( "version" );
-        }
+        //LDEBUG( applog, "adding command-line parser:\n" << t_parser << *f_master_config );
+        f_master_config.merge( f_nonoption_kw_args );
 
         //std::cout << "fourth configuration complete" << std::endl;
-        LPROG( slog, "Final configuration:\n" << f_master_config );
+        LPROG( applog, "Final configuration:\n" << f_master_config );
     }
 
 } /* namespace scarab */

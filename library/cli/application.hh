@@ -62,6 +62,8 @@ namespace scarab
             mv_referrable_const( std::string, config_filename );
             mv_accessible( unsigned, global_verbosity );
 
+            mv_referrable( scarab::param_node, nonoption_kw_args );
+            mv_referrable( scarab::param_array, nonoption_ord_args );
     };
 
 } /* namespace scarab */
