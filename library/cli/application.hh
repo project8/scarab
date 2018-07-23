@@ -60,6 +60,7 @@ namespace scarab
             mv_referrable( scarab::param_node, default_config );
 
             mv_referrable_const( std::string, config_filename );
+            mv_accessible( unsigned, global_verbosity );
 
     };
 

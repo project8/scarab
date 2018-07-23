@@ -11,6 +11,8 @@
 
 #include "logger.hh"
 
+using std::string;
+
 namespace scarab
 {
     LOGGER( applog, "application" );
@@ -19,12 +21,14 @@ namespace scarab
             command(),
             f_master_config(),
             f_default_config(),
-            f_config_filename()
+            f_config_filename(),
+            f_global_verbosity( 1 )
     {
         add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
-        // TODO: add logger option (including member variable)
+        add_option( "--verbosity", f_global_verbosity, "Global logger verosity" );
 
         auto t_version_callback = [](int count){
+            LPROG( applog, "PRINT VERSION INFORMATION HERE" );
             // TODO: implement version callback
         };
         add_flag_function( "-v,--version", t_version_callback, "Print the version message and exit" );
@@ -47,21 +51,10 @@ namespace scarab
         //cout << f_master_config );
         //cout << t_parser );
 
-        string t_name_logger( "logger" );
         string t_name_exe( "executable" ); // the name used to specify the executable in parser
-        string t_name_config( "config" );
         string t_name_json( "json" );
 
-        // TODO: convert this to use the local value of the logger verbosity
-
-        if( t_parser.has( t_name_logger ) )
-        {
-            try
-            {
-                slog.SetGlobalLevel( (logger::ELevel)t_parser[t_name_logger]["verbosity"]().as_uint() );
-            }
-            catch( std::exception& e ) {}
-        }
+        applog.SetGlobalLevel( (logger::ELevel)f_global_verbosity );
 
         // TODO: decide on whether we want to keep this
 
@@ -77,9 +70,9 @@ namespace scarab
         if( readlink( "/proc/self/exe", t_exe_buf, t_bufsize ) < 0 )
 #endif
         {
-            LWARN( slog, "Could not retrieve executable file name" );
+            LWARN( applog, "Could not retrieve executable file name" );
 #ifdef __APPLE__
-            LWARN( slog, "Executable name buffer is too small; needs size %u\n" << t_bufsize );
+            LWARN( applog, "Executable name buffer is too small; needs size %u\n" << t_bufsize );
 #endif
         }
         f_exe_name = string( t_exe_buf );
@@ -110,10 +103,6 @@ namespace scarab
         //cout << f_master_config );
         //cout << t_parser );
 
-        // fourth configuration: command line arguments
-        t_parser.erase( t_name_exe );
-        t_parser.erase( t_name_config );
-        t_parser.erase( t_name_json );
 
         // TODO: convert this to use the App::remaining feature
 
