@@ -105,6 +105,8 @@ namespace scarab
 
             void append( const param_array& an_array );
 
+            void merge( const param_array& an_array );
+
             void erase( unsigned a_index );
             param_ptr_t remove( unsigned a_index );
             void clear();

@@ -93,6 +93,8 @@ namespace scarab
             template< typename XValType >
             XValType get_value( unsigned a_index, XValType a_default ) const;
 
+            void merge( const param& a_param );
+
             virtual std::string to_string() const;
 
             static unsigned s_indent_level;

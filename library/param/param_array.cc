@@ -89,6 +89,47 @@ namespace scarab
         return true;
     }
 
+    void param_array::merge( const param_array& a_object )
+    {
+        //LDEBUG( dlog, "merging array with " << a_object.size() << " items:\n" << a_object );
+        if( size() < a_object.size() ) resize( a_object.size() );
+
+        for( unsigned index = 0; index < size(); ++index )
+        {
+            if( f_contents[index]->is_null() )
+            {
+                //LDEBUG( dlog, "have a null object at <" << index << ">; adding <" << a_object[index] << ">" );
+                assign( index, a_object[index] );
+                continue;
+            }
+
+            param& t_param = (*this)[index];
+            if( t_param.is_value() && a_object[index].is_value() )
+            {
+                //LDEBUG( dlog, "replacing the value at <" << index << "> with <" << a_object[index] << ">" );
+                t_param.as_value() = a_object[index].as_value();
+                continue;
+            }
+            if( t_param.is_node() && a_object[index].is_node() )
+            {
+                //LDEBUG( dlog, "merging nodes at <" << index << ">" )
+                t_param.as_node().merge( a_object[index].as_node() );
+                continue;
+            }
+            if( t_param.is_array() && a_object[index].is_array() )
+            {
+                //LDEBUG( dlog, "merging array at <" << index << ">" );
+                t_param.as_array().merge( a_object[index].as_array() );
+                continue;
+            }
+
+            //LDEBUG( dlog, "generic replace" );
+            assign( index, a_object[index] );
+        }
+        return;
+     }
+
+
     std::string param_array::to_string() const
     {
         stringstream out;
