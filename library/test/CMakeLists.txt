@@ -49,6 +49,7 @@ if( Scarab_ENABLE_TESTING )
     if( Scarab_BUILD_CLI )
         set( test_programs
             ${test_programs}
+            test_app_with_callback
             test_basic_application
             test_nonoption_parser
         )
