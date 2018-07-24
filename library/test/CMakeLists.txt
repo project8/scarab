@@ -24,7 +24,6 @@ if( Scarab_ENABLE_TESTING )
     if( Scarab_BUILD_PARAM )
         set( test_programs
             ${test_programs}
-            test_configurator
             test_param_array
             test_param_by_pointer
             test_param_node
