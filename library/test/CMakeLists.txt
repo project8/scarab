@@ -17,10 +17,6 @@ if( Scarab_ENABLE_TESTING )
     set( test_programs
         test__member_variables
         test_logger
-        test_param_array
-        test_param_by_pointer
-        test_param_node
-        test_param_value
         test_terminate
         test_time
     )
@@ -29,6 +25,10 @@ if( Scarab_ENABLE_TESTING )
         set( test_programs
             ${test_programs}
             test_configurator
+            test_param_array
+            test_param_by_pointer
+            test_param_node
+            test_param_value
         )
     endif( Scarab_BUILD_PARAM )
 
@@ -49,6 +49,7 @@ if( Scarab_ENABLE_TESTING )
     if( Scarab_BUILD_CLI )
         set( test_programs
             ${test_programs}
+            test_basic_application
             test_nonoption_parser
         )
     endif( Scarab_BUILD_CLI )
