@@ -19,8 +19,8 @@ namespace scarab
 {
     LOGGER( applog, "application" );
 
-    application::application() :
-            command(),
+    main_app::main_app() :
+            app(),
             f_master_config(),
             f_default_config(),
             f_config_filename(),
@@ -28,21 +28,24 @@ namespace scarab
             f_nonoption_kw_args(),
             f_nonoption_ord_args()
     {
+        allow_extras(); // allow unrecognized options, which are parsed into the nonoption args
+
         add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
         add_option( "--verbosity", f_global_verbosity, "Global logger verosity" );
 
         auto t_version_callback = [](int count){
             LPROG( applog, "PRINT VERSION INFORMATION HERE" );
             // TODO: implement version callback
+            throw CLI::Success();
         };
         add_flag_function( "-v,--version", t_version_callback, "Print the version message and exit" );
     }
 
-    application::~application()
+    main_app::~main_app()
     {
     }
 
-    void application::pre_callback()
+    void main_app::pre_callback()
     {
         // first configuration: defaults
         f_master_config.merge( f_default_config );
@@ -79,9 +82,10 @@ namespace scarab
 */
 
         // second configuration: config file
-        path t_config_filepath = scarab::expand_path( f_config_filename );
-        if( ! t_config_filepath.empty() )
+        if( ! f_config_filename.empty() )
         {
+            path t_config_filepath = scarab::expand_path( f_config_filename );
+            LDEBUG( applog, "Loading config file <" << t_config_filepath << "> from filename <" << f_config_filename << ">" );
             param_translator t_translator;
             std::unique_ptr< param > t_config_from_file( t_translator.read_file( t_config_filepath.native() ));
             if( t_config_from_file == NULL )
@@ -113,6 +117,7 @@ namespace scarab
 
         //std::cout << "fourth configuration complete" << std::endl;
         LPROG( applog, "Final configuration:\n" << f_master_config );
+        LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
     }
 
 } /* namespace scarab */

@@ -15,7 +15,7 @@
 
 namespace scarab
 {
-    typedef CLI::App command;
+    typedef CLI::App app;
 
     /*!
      @class application
@@ -30,26 +30,27 @@ namespace scarab
      - API: https://cliutils.github.io/CLI11/index.html
 
      Basic usage (customized from CLI11's basic usage):
-     int main(int argc, char **argv)
+
+     int main( int argc, char **argv )
      {
-         application app;
+         main_app the_main;
 
          // Add new options/flags here
 
          // Set the default config file
-         app.default_config() = t_default_config;
+         the_main.default_config() = t_default_config;
 
          // This includes calling application::pre_callback() to finalize the global config
-         CLI11_PARSE(app, argc, argv);
+         CLI11_PARSE( the_main, argc, argv );
 
-    return 0;
-}
+         return 0;
+    }
      */
-    class application : public command
+    class main_app : public app
     {
         public:
-            application();
-            virtual ~application();
+            main_app();
+            virtual ~main_app();
 
         public:
             /// parses positional arguments into the global config
