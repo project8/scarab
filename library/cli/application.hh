@@ -17,6 +17,8 @@ namespace scarab
 {
     typedef CLI::App app;
 
+    class version_semantic;
+
     /*!
      @class application
      @author N. S. Oblath
@@ -57,14 +59,16 @@ namespace scarab
             /// called after parsing, before running callbacks
             virtual void pre_callback();
 
-            mv_referrable_const( scarab::param_node, master_config );
-            mv_referrable( scarab::param_node, default_config );
+            void set_version( version_semantic* a_ver );
+
+            mv_referrable_const( param_node, master_config );
+            mv_referrable( param_node, default_config );
 
             mv_referrable_const( std::string, config_filename );
             mv_accessible( unsigned, global_verbosity );
 
-            mv_referrable( scarab::param_node, nonoption_kw_args );
-            mv_referrable( scarab::param_array, nonoption_ord_args );
+            mv_referrable( param_node, nonoption_kw_args );
+            mv_referrable( param_array, nonoption_ord_args );
     };
 
 } /* namespace scarab */

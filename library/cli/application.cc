@@ -7,11 +7,10 @@
 
 #include "application.hh"
 
-#include "nonoption_parser.hh"
-
-#include "param_codec.hh"
-
 #include "logger.hh"
+#include "nonoption_parser.hh"
+#include "param_codec.hh"
+#include "version_wrapper.hh"
 
 using std::string;
 
@@ -34,8 +33,7 @@ namespace scarab
         add_option( "--verbosity", f_global_verbosity, "Global logger verosity" );
 
         auto t_version_callback = [](int count){
-            LPROG( applog, "PRINT VERSION INFORMATION HERE" );
-            // TODO: implement version callback
+            LPROG( applog, '\n' << version_wrapper::get_instance()->version_info_string() );
             throw CLI::Success();
         };
         add_flag_function( "-v,--version", t_version_callback, "Print the version message and exit" );
@@ -45,41 +43,17 @@ namespace scarab
     {
     }
 
+    void set_version( version_semantic* a_ver )
+    {
+        version_wrapper::get_instance()->set_imp( a_ver );
+    }
+
     void main_app::pre_callback()
     {
         // first configuration: defaults
         f_master_config.merge( f_default_config );
 
-        //std::cout << "first configuration complete" << std::endl;
-        //cout << f_master_config );
-        //cout << t_parser );
-
-        string t_name_exe( "executable" ); // the name used to specify the executable in parser
-        string t_name_json( "json" );
-
         applog.SetGlobalLevel( (logger::ELevel)f_global_verbosity );
-
-        // TODO: decide on whether we want to keep this
-/*
-        // name of executable
-        //f_exe_name = t_parser.get_value( t_name_exe, f_exe_name );
-#ifdef __APPLE__
-        char t_exe_buf[ 2048 ];
-        uint32_t t_bufsize = sizeof( t_exe_buf );
-        if( _NSGetExecutablePath( t_exe_buf, &t_bufsize ) != 0 )
-#elif __linux
-        const size_t t_bufsize = 2048;
-        char t_exe_buf[ t_bufsize ];
-        if( readlink( "/proc/self/exe", t_exe_buf, t_bufsize ) < 0 )
-#endif
-        {
-            LWARN( applog, "Could not retrieve executable file name" );
-#ifdef __APPLE__
-            LWARN( applog, "Executable name buffer is too small; needs size %u\n" << t_bufsize );
-#endif
-        }
-        f_exe_name = string( t_exe_buf );
-*/
 
         // second configuration: config file
         if( ! f_config_filename.empty() )
@@ -99,23 +73,14 @@ namespace scarab
             f_master_config.merge( t_config_from_file->as_node() );
         }
 
-        //std::cout << "second configuration complete" << std::endl;
-        //cout << f_master_config );
-        //cout << t_parser );
-
-
-        //std::cout << "third configuration complete" << std::endl;
-        //cout << f_master_config );
-        //cout << t_parser );
-
         nonoption_parser t_no_parser( remaining() );
         f_nonoption_kw_args = t_no_parser.kw_args();
         f_nonoption_ord_args = t_no_parser.ord_args();
 
+        // third configuration: keyword args
         //LDEBUG( applog, "adding command-line parser:\n" << t_parser << *f_master_config );
         f_master_config.merge( f_nonoption_kw_args );
 
-        //std::cout << "fourth configuration complete" << std::endl;
         LPROG( applog, "Final configuration:\n" << f_master_config );
         LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
     }
