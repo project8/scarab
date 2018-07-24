@@ -36,7 +36,7 @@ namespace scarab
             LPROG( applog, '\n' << version_wrapper::get_instance()->version_info_string() );
             throw CLI::Success();
         };
-        add_flag_function( "-v,--version", t_version_callback, "Print the version message and exit" );
+        add_flag_function( "-V,--version", t_version_callback, "Print the version message and exit" );
     }
 
     main_app::~main_app()

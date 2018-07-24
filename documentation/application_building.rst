@@ -46,7 +46,7 @@ Options
     Several options are available with any scarab-based application:
 
     * ``-h`` or ``--help`` will print the usage message and exit
-    * ``-v`` or ``--version`` will print the version information and exit
+    * ``-V`` or ``--version`` will print the version information and exit
     * ``-c`` or ``--config`` allows the user to provide a configuration file
     * ``--verbosity`` allows the user to set the global maximum verbosity on a scale of 0 (trace) to 6 (fatal)
 
