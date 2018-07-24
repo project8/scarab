@@ -57,7 +57,7 @@ namespace scarab
         applog.SetGlobalLevel( (logger::ELevel)f_global_verbosity );
 
         // TODO: decide on whether we want to keep this
-
+/*
         // name of executable
         //f_exe_name = t_parser.get_value( t_name_exe, f_exe_name );
 #ifdef __APPLE__
@@ -76,6 +76,7 @@ namespace scarab
 #endif
         }
         f_exe_name = string( t_exe_buf );
+*/
 
         // second configuration: config file
         path t_config_filepath = scarab::expand_path( f_config_filename );
