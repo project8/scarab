@@ -13,6 +13,8 @@ using std::stringstream;
 
 #include "param_array.hh"
 
+#include "param_node.hh"
+
 
 namespace scarab
 {
@@ -73,6 +75,16 @@ namespace scarab
         return *this;
     }
 
+    void param_array::resize( unsigned a_size )
+    {
+        f_contents.resize( a_size );
+        for( auto it = f_contents.begin(); it != f_contents.end(); ++it )
+        {
+            if( ! *it ) it->reset( new param() );
+        }
+        return;
+    }
+
     bool param_array::has_subset( const param& a_subset ) const
     {
         if( ! a_subset.is_array() ) return false;
@@ -96,7 +108,7 @@ namespace scarab
 
         for( unsigned index = 0; index < size(); ++index )
         {
-            if( f_contents[index]->is_null() )
+            if( f_contents.at( index )->is_null() )
             {
                 //LDEBUG( dlog, "have a null object at <" << index << ">; adding <" << a_object[index] << ">" );
                 assign( index, a_object[index] );
