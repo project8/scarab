@@ -45,7 +45,14 @@ if( Scarab_ENABLE_TESTING )
             test_yaml
         )
     endif( Scarab_BUILD_CODEC_YAML )
-    
+
+    if( Scarab_BUILD_CLI )
+        set( test_programs
+            ${test_programs}
+            test_nonoption_parser
+        )
+    endif( Scarab_BUILD_CLI )
+
     pbuilder_executables( test_programs lib_dependencies )
 
 endif( Scarab_ENABLE_TESTING )
