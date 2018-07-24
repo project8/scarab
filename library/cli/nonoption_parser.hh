@@ -35,6 +35,7 @@ namespace scarab
         public:
             static const char f_value_separator = '=';
             static const char f_node_separator = '.';
+            static const char f_option_starter = '-';
 
     };
 

@@ -73,9 +73,17 @@ namespace scarab
             f_master_config.merge( t_config_from_file->as_node() );
         }
 
-        nonoption_parser t_no_parser( remaining() );
-        f_nonoption_kw_args = t_no_parser.kw_args();
-        f_nonoption_ord_args = t_no_parser.ord_args();
+        try
+        {
+            nonoption_parser t_no_parser( remaining() );
+            f_nonoption_kw_args = t_no_parser.kw_args();
+            f_nonoption_ord_args = t_no_parser.ord_args();
+        }
+        catch( error& e )
+        {
+            LERROR( applog, "Unable to parse remaining arguments: " << e.what() );
+            throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
+        }
 
         // third configuration: keyword args
         //LDEBUG( applog, "adding command-line parser:\n" << t_parser << *f_master_config );

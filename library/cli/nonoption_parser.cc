@@ -30,6 +30,9 @@ namespace scarab
     {
         // this method can throw scarab::error
 
+        // if an_arg starts with '-', then it's an option and shouldn't be considered here
+        if( an_arg[0] == f_option_starter ) throw error() << "Cannot parse an option with the nonoption_parser: " << an_arg;
+
         size_t t_val_pos = an_arg.find_first_of( f_value_separator );
         if( t_val_pos != std::string::npos )
         {
