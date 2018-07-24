@@ -47,20 +47,20 @@ namespace scarab
 {
     struct do_a_thing
     {
-            do_a_thing() : f_value( 5 ) {}
+        do_a_thing() : f_value( 5 ) {}
 
-            void execute( const main_app& an_app )
-            {
-                // configure to run
-                f_value = an_app.master_config().get_value( "value", f_value );
+        void execute( const main_app& an_app )
+        {
+            // configure to run
+            f_value = an_app.master_config().get_value( "value", f_value );
 
-                // do a thing!
-                LPROG( testlog, "My value is: " << f_value );
+            // do a thing!
+            LPROG( testlog, "My value is: " << f_value );
 
-                return;
-            }
+            return;
+        }
 
-            int f_value;
+        int f_value;
     };
 }
 

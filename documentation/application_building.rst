@@ -73,6 +73,19 @@ Non-Option Arguments
 Creating an Application
 -----------------------
 
+Several examples are included below to demonstrate how one can create an application using Scarab.
+
+CLI Library
+###########
+
+Scarab uses the CLI11 library to do command-line argument parsing.  The ``CLI::App`` class has been typedef'd as ``scarab::app`` for convenience, and there is a derived class ``scarab::main_app`` that takes care of parsing the non-option arguments.
+
+Here are some useful resource for learning how to use the CLI11 library:
+
+*  `GitHub repo and README <https://github.com/CLIUtils/CLI11>`_
+*  `User manual <https://cliutils.gitlab.io/CLI11Tutorial/>`_
+*  `API reference <https://cliutils.github.io/CLI11/index.html>`_
+
 The simplest example
 ####################
 
@@ -139,5 +152,65 @@ This example captures the behavior of the application in a class, and then runs 
 
         CLI11_PARSE( the_main, argc, argv );
 
+        return 0;
+    }
+
+Example with subcommands
+########################
+
+This example uses a class with two functions that are implemented as subcommands called by callback.  Note that ``app.fallthrough()`` is used in the main function to allow non-option arguments to be collected by the main app.
+
+::
+
+    #include "application.hh"
+    #include "logger.hh"
+
+    LOGGER( testlog, "test_app_with_subcommands" );
+
+    namespace scarab
+    {
+        struct get_or_set
+        {
+            get_or_set() : f_value( 5 ) {}
+
+            void setup_subcommands( main_app& an_app )
+            {
+                app* t_sc_get = an_app.add_subcommand( "get", "Get the value" );
+                t_sc_get->callback([this]() { this->get(); } );
+
+                app* t_sc_set = an_app.add_subcommand( "set", "Set the value" );
+                t_sc_set->callback([&an_app, this]() { this->set( an_app ); } );
+
+                return;
+            }
+
+            void get()
+            {
+                LPROG( testlog, "Value is: " << f_value );
+                return;
+            }
+
+            void set( const main_app& an_app )
+            {
+                f_value = an_app.master_config().get_value( "value", f_value );
+                LPROG( testlog, "Just to check: " << f_value );
+                return;
+            }
+
+            int f_value;
+        };
+    }
+
+    using namespace scarab;
+    int main( int argc, char **argv )
+    {    
+        main_app the_main;
+        the_main.require_subcommand();
+        the_main.fallthrough();
+
+        get_or_set t_gos;
+        t_gos.setup_subcommands( the_main );
+
+        CLI11_PARSE( the_main, argc, argv );
         return 0;
     }
