@@ -10,7 +10,7 @@
 namespace scarab
 {
 
-    class nonoption_parser
+    class SCARAB_API nonoption_parser
     {
         public:
             nonoption_parser( std::vector< std::string > an_args );

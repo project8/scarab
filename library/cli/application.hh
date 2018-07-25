@@ -48,7 +48,7 @@ namespace scarab
          return 0;
     }
      */
-    class main_app : public app
+    class SCARAB_API main_app : public app
     {
         public:
             main_app();
