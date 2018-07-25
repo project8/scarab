@@ -20,7 +20,7 @@ namespace scarab
     class version_semantic;
 
     /*!
-     @class application
+     @class main_app
      @author N. S. Oblath
 
      @brief Primary application class
