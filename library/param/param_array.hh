@@ -90,18 +90,21 @@ namespace scarab
             void assign( unsigned a_index, param&& a_value );
             // directly assign a_value_ptr to the array at a_index
             void assign( unsigned a_index, param_ptr_t a_value_ptr );
-            // directly assign a_value to the array at a_index; allows implicit construction with raw types (int, string, etc)
-            void assign( unsigned a_index, param_value&& a_value );
+            // directly assign a_value to the array at a_index for any type that param_value accepts
+            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
+            void assign( unsigned a_index, T a_value );
 
             void push_back( const param& a_value );
             void push_back( param&& a_value );
             void push_back( param_ptr_t a_value_ptr );
-            void push_back( param_value&& a_value );
+            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
+            void push_back( T a_value );
 
             void push_front( const param& a_value );
             void push_front( param&& a_value );
             void push_front( param_ptr_t a_value_ptr );
-            void push_front( param_value&& a_value );
+            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
+            void push_front( T a_value );
 
             void append( const param_array& an_array );
 
@@ -228,10 +231,11 @@ namespace scarab
         return;
     }
     // directly move a_value to the array at a_index
-    inline void param_array::assign( unsigned a_index, param_value&& a_value )
+    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
+    inline void param_array::assign( unsigned a_index, T a_value )
     {
         erase( a_index );
-        f_contents[ a_index ] = a_value.move_clone();
+        f_contents[ a_index ] = param_ptr_t( new param_value( a_value ) );
         return;
     }
 
@@ -250,7 +254,8 @@ namespace scarab
         f_contents.push_back( std::move(a_value_ptr) );
         return;
     }
-    inline void param_array::push_back( param_value&& a_value )
+    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
+    inline void param_array::push_back( T a_value )
     {
         f_contents.push_back( a_value.move_clone() );
         return;
@@ -271,7 +276,8 @@ namespace scarab
         f_contents.push_front( std::move(a_value_ptr) );
         return;
     }
-    inline void param_array::push_front( param_value&& a_value )
+    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
+    inline void param_array::push_front( T a_value )
     {
         f_contents.push_front( a_value.move_clone() );
         return;
