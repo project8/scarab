@@ -257,7 +257,7 @@ namespace scarab
     template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
     inline void param_array::push_back( T a_value )
     {
-        f_contents.push_back( a_value.move_clone() );
+        f_contents.push_back( param_ptr_t( new param_value( a_value ) ) );
         return;
     }
 
@@ -279,7 +279,7 @@ namespace scarab
     template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
     inline void param_array::push_front( T a_value )
     {
-        f_contents.push_front( a_value.move_clone() );
+        f_contents.push_front( param_ptr_t( new param_value( a_value ) ) );
         return;
     }
 
