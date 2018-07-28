@@ -34,7 +34,7 @@ namespace scarab
     }
 }
 
-int main(int argc, char ** argv)
+int main(int , char ** )
 {
     // Use for option 2 (signal handling)
     //struct sigaction sigact;

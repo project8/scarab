@@ -75,21 +75,8 @@ namespace scarab
             template< typename XValType >
             XValType as() const;
 
-            void set( bool a_value );
-            void set( uint8_t a_value );
-            void set( uint16_t a_value );
-            void set( uint32_t a_value );
-            void set( uint64_t a_value );
-            void set( int8_t a_value );
-            void set( int16_t a_value );
-            void set( int32_t a_value );
-            void set( int64_t a_value );
-            void set( float a_value );
-            void set( double a_value );
-            void set( const std::string& a_value );
-            void set( const char* a_value );
-            //template< typename XValType >
-            //void set( XValType a_value );
+            template< typename XValType, typename std::enable_if< std::is_convertible< XValType, param_value >::value, XValType >::type* = nullptr >
+            void set( XValType a_value );
 
             //template< typename XStreamableType >
             //param_value& operator<<( const XStreamableType& a_streamable );
@@ -498,81 +485,10 @@ namespace scarab
         return boost::apply_visitor( as_path_visitor(), f_value );
     }
 
-    inline void param_value::set( bool a_value )
+    template< typename XValType, typename std::enable_if< std::is_convertible< XValType, param_value >::value, XValType >::type* >
+    void param_value::set( XValType a_value )
     {
         f_value = a_value;
-        return;
-    }
-
-    inline void param_value::set( uint8_t a_value )
-    {
-        f_value = uint64_t(a_value);
-        return;
-    }
-
-    inline void param_value::set( uint16_t a_value )
-    {
-        f_value = uint64_t(a_value);
-        return;
-    }
-
-    inline void param_value::set( uint32_t a_value )
-    {
-        f_value = uint64_t(a_value);
-        return;
-    }
-
-    inline void param_value::set( uint64_t a_value )
-    {
-        f_value = a_value;
-        return;
-    }
-
-    inline void param_value::set( int8_t a_value )
-    {
-        f_value = int64_t(a_value);
-        return;
-    }
-
-    inline void param_value::set( int16_t a_value )
-    {
-        f_value = int64_t(a_value);
-        return;
-    }
-
-    inline void param_value::set( int32_t a_value )
-    {
-        f_value = int64_t(a_value);
-        return;
-    }
-
-    inline void param_value::set( int64_t a_value )
-    {
-        f_value = a_value;
-        return;
-    }
-
-    inline void param_value::set( float a_value )
-    {
-        f_value = a_value;
-        return;
-    }
-
-    inline void param_value::set( double a_value )
-    {
-        f_value = a_value;
-        return;
-    }
-
-    inline void param_value::set( const std::string& a_value )
-    {
-        f_value = a_value;
-        return;
-    }
-
-    inline void param_value::set( const char* a_value )
-    {
-        f_value = std::string( a_value );
         return;
     }
 
