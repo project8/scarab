@@ -123,7 +123,9 @@ namespace scarab
             bool add( const std::string& a_name, param_ptr_t a_value_ptr );
             /// Adds a_value as a param_value; allows implicit construction with raw types (int, string, etc)
             /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
-            bool add( const std::string& a_name, param_value&& a_value );
+            //bool add( const std::string& a_name, param_value&& a_value );
+            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
+            bool add( const std::string& a_name, T a_value );
 
             /// Creates a copy of a_value; overwrites if the key exits
             void replace( const std::string& a_name, const param& a_value );
@@ -255,13 +257,26 @@ namespace scarab
         }
         return false;
     }
-
+/*
     inline bool param_node::add( const std::string& a_name, param_value&& a_value )
     {
         contents::iterator it = f_contents.find( a_name );
         if( it == f_contents.end() )
         {
             f_contents.insert( contents_type( a_name, a_value.move_clone() ) );
+            return true;
+        }
+        return false;
+    }
+*/
+    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
+    inline bool param_node::add( const std::string& a_name, T a_value )
+    {
+        //static_assert(std::is_convertible< T, param_value >::value, "Cannot convert type to param_value" );
+        contents::iterator it = f_contents.find( a_name );
+        if( it == f_contents.end() )
+        {
+            f_contents.insert( contents_type( a_name, param_ptr_t( new param_value( a_value ) ) ) );
             return true;
         }
         return false;
