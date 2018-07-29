@@ -13,6 +13,8 @@ using std::stringstream;
 
 #include "param_value.hh"
 
+#include "param_base_impl.hh"
+
 //#include "logger.hh"
 //LOGGER( dlog, "param_value" )
 
