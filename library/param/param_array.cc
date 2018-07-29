@@ -13,6 +13,8 @@ using std::stringstream;
 
 #include "param_array.hh"
 
+#include "param_base_impl.hh"
+
 
 namespace scarab
 {
