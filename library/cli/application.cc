@@ -32,10 +32,11 @@ namespace scarab
         add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
         add_option( "--verbosity", f_global_verbosity, "Global logger verosity" );
 
-        auto t_version_callback = [](int count){
-            LPROG( applog, '\n' << version_wrapper::get_instance()->version_info_string() );
-            throw CLI::Success();
-        };
+        auto t_version_callback = [](int)
+            {
+                LPROG( applog, '\n' << version_wrapper::get_instance()->version_info_string() );
+                throw CLI::Success();
+            };
         add_flag_function( "-V,--version", t_version_callback, "Print the version message and exit" );
     }
 
@@ -43,7 +44,7 @@ namespace scarab
     {
     }
 
-    void set_version( version_semantic* a_ver )
+    void main_app::set_version( version_semantic* a_ver )
     {
         version_wrapper::get_instance()->set_imp( a_ver );
     }
