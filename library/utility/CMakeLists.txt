@@ -17,6 +17,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/path.hh
     ${dir}/scarab_api.hh
     ${dir}/scarab_version.hh
+    ${dir}/signal_handler.hh
     ${dir}/singleton.hh
     ${dir}/terminate.hh
     ${dir}/time.hh
@@ -30,6 +31,7 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/digital.cc
     ${dir}/error.cc
     ${dir}/path.cc
+    ${dir}/signal_handler.cc
     ${dir}/terminate.cc
     ${dir}/time.cc
     ${dir}/typename.cc
