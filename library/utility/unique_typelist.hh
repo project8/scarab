@@ -38,23 +38,23 @@ namespace scarab
 
     // appending
     template< typename T, typename... ListItems >
-    struct append_impl;
+    struct unique_append_impl;
 
     template< typename T >
-    struct append_impl< T, type_list<> >
+    struct unique_append_impl< T, type_list<> >
     {
         using type = type_list< T >;
     };
 
     template< typename T, typename... ListItems >
-    struct append_impl< T, type_list< ListItems... > >
+    struct unique_append_impl< T, type_list< ListItems... > >
     {
-        static_assert(is_unique< T, ListItems... >::value, "Non-unique return code found");
+        static_assert(is_unique< T, ListItems... >::value, "Non-unique type found");
         using type = type_list< T, ListItems... >;
     };
 
     template< typename T, typename List >
-    using append = typename append_impl< T, List >::type;
+    using unique_append = typename unique_append_impl< T, List >::type;
 
     // for debug printing
     //template< typename T > struct debug_t;
@@ -65,18 +65,18 @@ namespace scarab
 #define TEST_LIST test_list_void
 
     typedef std::integral_constant< unsigned, 0 > zero_t;
-    using test_list_zero_t = append< zero_t, TEST_LIST >;
+    using test_list_zero_t = unique_append< zero_t, TEST_LIST >;
 #undef TEST_LIST
 #define TEST_LIST test_list_zero_t
 
     typedef std::integral_constant< unsigned, 1 > one_t;
-    using test_list_one_t = append< one_t, TEST_LIST >;
+    using test_list_one_t = unique_append< one_t, TEST_LIST >;
 #undef TEST_LIST
 #define TEST_LIST test_list_one_t
 */
 /*    // this should fail
     typedef std::integral_constant< unsigned, 1 > duplicate_t;
-    using test_list_duplicate_t = append< duplicate_t, TEST_LIST >;
+    using test_list_duplicate_t = unique_append< duplicate_t, TEST_LIST >;
 #undef TEST_LIST
 #define TEST_LIST test_list_duplicate_t
     //debug_t< TEST_LIST > d;
@@ -117,23 +117,23 @@ namespace scarab
 
     // appending
     template< int T, int... ListItems >
-    struct append_impl_int;
+    struct unique_append_impl_int;
 
     template< int T >
-    struct append_impl_int< T >
+    struct unique_append_impl_int< T >
     {
         using type = int_list< T >;
     };
 
     template< int T, int... ListItems >
-    struct append_impl_int< T, int_list< ListItems... > >
+    struct unique_append_impl_int< T, int_list< ListItems... > >
     {
         static_assert(is_unique_int< T, ListItems... >::value, "Non-unique return code found");
         using type = int_list< T, ListItems... >;
     };
 
     template< int T, typename List >
-    using append_int = typename append_impl_int< T, List >::type;
+    using unique_append_int = typename unique_append_impl_int< T, List >::type;
 
 
     // test implementation
@@ -147,20 +147,17 @@ namespace scarab
 #define TEST_LIST_INT test_list_zero_int
 
     const static int one_int = 1;
-    using test_list_one_int = append_int< one_int, TEST_LIST_INT >;
+    using test_list_one_int = unique_append_int< one_int, TEST_LIST_INT >;
 #undef TEST_LIST_INT
 #define TEST_LIST_INT test_list_one_int
 */
 /*    // this should fail
     const static int duplicate_int = 1;
-    using test_list_duplicate_t = append< duplicate_int, TEST_LIST >;
+    using test_list_duplicate_t = unique_append< duplicate_int, TEST_LIST >;
 #undef TEST_LIST
 #define TEST_LIST test_list_duplicate_int
     //debug_t< TEST_LIST > d;
 */
-
-
-
 
 }
 
