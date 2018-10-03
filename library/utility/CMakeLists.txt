@@ -22,6 +22,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/terminate.hh
     ${dir}/time.hh
     ${dir}/typename.hh
+    ${dir}/unique_typelist.hh
     ${dir}/version_base.hh
     ${dir}/version_wrapper.hh
     PARENT_SCOPE )
