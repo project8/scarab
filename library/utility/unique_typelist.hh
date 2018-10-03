@@ -3,6 +3,17 @@
  *
  *  Created on: Oct 3, 2018
  *      Author: N.S. Oblath
+ *
+ *  This file allows you to create type lists with unique elements.
+ *
+ *  The typelist itself is a standard type list, and the uniqueness of the elements is
+ *  enforced as elements are appended using `unique_append`.
+ *
+ *  Test code is commented out below as an example of how to use the append functionality.
+ *
+ *  The current version works for types; a version that made integer lists was explored but a problem was found
+ *  that didn't have an obvious work-around.  That path was abandoned because the type version can work for
+ *  integers using std::integer_constant.  The integer code is commented out below in case a work-around can be found.
  */
 
 #ifndef SCARAB_UNIQUE_TYPELIST_HH_
