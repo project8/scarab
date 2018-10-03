@@ -57,8 +57,7 @@ namespace scarab
     using append = typename append_impl< T, List >::type;
 
     // for debug printing
-    template< typename T > struct debug_t;
-
+    //template< typename T > struct debug_t;
 
     // test implementation
 /*    // this should work
