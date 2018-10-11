@@ -1,1 +1,1 @@
-sphinxcontrib.contentui
+sphinxcontrib-contentui
