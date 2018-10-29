@@ -46,7 +46,34 @@ namespace scarab
          CLI11_PARSE( the_main, argc, argv );
 
          return 0;
-    }
+     }
+
+     Notes for setting options in an application:
+
+       Stages for setting the configuration
+       1. Default options
+       2. Config file
+       3. Non-option arguments
+       4. Application-specified options
+
+       In stage 3, arguments can have two forms:
+         - Keyword arguments, in the form [name]=[value], are merged with the config.
+           They're also separately accessible as `nonoption_kw_args`
+         - Ordered arguments, in the form [value], are not merged with the config.
+           They're accessible as `nonoption_ord_args`
+
+       Application specified options are merged with the config and
+       are separately accessible as `app_options`.
+
+       Example:
+         > my_app -c config.yaml --an_opt 20 nested.value="hello"
+
+         What happens:
+         1. my_app will have default values hard-coded
+         2. File `config.yaml` will be parsed and merged with the defaults
+         3. Configuration `nested { value: "hello" }` will be merged with the config
+         4. Option `an_opt` will set something specified in the config to 20
+
      */
     class SCARAB_API main_app : public app
     {
@@ -61,14 +88,21 @@ namespace scarab
 
             void set_version( version_semantic* a_ver );
 
-            mv_referrable_const( param_node, master_config );
+            mv_referrable( param_node, master_config );
+
+            // configuration stage 1
             mv_referrable( param_node, default_config );
 
+            // configuration stage 2
             mv_referrable_const( std::string, config_filename );
             mv_accessible( unsigned, global_verbosity );
 
+            // configuration stage 3
             mv_referrable( param_node, nonoption_kw_args );
             mv_referrable( param_array, nonoption_ord_args );
+
+            // configuration stage 4
+            mv_referrable( param_node, app_options );
     };
 
 } /* namespace scarab */

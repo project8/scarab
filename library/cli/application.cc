@@ -25,7 +25,8 @@ namespace scarab
             f_config_filename(),
             f_global_verbosity( 1 ),
             f_nonoption_kw_args(),
-            f_nonoption_ord_args()
+            f_nonoption_ord_args(),
+            f_app_options()
     {
         allow_extras(); // allow unrecognized options, which are parsed into the nonoption args
 
@@ -51,12 +52,12 @@ namespace scarab
 
     void main_app::pre_callback()
     {
-        // first configuration: defaults
+        // first configuration stage: defaults
         f_master_config.merge( f_default_config );
 
         applog.SetGlobalLevel( (logger::ELevel)f_global_verbosity );
 
-        // second configuration: config file
+        // second configuration stage: config file
         if( ! f_config_filename.empty() )
         {
             path t_config_filepath = scarab::expand_path( f_config_filename );
@@ -86,9 +87,12 @@ namespace scarab
             throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
         }
 
-        // third configuration: keyword args
+        // third configuration stage: keyword args
         //LDEBUG( applog, "adding command-line parser:\n" << t_parser << *f_master_config );
         f_master_config.merge( f_nonoption_kw_args );
+
+        // fourth configuration stage: application options
+        f_master_config.merge( f_app_options );
 
         LPROG( applog, "Final configuration:\n" << f_master_config );
         LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
