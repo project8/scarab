@@ -51,22 +51,22 @@
 //**********
 
 #define mv_accessible_noset( x_type, x_variable )\
+    protected:\
+        x_type var_name( x_variable );\
     public:\
         x_type get_fcn( x_variable )() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        x_type var_name( x_variable );
+        }
 
 #define mv_accessible( x_type, x_variable )\
+    mv_accessible_noset( x_type, x_variable )\
     public:\
         void set_fcn( x_variable )( x_type p_variable )\
         {\
             var_name( x_variable ) = p_variable;\
             return;\
-        }\
-        mv_accessible_noset( x_type, x_variable )
+        }
 
 #define mv_accessible_static_noset( x_type, x_variable )\
     public:\
