@@ -15,7 +15,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
 set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/application.cc
     ${dir}/nonoption_parser.cc
-    ${dir}/deprecated/configurator.hh
-    ${dir}/deprecated/parsable.hh
-    ${dir}/deprecated/parser.hh
+    ${dir}/deprecated/configurator.cc
+    ${dir}/deprecated/parsable.cc
+    ${dir}/deprecated/parser.cc
     PARENT_SCOPE )
