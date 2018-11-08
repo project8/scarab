@@ -44,7 +44,7 @@ namespace scarab
     template< typename XReturnType >
     XReturnType configurator::get( const std::string& a_name ) const
     {
-        return f_master_config[a_name]().as< XReturnType >();
+        return f_master_config.get_value< XReturnType >( a_name );
     }
 
     template< typename XReturnType >

@@ -17,10 +17,14 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/path.hh
     ${dir}/scarab_api.hh
     ${dir}/scarab_version.hh
+    ${dir}/signal_handler.hh
     ${dir}/singleton.hh
     ${dir}/terminate.hh
     ${dir}/time.hh
     ${dir}/typename.hh
+    ${dir}/unique_typelist.hh
+    ${dir}/version_base.hh
+    ${dir}/version_wrapper.hh
     PARENT_SCOPE )
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
@@ -28,9 +32,11 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/digital.cc
     ${dir}/error.cc
     ${dir}/path.cc
+    ${dir}/signal_handler.cc
     ${dir}/terminate.cc
     ${dir}/time.cc
     ${dir}/typename.cc
+    ${dir}/version_base.cc
 )
 
 configure_file( ${dir}/scarab_version.cc.in ${CMAKE_CURRENT_BINARY_DIR}/scarab_version.cc )

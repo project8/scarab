@@ -35,13 +35,15 @@ option( Scarab_BUILD_AUTHENTICATION "Flag to enable building of the authenticati
 
 option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
 
-if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML) AND NOT Scarab_BUILD_PARAM )
-    message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs requires Param.  If you want a Codec, turn on Param.  If you want Param off, turn the Codecs off." )
-endif( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML) AND NOT Scarab_BUILD_PARAM )
+option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interface class" TRUE )
+
+if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
+    message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs, Authentication, and CLI requires Param.  If you want these elements, turn on Param.  If you want Param off, turn these elements off." )
+endif()
 
 if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
     message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the JSON Codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
-endif( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
+endif()
 
 #######################
 # Scarab dependencies #
@@ -110,6 +112,11 @@ endif( WIN32 )
 # date library
 include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/date )
 
+# cli11 library
+if( Scarab_BUILD_CLI )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/cli11 )
+endif( Scarab_BUILD_CLI )
+
 
 ########################
 # Build Scarab library #
@@ -151,6 +158,12 @@ if( Scarab_BUILD_AUTHENTICATION )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )
     add_subdirectory( authentication )
 endif( Scarab_BUILD_AUTHENTICATION )
+
+if( Scarab_BUILD_CLI )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/cli )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/cli/deprecated )
+    add_subdirectory( cli )
+endif( Scarab_BUILD_CLI )
 
 ##########
 

@@ -98,11 +98,12 @@ namespace scarab
                 add( it->first, *it->second );
                 continue;
             }
+
             param& t_param = (*this)[ it->first ];
-            if( t_param.is_value() )
+            if( t_param.is_value() && it->second->is_value() )
             {
                 //LDEBUG( dlog, "replacing the value of \"" << it->first << "\" <" << get_value( it->first ) << "> with <" << *it->second << ">" );
-                replace( it->first, *it->second );
+                t_param.as_value() = it->second->as_value();
                 continue;
             }
             if( t_param.is_node() && it->second->is_node() )
@@ -113,10 +114,11 @@ namespace scarab
             }
             if( t_param.is_array() && it->second->is_array() )
             {
-                //LDEBUG( dlog, "appending array" );
-                t_param.as_array().append( it->second->as_array() );
+                //LDEBUG( dlog, "merging array" );
+                t_param.as_array().merge( it->second->as_array() );
                 continue;
             }
+
             //LDEBUG( dlog, "generic replace" );
             this->replace( it->first, *it->second );
         }

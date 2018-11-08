@@ -108,6 +108,8 @@ namespace scarab
 
             void append( const param_array& an_array );
 
+            void merge( const param_array& an_array );
+
             void erase( unsigned a_index );
             param_ptr_t remove( unsigned a_index );
             void clear();
@@ -166,12 +168,6 @@ namespace scarab
         return f_contents.empty();
     }
 
-    inline void param_array::resize( unsigned a_size )
-    {
-        f_contents.resize( a_size );
-        return;
-    }
-
     inline std::string param_array::get_value( unsigned a_index, const std::string& a_default ) const
     {
         return a_index < size() ? operator[]( a_index ).to_string() : a_default;
@@ -213,21 +209,21 @@ namespace scarab
     inline void param_array::assign( unsigned a_index, const param& a_value )
     {
         erase( a_index );
-        f_contents[ a_index ] = a_value.clone();
+        f_contents.at( a_index ) = a_value.clone();
         return;
     }
     // directly move a_value to the array at a_index
     inline void param_array::assign( unsigned a_index, param&& a_value )
     {
         erase( a_index );
-        f_contents[ a_index ] = a_value.move_clone();
+        f_contents.at( a_index ) = a_value.move_clone();
         return;
     }
     // directly assign a_value_ptr to the array at a_index
     inline void param_array::assign( unsigned a_index, param_ptr_t a_value_ptr )
     {
         erase( a_index );
-        f_contents[ a_index ] = std::move(a_value_ptr);
+        f_contents.at( a_index ) = std::move(a_value_ptr);
         return;
     }
     // directly move a_value to the array at a_index
@@ -235,7 +231,7 @@ namespace scarab
     inline void param_array::assign( unsigned a_index, T a_value )
     {
         erase( a_index );
-        f_contents[ a_index ] = param_ptr_t( new param_value( a_value ) );
+        f_contents.at( a_index ) = param_ptr_t( new param_value( a_value ) );
         return;
     }
 
@@ -294,12 +290,12 @@ namespace scarab
 
     inline void param_array::erase( unsigned a_index )
     {
-        f_contents[ a_index ].reset();
+        f_contents.at( a_index ).reset();
         return;
     }
     inline param_ptr_t param_array::remove( unsigned a_index )
     {
-        param_ptr_t t_current( std::move( f_contents[ a_index ] ) );
+        param_ptr_t t_current( std::move( f_contents.at( a_index ) ) );
         return t_current;
     }
     inline void param_array::clear()
