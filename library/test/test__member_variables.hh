@@ -3,6 +3,8 @@
  *
  *  Created on: May 30, 2017
  *      Author: obla999
+ *
+ *  The variables in the test_acc struct include a test of doxygen-compliant documentation
  */
 
 #ifndef SCARAB_TEST__MEMBER_VARIABLE_HH_
@@ -26,7 +28,13 @@
 
 struct test_acc
 {
+    /// Very special variable f_acc_ns_int
     mv_accessible_noset( int, mv_acc_ns_int )
+    /**
+     *  Another special variable: f_acc_int
+     *  This variable is so special it requires
+     *  a multi-line comment
+     */
     mv_accessible( int, mv_acc_int )
 };
 
