@@ -51,58 +51,58 @@
 //**********
 
 #define mv_accessible_noset( x_type, x_variable )\
+    protected:\
+        x_type var_name( x_variable );\
     public:\
         x_type get_fcn( x_variable )() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        x_type var_name( x_variable );
+        }
 
 #define mv_accessible( x_type, x_variable )\
+    mv_accessible_noset( x_type, x_variable )\
     public:\
         void set_fcn( x_variable )( x_type p_variable )\
         {\
             var_name( x_variable ) = p_variable;\
             return;\
-        }\
-        mv_accessible_noset( x_type, x_variable )
+        }
 
 #define mv_accessible_static_noset( x_type, x_variable )\
+    protected:\
+        static x_type static_var_name( x_variable );\
     public:\
         static x_type get_fcn( x_variable )()\
         {\
             return static_var_name( x_variable );\
-        }\
-    protected:\
-        static x_type static_var_name( x_variable );
+        }
 
 #define mv_accessible_static( x_type, x_variable )\
+    mv_accessible_static_noset( x_type, x_variable )\
     public:\
         static void set_fcn( x_variable )( x_type p_variable )\
         {\
             static_var_name( x_variable ) = p_variable;\
             return;\
-        }\
-        mv_accessible_static_noset( x_type, x_variable )
+        }
 
 #define mv_accessible_mutable_noset( x_type, x_variable )\
+    protected:\
+        mutable x_type var_name( x_variable );\
     public:\
         x_type get_fcn( x_variable )() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        mutable x_type var_name( x_variable );
+        }
 
 #define mv_accessible_mutable( x_type, x_variable )\
+    mv_accessible_mutable_noset( x_type, x_variable )\
     public:\
         void set_fcn( x_variable )( x_type p_variable ) const\
         {\
             var_name( x_variable ) = p_variable;\
             return;\
-        }\
-        mv_accessible_mutable_noset( x_type, x_variable )
+        }
 
 
 //**************
@@ -110,39 +110,39 @@
 //**************
 
 #define mv_referrable_const( x_type, x_variable )\
+    protected:\
+        x_type var_name( x_variable );\
     public:\
         const x_type& x_variable() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        x_type var_name( x_variable );
+        }
 
 #define mv_referrable( x_type, x_variable )\
+    mv_referrable_const( x_type, x_variable )\
     public:\
         x_type& x_variable()\
         {\
             return var_name( x_variable );\
-        }\
-        mv_referrable_const( x_type, x_variable )
+        }
 
 #define mv_referrable_static( x_type, x_variable )\
+    protected:\
+        static x_type static_var_name( x_variable );\
     public:\
         static x_type& x_variable()\
         {\
             return static_var_name( x_variable );\
-        }\
-    protected:\
-        static x_type static_var_name( x_variable );
+        }
 
 #define mv_referrable_mutable( x_type, x_variable )\
+    protected:\
+        mutable x_type var_name( x_variable );\
     public:\
         x_type& x_variable() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        mutable x_type var_name( x_variable );
+        }
 
 
 //***********
@@ -150,61 +150,61 @@
 //***********
 
 #define mv_assignable_noset( x_type, x_variable )\
+    protected:\
+        x_type* var_name( x_variable );\
     public:\
         x_type* get_fcn( x_variable )() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        x_type* var_name( x_variable );
+        }
 
 #define mv_assignable( x_type, x_variable )\
+    mv_assignable_noset( x_type, x_variable )\
     public:\
         void set_fcn( x_variable )( x_type* p_variable )\
         {\
             delete var_name( x_variable );\
             var_name( x_variable ) = p_variable;\
             return;\
-        }\
-        mv_assignable_noset( x_type, x_variable )
+        }
 
 #define mv_assignable_static_noset( x_type, x_variable )\
+    protected:\
+        static x_type* static_var_name( x_variable );\
     public:\
         static x_type* get_fcn( x_variable )()\
         {\
             return static_var_name( x_variable );\
-        }\
-    protected:\
-        static x_type* static_var_name( x_variable );
+        }
 
 #define mv_assignable_static( x_type, x_variable )\
+    mv_assignable_static_noset( x_type, x_variable )\
     public:\
         static void set_fcn( x_variable )( x_type* p_variable )\
         {\
             delete static_var_name( x_variable );\
             static_var_name( x_variable ) = p_variable;\
             return;\
-        }\
-        mv_assignable_static_noset( x_type, x_variable )
+        }
 
 #define mv_assignable_mutable_noset( x_type, x_variable )\
+    protected:\
+        mutable x_type* var_name( x_variable );\
     public:\
         x_type* get_fcn( x_variable )() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        mutable x_type* var_name( x_variable );
+        }
 
 #define mv_assignable_mutable( x_type, x_variable )\
+    mv_assignable_mutable_noset( x_type, x_variable )\
     public:\
         void set_fcn( x_variable )( x_type* p_variable ) const\
         {\
             delete var_name( x_variable );\
             var_name( x_variable ) = p_variable;\
             return;\
-        }\
-        mv_assignable_mutable_noset( x_type, x_variable )
+        }
 
 
 //**************
@@ -212,39 +212,39 @@
 //**************
 
 #define mv_shared_ptr_const( x_type, x_variable )\
+    protected:\
+        std::shared_ptr< x_type > var_name( x_variable );\
     public:\
         const std::shared_ptr< x_type > x_variable() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        std::shared_ptr< x_type > var_name( x_variable );
+        }
 
 #define mv_shared_ptr( x_type, x_variable )\
+    mv_shared_ptr_const( x_type, x_variable )\
     public:\
         std::shared_ptr< x_type > x_variable()\
         {\
             return var_name( x_variable );\
-        }\
-        mv_shared_ptr_const( x_type, x_variable )
+        }
 
 #define mv_shared_ptr_static( x_type, x_variable )\
+    protected:\
+        static std::shared_ptr< x_type > static_var_name( x_variable );\
     public:\
         static std::shared_ptr< x_type >  x_variable()\
         {\
             return static_var_name( x_variable );\
-        }\
-    protected:\
-        static std::shared_ptr< x_type > static_var_name( x_variable );
+        }
 
 #define mv_shared_ptr_mutable( x_type, x_variable )\
+    protected:\
+        mutable std::shared_ptr< x_type > var_name( x_variable );\
     public:\
         std::shared_ptr< x_type > x_variable() const\
         {\
             return var_name( x_variable );\
-        }\
-    protected:\
-        mutable std::shared_ptr< x_type > var_name( x_variable );
+        }
 
 
 //**********
@@ -252,56 +252,56 @@
 //**********
 
 #define mv_atomic_noset( x_type, x_variable )\
+    protected:\
+        std::atomic< x_type > var_name( x_variable );\
     public:\
         x_type get_fcn( x_variable )() const\
         {\
             return var_name( x_variable ).load();\
-        }\
-    protected:\
-        std::atomic< x_type > var_name( x_variable );
+        }
 
 #define mv_atomic( x_type, x_variable )\
+    mv_atomic_noset( x_type, x_variable )\
     public:\
         void set_fcn( x_variable )( x_type p_variable )\
         {\
             var_name( x_variable ).store( p_variable );\
             return;\
-        }\
-        mv_atomic_noset( x_type, x_variable )
+        }
 
 #define mv_atomic_static_noset( x_type, x_variable )\
+    protected:\
+        static std::atomic< x_type > static_var_name( x_variable );\
     public:\
         static x_type get_fcn( x_variable )()\
         {\
             return static_var_name( x_variable ).load();\
-        }\
-    protected:\
-        static std::atomic< x_type > static_var_name( x_variable );
+        }
 
 #define mv_atomic_static( x_type, x_variable )\
+    mv_atomic_static_noset( x_type, x_variable )\
     public:\
         static void set_fcn( x_variable )( x_type p_variable )\
         {\
             static_var_name( x_variable ).store( p_variable );\
             return;\
-        }\
-        mv_atomic_static_noset( x_type, x_variable )
+        }
 
 #define mv_atomic_mutable_noset( x_type, x_variable )\
+    protected:\
+        mutable std::atomic< x_type > var_name( x_variable );\
     public:\
         x_type get_fcn( x_variable )() const\
         {\
             return var_name( x_variable ).load();\
-        }\
-    protected:\
-        mutable std::atomic< x_type > var_name( x_variable );
+        }
 
 #define mv_atomic_mutable( x_type, x_variable )\
+    mv_atomic_mutable_noset( x_type, x_variable )\
     public:\
         void set_fcn( x_variable )( x_type p_variable ) const\
         {\
             var_name( x_variable ).store( p_variable );\
             return;\
-        }\
-        mv_atomic_mutable_noset( x_type, x_variable )
+        }
 
