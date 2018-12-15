@@ -22,21 +22,32 @@
  * - static
  * - mutable
  *
- * How to use this file:
+ * Accessors for normal variables, pointers, and atomics are of the form [set_prefix][variable name] and [get_prefix][variable_name].
+ * Accessors for referrable variables and shared_ptr's are of the form [variable name], both const and non-const
+ *
+ * To use this template file, the client package needs to define prefixes for 
+ * set and get functions, and for normal and non-static and static variables.
+ * This definition is done in the CMake stage of the build.  As an example, 
+ * see library/utility/CMakeLists.txt where both the camel-case and snake-case 
+ * headers are created.
+ * 
+ * If you want to use either the snake-case or camel-case header, but with different 
+ * macros, you can create a new header that includes the appropriate member-variable header 
+ * and then aliases the macros.  As an example, see library/utility/member_variables.hh.
+ * 
+ * Steps for creating a header file with different prefixes and aliased macros:
  *
  * 1. Create the include file that will be used (see e.g. member_variables.hh)
  * 2. Add include guards
- * 3. Define set_prefix, get_prefix, var_prefix, and static_prefix
- * 4. #include this file
+ * 3. Include either _camel_case_member_variables.hh or _snake_case_member_variables.hh
+ * 4. Alias the camel_case_mv_ or snake_case_mv_ macros if desired
  *
- * Macros that must be defined to use this file:
+ * CMake variables that must be defined to use this file:
+ * - macro_prefix: the prefix for the macro names (e.g. snake_case_)
  * - set_prefix: the prefix for set accessor functions (e.g. set_)
  * - get_prefix: the prefix for get accessor functions (e.g. get_)
  * - var_prefix: the prefix for variables (e.g. f_)
  * - static_prefix: the prefix for static variables (e.g. s_)
- *
- * Accessors for normal variables, pointers, and atomics are of the form [set_prefix][variable name] and [get_prefix][variable_name].
- * Accessors for referrable variables and shared_ptr's are of the form [variable name], both const and non-const
  *
  */
 
