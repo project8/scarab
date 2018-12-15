@@ -1,0 +1,318 @@
+/*
+ * _member_variables.hh.in
+ *
+ *  Created on: Jan 6, 2016
+ *      Author: N.S. Oblath
+ */
+
+#include "macros.hh"
+
+/**
+ * Templates for macros for class member variables
+ *
+ * Types of variables:
+ * - "normal"
+ * - referrable (i.e. accessed by reference)
+ * - pointers
+ * - std::shared_ptr
+ * - std::atomic
+ *
+ * Variations:
+ * - no set (non-const) accessor
+ * - static
+ * - mutable
+ *
+ * Accessors for normal variables, pointers, and atomics are of the form [set_prefix][variable name] and [get_prefix][variable_name].
+ * Accessors for referrable variables and shared_ptr's are of the form [variable name], both const and non-const
+ *
+ * To use this template file, the client package needs to define prefixes for 
+ * set and get functions, and for normal and non-static and static variables.
+ * This definition is done in the CMake stage of the build.  As an example, 
+ * see library/utility/CMakeLists.txt where both the camel-case and snake-case 
+ * headers are created.
+ * 
+ * If you want to use either the snake-case or camel-case header, but with different 
+ * macros, you can create a new header that includes the appropriate member-variable header 
+ * and then aliases the macros.  As an example, see library/utility/member_variables.hh.
+ * 
+ * Steps for creating a header file with different prefixes and aliased macros:
+ *
+ * 1. Create the include file that will be used (see e.g. member_variables.hh)
+ * 2. Add include guards
+ * 3. Include either _camel_case_member_variables.hh or _snake_case_member_variables.hh
+ * 4. Alias the camel_case_mv_ or snake_case_mv_ macros if desired
+ *
+ * CMake variables that must be defined to use this file:
+ * - macro_prefix: the prefix for the macro names (e.g. snake_case_)
+ * - set_prefix: the prefix for set accessor functions (e.g. set_)
+ * - get_prefix: the prefix for get accessor functions (e.g. get_)
+ * - var_prefix: the prefix for variables (e.g. f_)
+ * - static_prefix: the prefix for static variables (e.g. s_)
+ *
+ */
+
+
+#define get_fcn( x_variable ) PASTE( @get_prefix@, x_variable )
+#define set_fcn( x_variable ) PASTE( @set_prefix@, x_variable )
+#define var_name( x_variable ) PASTE( @var_prefix@, x_variable )
+#define static_var_name( x_variable ) PASTE( @static_prefix@, x_variable )
+
+//**********
+// normal
+//**********
+
+#define @macro_prefix@mv_accessible_noset( x_type, x_variable )\
+    protected:\
+        x_type var_name( x_variable );\
+    public:\
+        x_type get_fcn( x_variable )() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_accessible( x_type, x_variable )\
+    @macro_prefix@mv_accessible_noset( x_type, x_variable )\
+    public:\
+        void set_fcn( x_variable )( x_type p_variable )\
+        {\
+            var_name( x_variable ) = p_variable;\
+            return;\
+        }
+
+#define @macro_prefix@mv_accessible_static_noset( x_type, x_variable )\
+    protected:\
+        static x_type static_var_name( x_variable );\
+    public:\
+        static x_type get_fcn( x_variable )()\
+        {\
+            return static_var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_accessible_static( x_type, x_variable )\
+    @macro_prefix@mv_accessible_static_noset( x_type, x_variable )\
+    public:\
+        static void set_fcn( x_variable )( x_type p_variable )\
+        {\
+            static_var_name( x_variable ) = p_variable;\
+            return;\
+        }
+
+#define @macro_prefix@mv_accessible_mutable_noset( x_type, x_variable )\
+    protected:\
+        mutable x_type var_name( x_variable );\
+    public:\
+        x_type get_fcn( x_variable )() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_accessible_mutable( x_type, x_variable )\
+    @macro_prefix@mv_accessible_mutable_noset( x_type, x_variable )\
+    public:\
+        void set_fcn( x_variable )( x_type p_variable ) const\
+        {\
+            var_name( x_variable ) = p_variable;\
+            return;\
+        }
+
+
+//**************
+// referrable
+//**************
+
+#define @macro_prefix@mv_referrable_const( x_type, x_variable )\
+    protected:\
+        x_type var_name( x_variable );\
+    public:\
+        const x_type& x_variable() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_referrable( x_type, x_variable )\
+    @macro_prefix@mv_referrable_const( x_type, x_variable )\
+    public:\
+        x_type& x_variable()\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_referrable_static( x_type, x_variable )\
+    protected:\
+        static x_type static_var_name( x_variable );\
+    public:\
+        static x_type& x_variable()\
+        {\
+            return static_var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_referrable_mutable( x_type, x_variable )\
+    protected:\
+        mutable x_type var_name( x_variable );\
+    public:\
+        x_type& x_variable() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+
+//***********
+// pointer
+//***********
+
+#define @macro_prefix@mv_assignable_noset( x_type, x_variable )\
+    protected:\
+        x_type* var_name( x_variable );\
+    public:\
+        x_type* get_fcn( x_variable )() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_assignable( x_type, x_variable )\
+    @macro_prefix@mv_assignable_noset( x_type, x_variable )\
+    public:\
+        void set_fcn( x_variable )( x_type* p_variable )\
+        {\
+            delete var_name( x_variable );\
+            var_name( x_variable ) = p_variable;\
+            return;\
+        }
+
+#define @macro_prefix@mv_assignable_static_noset( x_type, x_variable )\
+    protected:\
+        static x_type* static_var_name( x_variable );\
+    public:\
+        static x_type* get_fcn( x_variable )()\
+        {\
+            return static_var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_assignable_static( x_type, x_variable )\
+    @macro_prefix@mv_assignable_static_noset( x_type, x_variable )\
+    public:\
+        static void set_fcn( x_variable )( x_type* p_variable )\
+        {\
+            delete static_var_name( x_variable );\
+            static_var_name( x_variable ) = p_variable;\
+            return;\
+        }
+
+#define @macro_prefix@mv_assignable_mutable_noset( x_type, x_variable )\
+    protected:\
+        mutable x_type* var_name( x_variable );\
+    public:\
+        x_type* get_fcn( x_variable )() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_assignable_mutable( x_type, x_variable )\
+    @macro_prefix@mv_assignable_mutable_noset( x_type, x_variable )\
+    public:\
+        void set_fcn( x_variable )( x_type* p_variable ) const\
+        {\
+            delete var_name( x_variable );\
+            var_name( x_variable ) = p_variable;\
+            return;\
+        }
+
+
+//**************
+// shared_ptr
+//**************
+
+#define @macro_prefix@mv_shared_ptr_const( x_type, x_variable )\
+    protected:\
+        std::shared_ptr< x_type > var_name( x_variable );\
+    public:\
+        const std::shared_ptr< x_type > x_variable() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_shared_ptr( x_type, x_variable )\
+    @macro_prefix@mv_shared_ptr_const( x_type, x_variable )\
+    public:\
+        std::shared_ptr< x_type > x_variable()\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_shared_ptr_static( x_type, x_variable )\
+    protected:\
+        static std::shared_ptr< x_type > static_var_name( x_variable );\
+    public:\
+        static std::shared_ptr< x_type >  x_variable()\
+        {\
+            return static_var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_shared_ptr_mutable( x_type, x_variable )\
+    protected:\
+        mutable std::shared_ptr< x_type > var_name( x_variable );\
+    public:\
+        std::shared_ptr< x_type > x_variable() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+
+//**********
+// atomic
+//**********
+
+#define @macro_prefix@mv_atomic_noset( x_type, x_variable )\
+    protected:\
+        std::atomic< x_type > var_name( x_variable );\
+    public:\
+        x_type get_fcn( x_variable )() const\
+        {\
+            return var_name( x_variable ).load();\
+        }
+
+#define @macro_prefix@mv_atomic( x_type, x_variable )\
+    @macro_prefix@mv_atomic_noset( x_type, x_variable )\
+    public:\
+        void set_fcn( x_variable )( x_type p_variable )\
+        {\
+            var_name( x_variable ).store( p_variable );\
+            return;\
+        }
+
+#define @macro_prefix@mv_atomic_static_noset( x_type, x_variable )\
+    protected:\
+        static std::atomic< x_type > static_var_name( x_variable );\
+    public:\
+        static x_type get_fcn( x_variable )()\
+        {\
+            return static_var_name( x_variable ).load();\
+        }
+
+#define @macro_prefix@mv_atomic_static( x_type, x_variable )\
+    @macro_prefix@mv_atomic_static_noset( x_type, x_variable )\
+    public:\
+        static void set_fcn( x_variable )( x_type p_variable )\
+        {\
+            static_var_name( x_variable ).store( p_variable );\
+            return;\
+        }
+
+#define @macro_prefix@mv_atomic_mutable_noset( x_type, x_variable )\
+    protected:\
+        mutable std::atomic< x_type > var_name( x_variable );\
+    public:\
+        x_type get_fcn( x_variable )() const\
+        {\
+            return var_name( x_variable ).load();\
+        }
+
+#define @macro_prefix@mv_atomic_mutable( x_type, x_variable )\
+    @macro_prefix@mv_atomic_mutable_noset( x_type, x_variable )\
+    public:\
+        void set_fcn( x_variable )( x_type p_variable ) const\
+        {\
+            var_name( x_variable ).store( p_variable );\
+            return;\
+        }
+

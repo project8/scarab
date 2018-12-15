@@ -2,7 +2,7 @@
  * member_variables.hh
  *
  *  Created on: Jan 6, 2016
- *      Author: nsoblath
+ *      Author: N.S. Oblath
  */
 
 #ifndef SCARAB_MEMBER_VARIABLES_HH_
@@ -55,11 +55,38 @@
  *
  */
 
-#define set_prefix set_
-#define get_prefix get_
-#define var_prefix f_
-#define static_prefix s_
+#include "_snake_case_member_variables.hh"
 
-#include "_member_variables.hh"
+#define mv_accessible                         snake_case_mv_accessible
+#define mv_accessible_noset                   snake_case_mv_accessible_noset
+#define mv_accessible_static                  snake_case_mv_accessible_static
+#define mv_accessible_static_noset            snake_case_mv_accessible_static_noset
+#define mv_accessible_mutable                 snake_case_mv_accessible_mutable
+#define mv_accessible_mutable_noset           snake_case_mv_accessible_mutable_noset
+
+#define mv_referrable                         snake_case_mv_referrable
+#define mv_referrable_const                   snake_case_mv_referrable_const
+#define mv_referrable_static                  snake_case_mv_referrable_static
+#define mv_referrable_mutable                 snake_case_mv_referrable_mutable
+
+#define mv_assignable                         snake_case_mv_assignable
+#define mv_assignable_noset                   snake_case_mv_assignable_noset
+#define mv_assignable_static                  snake_case_mv_assignable_static
+#define mv_assignable_static_noset            snake_case_mv_assignable_static_noset
+#define mv_assignable_mutable                 snake_case_mv_assignable_mutable
+#define mv_assignable_mutable_noset           snake_case_mv_assignable_mutable_noset
+
+#define mv_shared_ptr                         snake_case_mv_shared_ptr
+#define mv_shared_ptr_const                   snake_case_mv_shared_ptr_const
+#define mv_shared_ptr_static                  snake_case_mv_shared_ptr_static
+#define mv_shared_ptr_mutable                 snake_case_mv_shared_ptr_mutable
+
+#define mv_atomic                             snake_case_mv_atomic
+#define mv_atomic_noset                       snake_case_mv_atomic_noset
+#define mv_atomic_static                      snake_case_mv_atomic_static
+#define mv_atomic_static_noset                snake_case_mv_atomic_static_noset
+#define mv_atomic_mutable                     snake_case_mv_atomic_mutable
+#define mv_atomic_mutable_noset               snake_case_mv_atomic_mutable_noset
+
 
 #endif /* SCARAB_MEMBER_VARIABLES_HH_ */

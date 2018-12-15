@@ -136,6 +136,7 @@ include_directories( BEFORE
 set( Scarab_HEADERS )
 set( Scarab_SOURCES )
 
+include_directories( BEFORE ${CMAKE_CURRENT_BINARY_DIR}/utility )
 add_subdirectory( utility )
 add_subdirectory( logger )
 
