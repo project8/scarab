@@ -37,8 +37,8 @@ int main( int argc, char** argv )
     scarab::param_node node = t_param_location->as_node();
     LDEBUG(slog, node);
     LDEBUG(slog, "Five: " << node["five"]());
-    LDEBUG(slog, "Subarray1: " << node["subarray1"]());
-    LDEBUG(slog, "Subarray2: " << node["subarray2"]());
+    LDEBUG(slog, "Subarray1: " << node["subarray1"]);
+    LDEBUG(slog, "Subarray2: " << node["subarray2"]);
 
     //write file
     param_output_yaml t_output;

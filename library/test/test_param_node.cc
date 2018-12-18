@@ -42,6 +42,7 @@
  */
 
 #include "param.hh"
+#include "param_yaml.hh"
 
 #include "logger.hh"
 
@@ -76,6 +77,17 @@ int main()
     LINFO( testlog, node["five"]() );
     LINFO( testlog, node["subarray1"][0]() );
     LINFO( testlog, node["subarray2"][0]() );
+
+    param_output_yaml t_output;
+    bool t_did_write_file = t_output.write_file( node, "test_output.yaml" );
+
+    if( ! t_did_write_file )
+    {
+        LERROR( testlog, "File did not write!" );
+        return -1;
+    }
+
+    LINFO( testlog, "File written successfully (test_output.yaml)" );
 
     return 0;
 }
