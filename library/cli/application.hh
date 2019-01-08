@@ -88,6 +88,9 @@ namespace scarab
 
             void set_version( version_semantic* a_ver );
 
+            template< typename XValType >
+            void set_app_option( const std::string& a_parsable );
+
             mv_referrable( param_node, master_config );
 
             // configuration stage 1
@@ -104,6 +107,12 @@ namespace scarab
             // configuration stage 4
             mv_referrable( param_node, app_options );
     };
+
+    template< typename XValType >
+    void main_app::set_app_option< XValType >( const std::string& a_parsable )
+    {
+
+    }
 
 } /* namespace scarab */
 
