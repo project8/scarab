@@ -12,6 +12,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/error.hh
     ${dir}/factory.hh
     ${dir}/macros.hh
+    ${dir}/map_at_default.hh
     ${dir}/member_variables.hh
     ${dir}/path.hh
     ${dir}/scarab_api.hh
