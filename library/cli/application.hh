@@ -11,7 +11,7 @@
 #include "CLI11.hpp"
 
 #include "member_variables.hh"
-#include "param.hh"
+#include "param_helpers.hh"
 
 namespace scarab
 {
@@ -88,8 +88,16 @@ namespace scarab
 
             void set_version( version_semantic* a_ver );
 
-            template< typename XValType >
-            void set_app_option( const std::string& a_parsable );
+            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
+            CLI::Option* add_config_option( std::string a_name,
+                               std::string a_master_config_addr,
+                               std::string a_description = "" );
+
+            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
+            CLI::Option* add_config_option( std::string a_name,
+                               std::string a_master_config_addr,
+                               std::string a_description,
+                               bool a_defaulted );
 
             mv_referrable( param_node, master_config );
 
@@ -106,13 +114,59 @@ namespace scarab
 
             // configuration stage 4
             mv_referrable( param_node, app_options );
+
+        private:
+            struct app_option_holder
+            {
+                virtual void add_to_app_options( param_node& a_app_options ) = 0;
+                CLI::Option* f_option;
+                std::string f_master_config_addr;
+            };
+
+            template< typename T >
+            struct app_option_holder_typed : app_option_holder
+            {
+                void add_to_app_options( param_node& a_app_options )
+                {
+                    param_ptr_t t_new_config_ptr = simple_parser::parse_address(
+                            f_master_config_addr,
+                            param_ptr_t( new param_value(f_value) ) ); // throws scarab::error if top-level param object is not a node
+                    a_app_options.merge( t_new_config_ptr->as_node() );
+                    return;
+                }
+                T f_value;
+            };
+
+            typedef std::vector< std::shared_ptr< app_option_holder > > app_option_holders_t;
+            typedef app_option_holders_t::const_iterator app_opt_holders_c_it;
+            std::vector< std::shared_ptr< app_option_holder > > f_app_option_holders;
     };
 
-    template< typename XValType >
-    void main_app::set_app_option< XValType >( const std::string& a_parsable )
+    template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
+    CLI::Option* main_app::add_config_option( std::string a_name,
+                       std::string a_master_config_addr,
+                       std::string a_description )
     {
-
+        auto t_opt_holder_ptr = std::make_shared< app_option_holder_typed<T> >();
+        t_opt_holder_ptr->f_option = add_option( a_name, t_opt_holder_ptr->f_value, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
+        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
+        f_app_option_holders.push_back( t_opt_holder_ptr );
+        return t_opt_holder_ptr->f_option;
     }
+
+    template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
+    CLI::Option* main_app::add_config_option( std::string a_name,
+                       std::string a_master_config_addr,
+                       std::string a_description,
+                       bool a_defaulted )
+    {
+        auto t_opt_holder_ptr = std::make_shared< app_option_holder_typed<T> >();
+        t_opt_holder_ptr->f_option = add_option( a_name, t_opt_holder_ptr->f_value, a_description, a_defaulted ); // throws CLI::OptionAlreadyAdded if the option's already there
+        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
+        f_app_option_holders.push_back( t_opt_holder_ptr );
+        return t_opt_holder_ptr->f_option;
+    }
+
 
 } /* namespace scarab */
 

@@ -92,6 +92,8 @@ namespace scarab
         f_master_config.merge( f_nonoption_kw_args );
 
         // fourth configuration stage: application options
+        std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
+                       [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
         f_master_config.merge( f_app_options );
 
         LPROG( applog, "Final configuration:\n" << f_master_config );
