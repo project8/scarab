@@ -136,6 +136,7 @@ include_directories( BEFORE
 set( Scarab_HEADERS )
 set( Scarab_SOURCES )
 
+include_directories( BEFORE ${CMAKE_CURRENT_BINARY_DIR}/utility )
 add_subdirectory( utility )
 add_subdirectory( logger )
 
@@ -161,6 +162,7 @@ endif( Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CLI )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/cli )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/cli/deprecated )
     add_subdirectory( cli )
 endif( Scarab_BUILD_CLI )
 

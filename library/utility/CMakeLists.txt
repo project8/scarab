@@ -5,7 +5,6 @@
 set( dir ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set( Scarab_HEADERS ${Scarab_HEADERS}
-    ${dir}/_member_variables.hh
     ${dir}/cancelable.hh
     ${dir}/concurrent_queue.hh
     ${dir}/destroyer.hh
@@ -13,6 +12,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/error.hh
     ${dir}/factory.hh
     ${dir}/macros.hh
+    ${dir}/map_at_default.hh
     ${dir}/member_variables.hh
     ${dir}/path.hh
     ${dir}/scarab_api.hh
@@ -25,7 +25,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/unique_typelist.hh
     ${dir}/version_base.hh
     ${dir}/version_wrapper.hh
-    PARENT_SCOPE )
+)
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/cancelable.cc
@@ -38,6 +38,27 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/typename.cc
     ${dir}/version_base.cc
 )
+
+set( macro_prefix camel_case_)
+set( set_prefix Set )
+set( get_prefix Get )
+set( var_prefix f )
+set( static_prefix s )
+configure_file( _member_variables.hh.in _camel_case_member_variables.hh @ONLY )    
+        
+set( macro_prefix snake_case_)
+set( set_prefix set_ )
+set( get_prefix get_ )
+set( var_prefix f_ )
+set( static_prefix s_ )
+configure_file( _member_variables.hh.in _snake_case_member_variables.hh @ONLY )
+
+set( Scarab_HEADERS
+    ${Scarab_HEADERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/_camel_case_member_variables.hh
+    ${CMAKE_CURRENT_BINARY_DIR}/_snake_case_member_variables.hh
+    PARENT_SCOPE )    
+
 
 configure_file( ${dir}/scarab_version.cc.in ${CMAKE_CURRENT_BINARY_DIR}/scarab_version.cc )
 set( Scarab_SOURCES
