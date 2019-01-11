@@ -115,7 +115,7 @@ namespace scarab
             // configuration stage 4
             mv_referrable( param_node, app_options );
 
-        private:
+        protected:
             struct app_option_holder
             {
                 virtual void add_to_app_options( param_node& a_app_options ) = 0;
