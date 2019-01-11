@@ -26,10 +26,15 @@ namespace scarab
      @brief Primary application class
 
      @details
-     See CLI11 documentation for the CLI::App class:
-     - GitHub Readme: https://github.com/CLIUtils/CLI11
-     - Tutorial: https://cliutils.gitlab.io/CLI11Tutorial
-     - API: https://cliutils.github.io/CLI11/index.html
+     This class is designed to provide an entry point for an application, and to setup the application's configuration
+     based on information provided by the user at the command line.
+
+     The application's master "configuration" is in the form of a scarab::param_node object that takes input from
+     default values, a configuration file, directly-addressed arguments, and application-specific options.
+
+     The `main_app` class uses and makes available all of the functionality of the CLI11 library, and
+     in particular it directly extends the CLI::App class.  Links to documentation on how to use CLI11
+     are provided below.
 
      Basic usage (customized from CLI11's basic usage):
 
@@ -48,7 +53,18 @@ namespace scarab
          return 0;
      }
 
-     Notes for setting options in an application:
+     Notes on specifying and using command-line arguments:
+
+       There are two main types of command-line arguments:
+       1. "Options" are named arguments.  On the command line they look like `-b [value]`, `--broker [value]`, or `-r` (flag with no value)
+       2. "Non-option" arguments have no name, and typically rely on the order they fall on the command line to interpret their meaning.
+
+       Options need to be specified in an application (i.e. CLI11 needs to know about them at compile time).
+       All of the functionality of CLI11 is available when using `main_app`,
+       so you can create options and flags (options with no values) that do not affect the configuration.
+       Alternatively, `main_app` provides the ability to define options that are automatically added to the configuration (see below).
+
+     Notes for setting the configuration in an application:
 
        Stages for setting the configuration
        1. Default options
@@ -57,13 +73,15 @@ namespace scarab
        4. Application-specified options
 
        In stage 3, arguments can have two forms:
-         - Keyword arguments, in the form [name]=[value], are merged with the config.
+         - Keyword arguments, in the form [name]=[value], are merged with the master config.
            They're also separately accessible as `nonoption_kw_args`
-         - Ordered arguments, in the form [value], are not merged with the config.
+         - Ordered arguments, in the form [value], are not merged with the master config.
            They're accessible as `nonoption_ord_args`
 
        Application specified options are merged with the config and
-       are separately accessible as `app_options`.
+       are separately accessible as `app_options`.  They have to be specified
+       in the application using `add_config_option()`, which will map
+       the option name to an address in the master config.
 
        Example:
          > my_app -c config.yaml --an_opt 20 nested.value="hello"
@@ -71,9 +89,20 @@ namespace scarab
          What happens:
          1. my_app will have default values hard-coded
          2. File `config.yaml` will be parsed and merged with the defaults
-         3. Configuration `nested { value: "hello" }` will be merged with the config
+         3. Configuration `nested { value: "hello" }` will be merged with the master config
          4. Option `an_opt` will set something specified in the config to 20
 
+     See CLI11 documentation for the CLI::App class:
+     - GitHub Readme: https://github.com/CLIUtils/CLI11
+     - Tutorial: https://cliutils.gitlab.io/CLI11Tutorial
+     - API: https://cliutils.github.io/CLI11/index.html
+
+     There are several test examples that can be used as useful references on different ways that
+     applications can be setup.  You'll find them in the scarab/library/test directory.
+     - test_app_with_callback.cc -- an example that runs a program using a callback function
+     - test_app_with_options.cc -- an example using basic CLI11 options (i.e. options that don't modify the configuration)
+     - test_app_with_subcommands.cc -- an example with two subcommands.  e.g. my_app do_action_A --an_option=6
+     - test_basic_application.cc -- the example above
      */
     class SCARAB_API main_app : public app
     {
