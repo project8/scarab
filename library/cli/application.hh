@@ -78,10 +78,13 @@ namespace scarab
          - Ordered arguments, in the form [value], are not merged with the master config.
            They're accessible as `nonoption_ord_args`
 
-       Application specified options are merged with the config and
+       Application specified options (stage 4) are merged with the config and
        are separately accessible as `app_options`.  They have to be specified
        in the application using `add_config_option()`, which will map
        the option name to an address in the master config.
+
+       The functionality for each stage is implemented in its own virtual function,
+       so a subclass can customize the procedure as needed.
 
        Example:
          > my_app -c config.yaml --an_opt 20 nested.value="hello"
@@ -114,6 +117,16 @@ namespace scarab
             /// parses positional arguments into the global config
             /// called after parsing, before running callbacks
             virtual void pre_callback();
+
+            // Functions to perform each configuration stage
+            /// Load default values
+            virtual void do_config_stage_1();
+            /// Load the config file
+            virtual void do_config_stage_2();
+            /// Load the directly-addressed non-option arguments
+            virtual void do_config_stage_3();
+            /// Load the application-specific options
+            virtual void do_config_stage_4();
 
             void set_version( version_semantic* a_ver );
 
