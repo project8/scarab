@@ -99,23 +99,33 @@ namespace scarab
                                std::string a_description,
                                bool a_defaulted );
 
+            /// Master configuration tree for the application
             mv_referrable( param_node, master_config );
 
             // configuration stage 1
+            /// Default configuration values
             mv_referrable( param_node, default_config );
 
             // configuration stage 2
+            /// Configuration file name
             mv_referrable_const( std::string, config_filename );
+            /// Global verbosity value
             mv_accessible( unsigned, global_verbosity );
 
             // configuration stage 3
+            /// Keyword configuration values coming from the command line, in the form: config.address=value
             mv_referrable( param_node, nonoption_kw_args );
+            /// Ordered configuration values coming in an application-specific order from the command line, in the form: value
             mv_referrable( param_array, nonoption_ord_args );
 
             // configuration stage 4
+            /// Application-specific options that are specified using add_config_option() functions
             mv_referrable( param_node, app_options );
 
         protected:
+            // these structs provide a type erasure mechanism that:
+            //  - holds the actual value provided on the CL, and
+            //  - adds the value to the f_app_options, and then to the global config, from the pre_callback function
             struct app_option_holder
             {
                 virtual void add_to_app_options( param_node& a_app_options ) = 0;
@@ -137,8 +147,6 @@ namespace scarab
                 T f_value;
             };
 
-            typedef std::vector< std::shared_ptr< app_option_holder > > app_option_holders_t;
-            typedef app_option_holders_t::const_iterator app_opt_holders_c_it;
             std::vector< std::shared_ptr< app_option_holder > > f_app_option_holders;
     };
 
