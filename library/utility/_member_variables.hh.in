@@ -5,6 +5,9 @@
  *      Author: N.S. Oblath
  */
 
+#ifndef @macro_prefix@SCARAB_UTILITY_MEMBER_VARIABLES_HH_
+#define @macro_prefix@SCARAB_UTILITY_MEMBER_VARIABLES_HH_
+
 #include "macros.hh"
 
 /**
@@ -51,11 +54,15 @@
  *
  */
 
+#ifndef SCARAB_UTILITY_MEMBER_VARIABLES_FCNS
+#define SCARAB_UTILITY_MEMBER_VARIABLES_FCNS
 
 #define get_fcn( x_variable ) PASTE( @get_prefix@, x_variable )
 #define set_fcn( x_variable ) PASTE( @set_prefix@, x_variable )
 #define var_name( x_variable ) PASTE( @var_prefix@, x_variable )
 #define static_var_name( x_variable ) PASTE( @static_prefix@, x_variable )
+
+#endif /* SCARAB_UTILITY_MEMBER_VARIABLES_FCNS */
 
 //**********
 // normal
@@ -316,3 +323,4 @@
             return;\
         }
 
+#endif /* @macro_prefix@SCARAB_UTILITY_MEMBER_VARIABLES_HH_ */
