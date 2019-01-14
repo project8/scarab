@@ -180,6 +180,7 @@ namespace scarab
             {
                 void add_to_app_options( param_node& a_app_options )
                 {
+                    if( ! (*f_option) ) return;
                     param_ptr_t t_new_config_ptr = simple_parser::parse_address(
                             f_master_config_addr,
                             param_ptr_t( new param_value(f_value) ) ); // throws scarab::error if top-level param object is not a node
