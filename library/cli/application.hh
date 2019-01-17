@@ -19,6 +19,91 @@ namespace scarab
 
     class version_semantic;
 
+    class main_app;
+
+    /*!
+     @class config_decorator
+     @author N. S. Oblath
+
+     @brief Adds the ability to create options and subcommands that are tied to a main_app's master config
+
+     @details
+     Note that while this class is called a decorator, it does not follow the actual decorator pattern.
+     It does, however, follow the spirit of that pattern in that it adds a capability to the CLI::App class.
+
+     Subcommands and options are tied to the main_app in slightly different ways because of the different ways
+     in which those two CLI11 classes are used.
+
+     Subcommands are CLI::App objects, and any App can have subcommands.  Therefore the collection of Apps in
+     use in a given application can form a multi-level parent-child structure.  Each parent App can have multiple
+     children, and owns those child App objects.  The children can also be parents, of course.
+     The scarab::config_decorator for each subcommand App object is created by the parent config_decorator's
+     add_config_subcommand() function.  That decorator has a link to its App and is owned by its parent decorator.
+
+     At the top of the App hierarchy is the primary App.  In Scarab, that's the main_app, which also inherits from
+     config_decorator.  So main_app is also the top of the config_decorator hierarchy.
+
+     Options, on the other hand, do not form their own hierarchy.  Each App owns its options.  On the Scarab side,
+     though, even options that belong to subcommands contribute to the main_app's master config.  Therefore when
+     config_decorator::add_config_option() is used, the app_option_holder that corresponds to the new option is
+     given directly to the main_app.
+    */
+    class SCARAB_API config_decorator
+    {
+        public:
+            config_decorator( main_app* a_main, app* a_this_app );
+            virtual ~config_decorator();
+
+            main_app* main() const;
+            app* this_app() const;
+
+            /// Add a subcommand that is linked to a particular main_app and can create options that modify that main_app's master config
+            config_decorator* add_config_subcommand( std::string a_subcommand_name, std::string a_description="" );
+
+            /// Add an option that gets automatically added to the master config of a main_app
+            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
+            CLI::Option* add_config_option( std::string a_name,
+                               std::string a_master_config_addr,
+                               std::string a_description = "" );
+
+        public:
+            // these structs provide a type erasure mechanism that:
+            //  - holds the actual value provided on the CL, and
+            //  - adds the value to the f_app_options, and then to the global config, from the pre_callback function
+            struct app_option_holder
+            {
+                virtual void add_to_app_options( param_node& a_app_options ) = 0;
+                CLI::Option* f_option;
+                std::string f_master_config_addr;
+                virtual ~app_option_holder() {}
+            };
+
+            template< typename T >
+            struct app_option_holder_typed : app_option_holder
+            {
+                void add_to_app_options( param_node& a_app_options )
+                {
+                    if( ! (*f_option) ) return;
+                    param_ptr_t t_new_config_ptr = simple_parser::parse_address(
+                            f_master_config_addr,
+                            param_ptr_t( new param_value(f_value) ) ); // throws scarab::error if top-level param object is not a node
+                    a_app_options.merge( t_new_config_ptr->as_node() );
+                    return;
+                }
+                T f_value;
+                virtual ~app_option_holder_typed() {}
+            };
+
+        protected:
+            main_app* f_main;
+            app* f_this;
+
+            // config_decorator owns the decorators of subcommands just like app owns the apps of subcommands
+            using conf_dec_ptr_t = std::unique_ptr< config_decorator >;
+            std::vector< conf_dec_ptr_t > f_subcommand_decorators;
+    };
+
+
     /*!
      @class main_app
      @author N. S. Oblath
@@ -107,7 +192,7 @@ namespace scarab
      - test_app_with_subcommands.cc -- an example with two subcommands.  e.g. my_app do_action_A --an_option=6
      - test_basic_application.cc -- the example above
      */
-    class SCARAB_API main_app : public app
+    class SCARAB_API main_app : public config_decorator, public app
     {
         public:
             main_app();
@@ -130,16 +215,16 @@ namespace scarab
 
             void set_version( version_semantic* a_ver );
 
-            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
-            CLI::Option* add_config_option( std::string a_name,
-                               std::string a_master_config_addr,
-                               std::string a_description = "" );
+//            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
+//            CLI::Option* add_config_option( std::string a_name,
+//                               std::string a_master_config_addr,
+//                               std::string a_description = "" );
 
-            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
-            CLI::Option* add_config_option( std::string a_name,
-                               std::string a_master_config_addr,
-                               std::string a_description,
-                               bool a_defaulted );
+//            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
+//            CLI::Option* add_config_option( std::string a_name,
+//                               std::string a_master_config_addr,
+//                               std::string a_description,
+//                               bool a_defaulted );
 
             /// Master configuration tree for the application
             mv_referrable( param_node, master_config );
@@ -164,7 +249,11 @@ namespace scarab
             /// Application-specific options that are specified using add_config_option() functions
             mv_referrable( param_node, app_options );
 
+            mv_referrable( std::vector< std::shared_ptr< app_option_holder > >, app_option_holders );
+            /*
+
         protected:
+
             // these structs provide a type erasure mechanism that:
             //  - holds the actual value provided on the CL, and
             //  - adds the value to the f_app_options, and then to the global config, from the pre_callback function
@@ -173,6 +262,7 @@ namespace scarab
                 virtual void add_to_app_options( param_node& a_app_options ) = 0;
                 CLI::Option* f_option;
                 std::string f_master_config_addr;
+                virtual ~app_option_holder() {}
             };
 
             template< typename T >
@@ -188,11 +278,13 @@ namespace scarab
                     return;
                 }
                 T f_value;
+                virtual ~app_option_holder_typed() {}
             };
 
             std::vector< std::shared_ptr< app_option_holder > > f_app_option_holders;
+            */
     };
-
+/*
     template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
     CLI::Option* main_app::add_config_option( std::string a_name,
                        std::string a_master_config_addr,
@@ -204,7 +296,8 @@ namespace scarab
         f_app_option_holders.push_back( t_opt_holder_ptr );
         return t_opt_holder_ptr->f_option;
     }
-
+    */
+/*
     template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
     CLI::Option* main_app::add_config_option( std::string a_name,
                        std::string a_master_config_addr,
@@ -217,6 +310,30 @@ namespace scarab
         f_app_option_holders.push_back( t_opt_holder_ptr );
         return t_opt_holder_ptr->f_option;
     }
+*/
+
+    template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
+    CLI::Option* config_decorator::add_config_option( std::string a_name,
+                       std::string a_master_config_addr,
+                       std::string a_description )
+    {
+        auto t_opt_holder_ptr = std::make_shared< app_option_holder_typed<T> >();
+        t_opt_holder_ptr->f_option = f_this->add_option( a_name, t_opt_holder_ptr->f_value, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
+        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
+        f_main->app_option_holders().push_back( t_opt_holder_ptr );
+        return t_opt_holder_ptr->f_option;
+    }
+
+    inline app* config_decorator::this_app() const
+    {
+        return f_this;
+    }
+
+    inline main_app* config_decorator::main() const
+    {
+        return f_main;
+    }
+
 
 
 } /* namespace scarab */
