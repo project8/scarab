@@ -215,17 +215,6 @@ namespace scarab
 
             void set_version( version_semantic* a_ver );
 
-//            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
-//            CLI::Option* add_config_option( std::string a_name,
-//                               std::string a_master_config_addr,
-//                               std::string a_description = "" );
-
-//            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
-//            CLI::Option* add_config_option( std::string a_name,
-//                               std::string a_master_config_addr,
-//                               std::string a_description,
-//                               bool a_defaulted );
-
             /// Master configuration tree for the application
             mv_referrable( param_node, master_config );
 
@@ -249,68 +238,10 @@ namespace scarab
             /// Application-specific options that are specified using add_config_option() functions
             mv_referrable( param_node, app_options );
 
+            /// Store the app option holder structs from this app and any subcommands
             mv_referrable( std::vector< std::shared_ptr< app_option_holder > >, app_option_holders );
-            /*
-
-        protected:
-
-            // these structs provide a type erasure mechanism that:
-            //  - holds the actual value provided on the CL, and
-            //  - adds the value to the f_app_options, and then to the global config, from the pre_callback function
-            struct app_option_holder
-            {
-                virtual void add_to_app_options( param_node& a_app_options ) = 0;
-                CLI::Option* f_option;
-                std::string f_master_config_addr;
-                virtual ~app_option_holder() {}
-            };
-
-            template< typename T >
-            struct app_option_holder_typed : app_option_holder
-            {
-                void add_to_app_options( param_node& a_app_options )
-                {
-                    if( ! (*f_option) ) return;
-                    param_ptr_t t_new_config_ptr = simple_parser::parse_address(
-                            f_master_config_addr,
-                            param_ptr_t( new param_value(f_value) ) ); // throws scarab::error if top-level param object is not a node
-                    a_app_options.merge( t_new_config_ptr->as_node() );
-                    return;
-                }
-                T f_value;
-                virtual ~app_option_holder_typed() {}
-            };
-
-            std::vector< std::shared_ptr< app_option_holder > > f_app_option_holders;
-            */
     };
-/*
-    template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
-    CLI::Option* main_app::add_config_option( std::string a_name,
-                       std::string a_master_config_addr,
-                       std::string a_description )
-    {
-        auto t_opt_holder_ptr = std::make_shared< app_option_holder_typed<T> >();
-        t_opt_holder_ptr->f_option = add_option( a_name, t_opt_holder_ptr->f_value, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
-        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
-        f_app_option_holders.push_back( t_opt_holder_ptr );
-        return t_opt_holder_ptr->f_option;
-    }
-    */
-/*
-    template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
-    CLI::Option* main_app::add_config_option( std::string a_name,
-                       std::string a_master_config_addr,
-                       std::string a_description,
-                       bool a_defaulted )
-    {
-        auto t_opt_holder_ptr = std::make_shared< app_option_holder_typed<T> >();
-        t_opt_holder_ptr->f_option = add_option( a_name, t_opt_holder_ptr->f_value, a_description, a_defaulted ); // throws CLI::OptionAlreadyAdded if the option's already there
-        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
-        f_app_option_holders.push_back( t_opt_holder_ptr );
-        return t_opt_holder_ptr->f_option;
-    }
-*/
+
 
     template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
     CLI::Option* config_decorator::add_config_option( std::string a_name,
@@ -333,8 +264,6 @@ namespace scarab
     {
         return f_main;
     }
-
-
 
 } /* namespace scarab */
 
