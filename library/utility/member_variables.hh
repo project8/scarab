@@ -68,6 +68,7 @@
 #define mv_referrable_const                   snake_case_mv_referrable_const
 #define mv_referrable_static                  snake_case_mv_referrable_static
 #define mv_referrable_mutable                 snake_case_mv_referrable_mutable
+#define mv_referrable_mutable_const           snake_case_mv_referrable_mutable_const
 
 #define mv_assignable                         snake_case_mv_assignable
 #define mv_assignable_noset                   snake_case_mv_assignable_noset
@@ -80,6 +81,7 @@
 #define mv_shared_ptr_const                   snake_case_mv_shared_ptr_const
 #define mv_shared_ptr_static                  snake_case_mv_shared_ptr_static
 #define mv_shared_ptr_mutable                 snake_case_mv_shared_ptr_mutable
+#define mv_shared_ptr_mutable_const           snake_case_mv_shared_ptr_mutable_const
 
 #define mv_atomic                             snake_case_mv_atomic
 #define mv_atomic_noset                       snake_case_mv_atomic_noset

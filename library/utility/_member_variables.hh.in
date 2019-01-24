@@ -146,11 +146,19 @@
             return static_var_name( x_variable );\
         }
 
-#define @macro_prefix@mv_referrable_mutable( x_type, x_variable )\
+#define @macro_prefix@mv_referrable_mutable_const( x_type, x_variable )\
     protected:\
         mutable x_type var_name( x_variable );\
     public:\
         x_type& x_variable() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_referrable_mutable( x_type, x_variable )\
+    @macro_prefix@mv_referrable_mutable_const( x_type, x_variable )\
+    public:\
+        x_type& x_variable()\
         {\
             return var_name( x_variable );\
         }
@@ -248,11 +256,19 @@
             return static_var_name( x_variable );\
         }
 
-#define @macro_prefix@mv_shared_ptr_mutable( x_type, x_variable )\
+#define @macro_prefix@mv_shared_ptr_mutable_const( x_type, x_variable )\
     protected:\
         mutable std::shared_ptr< x_type > var_name( x_variable );\
     public:\
         std::shared_ptr< x_type > x_variable() const\
+        {\
+            return var_name( x_variable );\
+        }
+
+#define @macro_prefix@mv_shared_ptr_mutable( x_type, x_variable )\
+    @macro_prefix@mv_shared_ptr_mutable_const( x_type, x_variable )\
+    public:\
+        std::shared_ptr< x_type > x_variable()\
         {\
             return var_name( x_variable );\
         }
