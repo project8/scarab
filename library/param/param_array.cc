@@ -107,8 +107,9 @@ namespace scarab
         //LDEBUG( dlog, "merging array with " << a_object.size() << " items:\n" << a_object );
         if( size() < a_object.size() ) resize( a_object.size() );
 
-        for( unsigned index = 0; index < size(); ++index )
+        for( unsigned index = 0; index < size() && index < a_object.size(); ++index )
         {
+            // directly assign if destination location is empty
             if( f_contents.at( index )->is_null() )
             {
                 //LDEBUG( dlog, "have a null object at <" << index << ">; adding <" << a_object[index] << ">" );
@@ -116,6 +117,7 @@ namespace scarab
                 continue;
             }
 
+            // overwrite/recurse if destination location matches incoming type
             param& t_param = (*this)[index];
             if( t_param.is_value() && a_object[index].is_value() )
             {
@@ -136,6 +138,7 @@ namespace scarab
                 continue;
             }
 
+            // overwrite via direct assignment if destination location does not match incoming type
             //LDEBUG( dlog, "generic replace" );
             assign( index, a_object[index] );
         }
