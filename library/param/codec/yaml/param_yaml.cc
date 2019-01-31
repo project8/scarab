@@ -160,19 +160,18 @@ namespace scarab
             return false;
         }
 
-        FILE* file = fopen( a_filename.c_str(), "w" );
+        YAML::Node a_node = param_output_yaml::check_param_type(a_to_write);
 
-        if (file == NULL)
+        std::ofstream fout( a_filename.c_str() );
+        if (! fout.is_open() )
         {
             LERROR( slog, "Unable to open file: " << a_filename );
             return false;
         }
 
-        YAML::Node a_node = param_output_yaml::check_param_type(a_to_write);
-
-        std::ofstream fout( a_filename.c_str() );
         fout << a_node;
-        fclose( file );
+
+        fout.close();
 
         return true;
     }

@@ -100,14 +100,7 @@ namespace scarab
 
     param_ptr_t param_input_json::read_document( const rapidjson::Document& a_doc )
     {
-        std::unique_ptr< param_node > t_doc_as_param( new param_node() );
-        for( rapidjson::Value::ConstMemberIterator jsonIt = a_doc.MemberBegin();
-                jsonIt != a_doc.MemberEnd();
-                ++jsonIt)
-        {
-            t_doc_as_param->replace( jsonIt->name.GetString(), param_input_json::read_value( jsonIt->value ) );
-        }
-        return t_doc_as_param;
+        return read_value( a_doc );
     }
 
     param_ptr_t param_input_json::read_value( const rapidjson::Value& a_value )

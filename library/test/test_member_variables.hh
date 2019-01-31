@@ -1,23 +1,20 @@
 /*
- * test__member_variable.hh
+ * test_member_variable.hh
  *
  *  Created on: May 30, 2017
  *      Author: obla999
+ *
+ *  The variables in the test_acc struct include a test of doxygen-compliant documentation
  */
 
-#ifndef SCARAB_TEST__MEMBER_VARIABLE_HH_
-#define SCARAB_TEST__MEMBER_VARIABLE_HH_
+#ifndef SCARAB_TEST_MEMBER_VARIABLE_HH_
+#define SCARAB_TEST_MEMBER_VARIABLE_HH_
 
 #include <atomic>
 #include <memory>
 #include <string>
 
-#define set_prefix set_
-#define get_prefix get_
-#define var_prefix f_
-#define static_prefix s_
-
-#include "_member_variables.hh"
+#include "member_variables.hh"
 
 
 //**********
@@ -26,7 +23,13 @@
 
 struct test_acc
 {
+    /// Very special variable f_acc_ns_int
     mv_accessible_noset( int, mv_acc_ns_int )
+    /**
+     *  Another special variable: f_acc_int
+     *  This variable is so special it requires
+     *  a multi-line comment
+     */
     mv_accessible( int, mv_acc_int )
 };
 
@@ -130,4 +133,4 @@ struct test_atm_mutable
 };
 
 
-#endif /* SCARAB_TEST__MEMBER_VARIABLE_HH_ */
+#endif /* SCARAB_TEST_MEMBER_VARIABLE_HH_ */

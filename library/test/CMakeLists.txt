@@ -5,7 +5,7 @@
 if( Scarab_ENABLE_TESTING )
 
     set( Scarab_test_HEADERS
-        test__member_variables.hh
+        test_member_variables.hh
     )
 
     pbuilder_install_headers( ${Scarab_test_HEADERS} )
@@ -15,7 +15,7 @@ if( Scarab_ENABLE_TESTING )
     )
     
     set( test_programs
-        test__member_variables
+        test_member_variables
         test_logger
         test_terminate
         test_time
