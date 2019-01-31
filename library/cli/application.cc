@@ -18,7 +18,28 @@ namespace scarab
 {
     LOGGER( applog, "application" );
 
+    config_decorator::config_decorator( main_app* a_main, app* a_this_app ) :
+            f_main( a_main ),
+            f_this( a_this_app ),
+            f_subcommand_decorators()
+    {
+    }
+
+    config_decorator::~config_decorator()
+    {
+    }
+
+    config_decorator* config_decorator::add_config_subcommand( std::string a_subcommand_name, std::string a_description )
+    {
+        app* t_subcommand = f_this->add_subcommand( a_subcommand_name, a_description );
+        //config_decorator* t_decorator = new config_decorator( f_main, t_subcommand );
+        f_subcommand_decorators.emplace_back( new config_decorator( f_main, t_subcommand ) );
+        return f_subcommand_decorators.back().get();
+    }
+
+
     main_app::main_app() :
+            config_decorator( this, this ),
             app(),
             f_master_config(),
             f_default_config(),
@@ -26,7 +47,8 @@ namespace scarab
             f_global_verbosity( 1 ),
             f_nonoption_kw_args(),
             f_nonoption_ord_args(),
-            f_app_options()
+            f_app_options(),
+            f_app_option_holders()
     {
         allow_extras(); // allow unrecognized options, which are parsed into the nonoption args
 
@@ -52,12 +74,44 @@ namespace scarab
 
     void main_app::pre_callback()
     {
-        // first configuration stage: defaults
-        f_master_config.merge( f_default_config );
+        do_config_stage_1();
 
         applog.SetGlobalLevel( (logger::ELevel)f_global_verbosity );
 
+        do_config_stage_2();
+
+        try
+        {
+            nonoption_parser t_no_parser( remaining() );
+            f_nonoption_kw_args = t_no_parser.kw_args();
+            f_nonoption_ord_args = t_no_parser.ord_args();
+        }
+        catch( error& e )
+        {
+            LERROR( applog, "Unable to parse remaining arguments: " << e.what() );
+            throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
+        }
+
+        do_config_stage_3();
+
+        do_config_stage_4();
+
+        LPROG( applog, "Final configuration:\n" << f_master_config );
+        LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
+    }
+
+    void main_app::do_config_stage_1()
+    {
+        // first configuration stage: defaults
+        LDEBUG( applog, "first configuration stage" );
+        f_master_config.merge( f_default_config );
+        return;
+    }
+
+    void main_app::do_config_stage_2()
+    {
         // second configuration stage: config file
+        LDEBUG( applog, "second configuration stage" );
         if( ! f_config_filename.empty() )
         {
             path t_config_filepath = scarab::expand_path( f_config_filename );
@@ -74,28 +128,25 @@ namespace scarab
             }
             f_master_config.merge( t_config_from_file->as_node() );
         }
-
-        try
-        {
-            nonoption_parser t_no_parser( remaining() );
-            f_nonoption_kw_args = t_no_parser.kw_args();
-            f_nonoption_ord_args = t_no_parser.ord_args();
-        }
-        catch( error& e )
-        {
-            LERROR( applog, "Unable to parse remaining arguments: " << e.what() );
-            throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
-        }
-
-        // third configuration stage: keyword args
-        //LDEBUG( applog, "adding command-line parser:\n" << t_parser << *f_master_config );
-        f_master_config.merge( f_nonoption_kw_args );
-
-        // fourth configuration stage: application options
-        f_master_config.merge( f_app_options );
-
-        LPROG( applog, "Final configuration:\n" << f_master_config );
-        LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
+        return;
     }
+
+    void main_app::do_config_stage_3()
+    {
+        // third configuration stage: keyword args
+        LDEBUG( applog, "third configuration stage" );
+        f_master_config.merge( f_nonoption_kw_args );
+        return;
+    }
+
+    void main_app::do_config_stage_4()
+    {
+        // fourth configuration stage: application options
+        std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
+                       [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
+        f_master_config.merge( f_app_options );
+        return;
+    }
+
 
 } /* namespace scarab */

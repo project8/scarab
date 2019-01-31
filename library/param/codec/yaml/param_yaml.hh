@@ -38,7 +38,7 @@ namespace scarab
             virtual ~param_input_yaml();
 
             virtual param_ptr_t read_file( const std::string& a_filename, const param_node& a_options = param_node() );
-            virtual param_ptr_t read_string( const std::string& a_json_str, const param_node& a_options = param_node() );
+            virtual param_ptr_t read_string( const std::string& a_string, const param_node& a_options = param_node() );
 
             param_ptr_t read_node_type( const YAML::Node& a_node );
             std::unique_ptr< param_array > sequence_handler( const YAML::Node& a_node );
@@ -54,7 +54,7 @@ namespace scarab
      @class param_output_yaml
      @author N.S. Oblath
 
-     @brief Convert YAMl to JSON
+     @brief Convert Param to YAML
 
      @details
      Options: None
