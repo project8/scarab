@@ -162,7 +162,7 @@
     public:\
         x_type& x_variable()\
         {\
-            return var_name( x_variable );\
+            return @macro_prefix@var_name( x_variable );\
         }
 
 
@@ -272,7 +272,7 @@
     public:\
         std::shared_ptr< x_type > x_variable()\
         {\
-            return var_name( x_variable );\
+            return @macro_prefix@var_name( x_variable );\
         }
 
 
