@@ -16,6 +16,7 @@ Common C++ utilities.
 # Components
 
 * Authentication
+* Command line interface
 * Logger
 * Param (hierarchical data structure)
 * Utility
