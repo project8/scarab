@@ -15,6 +15,7 @@ if( Scarab_ENABLE_TESTING )
     )
     
     set( test_programs
+        test_digital
         test_member_variables
         test_logger
         test_terminate
