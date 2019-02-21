@@ -3,6 +3,45 @@
  *
  *  Created on: Feb 15, 2019
  *      Author: N.S. Oblath
+ *
+ *  Expected output (approximately for the floating-point side of the DAC tests)
+ *
+ *      ADC Unsigned Test
+ *      -0.1 --> 0
+ *      0 --> 0
+ *      0.1 --> 26
+ *      0.5 --> 128
+ *      0.9 --> 230
+ *      1 --> 255
+ *      1.1 --> 255
+ *
+ *      ADC Signed Test
+ *      -0.6 --> -128
+ *      -0.5 --> -128
+ *      -0.4 --> -102
+ *      0 --> 0
+ *      0.4 --> 102
+ *      0.5 --> 127
+ *      0.6 --> 127
+ *
+ *      DAC Unsigned Test
+ *      0 --> 0
+ *      0 --> 0
+ *      26 --> 0.101562
+ *      128 --> 0.5
+ *      230 --> 0.898438
+ *      255 --> 0.996094
+ *      255 --> 0.996094
+ *
+ *      DAC Signed Test
+ *      -128 --> -0.5
+ *      -128 --> -0.5
+ *      -102 --> -0.398438
+ *      0 --> 0
+ *      102 --> 0.398438
+ *      127 --> 0.496094
+ *      127 --> 0.496094
+ *
  */
 
 #include "digital.hh"
@@ -15,6 +54,10 @@ using namespace scarab;
 int main()
 {
     std::cout << "ADC Unsigned Test" << std::endl;
+    // 8 bit digitized data
+    // V offset = 0 V
+    // V range = 1 V
+    // Expected analog data: varying between 0 V and 1 V
     dig_calib_params t_params_1;
     get_calib_params( 8, 1, 0., 1., true, &t_params_1 );
 
@@ -30,8 +73,13 @@ int main()
     std::cout << std::endl;
 
     std::cout << "ADC Signed Test" << std::endl;
+    // 8 bit digitized data
+    // V offset = 0 V
+    // V range = 1 V
+    // Expected analog data: symmetric about 0 V with maximum deviation of +/- 0.5 V
+
     dig_calib_params t_params_2;
-    get_calib_params( 8, 1, -0.5, 1., true, &t_params_2 );
+    get_calib_params( 8, 1, 0., 1., true, &t_params_2 );
 
     std::vector< double > t_inputs_2{ -0.6, -0.5, -0.4, 0., 0.4, 0.5, 0.6 };
     std::vector< int > t_outputs_2;
