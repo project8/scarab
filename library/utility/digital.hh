@@ -1,13 +1,10 @@
 /*
- * digital.h
+ * digital.hh
  *
- * written by jared kofron <jared.kofron@gmail.com>
+ * Created on: ~2016
+ *     Author: N.S. Oblath
  *
- * functions for converting from D2A and A2D.  prototypes are declared in
- * digital.h.  versions are included for both floats and doubles.  there are
- * two styles of the functions inspired by the GSL way of doing things - a 
- * normal version which returns the simple type of interest, and an 'error' 
- * version which can return information about bad arguments.
+ *
  */
 
 #ifndef SCARAB_DIGITAL_HH_
@@ -21,6 +18,28 @@
 namespace scarab
 {
 
+    /** \struct dig_calib_params
+        \brief Collection of parameters used for converting between analog and digital data
+
+        Typically this struct is filled in with one of the get_calib_params functions.
+
+        Notes on parameters that are typically specified by the user:
+
+        \param bit_depth The number of bits used by the digitized data (<= to the size of the data type)
+
+        \param data_type_size The size of the digitized data type in bytes
+
+        \param v_range The voltage range covered by the digitization
+
+        \param v_offset The voltage offset for the measurement.  The specific meaning of this depends on whether
+        you're recording your data as variations about some middle point, or as positive variations above a pedestal.
+        In the former case, it's assumed (by how the a2d function is setup) that you'll be using a signed datatype for
+        the digitized data.  In the latter case, it's assumed that you'll be using an unsigned datatype.
+
+        \param bits_right_aligned Whether the bits within the data type are right aligned or left-aligned
+
+        \param dac_gain Some digitizers libraries provide the DAC gain that should be used for reconstructing analog values.
+     */
     struct SCARAB_API dig_calib_params
     {
         unsigned bit_depth;
@@ -35,8 +54,9 @@ namespace scarab
     };
 
 
-
+    /// Calculate the digitizer calibration parameters with basic parameters: number of bits, Voffset, and Vrange
     SCARAB_API void get_calib_params( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, bool bits_r_aligned, dig_calib_params *params );
+    /// Calculate the digitizer calibration parameters when given the DAC gain (e.g. from a digitizer's own calibration)
     SCARAB_API void get_calib_params2( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, double dac_gain, bool bits_r_aligned, dig_calib_params *params );
 
 
@@ -51,33 +71,17 @@ namespace scarab
     template< typename condition >
     using enable_if_unsigned = typename std::enable_if< condition::value, detail::is_unsigned >::type;
 
-    /*
-     * convert an unsigned digital <=64 bit value to a double or float.
-     */
-    template< typename dig_type, typename an_type,
-              enable_if_unsigned< std::is_unsigned<dig_type> >... >
-    an_type d2a( dig_type dig, const struct dig_calib_params* params )
+    /// Convert a signed or unsigned digital value to an analog value.
+    template< typename dig_type, typename an_type >
+    SCARAB_API an_type d2a( dig_type dig, const struct dig_calib_params* params )
     {
         return params->v_offset + params->dac_gain * ( an_type )dig;
     }
 
-    /*
-     * convert a signed digital <=64 bit value to a double or float.
-     */
-    template< typename dig_type, typename an_type,
-              enable_if_signed< std::is_signed<dig_type> >... >
-    an_type d2a( dig_type dig, const struct dig_calib_params* params )
-    {
-        return params->v_offset + params->dac_gain * (( an_type )dig + 0.5 * params->levels);
-    }
-
-    /*
-     * convert an analog value to an unsigned digital value.
-     */
+    /// Convert an analog value to an unsigned digital value.
     template< typename an_type, typename dig_type,
                 enable_if_unsigned< std::is_unsigned<dig_type> >... >
-              //typename = typename std::enable_if< std::is_unsigned<dig_type>::value, void >::type >
-    dig_type a2d( an_type analog, const struct dig_calib_params* params )
+    SCARAB_API dig_type a2d( an_type analog, const struct dig_calib_params* params )
     {
         analog = ( analog - params->v_offset ) * params->inv_v_range * (an_type)(params->levels);
         if( analog > (an_type)(params->levels - 1) ) analog = params->levels - 1;
@@ -85,18 +89,16 @@ namespace scarab
         return (dig_type)std::round( analog );
     }
 
-    /*
-     * convert an analog value to a signed digital value.
-     */
+    ///Convert an analog value to a signed digital value.
     template< typename an_type, typename dig_type,
               enable_if_signed< std::is_signed<dig_type> >... >
-              //typename = typename std::enable_if< std::is_signed<dig_type>::value, void >::type >
-    dig_type a2d( an_type analog, const struct dig_calib_params* params )
+    SCARAB_API dig_type a2d( an_type analog, const struct dig_calib_params* params )
     {
+        double half_levels = params->levels * 0.5;
         analog = ( analog - params->v_offset ) * params->inv_v_range * (an_type)(params->levels);
-        if( analog > (an_type)(params->levels - 1) ) analog = params->levels - 1;
-        else if( analog < 0. ) analog = 0.;
-        return (dig_type)std::round( analog - 0.5 * params->levels );
+        if( analog > (an_type)(half_levels - 1) ) analog = half_levels - 1;
+        else if( analog < -half_levels ) analog = -half_levels;
+        return (dig_type)std::round( analog );
     }
 
 }
