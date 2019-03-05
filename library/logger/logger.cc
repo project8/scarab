@@ -145,7 +145,7 @@ namespace scarab
                     //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
                     (*fErr) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
-                    (*fOut) << "(tid " << std::this_thread::get_id() << ") ";
+                    (*fErr) << "(tid " << std::this_thread::get_id() << ") ";
 #endif
                     copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fErr));
                     (*fErr) << "(" << loc.fLineNumber  << "): ";
@@ -156,7 +156,7 @@ namespace scarab
                     //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
                     (*fErr) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
-                    (*fOut) << "(tid " << std::this_thread::get_id() << ") ";
+                    (*fErr) << "(tid " << std::this_thread::get_id() << ") ";
 #endif
                     copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fErr));
                     (*fErr) << "(" << loc.fLineNumber  << "): ";
