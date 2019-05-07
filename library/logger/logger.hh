@@ -10,6 +10,7 @@
 #define SCARAB_LOGGER_HH_
 
 #include "macros.hh"
+#include "scarab_api.hh"
 
 /**
  * @file
@@ -32,8 +33,6 @@
 #define macro_dispatcher__(func, nargs) func ## nargs
 
 #endif  /* LOGGER_UTILITY_MACROS_ */
-
-#ifndef _WIN32
 
 // COLOR DEFINITIONS
 #define COLOR_NORMAL "0"
@@ -104,7 +103,7 @@ namespace scarab
      * </pre>
      *
      */
-    class logger
+    class SCARAB_API logger
     {
         public:
             enum ELevel {
@@ -380,7 +379,8 @@ namespace scarab
 #define LERROR_ONCE(...)  macro_dispatcher(__LOG_ERROR_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LFATAL_ONCE(...)  macro_dispatcher(__LOG_FATAL_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 
-#else /*_WIN32*/
+//#else /*_WIN32*/
+#if 0
 
 #include <iostream>
 #define LOGGER(I,K)
