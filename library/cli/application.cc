@@ -5,6 +5,8 @@
  *      Author: N.S. Oblath
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "application.hh"
 
 #include "logger.hh"
@@ -14,9 +16,10 @@
 
 using std::string;
 
+LOGGER(applog, "application");
+
 namespace scarab
 {
-    LOGGER( applog, "application" );
 
     config_decorator::config_decorator( main_app* a_main, app* a_this_app ) :
             f_main( a_main ),
@@ -117,7 +120,7 @@ namespace scarab
             path t_config_filepath = scarab::expand_path( f_config_filename );
             LDEBUG( applog, "Loading config file <" << t_config_filepath << "> from filename <" << f_config_filename << ">" );
             param_translator t_translator;
-            std::unique_ptr< param > t_config_from_file( t_translator.read_file( t_config_filepath.native() ));
+            std::unique_ptr< param > t_config_from_file( t_translator.read_file( t_config_filepath.string() ));
             if( t_config_from_file == NULL )
             {
                 throw error() << "[application] error parsing config file";

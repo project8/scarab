@@ -5,6 +5,9 @@
  *      Author: N.S. Oblath
  */
 
+// stack trace upon termination has not been implemented for Windows
+#ifndef _WIN32
+
 #include "terminate.hh"
 
 #include "logger.hh"
@@ -105,3 +108,5 @@ namespace scarab
 */
 
 } /* namespace scarab */
+
+#endif /* ifndef _WIN32 */

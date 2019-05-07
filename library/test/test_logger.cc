@@ -5,6 +5,8 @@
  *      Author: nsoblath
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "logger.hh"
 
 using namespace scarab;

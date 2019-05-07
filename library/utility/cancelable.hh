@@ -10,11 +10,13 @@
 #ifndef SCARAB_CANCELABLE_HH_
 #define SCARAB_CANCELABLE_HH_
 
+#include "scarab_api.hh"
+
 #include <atomic>
 
 namespace scarab
 {
-    class cancelable
+    class SCARAB_API cancelable
     {
         public:
             cancelable();

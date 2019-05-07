@@ -7,6 +7,8 @@
  *      Usage: test_json [filename]
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "param.hh"
 #include "param_json.hh"
 #include "logger.hh"

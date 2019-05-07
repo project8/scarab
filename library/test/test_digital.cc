@@ -44,6 +44,8 @@
  *
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "digital.hh"
 
 #include <iostream>

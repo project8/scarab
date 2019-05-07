@@ -8,6 +8,7 @@
 #ifndef SCARAB_DESTROYER_HH_
 #define SCARAB_DESTROYER_HH_
 
+
 namespace scarab
 {
 

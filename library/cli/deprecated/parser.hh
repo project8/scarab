@@ -8,7 +8,7 @@
 namespace scarab
 {
 
-    class parser : public param_node
+    class SCARAB_API parser : public param_node
     {
         public:
             parser( int an_argc, char** an_argv );

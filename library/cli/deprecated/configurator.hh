@@ -13,7 +13,7 @@
 
 namespace scarab
 {
-    class configurator
+    class SCARAB_API configurator
     {
         public:
             configurator( int an_argc, char** an_argv, const scarab::param_node& a_default = scarab::param_node() );
