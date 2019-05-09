@@ -18,8 +18,6 @@
  *
  */
 
-#define SCARAB_API_EXPORTS
-
 #include "param_value.hh"
 
 #include "logger.hh"

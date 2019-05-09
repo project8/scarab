@@ -24,8 +24,6 @@
  *
  */
 
-#define SCARAB_API_EXPORTS
-
 #include "application.hh"
 
 #include "logger.hh"

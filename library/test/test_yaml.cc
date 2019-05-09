@@ -7,8 +7,6 @@
  *      Usage: test_yaml [filename]
  */
 
-#define SCARAB_API_EXPORTS
-
 #include "param.hh"
 #include "param_yaml.hh"
 #include "logger.hh"

@@ -44,8 +44,6 @@
  *
  */
 
-#define SCARAB_API_EXPORTS
-
 #include "nonoption_parser.hh"
 
 #include "logger.hh"

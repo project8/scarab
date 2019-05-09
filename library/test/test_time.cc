@@ -5,8 +5,6 @@
  *      Author: obla999
  */
 
-#define SCARAB_API_EXPORTS
-
 #include "time.hh"
 
 #include "logger.hh"

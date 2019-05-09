@@ -5,8 +5,6 @@
  *      Author: N.S. Oblath
  */
 
-#define SCARAB_API_EXPORTS
-
 #include "terminate.hh"
 
 #include "logger.hh"
