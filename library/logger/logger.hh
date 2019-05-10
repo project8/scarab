@@ -25,8 +25,12 @@
 #ifndef LOGGER_UTILITY_MACROS_
 #define LOGGER_UTILITY_MACROS_
 
-#define va_num_args(...) va_num_args_impl(__VA_ARGS__, 5,4,3,2,1)
+#define msvc_bug_fix(m, args) m args
+
+#define va_num_args(...) va_num_args_(__VA_ARGS__, 5,4,3,2,1)
+#define va_num_args_(...) msvc_bug_fix(va_num_args_impl, (__VA_ARGS__))
 #define va_num_args_impl(_1,_2,_3,_4,_5,N,...) N
+
 
 #define macro_dispatcher(func, ...) macro_dispatcher_(func, va_num_args(__VA_ARGS__))
 #define macro_dispatcher_(func, nargs) macro_dispatcher__(func, nargs)
@@ -276,7 +280,7 @@ namespace scarab
 #define __DEFAULT_LOGGER        scarab::logger::GetRootLogger()
 
 #define __LOG_LOCATION         scarab::logger::Location(__FILE__, __FUNC__, __LINE__)
-#ifndef _WIN32
+//#ifndef _WIN32
 #define __LOG_LOG_4(I,L,M,O) \
         { \
     if (I.IsLevelEnabled(scarab::logger::e##L)) { \
@@ -288,10 +292,10 @@ namespace scarab
         } \
     } \
         }
-#else
-#define __LOG_LOG_4(I,L,M,O) \
-	    { }
-#endif
+//#else
+//#define __LOG_LOG_4(I,L,M,O) \
+//	    { }
+//#endif
 
 
 #define __LOG_LOG_3(I,L,M)     __LOG_LOG_4(I,L,M,false)
@@ -308,7 +312,7 @@ namespace scarab
 #define __LOG_INFO_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Info,M,false)
 
 #define __LOG_PROG_2(I,M)      __LOG_LOG_4(I,Prog,M,false)
-#define __LOG_PROG_1(M)        __LOG_LOG_4(__KTDEFAULT_LOGGER,Prog,M,false)
+#define __LOG_PROG_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Prog,M,false)
 
 #define __LOG_WARN_2(I,M)      __LOG_LOG_4(I,Warn,M,false)
 #define __LOG_WARN_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Warn,M,false)
