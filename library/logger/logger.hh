@@ -26,9 +26,11 @@
 #define LOGGER_UTILITY_MACROS_
 
 #define msvc_bug_fix(m, args) m args
+#define expand(x) x
 
-#define va_num_args(...) va_num_args_(__VA_ARGS__, 5,4,3,2,1)
-#define va_num_args_(...) msvc_bug_fix(va_num_args_impl, (__VA_ARGS__))
+//#define va_num_args(...) va_num_args_(__VA_ARGS__, 5,4,3,2,1)
+//#define va_num_args_(...) msvc_bug_fix(va_num_args_impl, (__VA_ARGS__))
+#define va_num_args(...) expand( va_num_args_impl(__VA_ARGS__, 5,4,3,2,1))
 #define va_num_args_impl(_1,_2,_3,_4,_5,N,...) N
 
 

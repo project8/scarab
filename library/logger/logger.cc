@@ -114,6 +114,7 @@ namespace scarab
                 logger::Private::getTimeAbsoluteStr();
                 if (fColored)
                 {
+                    std::cerr << "B1" << std::endl;
                     //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
                     (*fOut) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
@@ -125,6 +126,7 @@ namespace scarab
                 }
                 else
                 {
+                    std::cerr << "B2" << std::endl;
                     //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
                     (*fOut) << logger::Private::sTimeBuff << " [" << setw(5) << level << "] ";
 #ifndef NDEBUG
@@ -143,6 +145,7 @@ namespace scarab
                 logger::Private::getTimeAbsoluteStr();
                 if (fColored)
                 {
+                    std::cerr << "B3" << std::endl;
                     //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
                     (*fErr) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
@@ -154,6 +157,7 @@ namespace scarab
                 }
                 else
                 {
+                    std::cerr << "B4" << std::endl;
                     //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
                     (*fErr) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
@@ -249,7 +253,7 @@ namespace scarab
 #ifndef _WIN32
         logger::Private::fColored = flag;
 #else
-        LWARN(&this, "Colored logging is not enabled in Windows");
+        LWARN("Colored logging is not enabled in Windows");
 #endif
         return;
     }
@@ -268,6 +272,7 @@ namespace scarab
 
     void logger::Log(ELevel level, const string& message, const Location& loc)
     {
+        std::cerr << "A" << std::endl;
         if (level >= eWarn)
         {
             fPrivate->logCerr(level, message, loc);
@@ -276,5 +281,6 @@ namespace scarab
         {
             fPrivate->logCout(level, message, loc);
         }
+        std::cerr << "C" << std::endl;
     }
 }
