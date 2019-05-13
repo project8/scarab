@@ -356,6 +356,8 @@ namespace scarab
 
 #define LOGGER(I,K)      static scarab::logger I(K);
 
+#ifndef _WIN32
+
 #define LOG(...)          macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
 #ifdef NDEBUG
 #define LTRACE(...)
@@ -385,7 +387,39 @@ namespace scarab
 #define LERROR_ONCE(...)  macro_dispatcher(__LOG_ERROR_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 #define LFATAL_ONCE(...)  macro_dispatcher(__LOG_FATAL_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 
-//#else /*_WIN32*/
+#else /*_WIN32*/
+
+#define LOG(I, ...)          __LOG_LOG_2(I, __VA_ARGS__)
+#ifdef NDEBUG
+#define LTRACE(I, ...)
+#define LDEBUG(I, ...)
+#else
+#define LTRACE(I, ...)       __LOG_TRACE_2(I, __VA_ARGS__)
+#define LDEBUG(I, ...)       __LOG_DEBUG_2(I, __VA_ARGS__)
+#endif
+#define LINFO(I, ...)        __LOG_INFO_2(I, __VA_ARGS__)
+#define LPROG(I, ...)        __LOG_PROG_2(I, __VA_ARGS__)
+#define LWARN(I, ...)        __LOG_WARN_2(I, __VA_ARGS__)
+#define LERROR(I, ...)       __LOG_ERROR_2(I, __VA_ARGS__)
+#define LFATAL(I, ...)       __LOG_FATAL_2(I, __VA_ARGS__)
+#define LASSERT(I, ...)      __LOG_ASSERT_2(I, __VA_ARGS__)
+
+#define LOG_ONCE(I, ...)     __LOG_LOG_ONCE_2(I, __VA_ARGS__)
+#ifdef NDEBUG
+#define LTRACE_ONCE(I, ...)
+#define LDEBUG_ONCE(I, ...)
+#else
+#define LTRACE_ONCE(I, ...)  __LOG_TRACE_ONCE_2(I, __VA_ARGS__)
+#define LDEBUG_ONCE(I, ...)  __LOG_DEBUG_ONCE_2(I, __VA_ARGS__)
+#endif
+#define LINFO_ONCE(I, ...)   __LOG_INFO_ONCE_2(I, __VA_ARGS__)
+//#define LPROG_ONCE(I, ...)   __LOG_PROG_ONCE_2(I, __VA_ARGS__)
+#define LWARN_ONCE(I, ...)   __LOG_WARN_ONCE_2(I, __VA_ARGS__)
+#define LERROR_ONCE(I, ...)  __LOG_ERROR_ONCE_2(I, __VA_ARGS__)
+#define LFATAL_ONCE(I, ...)  __LOG_FATAL_ONCE_2(I, __VA_ARGS__)
+
+#endif /*_WIN32*/
+
 #if 0
 
 #include <iostream>

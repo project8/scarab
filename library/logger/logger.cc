@@ -253,7 +253,7 @@ namespace scarab
 #ifndef _WIN32
         logger::Private::fColored = flag;
 #else
-        LWARN("Colored logging is not enabled in Windows");
+        std::cerr << "Colored logging is not enabled in Windows" << std::endl;
 #endif
         return;
     }
