@@ -416,7 +416,7 @@ namespace scarab
 #define LDEBUG_ONCE(I, ...)  __LOG_DEBUG_ONCE_2(I, __VA_ARGS__)
 #endif
 #define LINFO_ONCE(I, ...)   __LOG_INFO_ONCE_2(I, __VA_ARGS__)
-//#define LPROG_ONCE(I, ...)   __LOG_PROG_ONCE_2(I, __VA_ARGS__)
+#define LPROG_ONCE(I, ...)   __LOG_PROG_ONCE_2(I, __VA_ARGS__)
 #define LWARN_ONCE(I, ...)   __LOG_WARN_ONCE_2(I, __VA_ARGS__)
 #define LERROR_ONCE(I, ...)  __LOG_ERROR_ONCE_2(I, __VA_ARGS__)
 #define LFATAL_ONCE(I, ...)  __LOG_FATAL_ONCE_2(I, __VA_ARGS__)
