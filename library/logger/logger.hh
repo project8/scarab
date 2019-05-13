@@ -342,6 +342,9 @@ namespace scarab
 #define __LOG_INFO_ONCE_2(I,M)      __LOG_LOG_4(I,Info,M,true)
 #define __LOG_INFO_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Info,M,true)
 
+#define __LOG_PROG_ONCE_2(I,M)      __LOG_LOG_4(I,Prog,M,true)
+#define __LOG_PROG_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Prog,M,true)
+
 #define __LOG_WARN_ONCE_2(I,M)      __LOG_LOG_4(I,Warn,M,true)
 #define __LOG_WARN_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Warn,M,true)
 
