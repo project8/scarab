@@ -10,16 +10,18 @@
 #ifndef SCARAB_UTILITY_TYPENAME_HH_
 #define SCARAB_UTILITY_TYPENAME_HH_
 
+#include "scarab_api.hh"
+
 #include <string>
 #include <typeinfo>
 
 namespace scarab
 {
 
-    std::string demangle( const char* a_name );
+    SCARAB_API std::string demangle( const char* a_name );
 
     template <class x_type>
-    std::string type( const x_type& a_param )
+    SCARAB_API std::string type( const x_type& a_param )
     {
         return demangle( typeid(a_param).name() );
     }

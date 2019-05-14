@@ -44,7 +44,6 @@
  *
  */
 
-
 #include "nonoption_parser.hh"
 
 #include "logger.hh"

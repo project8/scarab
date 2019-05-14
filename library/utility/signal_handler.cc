@@ -5,6 +5,8 @@
  *      Author: N.S. Oblath
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "signal_handler.hh"
 
 #include "cancelable.hh"
@@ -13,6 +15,11 @@
 
 #include <signal.h>
 #include <thread>
+
+#ifdef _WIN32
+#include <Windows.h>
+//#include "processthreadsapi.h"
+#endif
 
 namespace scarab
 {

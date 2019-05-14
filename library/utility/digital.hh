@@ -73,7 +73,7 @@ namespace scarab
 
     /// Convert a signed or unsigned digital value to an analog value.
     template< typename dig_type, typename an_type >
-    SCARAB_API an_type d2a( dig_type dig, const struct dig_calib_params* params )
+    an_type d2a( dig_type dig, const struct dig_calib_params* params )
     {
         return params->v_offset + params->dac_gain * ( an_type )dig;
     }
@@ -81,7 +81,7 @@ namespace scarab
     /// Convert an analog value to an unsigned digital value.
     template< typename an_type, typename dig_type,
                 enable_if_unsigned< std::is_unsigned<dig_type> >... >
-    SCARAB_API dig_type a2d( an_type analog, const struct dig_calib_params* params )
+    dig_type a2d( an_type analog, const struct dig_calib_params* params )
     {
         analog = ( analog - params->v_offset ) * params->inv_v_range * (an_type)(params->levels);
         if( analog > (an_type)(params->levels - 1) ) analog = params->levels - 1;
@@ -92,7 +92,7 @@ namespace scarab
     ///Convert an analog value to a signed digital value.
     template< typename an_type, typename dig_type,
               enable_if_signed< std::is_signed<dig_type> >... >
-    SCARAB_API dig_type a2d( an_type analog, const struct dig_calib_params* params )
+    dig_type a2d( an_type analog, const struct dig_calib_params* params )
     {
         double half_levels = params->levels * 0.5;
         analog = ( analog - params->v_offset ) * params->inv_v_range * (an_type)(params->levels);

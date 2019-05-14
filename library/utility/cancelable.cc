@@ -5,6 +5,8 @@
  *      Author: nsoblath
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "cancelable.hh"
 
 #include "logger.hh"

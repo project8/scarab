@@ -10,6 +10,7 @@
 #define SCARAB_LOGGER_HH_
 
 #include "macros.hh"
+#include "scarab_api.hh"
 
 /**
  * @file
@@ -24,16 +25,20 @@
 #ifndef LOGGER_UTILITY_MACROS_
 #define LOGGER_UTILITY_MACROS_
 
-#define va_num_args(...) va_num_args_impl(__VA_ARGS__, 5,4,3,2,1)
+#define msvc_bug_fix(m, args) m args
+#define expand(x) x
+
+//#define va_num_args(...) va_num_args_(__VA_ARGS__, 5,4,3,2,1)
+//#define va_num_args_(...) msvc_bug_fix(va_num_args_impl, (__VA_ARGS__))
+#define va_num_args(...) expand( va_num_args_impl(__VA_ARGS__, 5,4,3,2,1))
 #define va_num_args_impl(_1,_2,_3,_4,_5,N,...) N
+
 
 #define macro_dispatcher(func, ...) macro_dispatcher_(func, va_num_args(__VA_ARGS__))
 #define macro_dispatcher_(func, nargs) macro_dispatcher__(func, nargs)
 #define macro_dispatcher__(func, nargs) func ## nargs
 
 #endif  /* LOGGER_UTILITY_MACROS_ */
-
-#ifndef _WIN32
 
 // COLOR DEFINITIONS
 #define COLOR_NORMAL "0"
@@ -104,7 +109,7 @@ namespace scarab
      * </pre>
      *
      */
-    class logger
+    class SCARAB_API logger
     {
         public:
             enum ELevel {
@@ -277,7 +282,7 @@ namespace scarab
 #define __DEFAULT_LOGGER        scarab::logger::GetRootLogger()
 
 #define __LOG_LOCATION         scarab::logger::Location(__FILE__, __FUNC__, __LINE__)
-#ifndef _WIN32
+//#ifndef _WIN32
 #define __LOG_LOG_4(I,L,M,O) \
         { \
     if (I.IsLevelEnabled(scarab::logger::e##L)) { \
@@ -289,10 +294,10 @@ namespace scarab
         } \
     } \
         }
-#else
-#define __LOG_LOG_4(I,L,M,O) \
-	    { }
-#endif
+//#else
+//#define __LOG_LOG_4(I,L,M,O) \
+//	    { }
+//#endif
 
 
 #define __LOG_LOG_3(I,L,M)     __LOG_LOG_4(I,L,M,false)
@@ -309,7 +314,7 @@ namespace scarab
 #define __LOG_INFO_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Info,M,false)
 
 #define __LOG_PROG_2(I,M)      __LOG_LOG_4(I,Prog,M,false)
-#define __LOG_PROG_1(M)        __LOG_LOG_4(__KTDEFAULT_LOGGER,Prog,M,false)
+#define __LOG_PROG_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Prog,M,false)
 
 #define __LOG_WARN_2(I,M)      __LOG_LOG_4(I,Warn,M,false)
 #define __LOG_WARN_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Warn,M,false)
@@ -337,6 +342,9 @@ namespace scarab
 #define __LOG_INFO_ONCE_2(I,M)      __LOG_LOG_4(I,Info,M,true)
 #define __LOG_INFO_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Info,M,true)
 
+#define __LOG_PROG_ONCE_2(I,M)      __LOG_LOG_4(I,Prog,M,true)
+#define __LOG_PROG_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Prog,M,true)
+
 #define __LOG_WARN_ONCE_2(I,M)      __LOG_LOG_4(I,Warn,M,true)
 #define __LOG_WARN_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Warn,M,true)
 
@@ -350,6 +358,8 @@ namespace scarab
 // PUBLIC MACROS
 
 #define LOGGER(I,K)      static scarab::logger I(K);
+
+#ifndef _WIN32
 
 #define LOG(...)          macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
 #ifdef NDEBUG
@@ -381,6 +391,39 @@ namespace scarab
 #define LFATAL_ONCE(...)  macro_dispatcher(__LOG_FATAL_ONCE_, __VA_ARGS__)(__VA_ARGS__)
 
 #else /*_WIN32*/
+
+#define LOG(I, ...)          __LOG_LOG_2(I, __VA_ARGS__)
+#ifdef NDEBUG
+#define LTRACE(I, ...)
+#define LDEBUG(I, ...)
+#else
+#define LTRACE(I, ...)       __LOG_TRACE_2(I, __VA_ARGS__)
+#define LDEBUG(I, ...)       __LOG_DEBUG_2(I, __VA_ARGS__)
+#endif
+#define LINFO(I, ...)        __LOG_INFO_2(I, __VA_ARGS__)
+#define LPROG(I, ...)        __LOG_PROG_2(I, __VA_ARGS__)
+#define LWARN(I, ...)        __LOG_WARN_2(I, __VA_ARGS__)
+#define LERROR(I, ...)       __LOG_ERROR_2(I, __VA_ARGS__)
+#define LFATAL(I, ...)       __LOG_FATAL_2(I, __VA_ARGS__)
+#define LASSERT(I, ...)      __LOG_ASSERT_2(I, __VA_ARGS__)
+
+#define LOG_ONCE(I, ...)     __LOG_LOG_ONCE_2(I, __VA_ARGS__)
+#ifdef NDEBUG
+#define LTRACE_ONCE(I, ...)
+#define LDEBUG_ONCE(I, ...)
+#else
+#define LTRACE_ONCE(I, ...)  __LOG_TRACE_ONCE_2(I, __VA_ARGS__)
+#define LDEBUG_ONCE(I, ...)  __LOG_DEBUG_ONCE_2(I, __VA_ARGS__)
+#endif
+#define LINFO_ONCE(I, ...)   __LOG_INFO_ONCE_2(I, __VA_ARGS__)
+#define LPROG_ONCE(I, ...)   __LOG_PROG_ONCE_2(I, __VA_ARGS__)
+#define LWARN_ONCE(I, ...)   __LOG_WARN_ONCE_2(I, __VA_ARGS__)
+#define LERROR_ONCE(I, ...)  __LOG_ERROR_ONCE_2(I, __VA_ARGS__)
+#define LFATAL_ONCE(I, ...)  __LOG_FATAL_ONCE_2(I, __VA_ARGS__)
+
+#endif /*_WIN32*/
+
+#if 0
 
 #include <iostream>
 #define LOGGER(I,K)
