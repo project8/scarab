@@ -5,6 +5,8 @@
  *      Author: nsoblath
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "configurator.hh"
 
 #include "logger.hh"

@@ -14,7 +14,7 @@
 namespace scarab
 {
 
-    class global_config : public singleton< global_config >
+    class SCARAB_API global_config : public singleton< global_config >
     {
         public:
             void set_config( const param_node& a_config );

@@ -8,11 +8,13 @@
 #ifndef SCARAB_DESTROYER_HH_
 #define SCARAB_DESTROYER_HH_
 
+#include "scarab_api.hh"
+
 namespace scarab
 {
 
     template< class XDoomed >
-    class destroyer
+    class SCARAB_API destroyer
     {
         public:
             destroyer( XDoomed* = 0 );

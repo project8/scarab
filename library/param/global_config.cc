@@ -5,6 +5,8 @@
  *      Author: nsoblath
  */
 
+#define SCARAB_API_EXPORTS
+
 #include "global_config.hh"
 
 namespace scarab

@@ -15,7 +15,7 @@ namespace scarab
     friend class scarab::destroyer< class_name >;
 
     template< class x_type >
-    class singleton
+    class SCARAB_API singleton
     {
         public:
             static x_type* get_instance();
