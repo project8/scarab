@@ -6,7 +6,8 @@
  *      Author: Marco Haag <marco.haag@kit.edu>
  */
 
-#ifndef _WIN32
+#define SCARAB_API_EXPORTS
+
 
 #include <algorithm>
 //#include <cstdio>
@@ -14,11 +15,11 @@
 #include <cstring> // for strrchr
 #include <iomanip>
 #include <iterator>
-#ifdef __MACH__
-#include <mach/mach_time.h>
-#else
-#include <sys/time.h>
-#endif
+//#ifdef __MACH__
+//#include <mach/mach_time.h>
+//#else
+//#include <sys/time.h>
+//#endif
 #include <mutex>
 #include <set>
 #include <time.h>
@@ -190,7 +191,11 @@ namespace scarab
             const char* logName = strrchr(name, '/') ? strrchr(name, '/') + 1 : name;
             fPrivate->fLogger = logName;
         }
+#ifndef _WIN32
         fPrivate->fColored = true;
+#else
+        fPrivate->fColored = false;
+#endif
         sprintf(logger::Private::sDateTimeFormat,  "%%Y-%%m-%%d %%T");
         SetLevel(eDebug);
         logger::Private::AllLoggers()->insert(this);
@@ -199,8 +204,12 @@ namespace scarab
     logger::logger(const std::string& name) : fPrivate(new Private())
     {
         fPrivate->fLogger = name.c_str();
+#ifndef _WIN32
         fPrivate->fColored = true;
-		sprintf(logger::Private::sDateTimeFormat, "%%Y-%%m-%%d %%T");
+#else
+        fPrivate->fColored = false;
+#endif
+        sprintf(logger::Private::sDateTimeFormat, "%%Y-%%m-%%d %%T");
 		SetLevel(eDebug);
 		logger::Private::AllLoggers()->insert(this);
     }
@@ -237,7 +246,11 @@ namespace scarab
 
     void logger::SetColored(bool flag)
     {
+#ifndef _WIN32
         logger::Private::fColored = flag;
+#else
+        std::cerr << "Colored logging is not enabled in Windows" << std::endl;
+#endif
         return;
     }
 
@@ -265,5 +278,3 @@ namespace scarab
         }
     }
 }
-
-#endif

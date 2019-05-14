@@ -36,7 +36,6 @@
  *
  */
 
-
 #include "application.hh"
 
 #include "logger.hh"

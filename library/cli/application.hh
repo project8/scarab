@@ -52,7 +52,12 @@ namespace scarab
     {
         public:
             config_decorator( main_app* a_main, app* a_this_app );
+            config_decorator( const config_decorator& ) = delete;
+            config_decorator( config_decorator&& ) = delete;
             virtual ~config_decorator();
+
+            config_decorator& operator=( const config_decorator& ) = delete;
+            config_decorator& operator=( config_decorator&& ) = delete;
 
             main_app* main() const;
             app* this_app() const;

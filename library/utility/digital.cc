@@ -15,7 +15,7 @@
 namespace scarab
 {
 
-    SCARAB_API void get_calib_params( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, bool bits_r_aligned, dig_calib_params *params )
+    void get_calib_params( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, bool bits_r_aligned, dig_calib_params *params )
     {
         params->bit_depth = n_bits;
         params->levels = 1 << n_bits;
@@ -29,7 +29,7 @@ namespace scarab
         return;
     }
 
-    SCARAB_API void get_calib_params2( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, double dac_gain, bool bits_r_aligned, dig_calib_params *params )
+    void get_calib_params2( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, double dac_gain, bool bits_r_aligned, dig_calib_params *params )
     {
         params->bit_depth = n_bits;
         params->levels = 1 << n_bits;

@@ -44,7 +44,6 @@ Run with --help for more information.
  *
  */
 
-
 #include "application.hh"
 
 #include "logger.hh"

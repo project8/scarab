@@ -78,6 +78,7 @@ if( Scarab_BUILD_CODEC_YAML )
 
     # Yaml-cpp
     option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
+	option( YAML_CPP_BUILD_TESTS "Enable parse tools" OFF )
     option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
     option( BUILD_SHARED_LIBS "yaml-cpp option setting" ON )
     add_subdirectory( param/codec/yaml/yaml-cpp )

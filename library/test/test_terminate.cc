@@ -5,7 +5,6 @@
  *      Author: N.S. Oblath
  */
 
-
 #include "terminate.hh"
 
 #include "logger.hh"

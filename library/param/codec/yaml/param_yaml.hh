@@ -31,7 +31,7 @@ namespace scarab
      @details
      Options: None
     */
-    class param_input_yaml : public param_input_codec
+    class SCARAB_API param_input_yaml : public param_input_codec
     {
         public:
             param_input_yaml();
@@ -59,7 +59,7 @@ namespace scarab
      @details
      Options: None
     */
-    class param_output_yaml : public param_output_codec
+    class SCARAB_API param_output_yaml : public param_output_codec
     {
         public:
             param_output_yaml();

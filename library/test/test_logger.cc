@@ -17,6 +17,7 @@ int main()
     LINFO( tlog, "This is an LINFO( message" );
     LWARN( tlog, "This is a WARN message" );
     LERROR( tlog, "This is an ERROR message" );
+    std::cout << "This is a cout message" << std::endl;
 
     return 0;
 }
