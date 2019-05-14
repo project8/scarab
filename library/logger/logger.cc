@@ -126,7 +126,7 @@ namespace scarab
                 else
                 {
                     //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                    (*fOut) << logger::Private::sTimeBuff << " [" << setw(5) << level << "] ";
+                    (*fOut) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
                     (*fOut) << "(tid " << std::this_thread::get_id() << ") ";
 #endif
