@@ -112,7 +112,13 @@ set( INC_PREFIX )
 
 # in windows, disable the min and max macros
 if( WIN32 )
+    # disable the min and max macros
     add_definitions( -DNOMINMAX )
+	# libraries and linking
+	set( CMAKE_SHARED_LIBRARY_PREFIX "" )
+	set( CMAKE_IMPORT_LIBRARY_PREFIX "" )
+	set( CMAKE_LINK_DEF_FILE_FLAG "" )
+	add_definitions( -DBOOST_ALL_DYN_LINK )
 endif( WIN32 )
 
 ##########
