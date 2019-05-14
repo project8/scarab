@@ -55,7 +55,7 @@ namespace scarab
         else
         {
             path t_path = expand_path( a_filename );
-            t_encoding = t_path.extension().native().substr( 1 ); // remove the '.' at the beginning
+            t_encoding = t_path.extension().string().substr( 1 ); // remove the '.' at the beginning
         }
 
         param_input_codec* t_codec = factory< param_input_codec >::get_instance()->create( t_encoding );
@@ -101,7 +101,7 @@ namespace scarab
         else
         {
             path t_path = expand_path( a_filename );
-            t_encoding = t_path.extension().native().substr( 1 ); // remove the '.' at the beginning
+            t_encoding = t_path.extension().string().substr( 1 ); // remove the '.' at the beginning
         }
 
         param_output_codec* t_codec = factory< param_output_codec >::get_instance()->create( t_encoding );

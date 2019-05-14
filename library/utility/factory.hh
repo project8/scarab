@@ -30,7 +30,7 @@ namespace scarab
     // base_registrar
 
     template< class XBaseType, typename ... XArgs >
-    class SCARAB_API base_registrar
+    class base_registrar
     {
         public:
             base_registrar() {}
@@ -47,7 +47,7 @@ namespace scarab
     // registrar
 
     template< class XBaseType, class XDerivedType, typename ... XArgs >
-    class SCARAB_API registrar : public base_registrar< XBaseType, XArgs... >
+    class registrar : public base_registrar< XBaseType, XArgs... >
     {
         public:
             registrar( const std::string& a_class_name );
@@ -64,7 +64,7 @@ namespace scarab
     // factory
 
     template< class XBaseType, typename ... XArgs >
-    class SCARAB_API factory : public singleton< factory< XBaseType, XArgs... > >
+    class factory : public singleton< factory< XBaseType, XArgs... > >
     {
         public:
             typedef std::map< std::string, const base_registrar< XBaseType, XArgs... >* > FactoryMap;
@@ -99,7 +99,7 @@ namespace scarab
     //*****************************************
 
     template< class XBaseType >
-    class SCARAB_API base_registrar< XBaseType, void >
+    class base_registrar< XBaseType, void >
     {
         public:
             base_registrar() {}
@@ -114,7 +114,7 @@ namespace scarab
     };
 
     template< class XBaseType, class XDerivedType >
-    class SCARAB_API registrar< XBaseType, XDerivedType, void > : public base_registrar< XBaseType >
+    class registrar< XBaseType, XDerivedType, void > : public base_registrar< XBaseType >
     {
         public:
             registrar( const std::string& a_class_name );
@@ -130,7 +130,7 @@ namespace scarab
 
 
     template< class XBaseType >
-    class SCARAB_API factory< XBaseType, void > : public singleton< factory< XBaseType > >
+    class factory< XBaseType, void > : public singleton< factory< XBaseType > >
     {
         public:
             typedef std::map< std::string, const base_registrar< XBaseType >* > FactoryMap;

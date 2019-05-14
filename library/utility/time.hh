@@ -40,15 +40,15 @@ namespace scarab
 #endif // __MACH__
 
 
-#ifdef _WIN32
-struct timespec
-{
-    time_t tv_sec;
-    long tv_nsec;
+//#ifdef _WIN32
+//struct SCARAB_API timespec
+//{
+//    time_t tv_sec;
+//    long tv_nsec;
     //inline SCARAB_API bool operator==( const timespec& rhs ) const { return tv_nsec==rhs.tv_nsec && tv_sec==rhs.tv_sec; }
     //inline SCARAB_API bool operator<( const timespec& rhs ) const { return tv_sec != rhs.tv_sec ? tv_sec < rhs.tv_sec : tv_nsec < rhs.tv_nsec; }
-};
-#endif
+//};
+//#endif
 //#else
 inline SCARAB_API bool operator==( const timespec& lhs, const timespec& rhs ) { return lhs.tv_nsec==rhs.tv_nsec && lhs.tv_sec==rhs.tv_sec; }
 inline SCARAB_API bool operator<( const timespec& lhs, const timespec& rhs ) { return lhs.tv_sec != rhs.tv_sec ? lhs.tv_sec < rhs.tv_sec : lhs.tv_nsec < rhs.tv_nsec; }

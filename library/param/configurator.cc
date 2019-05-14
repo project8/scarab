@@ -22,6 +22,8 @@
 #include <mach-o/dyld.h>
 #elif __linux
 #include <unistd.h> // for readlink
+#elif _WIN32
+#include <Windows.h>
 #endif
 
 using std::string;
@@ -80,6 +82,9 @@ namespace scarab
         const size_t t_bufsize = 2048;
         char t_exe_buf[ t_bufsize ];
         if( readlink( "/proc/self/exe", t_exe_buf, t_bufsize ) < 0 )
+#elif _WIN32
+		TCHAR t_exe_buf[MAX_PATH];
+		if( ! GetModuleFileName( NULL, t_exe_buf, MAX_PATH ) < 0 )
 #endif
         {
             LWARN( slog, "Could not retrieve executable file name" );
@@ -96,7 +101,7 @@ namespace scarab
             if( ! t_config_filename.empty() )
             {
                 param_translator t_translator;
-                param* t_config_from_file = t_translator.read_file( t_config_filename.native() );
+                param* t_config_from_file = t_translator.read_file( t_config_filename.string() );
                 if( t_config_from_file == NULL )
                 {
                     throw error() << "[configurator] error parsing config file";
