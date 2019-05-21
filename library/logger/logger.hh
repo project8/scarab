@@ -282,7 +282,6 @@ namespace scarab
 #define __DEFAULT_LOGGER        scarab::logger::GetRootLogger()
 
 #define __LOG_LOCATION         scarab::logger::Location(__FILE__, __FUNC__, __LINE__)
-//#ifndef _WIN32
 #define __LOG_LOG_4(I,L,M,O) \
         { \
     if (I.IsLevelEnabled(scarab::logger::e##L)) { \
@@ -294,10 +293,6 @@ namespace scarab
         } \
     } \
         }
-//#else
-//#define __LOG_LOG_4(I,L,M,O) \
-//	    { }
-//#endif
 
 
 #define __LOG_LOG_3(I,L,M)     __LOG_LOG_4(I,L,M,false)
@@ -422,41 +417,5 @@ namespace scarab
 #define LFATAL_ONCE(I, ...)  __LOG_FATAL_ONCE_2(I, __VA_ARGS__)
 
 #endif /*_WIN32*/
-
-#if 0
-
-#include <iostream>
-#define LOGGER(I,K)
-
-#define LOG(I,K)         std::cout << "LOG: " << K << std::endl;
-#ifndef NDEBUG
-#define LTRACE(I,K)       std::cout << "TRACE: " << K << std::endl;
-#define LDEBUG(I,K)       std::cout << "DEBUG: " << K << std::endl;
-#else
-#define LTRACE(I,K)
-#define LDEBUG(I,K)
-#endif
-#define LINFO(I,K)        std::cout << "INFO: " << K << std::endl;
-#define LPROG(I,K)        std::cout << "PROG: " << K << std::endl;
-#define LWARN(I,K)        std::cout << "WARN: " << K << std::endl;
-#define LERROR(I,K)       std::cout << "ERROR: " << K << std::endl;
-#define LFATAL(I,K)       std::cout << "FATAL: " << K << std::endl;
-#define LASSERT(I,K)      std::cout << "ASSERT: " << K << std::endl;
-
-#define LOG_ONCE(I,K)    std::cout << "LOG: " << K << std::endl;
-#ifndef NDEBUG
-#define LTRACE_ONCE(I,K)  std::cout << "TRACE: " << K << std::endl;
-#define LDEBUG_ONCE(I,K)  std::cout << "DEBUG: " << K << std::endl;
-#else
-#define LTRACE_ONCE(I,K)
-#define LDEBUG_ONCE(I,K)
-#endif
-#define LINFO_ONCE(I,K)   std::cout << "INFO: " << K << std::endl;
-#define LPROG_ONCE(I,K)   std::cout << "PROG: " << K << std::endl;
-#define LWARN_ONCE(I,K)   std::cout << "WARN: " << K << std::endl;
-#define LERROR_ONCE(I,K)  std::cout << "ERROR: " << K << std::endl;
-#define LFATAL_ONCE(I,K)  std::cout << "FATAL: " << K << std::endl;
-
-#endif
 
 #endif /* SCARAB_LOGGER_HH_ */
