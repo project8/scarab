@@ -8,6 +8,12 @@
 #ifndef SCARAB_UTILITY_MACROS_HH_
 #define SCARAB_UTILITY_MACROS_HH_
 
+// Return value constants
+#define RETURN_SUCCESS 0
+#define RETURN_ERROR 1
+#define RETURN_CANCELED 2
+#define RETURN_REVOKED 3
+
 #define PASTE2( x, y ) x##y
 #define PASTE( x, y ) PASTE2( x, y )
 

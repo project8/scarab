@@ -24,10 +24,10 @@ namespace scarab
     {
     }
 
-    void cancelable::do_cancellation()
+    void cancelable::do_cancellation( int a_code )
     {
         // override in derived class
-        LDEBUG( slog, "cancelable::do_cancellation" );
+        LDEBUG( slog, "cancelable::do_cancellation with code <" << a_code << ">" );
         return;
     }
 
