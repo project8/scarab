@@ -35,6 +35,7 @@ namespace scarab
 
     signal_handler::signal_handler()
     {
+        // setup to handle SIGINT
         if( ! f_handling_sig_int && signal( SIGINT, signal_handler::handler_cancel_threads ) == SIG_ERR )
         {
             throw error() << "Unable to handle SIGINT\n";
@@ -45,6 +46,7 @@ namespace scarab
         }
 
 #ifndef _WIN32
+        // setup to handle SIGQUIT
         if( ! f_handling_sig_quit && signal( SIGQUIT, signal_handler::handler_cancel_threads ) == SIG_ERR )
         {
             throw error() << "Unable to handle SIGQUIT\n";
@@ -99,28 +101,30 @@ namespace scarab
 
     void signal_handler::handler_cancel_threads( int )
     {
-        print_message();
+        LPROG( slog, "\n\nHello!  Your signal is being handled by signal_handler.\n"
+             << "Have a nice day!\n" );
+        cancel_all( RETURN_SUCCESS );
+        return;
+    }
+
+    void signal_handler::cancel_all( int a_code )
+    {
+        LDEBUG( slog, "Canceling all cancelables" );
 
         f_mutex.lock();
         f_got_exit_signal = true;
         while( ! f_cancelers.empty() )
         {
-            (*f_cancelers.begin())->cancel();
+            (*f_cancelers.begin())->cancel( a_code );
             f_cancelers.erase( f_cancelers.begin() );
             std::this_thread::sleep_for( std::chrono::seconds(1) );
         }
         f_mutex.unlock();
 
 #ifdef _WIN32
-        ExitProcess( 1 );
+        ExitProcess( a_code );
 #endif
-        return;
-    }
 
-    void signal_handler::print_message()
-    {
-        LPROG( slog, "\n\nHello!  Your signal is being handled by signal_handler.\n"
-             << "Have a nice day!\n" );
         return;
     }
 

@@ -24,14 +24,22 @@ namespace scarab
             signal_handler();
             virtual ~signal_handler();
 
+            /// Add a cancelable object
             void add_cancelable( cancelable* a_cancelable );
+            /// Remove a cancelable object
             void remove_cancelable( cancelable* a_cancelable );
 
+            /// Remove all cancelables
             void reset();
 
+            /// Check whether an exit signal has been received
             static bool got_exit_signal();
 
+            /// Signal handler function
             static void handler_cancel_threads( int _ignored );
+
+            /// Asynchronous call to exit the process with the given exit code
+            static void cancel_all( int a_code );
 
         private:
             static void print_message();
