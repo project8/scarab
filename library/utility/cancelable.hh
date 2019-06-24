@@ -21,7 +21,12 @@ namespace scarab
     {
         public:
             cancelable();
+            cancelable( const cancelable& a_orig );
+            cancelable( cancelable&& a_orig );
             virtual ~cancelable();
+
+            cancelable& operator=( const cancelable& a_orig );
+            cancelable& operator=( cancelable&& a_orig );
 
             /// asynchronous cancel function
             void cancel( int a_code = RETURN_SUCCESS );
