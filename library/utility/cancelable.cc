@@ -17,11 +17,32 @@ namespace scarab
 
     cancelable::cancelable() :
             f_canceled( false )
+    {}
+
+    cancelable::cancelable( const cancelable& a_orig ) :
+            f_canceled( a_orig.f_canceled.load() )
+    {}
+
+    cancelable::cancelable( cancelable&& a_orig ) :
+            f_canceled( a_orig.f_canceled.load() )
     {
+        a_orig.f_canceled.store( false );
     }
 
     cancelable::~cancelable()
+    {}
+
+    cancelable& cancelable::operator=( const cancelable& a_orig )
     {
+        f_canceled.store( a_orig.f_canceled.load() );
+        return *this;
+    }
+
+    cancelable& cancelable::operator=( cancelable&& a_orig )
+    {
+        f_canceled.store( a_orig.f_canceled.load() );
+        a_orig.f_canceled.store( false );
+        return *this;
     }
 
     void cancelable::do_cancellation( int a_code )
