@@ -21,6 +21,10 @@
 #include <thread>
 #endif
 
+#ifdef PYBIND11
+#include <pybind11/pybind11.h>
+#endif
+
 #include "logger.hh"
 
 using namespace std;
@@ -105,6 +109,10 @@ namespace scarab
             {
                 logger::Private::sMutex.lock();
                 logger::Private::getTimeAbsoluteStr();
+#ifdef PYBIND
+                std::stringstream sStream;
+                fOut = &sStream;
+#endif
                 if (fColored)
                 {
                     //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
@@ -127,6 +135,9 @@ namespace scarab
                     (*fOut) << "(" << loc.fLineNumber  << "): ";
                     (*fOut) << message << endl;
                 }
+#ifdef PYBIND
+                py::print(sStream.str());
+#endif
                 logger::Private::sMutex.unlock();
             }
 
@@ -134,6 +145,10 @@ namespace scarab
             {
                 logger::Private::sMutex.lock();
                 logger::Private::getTimeAbsoluteStr();
+#ifdef PYBIND
+                std::stringstream sStream;
+                fErr = &sStream;
+#endif
                 if (fColored)
                 {
                     //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
@@ -156,6 +171,9 @@ namespace scarab
                     (*fErr) << "(" << loc.fLineNumber  << "): ";
                     (*fErr) << message << endl;
                 }
+#ifdef PYBIND
+                py::print(sStream.str());
+#endif
                 logger::Private::sMutex.unlock();
             }
     };

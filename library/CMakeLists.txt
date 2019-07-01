@@ -45,6 +45,8 @@ if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
     message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the JSON Codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
 endif()
 
+option( Scarab_PYBIND "Flag to enable PYBIND11 use" FALSE )
+
 #######################
 # Scarab dependencies #
 #######################
@@ -118,6 +120,13 @@ if( Scarab_BUILD_CLI )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/cli11 )
 endif( Scarab_BUILD_CLI )
 
+# Pybind11
+# Currently only works if Scarab is being used as a submodule of something that has Pybind11
+if( Scarab_PYBIND )
+    add_definitions( -DPYBIND )
+else( Scarab_PYBIND )
+    remove_definitions( -DPYBIND )
+endif( Scarab_PYBIND )
 
 ########################
 # Build Scarab library #
