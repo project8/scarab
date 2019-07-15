@@ -21,8 +21,8 @@
 #include <thread>
 #endif
 
-#ifdef PYBIND11
-#include <pybind11/pybind11.h>
+#ifdef PYTHON_LOGGER
+#include "pybind11/pybind11.h"
 #endif
 
 #include "logger.hh"
@@ -109,7 +109,7 @@ namespace scarab
             {
                 logger::Private::sMutex.lock();
                 logger::Private::getTimeAbsoluteStr();
-#ifdef PYBIND
+#ifdef PYTHON_LOGGER
                 std::stringstream sStream;
                 fOut = &sStream;
 #endif
@@ -135,8 +135,8 @@ namespace scarab
                     (*fOut) << "(" << loc.fLineNumber  << "): ";
                     (*fOut) << message << endl;
                 }
-#ifdef PYBIND
-                py::print(sStream.str());
+#ifdef PYTHON_LOGGER
+                pybind11::print(sStream.str());
 #endif
                 logger::Private::sMutex.unlock();
             }
@@ -145,7 +145,7 @@ namespace scarab
             {
                 logger::Private::sMutex.lock();
                 logger::Private::getTimeAbsoluteStr();
-#ifdef PYBIND
+#ifdef PYTHON_LOGGER
                 std::stringstream sStream;
                 fErr = &sStream;
 #endif
@@ -171,8 +171,8 @@ namespace scarab
                     (*fErr) << "(" << loc.fLineNumber  << "): ";
                     (*fErr) << message << endl;
                 }
-#ifdef PYBIND
-                py::print(sStream.str());
+#ifdef PYTHON_LOGGER
+                pybind11::print(sStream.str());
 #endif
                 logger::Private::sMutex.unlock();
             }

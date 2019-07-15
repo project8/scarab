@@ -37,6 +37,10 @@ option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
 
 option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interface class" TRUE )
 
+option( Scarab_BUILD_PYBIND "Flag to enable Python bindings" FALSE )
+
+option( Scarab_LOGGER_TO_PYTHON "Flag to switch the logger to using Python printing" FALSE )
+
 if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
     message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs, Authentication, and CLI requires Param.  If you want these elements, turn on Param.  If you want Param off, turn these elements off." )
 endif()
@@ -44,8 +48,6 @@ endif()
 if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
     message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the JSON Codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
 endif()
-
-option( Scarab_PYBIND "Flag to enable PYBIND11 use" FALSE )
 
 #######################
 # Scarab dependencies #
@@ -120,13 +122,20 @@ if( Scarab_BUILD_CLI )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/cli11 )
 endif( Scarab_BUILD_CLI )
 
-# Pybind11
-# Currently only works if Scarab is being used as a submodule of something that has Pybind11
-if( Scarab_PYBIND )
-    add_definitions( -DPYBIND )
-else( Scarab_PYBIND )
-    remove_definitions( -DPYBIND )
-endif( Scarab_PYBIND )
+# Python bindings: Pybind11 and Python printing from the logger (also using Pybind11)
+if( Scarab_LOGGER_TO_PYTHON )
+    add_definitions( -DPYTHON_LOGGER )
+    set_option( Scarab_BUILD_PYBIND TRUE )
+else( Scarab_LOGGER_TO_PYTHON )
+    remove_definitions( -DPYTHON_LOGGER )
+endif( Scarab_LOGGER_TO_PYTHON )
+
+if( Scarab_BUILD_PYBIND )
+    find_package( PythonLibs )
+    message( STATUS "Py include: ${PYTHON_INCLUDE_DIRS}" )
+    include_directories( BEFORE ${PYTHON_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/external/pybind11/include )
+    add_subdirectory( ${PROJECT_SOURCE_DIR}/external/pybind11 )
+endif( Scarab_BUILD_PYBIND )
 
 ########################
 # Build Scarab library #
