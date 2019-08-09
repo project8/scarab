@@ -62,11 +62,13 @@ else( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
 endif( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
 set( BIN_INSTALL_SUBDIR "bin" CACHE PATH "Install subdirectory for binaries" )
 set( CONFIG_INSTALL_SUBDIR "config" CACHE PATH "Install subdirectory for config files" )
+set( DATA_INSTALL_SUBDIR "data" CACHE PATH "Install subdirectory for data files" )
 
 set( INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${INCLUDE_INSTALL_SUBDIR}" )
 set( LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_SUBDIR}" )
 set( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${BIN_INSTALL_SUBDIR}" )
 set( CONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONFIG_INSTALL_SUBDIR}" )
+set( DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_SUBDIR}" )
 
 # flag for building test programs
 option( ${PROJECT_NAME}_ENABLE_TESTING "Turn on or off the building of test programs" OFF )
@@ -281,6 +283,10 @@ endmacro()
 
 macro( pbuilder_install_config )
     install( FILES ${ARGN} DESTINATION ${CONFIG_INSTALL_DIR} )
+endmacro()
+
+macro( pbuilder_install_data )
+    install( FILES ${ARGN} DESTINATION ${DATA_INSTALL_DIR} )
 endmacro()
 
 macro( pbuilder_install_files DEST_DIR )
