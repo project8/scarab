@@ -51,6 +51,11 @@ namespace scarab
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
 
+            /// Strict equality
+            bool operator==( const param_value& rhs ) const;
+            bool strict_is_equal_to( const param_value& rhs ) const;
+            bool loose_is_equal_to( const param_value& rhs ) const;
+
             bool empty() const;
 
             virtual bool is_null() const;
@@ -91,6 +96,40 @@ namespace scarab
             //*********************
             // Visitor Classes
             //*********************
+
+            class are_strict_equals : public boost::static_visitor< bool >
+            {
+                public:
+                    template < typename T, typename U >
+                    bool operator()( const T &, const U & ) const
+                    {
+                        return false; // cannot compare different types
+                    }
+
+                    template < typename T >
+                    bool operator()( const T & lhs, const T & rhs ) const
+                    {
+                        return lhs == rhs;
+                    }
+            };
+
+            class are_loose_equals : public boost::static_visitor< bool >
+            {
+                public:
+                    template < typename T, typename U >
+                    bool operator()( const T & rhs, const U & lhs ) const
+                    {
+                        as_string_visitor t_as_string;
+                        return t_as_string(lhs) == t_as_string(rhs); // cannot compare different types
+                    }
+
+                    template < typename T >
+                    bool operator()( const T & lhs, const T & rhs ) const
+                    {
+                        return lhs == rhs;
+                    }
+            };
+
 
             class type_visitor : public boost::static_visitor<>
             {
@@ -413,6 +452,21 @@ namespace scarab
     inline param_ptr_t param_value::move_clone()
     {
         return param_ptr_t( new param_value( std::move(*this) ) );
+    }
+
+    inline bool param_value::operator==( const param_value& rhs ) const
+    {
+        return boost::apply_visitor( are_strict_equals(), f_value, rhs.f_value );
+    }
+
+    inline bool param_value::strict_is_equal_to( const param_value& rhs ) const
+    {
+        return boost::apply_visitor( are_strict_equals(), f_value, rhs.f_value );
+    }
+
+    inline bool param_value::loose_is_equal_to( const param_value& rhs ) const
+    {
+        return boost::apply_visitor( are_loose_equals(), f_value, rhs.f_value );
     }
 
     inline std::string param_value::type() const
