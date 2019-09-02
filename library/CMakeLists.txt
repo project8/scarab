@@ -37,6 +37,8 @@ option( Scarab_BUILD_PARAM "Flag to enable building of the param class" TRUE )
 
 option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interface class" TRUE )
 
+option( Scarab_BUILD_PYTHON "Build python bindings" TRUE )
+
 if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
     message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs, Authentication, and CLI requires Param.  If you want these elements, turn on Param.  If you want Param off, turn these elements off." )
 endif()
@@ -118,6 +120,13 @@ if( Scarab_BUILD_CLI )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/cli11 )
 endif( Scarab_BUILD_CLI )
 
+# Pybind11
+if( Scarab_BUILD_PYTHON )
+    set( PYBIND11_INSTALL ON CACHE BOOL "Pybind11 option to install itself" FORCE )
+    add_subdirectory( External/pybind11 )
+    include_directories( External/pybind11/include )    
+endif( Scarab_BUILD_PYTHON )
+
 
 ########################
 # Build Scarab library #
@@ -174,6 +183,14 @@ endif( Scarab_BUILD_CLI )
 pbuilder_library( Scarab Scarab_SOURCES "" )
 
 pbuilder_install_headers( ${Scarab_HEADERS} )
+
+
+##########
+# Python #
+##########
+
+add_subdirectory( python )
+
 
 ###########
 # Testing #
