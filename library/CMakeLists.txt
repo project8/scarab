@@ -123,8 +123,8 @@ endif( Scarab_BUILD_CLI )
 # Pybind11
 if( Scarab_BUILD_PYTHON )
     set( PYBIND11_INSTALL ON CACHE BOOL "Pybind11 option to install itself" FORCE )
-    add_subdirectory( External/pybind11 )
-    include_directories( External/pybind11/include )    
+    add_subdirectory( external/pybind11 )
+    include_directories( external/pybind11/include )    
 endif( Scarab_BUILD_PYTHON )
 
 
