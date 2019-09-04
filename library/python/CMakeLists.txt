@@ -33,9 +33,9 @@ if( Scarab_BUILD_PYTHON )
     configure_file( add_lib_python_path.sh.in add_lib_python_path.sh @ONLY)
     install( FILES ${CMAKE_CURRENT_BINARY_DIR}/add_lib_python_path.sh DESTINATION ${BIN_INSTALL_DIR} )
 
-    pybind11_add_module( py_scarab ${PYBINDING_SOURCEFILES} )
-    target_link_libraries( py_scarab PRIVATE ${FULL_LIB_DEPENDENCIES} ${EXTERNAL_LIBRARIES} )
-    install( TARGETS py_scarab DESTINATION ${LIB_INSTALL_DIR} )
+    pybind11_add_module( scarab ${PYBINDING_SOURCEFILES} )
+    target_link_libraries( scarab PRIVATE ${FULL_LIB_DEPENDENCIES} ${EXTERNAL_LIBRARIES} )
+    install( TARGETS scarab DESTINATION ${LIB_INSTALL_DIR} )
     pbuilder_install_headers( ${PYBINDING_HEADERFILES} )
 
 endif( Scarab_BUILD_PYTHON )
