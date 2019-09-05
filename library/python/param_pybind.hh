@@ -116,14 +116,6 @@ namespace scarab_pybind
             .def( "__str__", &scarab::param::to_string )
             .def( "__call__", (scarab::param_value& (scarab::param::*)()) &scarab::param::operator(),
                     pybind11::return_value_policy::reference_internal )
-            /* TODO doesn't python automatically upcast to an ParamArray or ParamNode? (In which case we don't need these here)...
-                    if we do need them here then we shold add the __setitem__ listed below
-            .def( "__getitem__", (scarab::param& (scarab::param::*)(unsigned)) &scarab::param::operator[],
-                    pybind11::return_value_policy::reference_internal )
-            .def( "__getitem__", (scarab::param& (scarab::param::*)(const std::string&)) &scarab::param::operator[],
-                    pybind11::return_value_policy::reference_internal )
-            */
-            //TODO: do we need __setitem__?
 
             .def( "is_null", &scarab::param::is_null, "return whether the param object is an empty param type" )
             .def( "is_node", &scarab::param::is_node, "return whether the param object is a ParamNode" )
