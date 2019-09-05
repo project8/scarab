@@ -11,12 +11,12 @@ namespace scarab_pybind
                    "Asynchronous call to exit the process with the given exit code" );
 
 
-        pybind11::class_< scarab::signal_handler >( mod, "SignalHandler" )
+        pybind11::class_< scarab::signal_handler >( mod, "SignalHandler", "handle system signals and pass cancel status to associated objects" )
             .def( pybind11::init< >() )
-            
-            .def( "add_cancelable", &scarab::signal_handler::add_cancelable )
-            .def( "remove_cancelable", &scarab::signal_handler::remove_cancelable )
-            .def( "reset", &scarab::signal_handler::reset )
+
+            .def( "add_cancelable", &scarab::signal_handler::add_cancelable, "add a cancelable object to the list to be canceled in the event of a SIGINT" )
+            .def( "remove_cancelable", &scarab::signal_handler::remove_cancelable, "remove a cancelable object from the list to be canceled in the event of a SIGINT" )
+            .def( "reset", &scarab::signal_handler::reset, "remove all cancelable objects" )
 
             ;
 

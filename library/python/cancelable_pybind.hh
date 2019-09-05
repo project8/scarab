@@ -7,7 +7,7 @@ namespace scarab_pybind
     void export_cancelable( pybind11::module& mod )
     {
 
-        pybind11::class_< scarab::cancelable >( mod, "Cancelable" )
+        pybind11::class_< scarab::cancelable, std::shared_ptr<scarab::cancelable> >( mod, "Cancelable" )
             .def( pybind11::init< >() )
 
             .def( "cancel", &scarab::cancelable::cancel )

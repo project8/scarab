@@ -97,7 +97,6 @@ namespace scarab_pybind
             pybind11::dict to_return;
             for (scarab::param_node_const_iterator an_item=this_node.begin(); an_item != this_node.end(); ++an_item)
             {
-                //TODO how do I modify the contents of a pybind11::dict here... the following still fails
                 to_return[ an_item.name().c_str() ] = to_python( *an_item );
             }
             return to_return;
@@ -110,32 +109,33 @@ namespace scarab_pybind
         mod.def( "to_param", &to_param, "Convert native python types to a param structure." );
 
         // param
-        pybind11::class_< scarab::param >( mod, "Param" )
+        pybind11::class_< scarab::param >( mod, "Param", "param data structure base class and null object" )
             .def( pybind11::init< >() )
             .def( pybind11::init< scarab::param_value >() )
 
             .def( "__str__", &scarab::param::to_string )
             .def( "__call__", (scarab::param_value& (scarab::param::*)()) &scarab::param::operator(),
                     pybind11::return_value_policy::reference_internal )
-            .def( "__getitem__", (scarab::param& (scarab::param::*)(unsigned)) &scarab::param::operator[],
-                    pybind11::return_value_policy::reference_internal )
-            .def( "__getitem__", (scarab::param& (scarab::param::*)(const std::string&)) &scarab::param::operator[],
-                    pybind11::return_value_policy::reference_internal )
-            //TODO: do we need __setitem__?
 
-            .def( "is_null", &scarab::param::is_null )
-            .def( "is_node", &scarab::param::is_node )
-            .def( "is_array", &scarab::param::is_array )
-            .def( "is_value", &scarab::param::is_value )
+            .def( "is_null", &scarab::param::is_null, "return whether the param object is an empty param type" )
+            .def( "is_node", &scarab::param::is_node, "return whether the param object is a ParamNode" )
+            .def( "is_array", &scarab::param::is_array, "return whether the param object is a ParamArray" )
+            .def( "is_value", &scarab::param::is_value, "return whether the param object is a ParamValue" )
 
-            .def( "as_array", (scarab::param_array& (scarab::param::*)()) &scarab::param::as_array,
-                    pybind11::return_value_policy::reference_internal )
-            .def( "as_node", (scarab::param_node& (scarab::param::*)()) &scarab::param::as_node,
-                    pybind11::return_value_policy::reference_internal )
-            .def( "as_value", (scarab::param_value& (scarab::param::*)()) &scarab::param::as_value,
-                    pybind11::return_value_policy::reference_internal )
+            .def( "as_array",
+                    (scarab::param_array& (scarab::param::*)()) &scarab::param::as_array,
+                    pybind11::return_value_policy::reference_internal,
+                    "returns Param object as a ParamArray" )
+            .def( "as_node",
+                    (scarab::param_node& (scarab::param::*)()) &scarab::param::as_node,
+                    pybind11::return_value_policy::reference_internal,
+                    "returns Param object as ParamNode" )
+            .def( "as_value",
+                    (scarab::param_value& (scarab::param::*)()) &scarab::param::as_value,
+                    pybind11::return_value_policy::reference_internal,
+                    "returns Param object as ParamValue" )
 
-            .def( "to_python", &to_python )
+            .def( "to_python", &to_python, "recursively converts param object to native python data structure" )
 
             //TODO: has_subset()
 
