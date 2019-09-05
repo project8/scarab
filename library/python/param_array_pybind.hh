@@ -15,7 +15,7 @@ namespace scarab_pybind
     void export_param_array( pybind11::module& mod )
     {
         // param_array
-        pybind11::class_< scarab::param_array, scarab::param >( mod, "ParamArray" )
+        pybind11::class_< scarab::param_array, scarab::param >( mod, "ParamArray", "param data structure object for holding an ordered sequence of objects" )
             .def( pybind11::init< >() )
             .def( "__str__", &scarab::param_array::to_string )
             .def( "__len__", &scarab::param_array::size,
@@ -31,7 +31,7 @@ namespace scarab_pybind
             .def( "empty", &scarab::param_array::empty,
                     "True if the length is zero" )
 
-            .def( "resize", &scarab::param_array::resize, pybind11::arg( "size" )
+            .def( "resize", &scarab::param_array::resize, pybind11::arg( "size" ),
                     "Sets the size of the array; if smaller than the current size, the extra elements are deleted" )
 
             .def( "assign",
@@ -69,11 +69,11 @@ namespace scarab_pybind
 
             .def( "push_back",
                     (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_back,
-                    pybind11::arg( "value" )
+                    pybind11::arg( "value" ),
                     "add a param object to the end of the array")
             .def( "push_front",
                     (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_front,
-                    pybind11::arg( "value" )
+                    pybind11::arg( "value" ),
                     "add a param object to the end of the array")
 
             .def( "append",
