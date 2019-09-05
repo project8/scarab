@@ -5,6 +5,7 @@
  *     Author: B.H. LaRoque
  */
 
+#include "cancelable_pybind.hh"
 #include "signal_handler_pybind.hh"
 
 #ifdef BUILD_PARAM_PYBINDING
@@ -16,6 +17,8 @@
 
 PYBIND11_MODULE( scarab, scarab_mod )
 {
+    // cancelable
+    scarab_pybind::export_cancelable( scarab_mod );
     // signal handler
     scarab_pybind::export_signal_handler( scarab_mod );
 #ifdef BUILD_PARAM_PYBINDING
