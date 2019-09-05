@@ -25,10 +25,10 @@ namespace scarab_pybind
             .def( "__iter__", [](const scarab::param_node& an_obj){ return pybind11::make_iterator(an_obj.begin(), an_obj.end()); },
                     pybind11::keep_alive<0, 1>() /* keep object alive while the iterator exists */ )
 
-            .def( "count", &scarab::param_node::count )
-
-            .def( "is_null", &scarab::param_node::is_null )
-            .def( "is_node", &scarab::param_node::is_node )
+            .def( "count",
+                    &scarab::param_node::count,
+                    pybind11::arg( "key" ),
+                    "returns the number of occurances of provided key" )
 
             //TODO: has_subset()
 
