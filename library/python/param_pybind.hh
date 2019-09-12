@@ -5,15 +5,18 @@
  *      Author: N. Oblath, L. Gladstone, B.H. LaRoque
  */
 
+#include <algorithm> //for std::replace on string
+
 #include "param.hh"
 #include "error.hh"
 
 #include "pybind11/pybind11.h"
 #include "pybind11/pytypes.h"
 
+
 namespace scarab_pybind
 {
-    scarab::param_ptr_t to_param( const pybind11::object& an_object )
+    scarab::param_ptr_t to_param( const pybind11::object& an_object, bool hyphenate_keys=false )
     {
         using namespace pybind11;
         if( isinstance< none >( an_object ) )
@@ -42,7 +45,7 @@ namespace scarab_pybind
             scarab::param_array& the_return_arr = the_return->as_array();
             for( auto an_item = an_object.begin(); an_item != an_object.end(); ++an_item )
             {
-                the_return_arr.push_back( to_param( an_item ) );
+                the_return_arr.push_back( to_param( reinterpret_borrow< object >( *an_item ) ) );
             }
             return the_return;
         }
@@ -57,7 +60,12 @@ namespace scarab_pybind
                 {
                     throw scarab::error() << "Cannot convert dict to param";
                 }
-                the_return_arr.add( static_cast< const str& >(an_item->first), to_param( static_cast< const object& >(an_item->second) ) );
+                std::string new_key = pybind11::str(an_item->first);
+                if ( hyphenate_keys )
+                {
+                    std::replace( new_key.begin(), new_key.end(), '_', '-' );
+                }
+                the_return_arr.add( new_key, to_param( static_cast< const object& >(an_item->second) ) );
             }
             return the_return;
         }
@@ -106,7 +114,11 @@ namespace scarab_pybind
 
     void export_param( pybind11::module& mod )
     {
-        mod.def( "to_param", &to_param, "Convert native python types to a param structure." );
+        mod.def( "to_param",
+                &to_param,
+                pybind11::arg( "object"),
+                pybind11::arg( "hyphenate_keys" ) = false,
+                "Convert native python types to a param structure." );
 
         // param
         pybind11::class_< scarab::param >( mod, "Param", "param data structure base class and null object" )
