@@ -8,7 +8,7 @@
 #ifndef PARAM_PYBIND_HH_
 #define PARAM_PYBIND_HH_
 
-//#include <algorithm> //for std::replace on string
+#include <algorithm> //for std::replace on string
 
 #include "param.hh"
 #include "error.hh"
@@ -19,8 +19,7 @@
 
 namespace scarab_pybind
 {
-    scarab::param_ptr_t to_param( const pybind11::object& an_object, bool hyphenate_keys=false );
-    /*
+    scarab::param_ptr_t to_param( const pybind11::object& an_object, bool hyphenate_keys=false )
     {
         using namespace pybind11;
         if( isinstance< none >( an_object ) )
@@ -75,10 +74,8 @@ namespace scarab_pybind
         }
         throw scarab::error() << "Unknown python type cannot be converted to param";
     }
-    */
 
-    pybind11::object to_python( const scarab::param& a_param );
-    /*
+    pybind11::object to_python( const scarab::param& a_param, bool underscore_keys = false )
     {
         if (a_param.is_null())
         {
@@ -111,13 +108,17 @@ namespace scarab_pybind
             pybind11::dict to_return;
             for (scarab::param_node_const_iterator an_item=this_node.begin(); an_item != this_node.end(); ++an_item)
             {
-                to_return[ an_item.name().c_str() ] = to_python( *an_item );
+                std::string new_key = an_item.name();
+                if ( underscore_keys )
+                {
+                    std::replace( new_key.begin(), new_key.end(), '-', '_' );
+                }
+                to_return[ new_key.c_str() ] = to_python( *an_item );
             }
             return to_return;
         }
         throw scarab::error() << "Unknown param type cannot be converted to Python";
     }
-    */
 
     void export_param( pybind11::module& mod )
     {
@@ -154,7 +155,10 @@ namespace scarab_pybind
                     pybind11::return_value_policy::reference_internal,
                     "returns Param object as ParamValue" )
 
-            .def( "to_python", &to_python, "recursively converts param object to native python data structure" )
+            .def( "to_python",
+                    &to_python,
+                    pybind11::arg( "underscore_keys" ) = false,
+                    "recursively converts param object to native python data structure" )
 
             //TODO: has_subset()
 
