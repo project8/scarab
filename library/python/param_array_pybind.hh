@@ -5,6 +5,9 @@
  *      Author: N. Oblath, L. Gladstone, B.H. LaRoque
  */
 
+#ifndef PARAM_ARRAY_PYBIND_HH_
+#define PARAM_ARRAY_PYBIND_HH_
+
 #include "param.hh"
 
 #include "pybind11/pybind11.h"
@@ -98,3 +101,4 @@ namespace scarab_pybind
     }
 
 } /* namespace scarab_pybind */
+#endif /* PARAM_ARRAY_PYBIND_HH_ */

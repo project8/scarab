@@ -5,7 +5,10 @@
  *      Author: N. Oblath, L. Gladstone, B.H. LaRoque
  */
 
-#include <algorithm> //for std::replace on string
+#ifndef PARAM_PYBIND_HH_
+#define PARAM_PYBIND_HH_
+
+//#include <algorithm> //for std::replace on string
 
 #include "param.hh"
 #include "error.hh"
@@ -16,7 +19,8 @@
 
 namespace scarab_pybind
 {
-    scarab::param_ptr_t to_param( const pybind11::object& an_object, bool hyphenate_keys=false )
+    scarab::param_ptr_t to_param( const pybind11::object& an_object, bool hyphenate_keys=false );
+    /*
     {
         using namespace pybind11;
         if( isinstance< none >( an_object ) )
@@ -71,8 +75,10 @@ namespace scarab_pybind
         }
         throw scarab::error() << "Unknown python type cannot be converted to param";
     }
+    */
 
-    pybind11::object to_python( const scarab::param& a_param )
+    pybind11::object to_python( const scarab::param& a_param );
+    /*
     {
         if (a_param.is_null())
         {
@@ -111,6 +117,7 @@ namespace scarab_pybind
         }
         throw scarab::error() << "Unknown param type cannot be converted to Python";
     }
+    */
 
     void export_param( pybind11::module& mod )
     {
@@ -159,3 +166,4 @@ namespace scarab_pybind
     }
 
 } /* namespace scarab_pybind */
+#endif /* PARAM_PYBIND_HH_ */
