@@ -10,6 +10,8 @@ if( Scarab_BUILD_PYTHON )
     set( PYBINDING_HEADERFILES
         ${dir}/cancelable_pybind.hh
         ${dir}/signal_handler_pybind.hh
+        ${dir}/application_pybind.hh
+        ${dir}/version_pybind.hh
     )
 
     # Python bindings
@@ -19,7 +21,7 @@ if( Scarab_BUILD_PYTHON )
 
     if( Scarab_BUILD_PARAM )
         add_definitions( -DBUILD_PARAM_PYBINDING )
-        set( PYBINDING_HEADERFILES 
+        set( PYBINDING_HEADERFILES
             ${PYBINDING_HEADERFILES}
             ${dir}/param_pybind.hh
             ${dir}/param_value_pybind.hh

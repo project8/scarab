@@ -5,8 +5,10 @@
  *     Author: B.H. LaRoque
  */
 
+#include "application_pybind.hh"
 #include "cancelable_pybind.hh"
 #include "signal_handler_pybind.hh"
+#include "version_pybind.hh"
 
 #ifdef BUILD_PARAM_PYBINDING
 #include "param_pybind.hh"
@@ -23,6 +25,8 @@ PYBIND11_MODULE( scarab, scarab_mod )
     scarab_pybind::export_signal_handler( scarab_mod );
     // application
     scarab_pybind::export_application( scarab_mod );
+    // utility
+    scarab_pybind::export_version( scarab_mod );
 #ifdef BUILD_PARAM_PYBINDING
     // Param-related data objects
     scarab_pybind::export_param( scarab_mod );
