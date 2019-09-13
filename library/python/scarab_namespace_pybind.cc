@@ -19,19 +19,21 @@
 
 PYBIND11_MODULE( scarab, scarab_mod )
 {
+    std::list< std::string > all_members;
     // cancelable
-    scarab_pybind::export_cancelable( scarab_mod );
+    all_members.splice( all_members.end(), scarab_pybind::export_cancelable( scarab_mod ) );
     // signal handler
-    scarab_pybind::export_signal_handler( scarab_mod );
+    all_members.splice( all_members.end(), scarab_pybind::export_signal_handler( scarab_mod ) );
     // application
-    scarab_pybind::export_application( scarab_mod );
+    all_members.splice( all_members.end(), scarab_pybind::export_application( scarab_mod ) );
     // utility
-    scarab_pybind::export_version( scarab_mod );
+    all_members.splice( all_members.end(), scarab_pybind::export_version( scarab_mod ) );
 #ifdef BUILD_PARAM_PYBINDING
     // Param-related data objects
-    scarab_pybind::export_param( scarab_mod );
-    scarab_pybind::export_param_value( scarab_mod );
-    scarab_pybind::export_param_array( scarab_mod );
-    scarab_pybind::export_param_node( scarab_mod );
+    all_members.splice( all_members.end(), scarab_pybind::export_param( scarab_mod ) );
+    all_members.splice( all_members.end(), scarab_pybind::export_param_value( scarab_mod ) );
+    all_members.splice( all_members.end(), scarab_pybind::export_param_array( scarab_mod ) );
+    all_members.splice( all_members.end(), scarab_pybind::export_param_node( scarab_mod ) );
 #endif
+    scarab_mod.attr( "__all__" ) = all_members;
 }
