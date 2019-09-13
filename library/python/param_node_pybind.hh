@@ -13,9 +13,12 @@
 namespace scarab_pybind
 {
 
-    void export_param_node( pybind11::module& mod )
+    std::list< std::string > export_param_node( pybind11::module& mod )
     {
+        std::list< std::string > all_members;
+
         // param_node
+        all_members.push_back( "ParamNode" );
         pybind11::class_< scarab::param_node, scarab::param >( mod, "ParamNode", "param data structure object for holding a collection of object indexable by string keys" )
             .def( pybind11::init< >() )
 
@@ -74,6 +77,7 @@ namespace scarab_pybind
 
 
             ;
+        return all_members;
     }
 } /* namespace scarab_pybind */
 #endif /* PARAM_NODE_PYBIND_HH_ */

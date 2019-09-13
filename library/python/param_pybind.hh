@@ -120,8 +120,11 @@ namespace scarab_pybind
         throw scarab::error() << "Unknown param type cannot be converted to Python";
     }
 
-    void export_param( pybind11::module& mod )
+    std::list< std::string > export_param( pybind11::module& mod )
     {
+        std::list< std::string > all_members;
+
+        all_members.push_back( "to_param" );
         mod.def( "to_param",
                 &to_param,
                 pybind11::arg( "object"),
@@ -129,6 +132,7 @@ namespace scarab_pybind
                 "Convert native python types to a param structure." );
 
         // param
+        all_members.push_back( "Param" );
         pybind11::class_< scarab::param >( mod, "Param", "param data structure base class and null object" )
             .def( pybind11::init< >() )
             .def( pybind11::init< scarab::param_value >() )
@@ -167,6 +171,7 @@ namespace scarab_pybind
             //TODO: merge()
 
             ;
+        return all_members;
     }
 
 } /* namespace scarab_pybind */

@@ -7,11 +7,14 @@
 
 namespace scarab_pybind
 {
-    void export_application( pybind11::module& mod )
+    std::list< std::string > export_application( pybind11::module& mod )
     {
+        std::list< std::string > all_members;
+
         //TODO: this class does not actually belong in this namespace... where should it go?
         pybind11::class_< CLI::Option >( mod, "_CliOption", "non-scarab class" );
 
+        all_members.push_back( "MainApp" );
         pybind11::class_< scarab::main_app >( mod, "MainApp", "Base class for creating CLI utilities" )
             .def( pybind11::init< >() )
 
@@ -41,6 +44,7 @@ namespace scarab_pybind
 
             ;
 
+        return all_members;
     }
 } /* namespace scarab_pybind */
 #endif /* APPLICATION_PYBIND_HH_ */

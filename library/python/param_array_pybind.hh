@@ -15,9 +15,12 @@
 namespace scarab_pybind
 {
 
-    void export_param_array( pybind11::module& mod )
+    std::list< std::string > export_param_array( pybind11::module& mod )
     {
+        std::list< std::string > all_members;
+
         // param_array
+        all_members.push_back( "ParamArray" );
         pybind11::class_< scarab::param_array, scarab::param >( mod, "ParamArray", "param data structure object for holding an ordered sequence of objects" )
             .def( pybind11::init< >() )
             .def( "__str__", &scarab::param_array::to_string )
@@ -98,6 +101,7 @@ namespace scarab_pybind
             .def( "clear", &scarab::param_array::clear, "erase all contents and resize to 0" )
 
             ;
+        return all_members;
     }
 
 } /* namespace scarab_pybind */

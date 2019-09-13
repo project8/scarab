@@ -7,13 +7,16 @@
 
 namespace scarab_pybind
 {
-    void export_signal_handler( pybind11::module& mod )
+    std::list< std::string > export_signal_handler( pybind11::module& mod )
     {
+        std::list< std::string > all_members;
+
+        all_members.push_back( "cancel_all" );
         mod.def( "cancel_all", [](int a_code){ return scarab::signal_handler::cancel_all( a_code ); },
                     pybind11::call_guard< pybind11::gil_scoped_release >(),
                    "Asynchronous call to exit the process with the given exit code" );
 
-
+        all_members.push_back( "SignalHandler" );
         pybind11::class_< scarab::signal_handler >( mod, "SignalHandler", "handle system signals and pass cancel status to associated objects" )
             .def( pybind11::init< >() )
 
@@ -23,6 +26,7 @@ namespace scarab_pybind
 
             ;
 
+    return all_members;
     }
 } /* namespace scarab_pybind */
 #endif /* SIGNAL_HANDLER_PYBIND_HH_ */
