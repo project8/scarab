@@ -21,6 +21,8 @@ PYBIND11_MODULE( scarab, scarab_mod )
     scarab_pybind::export_cancelable( scarab_mod );
     // signal handler
     scarab_pybind::export_signal_handler( scarab_mod );
+    // application
+    scarab_pybind::export_application( scarab_mod );
 #ifdef BUILD_PARAM_PYBINDING
     // Param-related data objects
     scarab_pybind::export_param( scarab_mod );
