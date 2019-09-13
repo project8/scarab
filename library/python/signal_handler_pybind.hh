@@ -1,3 +1,6 @@
+#ifndef SIGNAL_HANDLER_PYBIND_HH_
+#define SIGNAL_HANDLER_PYBIND_HH_
+
 #include "signal_handler.hh"
 
 #include "pybind11/pybind11.h"
@@ -22,3 +25,4 @@ namespace scarab_pybind
 
     }
 } /* namespace scarab_pybind */
+#endif /* SIGNAL_HANDLER_PYBIND_HH_ */

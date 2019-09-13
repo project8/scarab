@@ -1,3 +1,6 @@
+#ifndef CANCELABLE_PYBIND_HH_
+#define CANCELABLE_PYBIND_HH_
+
 #include "cancelable.hh"
 
 #include "pybind11/pybind11.h"
@@ -19,3 +22,4 @@ namespace scarab_pybind
     }
 }
 
+#endif /* CANCELABLE_PYBIND_HH_ */

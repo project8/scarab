@@ -131,7 +131,9 @@ namespace scarab
     bool version_semantic::operator<( const version_semantic& a_other )
     {
         if( f_major_ver < a_other.f_major_ver ) return true;
+        if( f_major_ver > a_other.f_major_ver ) return false;
         if( f_minor_ver < a_other.f_minor_ver ) return true;
+        if( f_minor_ver > a_other.f_minor_ver ) return false;
         if( f_patch_ver < a_other.f_patch_ver ) return true;
         return false;
     }
@@ -141,6 +143,16 @@ namespace scarab
         return f_major_ver == a_other.f_major_ver &&
                f_minor_ver == a_other.f_minor_ver &&
                f_patch_ver == a_other.f_patch_ver;
+    }
+
+    bool version_semantic::operator>( const version_semantic& a_other )
+    {
+        if( f_major_ver > a_other.f_major_ver ) return true;
+        if( f_major_ver < a_other.f_major_ver ) return false;
+        if( f_minor_ver > a_other.f_minor_ver ) return true;
+        if( f_minor_ver < a_other.f_minor_ver ) return false;
+        if( f_patch_ver > a_other.f_patch_ver ) return true;
+        return false;
     }
 
     bool version_semantic::parse( const std::string& a_ver )
