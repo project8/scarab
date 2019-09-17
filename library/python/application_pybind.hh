@@ -3,6 +3,7 @@
 
 #include "pybind11/pybind11.h"
 #include "pybind11/functional.h"
+#include "pybind11/stl.h"
 
 #include "application.hh"
 
@@ -61,6 +62,22 @@ namespace scarab_pybind
                   "add a CLI flag, the config will contain a count of occurrances" )
 
             .def( "set_version", &scarab::main_app::set_version )
+
+            // implement execute as a lambda, it is a macro in CLI11
+            .def( "execute",
+                  [](scarab::main_app& an_app, std::list< std::string > args )
+                  {
+                    //TODO: this feels... super ugly, also how do I deal with errors/return codes?
+                    const char* argv[args.size()];
+                    std::list< std::string >::iterator an_arg = args.begin();
+                    for (unsigned i_arg=0; i_arg<args.size(); ++i_arg)
+                    {
+                        argv[i_arg] = an_arg->c_str();
+                        ++an_arg;
+                    }
+                    CLI11_PARSE( an_app, args.size(), argv );
+                  },
+                  "parse arguments and execute the application" )
 
             ;
 
