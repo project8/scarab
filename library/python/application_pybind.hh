@@ -11,12 +11,19 @@ namespace scarab_pybind
     {
         std::list< std::string > all_members;
 
-        //TODO: this class does not actually belong in this namespace... where should it go?
-        pybind11::class_< CLI::Option >( mod, "_CliOption", "non-scarab class" );
+        //TODO: the CLI:: namespace isn't part of scarab, but we need to provide access to these types...
+        //TODO May be able to use lambdas to avoid needing to be able to return these
+        pybind11::class_< CLI::App >( mod, "_CliApp", "non-scarab application class" )
+            //.def( "callback", &CLI::App::callback, pybind11::arg( "callable" ), "set the callback for application execution" )
+            ;
+        pybind11::class_< CLI::Option >( mod, "_CliOption", "non-scarab option class" )
+            ;
 
         all_members.push_back( "MainApp" );
-        pybind11::class_< scarab::main_app >( mod, "MainApp", "Base class for creating CLI utilities" )
+        pybind11::class_< scarab::main_app, CLI::App >( mod, "MainApp", "Base class for creating CLI utilities" )
             .def( pybind11::init< >() )
+
+            .def( "set_callback", [](scarab::main_app* an_app, std::function< void() > a_fun){ an_app->callback( a_fun );} )
 
             // member variables
             .def_property_readonly( "master_config", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::master_config )
