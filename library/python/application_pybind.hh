@@ -28,18 +28,34 @@ namespace scarab_pybind
             .def_property_readonly( "nonoption_ord_args", (scarab::param_array& (scarab::main_app::*)()) &scarab::main_app::nonoption_ord_args )
             .def_property_readonly( "app_options", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::app_options )
 
+            //TODO: add_config_subcommand?
+
+            //add_config_options... what template versions do we need?
+            .def( "add_config_option",
+                  &scarab::config_decorator::add_config_option< std::string >,
+                  pybind11::arg( "option" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
+                  "add a sequence of string arguments" )
             .def( "add_config_multi_option",
                   &scarab::config_decorator::add_config_multi_option< std::string >,
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
                   "add a sequence of string arguments" )
-            .def( "add_config_multi_option",
+            .def( "add_config_flag",
                   &scarab::config_decorator::add_config_flag< bool >,
                   pybind11::arg( "flag" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
+                  "add a CLI flag, which is toggled as a bool" )
+            .def( "add_config_counted_flag",
+                  &scarab::config_decorator::add_config_flag< unsigned >,
+                  pybind11::arg( "flag" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
                   "add a CLI flag, the config will contain a count of occurrances" )
+
             .def( "set_version", &scarab::main_app::set_version )
 
             ;
