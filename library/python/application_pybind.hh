@@ -11,16 +11,8 @@ namespace scarab_pybind
     {
         std::list< std::string > all_members;
 
-        //TODO: the CLI:: namespace isn't part of scarab, but we need to provide access to these types...
-        //TODO May be able to use lambdas to avoid needing to be able to return these
-        pybind11::class_< CLI::App >( mod, "_CliApp", "non-scarab application class" )
-            //.def( "callback", &CLI::App::callback, pybind11::arg( "callable" ), "set the callback for application execution" )
-            ;
-        pybind11::class_< CLI::Option >( mod, "_CliOption", "non-scarab option class" )
-            ;
-
         all_members.push_back( "MainApp" );
-        pybind11::class_< scarab::main_app, CLI::App >( mod, "MainApp", "Base class for creating CLI utilities" )
+        pybind11::class_< scarab::main_app >( mod, "MainApp", "Base class for creating CLI utilities" )
             .def( pybind11::init< >() )
 
             .def( "set_callback", [](scarab::main_app* an_app, std::function< void() > a_fun){ an_app->callback( a_fun );} )
@@ -39,25 +31,29 @@ namespace scarab_pybind
 
             //add_config_options... what template versions do we need?
             .def( "add_config_option",
-                  &scarab::config_decorator::add_config_option< std::string >,
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_option< std::string >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
                   "add a sequence of string arguments" )
             .def( "add_config_multi_option",
-                  &scarab::config_decorator::add_config_multi_option< std::string >,
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_multi_option< std::string >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
                   "add a sequence of string arguments" )
             .def( "add_config_flag",
-                  &scarab::config_decorator::add_config_flag< bool >,
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_flag< bool >(a_name, a_addr, a_description);},
                   pybind11::arg( "flag" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
                   "add a CLI flag, which is toggled as a bool" )
             .def( "add_config_counted_flag",
-                  &scarab::config_decorator::add_config_flag< unsigned >,
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_flag< unsigned >(a_name, a_addr, a_description);},
                   pybind11::arg( "flag" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
