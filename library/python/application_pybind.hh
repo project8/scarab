@@ -1,9 +1,10 @@
 #ifndef APPLICATION_PYBIND_HH_
 #define APPLICATION_PYBIND_HH_
 
-#include "application.hh"
-
 #include "pybind11/pybind11.h"
+#include "pybind11/functional.h"
+
+#include "application.hh"
 
 namespace scarab_pybind
 {
