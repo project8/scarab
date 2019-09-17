@@ -5,6 +5,8 @@
  *     Author: B.H. LaRoque
  */
 
+#include "pybind11/stl.h"
+
 #include "application_pybind.hh"
 #include "cancelable_pybind.hh"
 #include "signal_handler_pybind.hh"
