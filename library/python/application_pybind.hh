@@ -37,20 +37,6 @@ namespace scarab_pybind
             //TODO: add_config_subcommand?
 
             //add_config_options... what template versions do we need?
-            .def( "add_config_option",
-                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
-                        {an_app->add_config_option< std::string >(a_name, a_addr, a_description);},
-                  pybind11::arg( "option" ),
-                  pybind11::arg( "config_address" ),
-                  pybind11::arg( "description" ) = "",
-                  "add a single-string argument" )
-            .def( "add_config_multi_option",
-                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
-                        {an_app->add_config_multi_option< std::string >(a_name, a_addr, a_description);},
-                  pybind11::arg( "option" ),
-                  pybind11::arg( "config_address" ),
-                  pybind11::arg( "description" ) = "",
-                  "add a sequence of string arguments" )
             .def( "add_config_flag",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_flag< bool >(a_name, a_addr, a_description);},
@@ -65,6 +51,48 @@ namespace scarab_pybind
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
                   "add a CLI flag, the config will contain a count of occurrances" )
+            .def( "add_config_string_option",
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_option< std::string >(a_name, a_addr, a_description);},
+                  pybind11::arg( "option" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
+                  "add a single-string argument" )
+            .def( "add_config_int_option",
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_option< int >(a_name, a_addr, a_description);},
+                  pybind11::arg( "option" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
+                  "add a single-integer argument" )
+            .def( "add_config_float_option",
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_option< double >(a_name, a_addr, a_description);},
+                  pybind11::arg( "option" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
+                  "add a single-float argument" )
+            .def( "add_config_multi_string_option",
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_multi_option< std::string >(a_name, a_addr, a_description);},
+                  pybind11::arg( "option" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
+                  "add a sequence of string arguments" )
+            .def( "add_config_multi_int_option",
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_multi_option< int >(a_name, a_addr, a_description);},
+                  pybind11::arg( "option" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
+                  "add a sequence of ints arguments" )
+            .def( "add_config_multi_float_option",
+                  [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
+                        {an_app->add_config_multi_option< double >(a_name, a_addr, a_description);},
+                  pybind11::arg( "option" ),
+                  pybind11::arg( "config_address" ),
+                  pybind11::arg( "description" ) = "",
+                  "add a sequence of string arguments" )
 
             .def( "set_version", &scarab::main_app::set_version )
 
