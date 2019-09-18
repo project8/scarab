@@ -26,7 +26,7 @@ namespace scarab_pybind
 
             ;
 
-    return all_members;
+        return all_members;
     }
 } /* namespace scarab_pybind */
 #endif /* SIGNAL_HANDLER_PYBIND_HH_ */
