@@ -38,7 +38,7 @@ namespace scarab_pybind
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a sequence of string arguments" )
+                  "add a single-string argument" )
             .def( "add_config_multi_option",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_multi_option< std::string >(a_name, a_addr, a_description);},
