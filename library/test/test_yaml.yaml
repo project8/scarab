@@ -1,0 +1,20 @@
+value-string: "here's a string"
+value-int: -5
+value-unsigned: 10
+value-float: 3.14
+value-bool: true
+
+array:
+  - 
+    - 1
+    - 2
+    - 3
+  - "nested string"
+  - first: one
+    second: two
+    third: three
+
+node:
+  five: 5
+  six: 6.0
+  seven: seven
