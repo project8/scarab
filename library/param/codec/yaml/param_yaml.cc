@@ -133,14 +133,43 @@ namespace scarab
     {
         try
         {
-            // YAML::Node stores values as strings (in YAML::detail::node_data), so don't worry about trying different value types
-            return std::unique_ptr< param_value >( new param_value( a_node.Scalar() ) );
+            // the order of these try statements matters!
+            try
+            {
+                return std::unique_ptr< param_value >( new param_value( a_node.as< unsigned >() ) );
+            }
+            catch( const YAML::BadConversion& )
+            {
+                try
+                {
+                    return std::unique_ptr< param_value >( new param_value( a_node.as< int >() ) );
+                }
+                catch( const YAML::BadConversion& )
+                {
+                    try
+                    {
+                        return std::unique_ptr< param_value >( new param_value( a_node.as< double >() ) );
+                    }
+                    catch( const YAML::BadConversion& )
+                    {
+                        try
+                        {
+                            return std::unique_ptr< param_value >( new param_value( a_node.as< bool >() ) );
+                        }
+                        catch( const YAML::BadConversion& )
+                        {
+                            return std::unique_ptr< param_value >( new param_value( a_node.Scalar() ) );
+                        }
+                    }
+                }
+            }
         }
         catch ( YAML::Exception& e )
         {
             LERROR( slog, "YAML error in scalar_handler: " << e.what() )
             return std::unique_ptr< param_value >();
         }
+        return std::unique_ptr< param_value >();
     }
 
 

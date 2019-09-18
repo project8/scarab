@@ -14,9 +14,12 @@
 namespace scarab_pybind
 {
 
-    void export_param_value( pybind11::module& mod )
+    std::list< std::string > export_param_value( pybind11::module& mod )
     {
+        std::list< std::string > all_members;
+
         // param_value
+        all_members.push_back( "ParamValue" );
         pybind11::class_< scarab::param_value, scarab::param >( mod, "ParamValue", "param data structure object for holding a single value" )
             // initialization overloads by type
             .def( pybind11::init< bool >() )
@@ -72,6 +75,7 @@ namespace scarab_pybind
             //TODO: empty(), clear(), has_subset()
 
             ;
+        return all_members;
     }
 
 } /* namespace scarab_pybind */

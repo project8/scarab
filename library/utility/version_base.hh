@@ -55,6 +55,8 @@ namespace scarab
             bool operator<( const version_semantic& a_other );
             /// Equality operator to compare version information only
             bool operator==( const version_semantic& a_other );
+            /// Greater-than operator to compare version information only
+            bool operator>( const version_semantic& a_other );
 
             virtual unsigned major_version() const;
             virtual unsigned minor_version() const;
