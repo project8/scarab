@@ -29,6 +29,11 @@ namespace scarab_pybind
             .def_property_readonly( "nonoption_ord_args", (scarab::param_array& (scarab::main_app::*)()) &scarab::main_app::nonoption_ord_args )
             .def_property_readonly( "app_options", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::app_options )
 
+            .def( "do_config_stage_1", &scarab::main_app::do_config_stage_1 )
+            .def( "do_config_stage_2", &scarab::main_app::do_config_stage_2 )
+            .def( "do_config_stage_3", &scarab::main_app::do_config_stage_3 )
+            .def( "do_config_stage_4", &scarab::main_app::do_config_stage_4 )
+
             //TODO: add_config_subcommand?
 
             //add_config_options... what template versions do we need?
