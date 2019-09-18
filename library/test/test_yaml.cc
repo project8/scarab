@@ -19,7 +19,7 @@ int main( int argc, char** argv )
 {
     if( argc < 2 )
     {
-        LERROR( slog, "Please provide a YAML file to read" );
+        LERROR( slog, "Please provide the test YAML file to be read: test_yaml.yaml" );
         return -1;
     }
 
@@ -34,6 +34,81 @@ int main( int argc, char** argv )
 
     LINFO( slog, "File read and parsed: \n" << *t_param_location );
 
+    LINFO( slog, "Checking types" );
+    if( ! t_param_location->is_node() )
+    {
+        LERROR( slog, "Top level is not a node" );
+    }
+    else
+    {
+        const param_node& t_top = t_param_location->as_node();
+        if( ! t_top["array"].is_array() )
+        {
+            LERROR( slog, "\"array\" is not an array" );
+        }
+        if( ! t_top["node"].is_node() )
+        {
+            LERROR( slog, "\"node\" is not a node" );
+        }
+        if( ! t_top["value-bool"].is_value() )
+        {
+            LERROR( slog, "\"value-bool\" is not a value" );
+        }
+        else
+        {
+            if( ! t_top["value-bool"]().is_bool() )
+            {
+                LERROR( slog, "\"value-bool\" is not bool" );
+            }
+        }
+        if( ! t_top["value-float"].is_value() )
+        {
+            LERROR( slog, "\"value-float\" is not a value" );
+        }
+        else
+        {
+            if( ! t_top["value-float"]().is_double() )
+            {
+                LERROR( slog, "\"value-float\" is not float" );
+            }
+        }
+        if( ! t_top["value-int"].is_value() )
+        {
+            LERROR( slog, "\"value-int\" is not a value" );
+        }
+        else
+        {
+            if( ! t_top["value-int"]().is_int() )
+            {
+                LERROR( slog, "\"value-int\" is not int" );
+            }
+        }
+        if( ! t_top["value-string"].is_value() )
+        {
+            LERROR( slog, "\"value-string\" is not a value" );
+        }
+        else
+        {
+            if( ! t_top["value-string"]().is_string() )
+            {
+                LERROR( slog, "\"value-string\" is not string" );
+            }
+        }
+        if( ! t_top["value-unsigned"].is_value() )
+        {
+            LERROR( slog, "\"value-unsigned\" is not a value" );
+        }
+        else
+        {
+            if( ! t_top["value-unsigned"]().is_uint() )
+            {
+                LERROR( slog, "\"value-unsigned\" is not unsigned" );
+            }
+        }
+        LINFO( slog, "If there were no errors, then the type tests passed" );
+    }
+    
+    
     //write file
     param_output_yaml t_output;
     bool t_did_write_file = t_output.write_file( *t_param_location, "test_output.yaml" );

@@ -21,6 +21,9 @@ if( Scarab_ENABLE_TESTING )
         test_terminate
         test_time
     )
+
+    set( test_configs
+    )
     
     if( Scarab_BUILD_PARAM )
         set( test_programs
@@ -44,6 +47,10 @@ if( Scarab_ENABLE_TESTING )
             ${test_programs}
             test_yaml
         )
+        set( test_configs
+            ${test_configs}
+            test_yaml.yaml
+        )
     endif( Scarab_BUILD_CODEC_YAML )
 
     if( Scarab_BUILD_CLI )
@@ -58,5 +65,7 @@ if( Scarab_ENABLE_TESTING )
     endif( Scarab_BUILD_CLI )
 
     pbuilder_executables( test_programs lib_dependencies )
+
+    pbuilder_install_config( ${test_configs} )
 
 endif( Scarab_ENABLE_TESTING )
