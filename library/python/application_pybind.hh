@@ -108,8 +108,10 @@ namespace scarab_pybind
                         argv[i_arg] = an_arg->c_str();
                         ++an_arg;
                     }
+                    // CLI11_PARSE returns an integer in the event of an error, the are meant to be
+                    // valid shell return codes, so 0 is success
                     CLI11_PARSE( an_app, args.size(), argv );
-                    //TODO I'm getting an error here that a non-void function reaches the end of execution... why isn't the [lambda?]function void?"
+                    return 0;
                   },
                   "parse arguments and execute the application" )
 
