@@ -157,7 +157,7 @@ namespace scarab
 
     bool version_semantic::parse( const std::string& a_ver )
     {
-        if( a_ver == "unknown" )
+        if( a_ver.empty() || a_ver == "unknown" )
         {
             f_major_ver = 0;
             f_minor_ver = 0;
@@ -166,6 +166,11 @@ namespace scarab
             return true;
         }
 
+        size_t t_start = 0;
+        if( a_ver[0] == 'v' )
+        {
+            t_start = 1;
+        }
         size_t t_delim_pos_1 = a_ver.find( s_delimeter, 0 );
         if( t_delim_pos_1 == std::string::npos )
         {
@@ -173,7 +178,7 @@ namespace scarab
             return false;
         }
         std::stringstream t_maj_ver_str;
-        t_maj_ver_str << a_ver.substr( 0, t_delim_pos_1 );
+        t_maj_ver_str << a_ver.substr( t_start, t_delim_pos_1 );
 
         size_t t_delim_pos_2 = a_ver.find( s_delimeter, t_delim_pos_1 + 1 );
         if( t_delim_pos_2 == std::string::npos )
