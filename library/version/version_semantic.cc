@@ -1,5 +1,5 @@
 /*
- * version_base.cc
+ * version_semantic.cc
  *
  *  Created on: Jul 23, 2018
  *      Author: N.S. Oblath
@@ -7,7 +7,7 @@
 
 #define SCARAB_API_EXPORTS
 
-#include "version_base.hh"
+#include "version_semantic.hh"
 
 #include "logger.hh"
 #include "path.hh"
@@ -29,22 +29,7 @@ using std::string;
 
 namespace scarab
 {
-    LOGGER( slog, "scarab_version" );
-
-    version_ifc::version_ifc()
-    {}
-
-    version_ifc::version_ifc( const version_ifc& )
-    {}
-
-    version_ifc::~version_ifc()
-    {}
-
-    version_ifc& version_ifc::operator=( const version_ifc& )
-    {
-        return *this;
-    }
-
+    LOGGER( slog, "version_semantic" );
 
     char version_semantic::s_delimeter = '.';
 

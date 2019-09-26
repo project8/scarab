@@ -1,7 +1,7 @@
 #ifndef VERSION_PYBIND_HH_
 #define VERSION_PYBIND_HH_
 
-#include "version_base.hh"
+#include "version_semantic.hh"
 
 #include "pybind11/pybind11.h"
 

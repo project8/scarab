@@ -1,44 +1,17 @@
 /*
- * version_base.hh
+ * version_semantic.hh
  *
  *  Created on: Jul 23, 2018
  *      Author: N.S. Oblath
  */
 
-#ifndef SCARAB_VERSION_BASE_HH_
-#define SCARAB_VERSION_BASE_HH_
+#ifndef SCARAB_VERSION_SEMANTIC_HH_
+#define SCARAB_VERSION_SEMANTIC_HH_
 
-#include "scarab_api.hh"
-
-#include <string>
+#include "version_ifc.hh"
 
 namespace scarab
 {
-
-    class SCARAB_API version_ifc
-    {
-        public:
-            version_ifc();
-            version_ifc( const version_ifc& );
-            virtual ~version_ifc();
-
-            version_ifc& operator=( const version_ifc& );
-
-            virtual unsigned major_version() const = 0;
-            virtual unsigned minor_version() const = 0;
-            virtual unsigned patch_version() const = 0;
-
-            virtual const std::string& version_str() const = 0;
-
-            virtual const std::string& package() const = 0;
-            virtual const std::string& commit() const = 0;
-
-            virtual const std::string& exe_name() const = 0;
-            virtual const std::string& hostname() const = 0;
-            virtual const std::string& username() const = 0;
-
-            virtual std::string version_info_string() const = 0;
-    };
 
     class SCARAB_API version_semantic : public version_ifc
     {
@@ -96,6 +69,8 @@ namespace scarab
             std::string f_username;
     };
 
+    typedef std::shared_ptr< version_semantic > version_semantic_ptr_t;
+
 
     inline unsigned version_semantic::major_version() const
     {
@@ -140,4 +115,4 @@ namespace scarab
 
 } /* namespace scarab */
 
-#endif /* SCARAB_VERSION_BASE_HH_ */
+#endif /* SCARAB_VERSION_SEMANTIC_HH_ */
