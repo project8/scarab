@@ -140,8 +140,31 @@ endmacro()
 
 # This should be called immediately after setting the project name
 macro( pbuilder_prepare_project )
-    # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
+    # default package name is the project name
     set( ${PROJECT_NAME}_PACKAGE_NAME "${PROJECT_NAME}" )
+
+    # if git is used, get the commit SHA1
+    find_package( Git )
+    if( GIT_FOUND )
+        execute_process( COMMAND ${GIT_EXECUTABLE} rev-parse -q HEAD  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE ${PROJECT_NAME}_GIT_COMMIT  OUTPUT_STRIP_TRAILING_WHITESPACE )
+        execute_process( COMMAND ${GIT_EXECUTABLE} describe --tags --long  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE ${PROJECT_NAME}_GIT_DESCRIBE  OUTPUT_STRIP_TRAILING_WHITESPACE )
+        execute_process( COMMAND git remote get-url origin WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE GIT_ORIGIN OUTPUT_STRIP_TRAILING_WHITESPACE )
+        if( GIT_ORIGIN )
+            message( STATUS "Git origin: ${GIT_ORIGIN}")
+            #string( REGEX MATCH ":.+$" GIT_PACKAGE ${GIT_ORIGIN} )
+            #string( SUBSTRING ${GIT_PACKAGE} 1 -1 GIT_PACKAGE )
+            string( REGEX MATCH "[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$" GIT_PACKAGE ${GIT_ORIGIN} )
+        else( GIT_ORIGIN )
+            execute_process( COMMAND git rev-parse --show-toplevel WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE TOP_DIR OUTPUT_STRIP_TRAILING_WHITESPACE )
+            execute_process( COMMAND basename ${TOP_DIR} OUTPUT_VARIABLE GIT_PACKAGE )
+        endif( GIT_ORIGIN )
+        message( STATUS "Git package: ${GIT_PACKAGE}" )
+
+        # override package name with git package
+        set( ${PROJECT_NAME}_PACKAGE_NAME "${GIT_PACKAGE}" )
+    endif( GIT_FOUND )
+
+    # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
     set( ${PROJECT_NAME}_PACKAGE_STRING "${PROJECT_NAME} ${${PROJECT_NAME}_VERSION}" )
     
     # Configuration header file
@@ -152,14 +175,7 @@ macro( pbuilder_prepare_project )
         )
         # Add the binary tree to the search path for include files so that the config file is found during the build
         include_directories( ${PROJECT_BINARY_DIR} )
-    endif( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.hh.in )
-    
-    # if git is used, get the commit SHA1
-    find_package( Git )
-    if( GIT_FOUND )
-        execute_process( COMMAND ${GIT_EXECUTABLE} rev-parse -q HEAD  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE ${PROJECT_NAME}_GIT_COMMIT  OUTPUT_STRIP_TRAILING_WHITESPACE )
-        execute_process( COMMAND ${GIT_EXECUTABLE} describe --tags --long  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE ${PROJECT_NAME}_GIT_DESCRIBE  OUTPUT_STRIP_TRAILING_WHITESPACE )
-    endif( GIT_FOUND )
+    endif( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.hh.in ) 
     
 endmacro()
 
