@@ -13,7 +13,7 @@ namespace scarab_pybind
         std::list< std::string > all_items;
 
         all_items.push_back( "VersionSemantic" );
-        pybind11::class_< scarab::version_semantic >( mod, "VersionSemantic", "data structure for representing semantic version information" )
+        pybind11::class_< scarab::version_semantic, std::shared_ptr< scarab::version_semantic > >( mod, "VersionSemantic", "data structure for representing semantic version information" )
             .def( pybind11::init<>() )
             .def( pybind11::init< unsigned, unsigned, unsigned >(),
                     pybind11::arg( "major"),
