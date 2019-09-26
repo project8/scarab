@@ -10,6 +10,8 @@
 
 #include "version_ifc.hh"
 
+#include <memory>
+
 namespace scarab
 {
 
