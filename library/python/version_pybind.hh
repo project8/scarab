@@ -30,12 +30,12 @@ namespace scarab_pybind
             .def_property_readonly( "patch_version", &scarab::version_semantic::patch_version )
             .def_property_readonly( "version", &scarab::version_semantic::version_str )
 
-            .def_property_readonly( "package", &scarab::version_semantic::package )
-            .def_property_readonly( "commit", &scarab::version_semantic::commit )
+            .def_property_readonly( "package", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::package )
+            .def_property_readonly( "commit", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::commit )
 
-            .def_property_readonly( "exe_name", &scarab::version_semantic::exe_name )
-            .def_property_readonly( "hostname", &scarab::version_semantic::hostname )
-            .def_property_readonly( "username", &scarab::version_semantic::username )
+            .def_property_readonly( "exe_name", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::exe_name )
+            .def_property_readonly( "hostname", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::hostname )
+            .def_property_readonly( "username", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::username )
 
             .def_property_readonly( "version_info", &scarab::version_semantic::version_info_string )
 
