@@ -155,8 +155,6 @@ add_subdirectory( utility )
 add_subdirectory( version )
 add_subdirectory( logger )
 
-message(STATUS "### ${Scarab_SOURCES}")
-
 if( Scarab_BUILD_PARAM )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
     add_subdirectory( param )
@@ -184,8 +182,6 @@ if( Scarab_BUILD_CLI )
 endif( Scarab_BUILD_CLI )
 
 ##########
-
-#message(STATUS "Scarab sources: ${Scarab_SOURCES}" )
 
 pbuilder_library( Scarab Scarab_SOURCES "" )
 
