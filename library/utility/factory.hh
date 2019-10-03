@@ -36,10 +36,6 @@ namespace scarab
             base_registrar() {}
             virtual ~base_registrar() {}
 
-        public:
-            friend class factory< XBaseType, XArgs... >;
-
-        protected:
             virtual XBaseType* create( XArgs ... args ) const = 0;
 
     };
@@ -53,11 +49,11 @@ namespace scarab
             registrar( const std::string& a_class_name );
             virtual ~registrar();
 
-        protected:
             void register_class( const std::string& a_class_name ) const;
 
             XBaseType* create( XArgs ... args ) const;
 
+        protected:
             std::string f_class_name;
     };
 
@@ -85,7 +81,7 @@ namespace scarab
 
         protected:
             FactoryMap* fMap;
-            std::mutex f_factory_mutex;
+            mutable std::mutex f_factory_mutex;
 
         protected:
             allow_singleton_access( factory );
