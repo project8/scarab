@@ -260,7 +260,7 @@ namespace scarab
     template< class XBaseType, class XDerivedType, typename ... XArgs >
     registrar< XBaseType, XDerivedType, XArgs... >::~registrar()
     {
-        factory< XBaseType, XArgs... >::get_instance()->remove_class( f_class_name );
+        //factory< XBaseType, XArgs... >::get_instance()->remove_class( f_class_name );
     }
 
     template< class XBaseType, class XDerivedType, typename ... XArgs >
@@ -380,7 +380,7 @@ namespace scarab
     template< class XBaseType, class XDerivedType >
     registrar< XBaseType, XDerivedType, void >::~registrar()
     {
-        factory< XBaseType >::get_instance()->remove_class( f_class_name );
+        //factory< XBaseType >::get_instance()->remove_class( f_class_name );
     }
 
     template< class XBaseType, class XDerivedType >
