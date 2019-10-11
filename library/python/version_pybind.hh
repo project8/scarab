@@ -1,7 +1,7 @@
 #ifndef VERSION_PYBIND_HH_
 #define VERSION_PYBIND_HH_
 
-#include "version_base.hh"
+#include "version_semantic.hh"
 
 #include "pybind11/pybind11.h"
 
@@ -13,7 +13,7 @@ namespace scarab_pybind
         std::list< std::string > all_items;
 
         all_items.push_back( "VersionSemantic" );
-        pybind11::class_< scarab::version_semantic >( mod, "VersionSemantic", "data structure for representing semantic version information" )
+        pybind11::class_< scarab::version_semantic, std::shared_ptr< scarab::version_semantic > >( mod, "VersionSemantic", "data structure for representing semantic version information" )
             .def( pybind11::init<>() )
             .def( pybind11::init< unsigned, unsigned, unsigned >(),
                     pybind11::arg( "major"),
@@ -30,12 +30,17 @@ namespace scarab_pybind
             .def_property_readonly( "patch_version", &scarab::version_semantic::patch_version )
             .def_property_readonly( "version", &scarab::version_semantic::version_str )
 
-            .def_property_readonly( "package", &scarab::version_semantic::package )
-            .def_property_readonly( "commit", &scarab::version_semantic::commit )
+            .def_property( "package", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::package,
+                           [](scarab::version_semantic& an_obj, const std::string& a_package ) {an_obj.package() = a_package; } )
+            .def_property( "commit", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::commit,
+                           [](scarab::version_semantic& an_obj, const std::string& a_commit ) {an_obj.commit() = a_commit; } )
 
-            .def_property_readonly( "exe_name", &scarab::version_semantic::exe_name )
-            .def_property_readonly( "hostname", &scarab::version_semantic::hostname )
-            .def_property_readonly( "username", &scarab::version_semantic::username )
+            .def_property( "exe_name", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::exe_name,
+                           [](scarab::version_semantic& an_obj, const std::string& an_exe ) {an_obj.exe_name() = an_exe; } )
+            .def_property( "hostname", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::hostname,
+                           [](scarab::version_semantic& an_obj, const std::string& a_hostname ) {an_obj.hostname() = a_hostname; } )
+            .def_property( "username", (std::string& (scarab::version_semantic::*)()) &scarab::version_semantic::username,
+                           [](scarab::version_semantic& an_obj, const std::string& a_username ) {an_obj.username() = a_username; } )
 
             .def_property_readonly( "version_info", &scarab::version_semantic::version_info_string )
 

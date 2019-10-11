@@ -70,7 +70,7 @@ namespace scarab
     {
     }
 
-    void main_app::set_version( version_semantic* a_ver )
+    void main_app::set_version( scarab::version_semantic_ptr_t a_ver )
     {
         version_wrapper::get_instance()->set_imp( a_ver );
     }

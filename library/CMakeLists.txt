@@ -139,6 +139,7 @@ endif( Scarab_BUILD_PYTHON )
 include_directories( BEFORE
     ${PROJECT_SOURCE_DIR}/utility
     ${PROJECT_SOURCE_DIR}/logger
+    ${PROJECT_SOURCE_DIR}/version
 )
 
 ##########
@@ -146,8 +147,12 @@ include_directories( BEFORE
 set( Scarab_HEADERS )
 set( Scarab_SOURCES )
 
-include_directories( BEFORE ${CMAKE_CURRENT_BINARY_DIR}/utility )
+include_directories( BEFORE 
+    ${CMAKE_CURRENT_BINARY_DIR}/utility 
+    ${CMAKE_CURRENT_BINARY_DIR}/version 
+)
 add_subdirectory( utility )
+add_subdirectory( version )
 add_subdirectory( logger )
 
 if( Scarab_BUILD_PARAM )
@@ -177,8 +182,6 @@ if( Scarab_BUILD_CLI )
 endif( Scarab_BUILD_CLI )
 
 ##########
-
-#message(STATUS "Scarab sources: ${Scarab_SOURCES}" )
 
 pbuilder_library( Scarab Scarab_SOURCES "" )
 

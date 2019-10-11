@@ -12,6 +12,7 @@
 
 #include "member_variables.hh"
 #include "param_helpers.hh"
+#include "version_semantic.hh"
 
 namespace scarab
 {
@@ -270,7 +271,7 @@ namespace scarab
             /// Load the application-specific options
             virtual void do_config_stage_4();
 
-            void set_version( version_semantic* a_ver );
+            void set_version( scarab::version_semantic_ptr_t a_ver );
 
             /// Master configuration tree for the application
             mv_referrable( param_node, master_config );

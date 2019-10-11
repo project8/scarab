@@ -1,44 +1,21 @@
 /*
- * version_base.hh
+ * version_semantic.hh
  *
  *  Created on: Jul 23, 2018
  *      Author: N.S. Oblath
  */
 
-#ifndef SCARAB_VERSION_BASE_HH_
-#define SCARAB_VERSION_BASE_HH_
+#ifndef SCARAB_VERSION_SEMANTIC_HH_
+#define SCARAB_VERSION_SEMANTIC_HH_
 
-#include "scarab_api.hh"
+#include "version_ifc.hh"
 
-#include <string>
+#include "member_variables.hh"
+
+#include <memory>
 
 namespace scarab
 {
-
-    class SCARAB_API version_ifc
-    {
-        public:
-            version_ifc();
-            version_ifc( const version_ifc& );
-            virtual ~version_ifc();
-
-            version_ifc& operator=( const version_ifc& );
-
-            virtual unsigned major_version() const = 0;
-            virtual unsigned minor_version() const = 0;
-            virtual unsigned patch_version() const = 0;
-
-            virtual const std::string& version_str() const = 0;
-
-            virtual const std::string& package() const = 0;
-            virtual const std::string& commit() const = 0;
-
-            virtual const std::string& exe_name() const = 0;
-            virtual const std::string& hostname() const = 0;
-            virtual const std::string& username() const = 0;
-
-            virtual std::string version_info_string() const = 0;
-    };
 
     class SCARAB_API version_semantic : public version_ifc
     {
@@ -64,13 +41,6 @@ namespace scarab
 
             virtual const std::string& version_str() const;
 
-            virtual const std::string& package() const;
-            virtual const std::string& commit() const;
-
-            virtual const std::string& exe_name() const;
-            virtual const std::string& hostname() const;
-            virtual const std::string& username() const;
-
             virtual std::string version_info_string() const;
 
         public:
@@ -88,13 +58,15 @@ namespace scarab
             unsigned f_patch_ver;
             std::string f_version;
 
-            std::string f_package;
-            std::string f_commit;
+            mv_referrable( std::string, package );
+            mv_referrable( std::string, commit );
 
-            std::string f_exe_name;
-            std::string f_hostname;
-            std::string f_username;
+            mv_referrable( std::string, exe_name );
+            mv_referrable( std::string, hostname );
+            mv_referrable( std::string, username );
     };
+
+    typedef std::shared_ptr< version_semantic > version_semantic_ptr_t;
 
 
     inline unsigned version_semantic::major_version() const
@@ -115,29 +87,6 @@ namespace scarab
         return f_version;
     }
 
-    inline const std::string& version_semantic::package() const
-    {
-        return f_package;
-    }
-
-    inline const std::string& version_semantic::commit() const
-    {
-        return f_commit;
-    }
-
-    inline const std::string& version_semantic::exe_name() const
-    {
-        return f_exe_name;
-    }
-    inline const std::string& version_semantic::hostname() const
-    {
-        return f_hostname;
-    }
-    inline const std::string& version_semantic::username() const
-    {
-        return f_username;
-    }
-
 } /* namespace scarab */
 
-#endif /* SCARAB_VERSION_BASE_HH_ */
+#endif /* SCARAB_VERSION_SEMANTIC_HH_ */

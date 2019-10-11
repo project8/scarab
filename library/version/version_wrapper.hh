@@ -14,19 +14,18 @@
 
 namespace scarab
 {
-
-    class SCARAB_API version_wrapper : public scarab::singleton< version_wrapper >, public scarab::version_ifc
+    class SCARAB_API version_wrapper : public singleton< version_wrapper >, public version_ifc
     {
         protected:
-            friend class scarab::singleton< version_wrapper >;
-            friend class scarab::destroyer< version_wrapper >;
+            friend class singleton< version_wrapper >;
+            friend class destroyer< version_wrapper >;
             version_wrapper() : f_imp( new version() ) {}
             ~version_wrapper() {}
 
         public:
-            void set_imp( scarab::version_semantic* a_imp )
+            void set_imp( version_semantic_ptr_t a_imp )
             {
-                if( a_imp != nullptr ) f_imp.reset( a_imp );
+                f_imp = a_imp;
                 return;
             }
 
@@ -77,7 +76,7 @@ namespace scarab
             }
 
         private:
-            std::unique_ptr< version_semantic > f_imp;
+            version_semantic_ptr_t f_imp;
     };
 
 }

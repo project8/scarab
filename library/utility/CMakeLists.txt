@@ -11,21 +11,19 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/digital.hh
     ${dir}/error.hh
     ${dir}/factory.hh
+    ${dir}/indexed_factory.hh
     ${dir}/macros.hh
     ${dir}/map_at_default.hh
     ${dir}/member_variables.hh
     ${dir}/path.hh
     ${dir}/scarab_api.hh
-    ${dir}/scarab_version.hh
     ${dir}/signal_handler.hh
     ${dir}/singleton.hh
     ${dir}/terminate.hh
     ${dir}/time.hh
     ${dir}/typename.hh
     ${dir}/unique_typelist.hh
-    ${dir}/version_base.hh
-    ${dir}/version_wrapper.hh
-)
+) # not PARENT_SCOPE so that we can set it to that scope in the set command below
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/cancelable.cc
@@ -36,7 +34,7 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/terminate.cc
     ${dir}/time.cc
     ${dir}/typename.cc
-    ${dir}/version_base.cc
+    PARENT_SCOPE 
 )
 
 set( macro_prefix camel_case_)
@@ -58,11 +56,3 @@ set( Scarab_HEADERS
     ${CMAKE_CURRENT_BINARY_DIR}/_camel_case_member_variables.hh
     ${CMAKE_CURRENT_BINARY_DIR}/_snake_case_member_variables.hh
     PARENT_SCOPE )    
-
-
-configure_file( ${dir}/scarab_version.cc.in ${CMAKE_CURRENT_BINARY_DIR}/scarab_version.cc )
-set( Scarab_SOURCES
-    ${Scarab_SOURCES}
-    ${CMAKE_CURRENT_BINARY_DIR}/scarab_version.cc
-    PARENT_SCOPE )
-    
