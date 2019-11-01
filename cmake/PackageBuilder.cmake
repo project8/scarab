@@ -235,12 +235,14 @@ macro( pbuilder_add_submodule_libraries )
     list( APPEND SUBMODULE_LIBRARIES ${ARGN} )
 endmacro()
 
-macro( pbuilder_expand_lib_names FULL_PROJECT_LIBRARIES PROJECT_LIBRARIES )
+macro( pbuilder_expand_lib_names FULL_PROJECT_LIBRARIES )
+    # Supply library targets as additional macro arguments
+    set( PROJECT_LIBRARIES ${ARGN} )
     set( ${FULL_PROJECT_LIBRARIES} )
-    foreach( project_lib ${${PROJECT_LIBRARIES}} )
+    foreach( project_lib ${PROJECT_LIBRARIES} )
         list( APPEND ${FULL_PROJECT_LIBRARIES} "${project_lib}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
     endforeach( project_lib )
-    #message( STATUS "project libraries( lib ): ${${FULL_PROJECT_LIBRARIES}}" )
+    #message( STATUS "***** project libraries( lib ): ${${FULL_PROJECT_LIBRARIES}}" )
 endmacro()
 
 macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES )
@@ -249,7 +251,8 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES )
     #message( STATUS "lib basename: ${LIB_BASENAME}" )
     #message( STATUS "full lib name: ${FULL_LIB_NAME}" )
 
-    pbuilder_expand_lib_names( FULL_PROJECT_LIBRARIES PROJECT_LIBRARIES )
+    pbuilder_expand_lib_names( FULL_PROJECT_LIBRARIES ${${PROJECT_LIBRARIES}} )
+    #message( STATUS "###### project libraries( lib ): ${FULL_PROJECT_LIBRARIES}" )
 
     message( STATUS "pbuilder: will build library <${FULL_LIB_NAME}>" )
     add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
