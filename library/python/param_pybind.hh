@@ -100,7 +100,7 @@ namespace scarab_pybind
             {
                 to_return.append( to_python( *an_item ) );
             }
-            return to_return;
+            return std::move(to_return);
         }
         else if (a_param.is_node())
         {
@@ -115,7 +115,7 @@ namespace scarab_pybind
                 }
                 to_return[ new_key.c_str() ] = to_python( *an_item );
             }
-            return to_return;
+            return std::move(to_return);
         }
         throw scarab::error() << "Unknown param type cannot be converted to Python";
     }
