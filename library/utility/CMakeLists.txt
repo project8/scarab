@@ -20,6 +20,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/signal_handler.hh
     ${dir}/singleton.hh
     ${dir}/terminate.hh
+    ${dir}/thread_singleton.hh
     ${dir}/time.hh
     ${dir}/typename.hh
     ${dir}/unique_typelist.hh
