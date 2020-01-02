@@ -16,11 +16,29 @@
 
 namespace scarab
 {
-
+    /*!
+     \def allow_singleton_access( class_name )
+     Gives friend access to your class from scarab::singleton< class_name > and scarab::destroyer< class_name > 
+     so that those classes can control the life of your singleton class.
+    */
 #define allow_singleton_access( class_name ) \
     friend class scarab::singleton< class_name >; \
     friend class scarab::destroyer< class_name >;
 
+    /*!
+      @class singleton
+      @author N.S. Oblath
+      @brief Base class that turns a class into a singleton
+
+      @details
+      To use:
+        1. Inherit your class from singleton< your_class >
+        2. Make your constructor and destructor protected (or private)
+        3. Add the `allow_singleton_access( your_class )` macro to your class definition to allow the base classes to access your class
+
+      The mutex f_mutex provides thread safety for creation and destruction of an instance of the singleton.  It's available to the 
+      derived class for thread-safe access to the object in general.
+    */
     template< class x_type >
     class singleton
     {
