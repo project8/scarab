@@ -1,12 +1,12 @@
 /*
- * singleton.hh
+ * thread_local_singleton.hh
  *
- *  Created on: Nov 7, 2011
- *      Author: nsoblath
+ *  Created on: Dec 31, 2019
+ *      Author: N.S. Oblath
  */
 
-#ifndef SCARAB_SINGLETON_HH_
-#define SCARAB_SINGLETON_HH_
+#ifndef SCARAB_THREAD_SINGLETON_HH_
+#define SCARAB_THREAD_SINGLETON_HH_
 
 #include "destroyer.hh"
 #include "error.hh"
@@ -17,30 +17,32 @@
 namespace scarab
 {
     /*!
-     \def allow_singleton_access( class_name )
+     \def allow_thread_singleton_access( class_name )
      Gives friend access to your class from scarab::singleton< class_name > and scarab::destroyer< class_name > 
      so that those classes can control the life of your singleton class.
     */
-#define allow_singleton_access( class_name ) \
-    friend class scarab::singleton< class_name >; \
+#define allow_thread_singleton_access( class_name ) \
+    friend class scarab::thread_singleton< class_name >; \
     friend class scarab::destroyer< class_name >;
 
     /*!
-      @class singleton
+      @class thread_singleton
       @author N.S. Oblath
-      @brief Base class that turns a class into a singleton
+      @brief Base class that turns a class into a thread-local singleton
 
       @details
-      To use:
-        1. Inherit your class from singleton< your_class >
-        2. Make your constructor and destructor protected (or private)
-        3. Add the `allow_singleton_access( your_class )` macro to your class definition to allow the base classes to access your class
+      A thread-local singleton is similar to a singleton except that a different instance exists in each thread.
 
-      The mutex f_mutex provides thread safety for creation and destruction of an instance of the singleton.  It's available to the 
+      To use:
+        1. Inherit your class from thread_singleton< your_class >
+        2. Make your constructor and destructor protected (or private)
+        3. Add the `allow_thread_singleton_access( your_class )` macro to your class definition to allow the base classes to access your class
+
+      The mutex f_mutex provides thread safety for creation and destruction of an instance of the thread_singleton.  It's available to the 
       derived class for thread-safe access to the object in general.
     */
     template< class x_type >
-    class singleton
+    class thread_singleton
     {
         public:
             static x_type* get_instance();
@@ -54,30 +56,30 @@ namespace scarab
             static void delete_instance();
 
         private:
-            static x_type* f_instance;
-            static destroyer< x_type > f_destroyer;
+            thread_local static x_type* f_instance;
+            thread_local static destroyer< x_type > f_destroyer;
 
         protected:
-            static std::mutex f_mutex;
+            thread_local static std::mutex f_mutex;
 
         protected:
-            singleton();
+            thread_singleton();
 
             friend class destroyer< x_type >;
-            ~singleton();
+            ~thread_singleton();
     };
 
     template< class x_type >
-    x_type* singleton< x_type >::f_instance = nullptr;
+    thread_local x_type* thread_singleton< x_type >::f_instance = nullptr;
 
     template< class x_type >
-    destroyer< x_type > singleton< x_type >::f_destroyer;
+    thread_local destroyer< x_type > thread_singleton< x_type >::f_destroyer;
 
     template< class x_type >
-    std::mutex singleton< x_type >::f_mutex;
+    thread_local std::mutex thread_singleton< x_type >::f_mutex;
 
     template< class x_type >
-    x_type* singleton< x_type >::get_instance()
+    x_type* thread_singleton< x_type >::get_instance()
     {
         if( f_instance == nullptr )
         {
@@ -88,7 +90,7 @@ namespace scarab
     }
 
     template< class x_type >
-    void singleton< x_type >::kill_instance()
+    void thread_singleton< x_type >::kill_instance()
     {
         if( f_instance != nullptr )
         {
@@ -100,7 +102,7 @@ namespace scarab
 
     template< class x_type >
     template< class... x_args >
-    x_type* singleton< x_type >::create_instance( x_args... args )
+    x_type* thread_singleton< x_type >::create_instance( x_args... args )
     {
         if( f_instance != nullptr )
         {
@@ -113,7 +115,7 @@ namespace scarab
     }
 
     template< class x_type >
-    void singleton< x_type >::construct_instance()
+    void thread_singleton< x_type >::construct_instance()
     {
         if( f_instance == nullptr )
         {
@@ -123,7 +125,7 @@ namespace scarab
     }
 
     template< class x_type >
-    void singleton< x_type >::delete_instance()
+    void thread_singleton< x_type >::delete_instance()
     {
         if( f_instance != nullptr )
         {
@@ -134,14 +136,14 @@ namespace scarab
     }
 
     template< class x_type >
-    singleton< x_type >::singleton()
+    thread_singleton< x_type >::thread_singleton()
     {
     }
     template< class x_type >
-    singleton< x_type >::~singleton()
+    thread_singleton< x_type >::~thread_singleton()
     {
     }
 
 } /* namespace scarab */
 
-#endif /* SCARAB_SINGLETON_HH_ */
+#endif /* SCARAB_THREAD_SINGLETON_HH_ */
