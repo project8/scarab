@@ -192,6 +192,7 @@ pbuilder_install_headers( ${Scarab_HEADERS} )
 # Python #
 ##########
 
+include_directories( BEFORE ${PROJECT_SOURCE_DIR}/python )
 add_subdirectory( python )
 
 
