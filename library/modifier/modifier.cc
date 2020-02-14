@@ -7,15 +7,11 @@
 
 #define SCARAB_API_EXPORTS
 
-#include "logger.hh"
-
 #include "modifier.hh"
 
 
 namespace scarab
 {
-    //LOGGER( mdlog, "modifier" );
-
     modifier::modifier()
     {
     }
