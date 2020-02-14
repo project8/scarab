@@ -13,6 +13,9 @@
 #include "nonoption_parser.hh"
 #include "param_codec.hh"
 #include "version_wrapper.hh"
+#include "null_modifier.hh"
+
+#include <list>
 
 using std::string;
 
@@ -99,6 +102,8 @@ namespace scarab
 
         do_config_stage_4();
 
+        do_config_stage_5();
+
         LPROG( applog, "Final configuration:\n" << f_master_config );
         LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
     }
@@ -148,6 +153,18 @@ namespace scarab
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
         f_master_config.merge( f_app_options );
+        return;
+    }
+
+    void main_app::do_config_stage_5()
+    {
+        // fifth configuration stage: additional modification of param_node  (variable substitution, etc.)
+        std::list<std::shared_ptr< modifier >> modifiers;
+        modifiers.push_back( std::make_shared< null_modifier >() ); //add items to chain
+        modifiers.push_back( std::make_shared < null_modifier >() );
+
+        std::for_each(modifiers.begin(), modifiers.end(),
+                [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_master_config);} );
         return;
     }
 

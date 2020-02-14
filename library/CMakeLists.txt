@@ -140,6 +140,7 @@ include_directories( BEFORE
     ${PROJECT_SOURCE_DIR}/utility
     ${PROJECT_SOURCE_DIR}/logger
     ${PROJECT_SOURCE_DIR}/version
+    ${PROJECT_SOURCE_DIR}/modifier
 )
 
 ##########
@@ -154,6 +155,7 @@ include_directories( BEFORE
 add_subdirectory( utility )
 add_subdirectory( version )
 add_subdirectory( logger )
+add_subdirectory( modifier )
 
 if( Scarab_BUILD_PARAM )
     include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
