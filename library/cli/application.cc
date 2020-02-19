@@ -13,6 +13,8 @@
 #include "nonoption_parser.hh"
 #include "param_codec.hh"
 #include "version_wrapper.hh"
+
+#include "env_substitute.hh"
 #include "null_modifier.hh"
 
 #include <list>
@@ -160,8 +162,9 @@ namespace scarab
     {
         // fifth configuration stage: additional modification of param_node  (variable substitution, etc.)
         std::list<std::shared_ptr< modifier >> modifiers;
-        modifiers.push_back( std::make_shared< null_modifier >() ); //add items to chain
-        modifiers.push_back( std::make_shared < null_modifier >() );
+        //add items to chain
+        modifiers.push_back( std::make_shared< null_modifier >() );
+        modifiers.push_back( std::make_shared< env_substitute >() );
 
         std::for_each(modifiers.begin(), modifiers.end(),
                 [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_master_config);} );
