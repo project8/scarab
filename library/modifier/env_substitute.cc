@@ -9,6 +9,7 @@
 
 #include "env_substitute.hh"
 #include "logger.hh"
+#include "param_array.hh"
 
 #include <iostream>
 #include <cstdlib>
@@ -18,31 +19,59 @@ namespace scarab
 {
     LOGGER( mm2log, "env_substitute" );
 
-    void env_substitute::modify(param_node &a_config) //use better type checking?
+    void env_substitute::modify(param_node &a_config)
     {
         for( auto it = a_config.begin(); it != a_config.end(); ++it )
         {
-            std::string old_value = (*it).to_string();
-            std::string new_value = substitute_environmentals(old_value);
-            if( new_value != old_value)
-                a_config.replace(it.name(),new_value);
+            recurse_param(it);
         }
         return;
     }
-    
-    std::string env_substitute::substitute_environmentals(std::string config_field) const
-    {
-        std::string new_value = config_field;
 
-        if(valid_env_name(config_field))
+    //takes in param_(array/node)_iterator, recursively goes through until value is found
+    template <class param_iterator>
+    void env_substitute::recurse_param(param_iterator &a_param)
+    {
+        if(a_param->is_array())
         {
-            config_field.erase(0,1); //erase leading dollar sign
-            LDEBUG( mm2log, "Found environmental variable in config: " << config_field);
-            char *p  = std::getenv(config_field.c_str());
+            auto &a_param_array = a_param->as_array();
+            for(auto it = a_param_array.begin(); it != a_param_array.end(); ++it) recurse_param(it);
+        }
+        else if(a_param->is_node())
+        {
+            auto &a_param_node = a_param->as_node();
+            for(auto it = a_param_node.begin(); it != a_param_node.end(); ++it) recurse_param(it);
+        }
+        else if(a_param->is_value())
+        {
+            auto &a_param_value = a_param->as_value();
+            if(a_param_value.is_string())
+            {
+                std::string old_value = a_param_value.to_string();
+                std::string new_value = substitute_environmentals(old_value);
+                if(old_value != new_value)
+                {
+                    LDEBUG( mm2log, "Substituting value:  " << old_value <<"  -->  " <<new_value);
+                    a_param_value.set(new_value);
+                }
+
+            }
+        }
+    }
+    
+    std::string env_substitute::substitute_environmentals(std::string old_value) const
+    {
+        std::string new_value = old_value;
+
+        if(valid_env_name(old_value))
+        {
+            old_value.erase(0,1); //erase leading dollar sign
+            LDEBUG( mm2log, "Found environmental variable in config: " << old_value);
+            char *p  = std::getenv(old_value.c_str());
 
             if(!p)
             {
-                LERROR( mm2log, "Variable $" << config_field << " in config not in environment! Leaving as string (not recommended)!");
+                LERROR( mm2log, "Variable $" << old_value << " in config not in environment! Leaving as string (not recommended)!");
                 return new_value;
             }
 

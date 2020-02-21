@@ -23,6 +23,9 @@ namespace scarab
         private:
             std::string substitute_environmentals(std::string config_field) const;
             bool valid_env_name(const std::string& env_name) const;
+            template <class param_iterator>
+            void recurse_param(param_iterator &a_param);
+
     };
 
 } /* namespace scarab */
