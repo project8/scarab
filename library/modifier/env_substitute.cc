@@ -47,8 +47,11 @@ namespace scarab
             auto &a_param_value = a_param->as_value();
             if(a_param_value.is_string())
             {
-                std::string old_value = a_param_value.to_string();
-                std::string new_value = substitute_environmentals(old_value);
+                const std::string old_value = a_param_value.to_string();
+                std::string new_value = old_value;
+
+                if(valid_env_name(old_value)) new_value = substitute_environmentals(old_value);
+
                 if(old_value != new_value)
                 {
                     LDEBUG( mm2log, "Substituting value:  " << old_value <<"  -->  " <<new_value);
@@ -61,21 +64,19 @@ namespace scarab
     std::string env_substitute::substitute_environmentals(std::string old_value) const
     {
         std::string new_value = old_value;
-        if(valid_env_name(old_value))
-        {
-            old_value.erase(0,1); //erase leading dollar sign
-            LDEBUG( mm2log, "Found environmental variable in config: " << old_value);
-            char *p  = std::getenv(old_value.c_str());
+        old_value.erase(0,1); //erase leading dollar sign
+        LDEBUG( mm2log, "Found environmental variable in config: " << old_value);
+        char *p  = std::getenv(old_value.c_str());
 
-            if(!p)
-            {
-                LERROR( mm2log, "Variable $" << old_value << " in config not in environment! Leaving as string (not recommended)!");
-            }
-            else
-            {
-                new_value = std::string(p);
-            }
+        if(!p)
+        {
+            LERROR( mm2log, "Variable $" << old_value << " in config not in environment! Leaving as string (not recommended)!");
         }
+        else
+        {
+            new_value = std::string(p);
+        }
+
         return new_value;
     }
 
