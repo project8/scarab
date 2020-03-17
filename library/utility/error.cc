@@ -7,24 +7,17 @@ namespace scarab
 {
 
     error::error() :
-            ::std::exception(),
-            f_error()
+            base_exception()
     {
     }
 
     error::error( const error& an_error ) :
-            std::exception(),
-            f_error( an_error.f_error )
+            base_exception( an_error )
     {
     }
 
-    error::~error() throw ()
+    error::~error() noexcept
     {
-    }
-
-    const char* error::what() const throw ()
-    {
-        return f_error.c_str();
     }
 
 }
