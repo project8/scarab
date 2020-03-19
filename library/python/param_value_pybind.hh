@@ -47,16 +47,11 @@ namespace scarab_pybind
                     "Return whether the param_value stores a string value" )
 
             // output cast to native types
-            .def( "as_bool", (bool (scarab::param_value::*)() const) &scarab::param_value::as_bool,
-                    "Get parameter value as a bool" )
-            .def( "as_uint", (unsigned (scarab::param_value::*)() const) &scarab::param_value::as_uint,
-                    "Get parameter value as an unsigned integer" )
-            .def( "as_int", (int (scarab::param_value::*)() const) &scarab::param_value::as_int,
-                    "Get parameter value as a signed integer" )
-            .def( "as_double", (double (scarab::param_value::*)() const) &scarab::param_value::as_double,
-                    "Get parameter value as a float" )
-            .def( "as_string", (const std::string& (scarab::param_value::*)() const) &scarab::param_value::as_string,
-                    "Get parameter value as a string" )
+            .def( "as_bool", &scarab::param_value::as_bool, "Get parameter value as a bool" )
+            .def( "as_uint", &scarab::param_value::as_uint, "Get parameter value as an unsigned integer" )
+            .def( "as_int", &scarab::param_value::as_int, "Get parameter value as a signed integer" )
+            .def( "as_double", &scarab::param_value::as_double, "Get parameter value as a float" )
+            .def( "as_string", &scarab::param_value::as_string, "Get parameter value as a string" )
 
             // set method overloads
             .def( "set", (void (scarab::param_value::*)(bool)) &scarab::param_value::set,
