@@ -74,13 +74,13 @@ namespace scarab
             {
                 switch(level)
                 {
-                    case eTrace : return "TRACE"; break;
-                    case eDebug : return "DEBUG"; break;
-                    case eInfo  : return "INFO"; break;
-                    case eProg  : return "PROG"; break;
-                    case eWarn  : return "WARN"; break;
-                    case eError : return "ERROR"; break;
-                    case eFatal : return "FATAL"; break;
+                    case ELevel::eTrace : return "TRACE"; break;
+                    case ELevel::eDebug : return "DEBUG"; break;
+                    case ELevel::eInfo  : return "INFO"; break;
+                    case ELevel::eProg  : return "PROG"; break;
+                    case ELevel::eWarn  : return "WARN"; break;
+                    case ELevel::eError : return "ERROR"; break;
+                    case ELevel::eFatal : return "FATAL"; break;
                     default     : return "XXX";
                 }
             }
@@ -89,13 +89,13 @@ namespace scarab
             {
                 switch(level)
                 {
-                    case eTrace : return TraceColor(); break;
-                    case eDebug : return DebugColor(); break;
-                    case eInfo  : return InfoColor(); break;
-                    case eProg  : return ProgColor(); break;
-                    case eWarn  : return WarnColor(); break;
-                    case eError : return ErrorColor(); break;
-                    case eFatal : return FatalColor(); break;
+                    case ELevel::eTrace : return TraceColor(); break;
+                    case ELevel::eDebug : return DebugColor(); break;
+                    case ELevel::eInfo  : return InfoColor(); break;
+                    case ELevel::eProg  : return ProgColor(); break;
+                    case ELevel::eWarn  : return WarnColor(); break;
+                    case ELevel::eError : return ErrorColor(); break;
+                    case ELevel::eFatal : return FatalColor(); break;
                     default     : return OtherColor();
                 }
             }
@@ -190,7 +190,7 @@ namespace scarab
         fPrivate->fColored = false;
 #endif
         sprintf(logger::Private::sDateTimeFormat,  "%%Y-%%m-%%d %%T");
-        SetLevel(eDebug);
+        SetLevel(ELevel::eDebug);
         logger::Private::AllLoggers()->insert(this);
     }
 
@@ -203,7 +203,7 @@ namespace scarab
         fPrivate->fColored = false;
 #endif
         sprintf(logger::Private::sDateTimeFormat, "%%Y-%%m-%%d %%T");
-		SetLevel(eDebug);
+		SetLevel(ELevel::eDebug);
 		logger::Private::AllLoggers()->insert(this);
     }
 
@@ -215,6 +215,11 @@ namespace scarab
     bool logger::IsLevelEnabled(ELevel level) const
     {
         return level >= fPrivate->fThreshold;
+    }
+
+    logger::ELevel logger::GetLevel() const
+    {
+        return fPrivate->fThreshold;
     }
 
     void logger::SetLevel(ELevel level) const
@@ -261,7 +266,7 @@ namespace scarab
 
     void logger::Log(ELevel level, const string& message, const Location& loc)
     {
-        if (level >= eWarn)
+        if (level >= ELevel::eWarn)
         {
             fPrivate->logCerr(level, message, loc);
         }

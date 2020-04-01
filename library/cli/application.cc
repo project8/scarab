@@ -9,7 +9,6 @@
 
 #include "application.hh"
 
-#include "logger.hh"
 #include "nonoption_parser.hh"
 #include "param_codec.hh"
 #include "version_wrapper.hh"
@@ -41,22 +40,51 @@ namespace scarab
     }
 
 
+    // utility function to fill the verbosity map
+    main_app::verbosity_map_t fill_verbosities()
+    {
+        main_app::verbosity_map_t t_map;
+        // have to hard-code the filling of the verbosity map because you can't iterate over an enum
+        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eTrace) ] = logger::ELevel::eTrace;
+        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eDebug) ] = logger::ELevel::eDebug;
+        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eInfo) ] = logger::ELevel::eInfo;
+        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eProg) ] = logger::ELevel::eProg;
+        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eWarn) ] = logger::ELevel::eWarn;
+        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eError) ] = logger::ELevel::eError;
+        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eFatal) ] = logger::ELevel::eFatal;
+        return t_map;
+    }
+
+    main_app::verbosity_map_t main_app::s_verbosities( fill_verbosities() );
+
     main_app::main_app() :
             config_decorator( this, this ),
             app(),
             f_master_config(),
             f_default_config(),
             f_config_filename(),
-            f_global_verbosity( 1 ),
             f_nonoption_kw_args(),
             f_nonoption_ord_args(),
             f_app_options(),
             f_app_option_holders()
     {
+        set_global_verbosity( logger::ELevel::eProg );
+
         allow_extras(); // allow unrecognized options, which are parsed into the nonoption args
 
         add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
-        add_option( "--verbosity", f_global_verbosity, "Global logger verosity" );
+
+        auto t_verbose_callback = [this]( unsigned a_count )
+            {
+                this->increase_global_verbosity( a_count );
+            };
+        add_flag_function( "-v,--verbose", t_verbose_callback, "Increase verbosity" );
+
+        auto t_quiet_callback = [this]( unsigned a_count )
+            {
+                this->decrease_global_verbosity( a_count );
+            };
+        add_flag_function( "-q,--quiet", t_quiet_callback, "Decrease verbosity" );
 
         auto t_version_callback = [](int)
             {
@@ -78,8 +106,6 @@ namespace scarab
     void main_app::pre_callback()
     {
         do_config_stage_1();
-
-        applog.SetGlobalLevel( (logger::ELevel)f_global_verbosity );
 
         do_config_stage_2();
 
@@ -148,6 +174,66 @@ namespace scarab
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
         f_master_config.merge( f_app_options );
+        return;
+    }
+
+    main_app::verbosity_t main_app::get_global_verbosity() const
+    {
+        return f_global_verbosity->first;
+    }
+ 
+    void main_app::set_global_verbosity( main_app::verbosity_t a_verbosity )
+    {
+        auto t_it = s_verbosities.find( a_verbosity );
+
+        // if we don't match a value, then find the next higher value
+        if( t_it == s_verbosities.end() )
+        {
+            t_it = s_verbosities.upper_bound( a_verbosity );
+            // make sure we don't go off the end
+            if( t_it == s_verbosities.end() ) t_it = std::prev(s_verbosities.end());
+        }
+
+        f_global_verbosity = t_it;
+
+        // set the global verbosity in the logger
+        applog.SetGlobalLevel( f_global_verbosity->second );
+        return;
+    }
+
+    void main_app::set_global_verbosity( logger::ELevel a_verbosity )
+    {
+        set_global_verbosity( static_cast< verbosity_t >(a_verbosity) );
+        return;
+    }
+
+    void main_app::increase_global_verbosity( unsigned an_offset )
+    {
+        // increased verbosity is lower in verbosity number
+        if( an_offset == 0 ) return;
+        // Move down, but don't go past the beginning
+        for( unsigned i_count = 0; i_count < an_offset; ++i_count )
+        {
+            if( f_global_verbosity == s_verbosities.begin() ) break;
+            --f_global_verbosity;
+        }
+        // set the global verbosity in the logger
+        applog.SetGlobalLevel( f_global_verbosity->second );
+        return;
+    }
+
+    void main_app::decrease_global_verbosity( unsigned an_offset )
+    {
+        // decreased verbosity is higher in verbosity number
+        if( an_offset == 0 ) return;
+        // Move up, but not past the end
+        for( unsigned i_count = 0; i_count < an_offset; ++i_count )
+        {
+            if( std::next(f_global_verbosity) == s_verbosities.end() ) break;
+            ++f_global_verbosity;
+        }
+        // set the global verbosity in the logger
+        applog.SetGlobalLevel( f_global_verbosity->second );
         return;
     }
 
