@@ -112,14 +112,20 @@ namespace scarab
     class SCARAB_API logger
     {
         public:
-            enum ELevel {
+            /**
+             * \enum logger::ELevel
+             * Defines the verbosity levels and their integer equivalents
+             * Note that these values were selected to match with those used in the dripline_python project
+             */
+            enum class ELevel : unsigned 
+            {
                 eTrace = 0,
-                eDebug = 1,
-                eInfo = 2,
-                eProg = 3,
-                eWarn = 4,
-                eError = 5,
-                eFatal = 6
+                eDebug = 10,
+                eInfo = 20,
+                eProg = 25,
+                eWarn = 30,
+                eError = 40,
+                eFatal = 50
             };
 
         public:
@@ -159,6 +165,12 @@ namespace scarab
              * @return
              */
             bool IsLevelEnabled(ELevel level) const;
+
+            /**
+             * Get the logger's minimum logging level
+             * @return The log level
+             */
+            ELevel GetLevel() const;
 
             /**
              * Set a logger's minimum logging level
@@ -207,7 +219,7 @@ namespace scarab
              */
             void LogTrace(const std::string& message, const Location& loc = Location())
             {
-                Log(eTrace, message, loc);
+                Log(ELevel::eTrace, message, loc);
             }
             /**
              * Log a message at DEBUG level.
@@ -217,7 +229,7 @@ namespace scarab
              */
             void LogDebug(const std::string& message, const Location& loc = Location())
             {
-                Log(eDebug, message, loc);
+                Log(ELevel::eDebug, message, loc);
             }
             /**
              * Log a message at INFO level.
@@ -227,7 +239,7 @@ namespace scarab
              */
             void LogInfo(const std::string& message, const Location& loc = Location())
             {
-                Log(eInfo, message, loc);
+                Log(ELevel::eInfo, message, loc);
             }
             /**
              * Log a message at PROG level.
@@ -237,7 +249,7 @@ namespace scarab
              */
             void LogProg(const std::string& message, const Location& loc = Location())
             {
-                Log(eProg, message, loc);
+                Log(ELevel::eProg, message, loc);
             }
             /**
              * Log a message at WARN level.
@@ -247,7 +259,7 @@ namespace scarab
              */
             void LogWarn(const std::string& message, const Location& loc = Location())
             {
-                Log(eWarn, message, loc);
+                Log(ELevel::eWarn, message, loc);
             }
             /**
              * Log a message at ERROR level.
@@ -257,7 +269,7 @@ namespace scarab
              */
             void LogError(const std::string& message, const Location& loc = Location())
             {
-                Log(eError, message, loc);
+                Log(ELevel::eError, message, loc);
             }
             /**
              * Log a message at FATAL level.
@@ -267,7 +279,7 @@ namespace scarab
              */
             void LogFatal(const std::string& message, const Location& loc = Location())
             {
-                Log(eFatal, message, loc);
+                Log(ELevel::eFatal, message, loc);
             }
 
         private:
@@ -284,12 +296,12 @@ namespace scarab
 #define __LOG_LOCATION         scarab::logger::Location(__FILE__, __FUNC__, __LINE__)
 #define __LOG_LOG_4(I,L,M,O) \
         { \
-    if (I.IsLevelEnabled(scarab::logger::e##L)) { \
+    if (I.IsLevelEnabled(scarab::logger::ELevel::e##L)) { \
         static bool _sLoggerMarker = false; \
         if (!O || !_sLoggerMarker) { \
             _sLoggerMarker = true; \
             std::ostringstream stream; stream << M; \
-            I.Log(scarab::logger::e##L, stream.str(), __LOG_LOCATION); \
+            I.Log(scarab::logger::ELevel::e##L, stream.str(), __LOG_LOCATION); \
         } \
     } \
         }
