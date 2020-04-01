@@ -10,9 +10,12 @@
 
 #include "CLI11.hpp"
 
+#include "logger.hh"
 #include "member_variables.hh"
 #include "param_helpers.hh"
 #include "version_semantic.hh"
+
+#include <type_traits>
 
 namespace scarab
 {
@@ -283,8 +286,6 @@ namespace scarab
             // configuration stage 2
             /// Configuration file name
             mv_referrable_const( std::string, config_filename );
-            /// Global verbosity value
-            mv_accessible( unsigned, global_verbosity );
 
             // configuration stage 3
             /// Keyword configuration values coming from the command line, in the form: config.address=value
@@ -298,6 +299,30 @@ namespace scarab
 
             /// Store the app option holder structs from this app and any subcommands
             mv_referrable( std::vector< std::shared_ptr< app_option_holder > >, app_option_holders );
+
+            //*************************
+            // Verbosity
+            //*************************
+        public:
+            using verbosity_t = std::underlying_type< logger::ELevel >::type; // typically is unsigned
+
+            /// Get the global verbosity
+            verbosity_t get_global_verbosity() const;
+            /// Set the global verbosity with the verbosity value
+            void set_global_verbosity( verbosity_t a_verbosity );
+            /// Set the global verbosity with the verbosity enum
+            void set_global_verbosity( logger::ELevel a_verbosity );
+
+            void increase_global_verbosity( unsigned an_offset );
+            void decrease_global_verbosity( unsigned an_offset );
+
+            using verbosity_map_t = std::map< verbosity_t, logger::ELevel >;
+            using verbosity_iterator_t = verbosity_map_t::iterator;
+            static verbosity_map_t s_verbosities;
+
+        protected:
+            verbosity_iterator_t f_global_verbosity;
+
     };
 
 

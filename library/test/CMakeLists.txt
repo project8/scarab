@@ -20,6 +20,7 @@ if( Scarab_ENABLE_TESTING )
         test_logger
         test_terminate
         test_time
+        test_verbosity
     )
 
     set( test_configs
