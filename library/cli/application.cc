@@ -78,7 +78,7 @@ namespace scarab
             {
                 this->increase_global_verbosity( a_count );
             };
-        add_flag_function( "-v,--verbosity", t_verbose_callback, "Increase verbosity" );
+        add_flag_function( "-v,--verbose", t_verbose_callback, "Increase verbosity" );
 
         auto t_quiet_callback = [this]( unsigned a_count )
             {
@@ -106,8 +106,6 @@ namespace scarab
     void main_app::pre_callback()
     {
         do_config_stage_1();
-
-        //applog.SetGlobalLevel( (logger::ELevel)f_global_verbosity );
 
         do_config_stage_2();
 
