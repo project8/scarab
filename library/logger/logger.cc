@@ -225,9 +225,9 @@ namespace scarab
     void logger::SetLevel(ELevel level) const
     {
 #if defined(NDEBUG) && defined(STANDARD)
-                fPrivate->fThreshold = level >= eInfo ? level : eInfo;
+                fPrivate->fThreshold = level >= ELevel::eInfo ? level : ELevel::eInfo;
 #elif defined(NDEBUG)
-                fPrivate->fThreshold = level >= eProg ? level : eProg;
+                fPrivate->fThreshold = level >= ELevel::eProg ? level : ELevel::eProg;
 #else
                 fPrivate->fThreshold = level;
 #endif
