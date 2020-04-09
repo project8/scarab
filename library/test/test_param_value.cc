@@ -50,6 +50,12 @@ int main()
     param_value string_val( "hello world" );
     LINFO( testlog, "String value: " << string_val );
 
+    param_value string_val_sq( "'hello world'" );
+    LINFO( testlog, "String value (strip single quotes): " << string_val_sq );
+
+    string_val.set( "'hello world'" );
+    LINFO( testlog, "String value (from op=, strip single quotes): " << string_val );
+
     string_val.set( "10" );
     LINFO( testlog, "String containing a number via as_int: " << string_val.as_int() );
 
