@@ -39,7 +39,9 @@ namespace scarab
             param_value( int64_t a_value );
             param_value( float a_value );
             param_value( double a_value );
+            /// String constructor; if a_value is wrapped in single quotes, they will be stripped
             param_value( const std::string& a_value );
+            /// C-string constructor; if a_value is wrapped in single quotes, they will be stripped
             param_value( const char* a_value );
             param_value( const param_value& orig );
             param_value( param_value&& orig );
@@ -542,7 +544,9 @@ namespace scarab
     template< typename XValType, typename std::enable_if< std::is_convertible< XValType, param_value >::value, XValType >::type* >
     void param_value::set( XValType a_value )
     {
-        f_value = a_value;
+        // as of v2.11.2, this was changed from f_value = a_value to *this = param_value( a_value )
+        // this is to take advantage of the stripping of single quotes around strings that's done in the string constructors
+        *this = param_value( a_value );
         return;
     }
 

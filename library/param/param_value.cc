@@ -109,9 +109,18 @@ namespace scarab
 
     param_value::param_value( const char* a_value ) :
             param(),
-            f_value( string( a_value ) )
+            f_value( string() )
     {
         //LWARN( dlog, "param_value constructor: char* --> k_string" );
+        string t_value( a_value );
+        if( t_value.size() > 1 && t_value.front() == '\'' && t_value.back() == '\'' )
+        {
+            f_value = t_value.substr( 1, t_value.size() - 2 );
+        }
+        else
+        {
+            f_value = t_value;
+        }
     }
 
     param_value::param_value( const string& a_value ) :
@@ -119,6 +128,14 @@ namespace scarab
             f_value( a_value )
     {
         //LWARN( dlog, "param_value constructor: string --> k_string" );
+        if( a_value.size() > 1 && a_value.front() == '\'' && a_value.back() == '\'' )
+        {
+            f_value = a_value.substr( 1, a_value.size() - 2 );
+        }
+        else
+        {
+            f_value = a_value;
+        }
     }
 
     param_value::param_value( const param_value& orig ) :
