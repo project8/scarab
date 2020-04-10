@@ -50,11 +50,42 @@ int main()
     param_value string_val( "hello world" );
     LINFO( testlog, "String value: " << string_val );
 
+    param_value string_val_sq( "'hello world'" );
+    LINFO( testlog, "String value (strip single quotes): " << string_val_sq );
+
+    string_val.set( "'hello world'" );
+    LINFO( testlog, "String value (from op=, strip single quotes): " << string_val );
+
     string_val.set( "10" );
     LINFO( testlog, "String containing a number via as_int: " << string_val.as_int() );
 
     string_val.set( "true" );
     LINFO( testlog, "String containing a bool via as_bool: " << string_val.as_bool() );
+
+    LINFO( testlog, "Quotation options" );
+    LINFO( testlog, "=================" );
+    LINFO( testlog, "Note that to test how things would be initialized from a text-based format like YAML, some of these tests have an extra set of \"\" around them." )
+
+    param_value quote_opts_val( 1 );
+    LINFO( testlog, "Initialized with number 1: " << quote_opts_val << "; is uint: " << quote_opts_val.is_uint() << "; is int: " << quote_opts_val.is_int() << "; is string: " << quote_opts_val.is_string() );
+
+    quote_opts_val.set( "1" );
+    LINFO( testlog, "Initialized with \"1\": " << quote_opts_val << "; is uint: " << quote_opts_val.is_uint() << "; is int: " << quote_opts_val.is_int() << "; is string: " << quote_opts_val.is_string() );
+
+    quote_opts_val.set( '1' );
+    LINFO( testlog, "Initialized with '1': " << quote_opts_val << "; is uint: " << quote_opts_val.is_uint() << "; is int: " << quote_opts_val.is_int() << "; is string: " << quote_opts_val.is_string() );
+
+    quote_opts_val.set( "'1'" );
+    LINFO( testlog, "Initialized with \"'1'\": " << quote_opts_val << "; is uint: " << quote_opts_val.is_uint() << "; is int: " << quote_opts_val.is_int() << "; is string: " << quote_opts_val.is_string() );
+
+    quote_opts_val.set( "\"'1'\"" );
+    LINFO( testlog, "Initialized with \"\\\"'1'\\\"\": " << quote_opts_val << "; is uint: " << quote_opts_val.is_uint() << "; is int: " << quote_opts_val.is_int() << "; is string: " << quote_opts_val.is_string() );
+
+    quote_opts_val.set( "''1''" );
+    LINFO( testlog, "Initialized with \"''1''\": " << quote_opts_val << "; is uint: " << quote_opts_val.is_uint() << "; is int: " << quote_opts_val.is_int() << "; is string: " << quote_opts_val.is_string() );
+
+    quote_opts_val.set( "'\'1\''" );
+    LINFO( testlog, "Initialized with \"'\\'1\\''\": " << quote_opts_val << "; is uint: " << quote_opts_val.is_uint() << "; is int: " << quote_opts_val.is_int() << "; is string: " << quote_opts_val.is_string() );
 
     LINFO( testlog, "Strict Equality Tests" );
     LINFO( testlog, "=====================" );
