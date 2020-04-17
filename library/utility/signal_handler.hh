@@ -35,6 +35,9 @@ namespace scarab
             /// Check whether an exit signal has been received
             static bool got_exit_signal();
 
+            /// Get the return code provided
+            static int get_return_code();
+
             /// Signal handler function
             static void handler_cancel_threads( int _ignored );
 
@@ -52,6 +55,7 @@ namespace scarab
             static std::mutex f_mutex;
 
             static bool f_got_exit_signal;
+            static int f_return_code;
 
             static bool f_handling_sig_quit;
             static bool f_handling_sig_int;
