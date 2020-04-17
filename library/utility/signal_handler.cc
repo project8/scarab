@@ -26,6 +26,7 @@ namespace scarab
     LOGGER( slog, "signal_handler" );
 
     bool signal_handler::f_got_exit_signal = false;
+    int signal_handler::f_return_code = RETURN_SUCCESS;
 
     bool signal_handler::f_handling_sig_int = false;
     bool signal_handler::f_handling_sig_quit = false;
@@ -87,6 +88,7 @@ namespace scarab
     {
         f_mutex.lock();
         f_got_exit_signal = false;
+        f_return_code = RETURN_SUCCESS;
         f_handling_sig_int = false;
         f_handling_sig_quit = false;
         f_cancelers.clear();
@@ -97,6 +99,11 @@ namespace scarab
     bool signal_handler::got_exit_signal()
     {
         return f_got_exit_signal;
+    }
+
+    int signal_handler::get_return_code()
+    {
+        return f_return_code;
     }
 
     void signal_handler::handler_cancel_threads( int )
@@ -113,6 +120,7 @@ namespace scarab
 
         f_mutex.lock();
         f_got_exit_signal = true;
+        f_return_code = a_code;
         while( ! f_cancelers.empty() )
         {
             (*f_cancelers.begin())->cancel( a_code );
