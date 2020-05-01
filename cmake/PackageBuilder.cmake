@@ -245,12 +245,13 @@ endmacro()
 macro( pbuilder_expand_lib_names )
     # Supply library targets as additional macro arguments
     set( PROJECT_LIBRARIES ${ARGN} )
+    message( STATUS "expanding these project libraries: ${PROJECT_LIBRARIES}" )
     set( FULL_PROJECT_LIBRARIES )
     foreach( project_lib ${PROJECT_LIBRARIES} )
         pbuilder_expand_lib_name( ${project_lib} )
-        list( APPEND ${FULL_PROJECT_LIBRARIES} "${FULL_LIB_NAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+        list( APPEND FULL_PROJECT_LIBRARIES ${FULL_LIB_NAME} )
     endforeach( project_lib )
-    #message( STATUS "***** project libraries( lib ): ${${FULL_PROJECT_LIBRARIES}}" )
+    message( STATUS "expanded to full project library names: ${FULL_PROJECT_LIBRARIES}" )
 endmacro()
 
 ### Updated for Scarab3
@@ -262,7 +263,7 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     message( STATUS "full lib name: ${FULL_LIB_NAME}" )
 
     pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
-    #message( STATUS "###### project libraries( lib ): ${FULL_PROJECT_LIBRARIES}" )
+    message( STATUS "full project libraries (lib): ${FULL_PROJECT_LIBRARIES}" )
 
     message( STATUS "pbuilder: will build library <${FULL_LIB_NAME}>" )
     add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
@@ -281,9 +282,9 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
 
     target_link_libraries( ${FULL_LIB_NAME} 
         PUBLIC
-            ${FULL_PROJECT_LIBRARIES} ${PUBLIC_EXTERNAL_LIBRARIES}
+            ${${FULL_PROJECT_LIBRARIES}} ${${PUBLIC_EXTERNAL_LIBRARIES}}
         PRIVATE
-            ${PRIVATE_EXTERNAL_LIBRARIES} 
+            ${${PRIVATE_EXTERNAL_LIBRARIES}} 
     )
 
     pbuilder_install_libraries( ${FULL_LIB_NAME} )
@@ -302,16 +303,24 @@ macro( pbuilder_install_libraries )
     ###set_target_properties( ${ARGN} PROPERTIES INSTALL_NAME_DIR ${LIB_INSTALL_DIR} )
 endmacro()
 
-macro( pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
-    set( FULL_PROJECT_LIBRARIES )
-    foreach( project_lib ${${PROJECT_LIBRARIES}} )
-        list( APPEND FULL_PROJECT_LIBRARIES "${project_lib}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
-    endforeach( project_lib )
-    message( STATUS "programs: ${${PROGRAMS}}" )
-    message( STATUS "project libraries( exe): ${FULL_PROJECT_LIBRARIES}" )
-    message( STATUS "external libraries: ${OLD_EXTERNAL_LIBRARIES}" )
+### Updated for Scarab3
+macro( pbuilder_executables SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    ###message( STATUS "programs: ${${PROGRAMS}}" )
+    message( STATUS "executable source files: ${${SOURCES}}" )
+    message( STATUS "project libraries: ${${PROJECT_LIBRARIES}}" )
+    message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
+    message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
 
-    message( STATUS "pbuilder: will build the following executables: ${${PROGRAMS}}" )
+    foreach( source ${${SOURCES}} )
+        get_filename_component( program ${source} NAME_WE )
+        if( NOT TARGET ${program} )
+            pbuilder_executable( ${program} source ${PROJECT_LIBRARIES} ${PUBLIC_EXTERNAL_LIBRARIES} ${PRIVATE_EXTERNAL_LIBRARIES} )
+        else()
+            message( FATAL "Duplicate target: ${program}" )
+        endif()
+    endforeach( source )
+
+    #[[message( STATUS "pbuilder: will build the following executables: ${${PROGRAMS}}" )
     foreach( program ${${PROGRAMS}} )
         if( NOT TARGET ${program} )
             if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
@@ -329,35 +338,77 @@ macro( pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
             target_link_libraries( ${program} ${FULL_PROJECT_LIBRARIES} ${OLD_EXTERNAL_LIBRARIES} )
             pbuilder_install_executables( ${program} )
         endif( NOT TARGET ${program} )
-    endforeach( program )
+    endforeach( program )]]
 endmacro()
 
+### Updated for Scarab3
+macro( pbuilder_executable THIS_PROGRAM SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    # Builds a single executable from one or more source files
+    message( STATUS "pbuilder will build executable ${THIS_PROGRAM} with ${${SOURCES}}" )
+    message( STATUS "\tlinking with: (project) ${${PROJECT_LIBRARIES}} -- (public ext) ${${PUBLIC_EXTERNAL_LIBRARIES}} -- (private ext) ${${PRIVATE_EXTERNAL_LIBRARIES}}")
+
+    add_executable( ${THIS_PROGRAM} ${${SOURCES}} )
+
+    pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
+    message( STATUS "full project libraries (exe): ${FULL_PROJECT_LIBRARIES}" )
+
+    target_link_libraries( ${THIS_PROGRAM} 
+        PUBLIC
+            ${FULL_PROJECT_LIBRARIES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+        PRIVATE
+            ${${PRIVATE_EXTERNAL_LIBRARIES}} 
+    )
+
+    pbuilder_install_executables( ${THIS_PROGRAM} )
+endmacro()
+
+### Updated for Scarab3
 macro( pbuilder_install_executables )
-    install( TARGETS ${ARGN} EXPORT ${PROJECT_NAME}Targets DESTINATION ${BIN_INSTALL_DIR} )
+    install( TARGETS ${ARGN} 
+        EXPORT ${PROJECT_NAME}Targets 
+        RUNTIME DESTINATION ${BIN_INSTALL_DIR} 
+    )
 endmacro()
 
+### Updated for Scarab3
 macro( pbuilder_install_headers )
     #message( STATUS "installing headers in ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH}" )
-    install( FILES ${ARGN} DESTINATION ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH} )
+    install( FILES ${ARGN} 
+        DESTINATION ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH} 
+    )
 endmacro()
 
+### Updated for Scarab3
 macro( pbuilder_install_header_dirs FILE_PATTERN )
-    install( DIRECTORY ${ARGN} DESTINATION ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH} FILES_MATCHING PATTERN "${FILE_PATTERN}" )
+    install( DIRECTORY ${ARGN} 
+        DESTINATION ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH} 
+        FILES_MATCHING PATTERN "${FILE_PATTERN}" 
+    )
 endmacro()
 
+### Updated for Scarab3
 macro( pbuilder_install_config )
-    install( FILES ${ARGN} DESTINATION ${CONFIG_INSTALL_DIR} )
+    install( FILES ${ARGN} 
+        DESTINATION ${CONFIG_INSTALL_DIR} 
+    )
 endmacro()
 
+### Updated for Scarab3
 macro( pbuilder_install_data )
-    install( FILES ${ARGN} DESTINATION ${DATA_INSTALL_DIR} )
+    install( FILES ${ARGN} 
+        DESTINATION ${DATA_INSTALL_DIR} 
+    )
 endmacro()
 
+### Updated for Scarab3
 macro( pbuilder_install_files DEST_DIR )
-    install( FILES ${ARGN} DESTINATION ${DEST_DIR} )
+    install( FILES ${ARGN} 
+        DESTINATION ${DEST_DIR} 
+    )
 endmacro()
 
 # This should be called AFTER all subdirectories with libraries have been called, and all include directories added.
+#[[
 macro( pbuilder_install_config_files )
     # Configuration header file
     if( EXISTS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.hh )
@@ -374,8 +425,9 @@ macro( pbuilder_install_config_files )
         file( REMOVE ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake.tmp )
         file( RENAME ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake.ppp ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake )
     endif( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in )
-endmacro()
+endmacro()]]
 
+### Updated for Scarab3
 macro( pbuilder_do_package_config CONFIG_PATH )
     # The argument CONFIG_PATH can optionally specify the locaiton of the package config file.
     # The default location is ${PROJECT_SOURCE_DIR}/${PACKAGE_NAME}Config.cmake.
