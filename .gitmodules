@@ -4,6 +4,3 @@
 [submodule "library/param/codec/json/rapidjson"]
 	path = library/param/codec/json/rapidjson
 	url = https://github.com/miloyip/rapidjson.git
-[submodule "library/external/pybind11"]
-	path = library/external/pybind11
-	url = https://github.com/pybind/pybind11.git
