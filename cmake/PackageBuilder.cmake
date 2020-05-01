@@ -66,6 +66,7 @@ set( DATA_INSTALL_SUBDIR "data" CACHE PATH "Install subdirectory for data files"
 
 set( INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${INCLUDE_INSTALL_SUBDIR}" )
 set( LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_SUBDIR}" )
+set( PACKAGE_CONFIG_INSTALL_DIR "${LIB_INSTALL_DIR}/cmake/${PROJECT_NAME}" )
 set( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${BIN_INSTALL_SUBDIR}" )
 set( CONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONFIG_INSTALL_SUBDIR}" )
 set( DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_SUBDIR}" )
@@ -235,38 +236,70 @@ macro( pbuilder_add_submodule_libraries )
     list( APPEND SUBMODULE_LIBRARIES ${ARGN} )
 endmacro()
 
-macro( pbuilder_expand_lib_names FULL_PROJECT_LIBRARIES )
+### Updated for Scarab3
+macro( pbuilder_expand_lib_name LIB_NAME )
+    set( FULL_LIB_NAME "${LIB_NAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+endmacro()
+
+### Updated for Scarab3
+macro( pbuilder_expand_lib_names )
     # Supply library targets as additional macro arguments
     set( PROJECT_LIBRARIES ${ARGN} )
-    set( ${FULL_PROJECT_LIBRARIES} )
+    set( FULL_PROJECT_LIBRARIES )
     foreach( project_lib ${PROJECT_LIBRARIES} )
-        list( APPEND ${FULL_PROJECT_LIBRARIES} "${project_lib}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+        pbuilder_expand_lib_name( ${project_lib} )
+        list( APPEND ${FULL_PROJECT_LIBRARIES} "${FULL_LIB_NAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
     endforeach( project_lib )
     #message( STATUS "***** project libraries( lib ): ${${FULL_PROJECT_LIBRARIES}}" )
 endmacro()
 
-macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES  )
+### Updated for Scarab3
+macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
     #message( STATUS "Building library ${LIB_BASENAME}; PARENT_LIB_NAME_SUFFIX is ${PARENT_LIB_NAME_SUFFIX}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
-    set( FULL_LIB_NAME "${LIB_BASENAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+    #set( FULL_LIB_NAME "${LIB_BASENAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+    pbuilder_expand_lib_name( ${LIB_BASENAME} )
     #message( STATUS "lib basename: ${LIB_BASENAME}" )
-    #message( STATUS "full lib name: ${FULL_LIB_NAME}" )
+    message( STATUS "full lib name: ${FULL_LIB_NAME}" )
 
-    pbuilder_expand_lib_names( FULL_PROJECT_LIBRARIES ${${PROJECT_LIBRARIES}} )
+    pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
     #message( STATUS "###### project libraries( lib ): ${FULL_PROJECT_LIBRARIES}" )
 
     message( STATUS "pbuilder: will build library <${FULL_LIB_NAME}>" )
     add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
-    target_compile_options( ${FULL_LIB_NAME} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
-    target_link_libraries( ${FULL_LIB_NAME} ${FULL_PROJECT_LIBRARIES} ${OLD_EXTERNAL_LIBRARIES} )
-    pbuilder_install_libraries( ${FULL_LIB_NAME})
+    ###target_compile_options( ${FULL_LIB_NAME} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
+
+    # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
+    # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_NAME} INCLUDE_DIRECTORIES )
+    message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_DIR}" )
+    message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
+    target_include_directories( ${FULL_LIB_NAME} 
+        INTERFACE
+            $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
+            $<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>
+    )
+
+    target_link_libraries( ${FULL_LIB_NAME} 
+        PUBLIC
+            ${FULL_PROJECT_LIBRARIES} ${PUBLIC_EXTERNAL_LIBRARIES}
+        PRIVATE
+            ${PRIVATE_EXTERNAL_LIBRARIES} 
+    )
+
+    pbuilder_install_libraries( ${FULL_LIB_NAME} )
 endmacro()
 
+### Updated for Scarab3
 macro( pbuilder_install_libraries )
+    # Unspecified arguments: any libraries to install
     #message( STATUS "installing libs: ${ARGN}" )
-    install( TARGETS ${ARGN} EXPORT ${PROJECT_NAME}Targets DESTINATION ${LIB_INSTALL_DIR} )
+    install( TARGETS ${ARGN} 
+        EXPORT ${PROJECT_NAME}Targets 
+        LIBRARY DESTINATION ${LIB_INSTALL_DIR} 
+    )
     #list( APPEND ${PROJECT_NAME}_LIBRARIES ${ARGN} )
-    set_property( GLOBAL APPEND PROPERTY ${PROJECT_NAME}_LIBRARIES ${ARGN} )
-    set_target_properties( ${ARGN} PROPERTIES INSTALL_NAME_DIR ${LIB_INSTALL_DIR} )
+    ###set_property( GLOBAL APPEND PROPERTY ${PROJECT_NAME}_LIBRARIES ${ARGN} )
+    ###set_target_properties( ${ARGN} PROPERTIES INSTALL_NAME_DIR ${LIB_INSTALL_DIR} )
 endmacro()
 
 macro( pbuilder_executables PROGRAMS PROJECT_LIBRARIES )
@@ -343,7 +376,44 @@ macro( pbuilder_install_config_files )
     endif( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in )
 endmacro()
 
-macro( pbuilder_variables_for_parent )
+macro( pbuilder_do_package_config CONFIG_PATH )
+    # The argument CONFIG_PATH can optionally specify the locaiton of the package config file.
+    # The default location is ${PROJECT_SOURCE_DIR}/${PACKAGE_NAME}Config.cmake.
+    # If something other than the default is to be used, it should be specified with that argument.
+
+    if( NOT ${CONFIG_PATH} )
+        set( CONFIG_PATH ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake )
+    endif()
+
+    if( NOT EXISTS ${CONFIG_PATH} )
+        message( FATAL "Package config file does not exist: ${CONFIG_PATH}" )
+    endif()
+
+    install( EXPORT ${PROJECT_NAME}Targets
+        FILE
+            ${PROJECT_NAME}Targets.cmake
+        NAMESPACE
+            ${PROJECT_NAME}::
+        DESTINATION
+            ${PACKAGE_CONFIG_INSTALL_DIR}
+    )
+
+    include( CMakePackageConfigHelpers )
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install( 
+        FILES 
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+            ${CONFIG_PATH}
+        DESTINATION 
+            ${PACKAGE_CONFIG_INSTALL_DIR}
+    )
+endmacro()
+
+#[[macro( pbuilder_variables_for_parent )
     if( NOT ${PBUILDER_STANDALONE} )
         set( ${PROJECT_NAME}_FOUND TRUE CACHE INTERNAL "" )
         set( ${PROJECT_NAME}_LOCATION ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "" )
@@ -357,4 +427,4 @@ macro( pbuilder_variables_for_parent )
         get_directory_property( COMPILE_DEFINITIONS COMPILE_DEFINITIONS )
         set( ${PROJECT_NAME}_COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS} CACHE INTERNAL "" )
     endif( NOT ${PBUILDER_STANDALONE} )
-endmacro()
+endmacro()]]
