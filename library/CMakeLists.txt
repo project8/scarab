@@ -147,7 +147,7 @@ include_directories( BEFORE
 set( Scarab_HEADERS )
 set( Scarab_SOURCES )
 
-include_directories( BEFORE 
+include_directories( BEFORE
     ${CMAKE_CURRENT_BINARY_DIR}/utility 
     ${CMAKE_CURRENT_BINARY_DIR}/version 
 )
@@ -176,14 +176,22 @@ if( Scarab_BUILD_AUTHENTICATION )
 endif( Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CLI )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/cli )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/cli/deprecated )
+    include_directories( BEFORE 
+        ${PROJECT_SOURCE_DIR}/cli
+        ${PROJECT_SOURCE_DIR}/cli/deprecated
+    )
     add_subdirectory( cli )
 endif( Scarab_BUILD_CLI )
 
 ##########
 
-pbuilder_library( Scarab Scarab_SOURCES "" )
+set( PACKAGE_LIBS )
+set( PUBLIC_EXT_LIBS 
+    Boost::filesystem
+)
+set( PRIVATE_EXT_LIBS )
+
+pbuilder_library( Scarab Scarab_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
 
 pbuilder_install_headers( ${Scarab_HEADERS} )
 
@@ -192,7 +200,7 @@ pbuilder_install_headers( ${Scarab_HEADERS} )
 # Python #
 ##########
 
-include_directories( BEFORE ${PROJECT_SOURCE_DIR}/python )
+list( APPEND Scarab_SOURCE_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/python )
 add_subdirectory( python )
 
 
@@ -203,9 +211,18 @@ add_subdirectory( python )
 add_subdirectory( test )
 
 
+##################
+# Package Config #
+##################
+
+configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
+
+pbuilder_do_package_config( ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
+
+
 ################################
 # Variables for parent project #
 ################################
 
-pbuilder_variables_for_parent()
+#pbuilder_variables_for_parent()
 
