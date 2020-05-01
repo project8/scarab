@@ -178,7 +178,6 @@ endif( Scarab_BUILD_AUTHENTICATION )
 if( Scarab_BUILD_CLI )
     include_directories( BEFORE 
         ${PROJECT_SOURCE_DIR}/cli
-        ${PROJECT_SOURCE_DIR}/cli/deprecated
     )
     add_subdirectory( cli )
 endif( Scarab_BUILD_CLI )
