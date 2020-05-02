@@ -1,3 +1,0 @@
-[submodule "library/param/codec/json/rapidjson"]
-	path = library/param/codec/json/rapidjson
-	url = https://github.com/miloyip/rapidjson.git

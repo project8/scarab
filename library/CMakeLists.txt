@@ -55,25 +55,15 @@ set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
 if( Scarab_BUILD_CODEC_JSON )
-	# filesystem and system for param_value's use of boost::filesystem::path
-	# thread and date_time for concurrent_queue
-	set( boost_components filesystem system thread date_time )
-
-    # RapidJSON
-    option( RAPIDJSON_BUILD_DOC "Build rapidjson documentation." OFF )
-    option( RAPIDJSON_BUILD_EXAMPLES "Build rapidjson examples." OFF )
-    option( RAPIDJSON_BUILD_TESTS "Build rapidjson perftests and unittests." OFF )
-    option( RAPIDJSON_BUILD_THIRDPARTY_GTEST "Use gtest installation in `thirdparty/gtest` by default if available" OFF )
-    option( RAPIDJSON_BUILD_CXX11 "Build rapidjson with C++11 (gcc/clang)" ON )
-    option( RAPIDJSON_BUILD_ASAN "Build rapidjson with address sanitizer (gcc/clang)" OFF )
-    option( RAPIDJSON_BUILD_UBSAN "Build rapidjson with undefined behavior sanitizer (gcc/clang)" OFF )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
     
     add_definitions( -DRAPIDJSON_FILE_BUFFER_SIZE=${RAPIDJSON_FILE_BUFFER_SIZE} )
     add_definitions( -DUSE_CODEC_JSON )
     
-    add_subdirectory( param/codec/json/rapidjson )
-    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/rapidjson/include/ )
+    # have to use a module find here to use the custom FindRapidJSON.cmake provided with Scarab
+    find_package( RapidJSON MODULE REQUIRED )
+
+    list( APPEND PUBLIC_EXT_LIBS RapidJSON::RapidJSON )
 else( Scarab_BUILD_CODEC_JSON )
     remove_definitions( -DUSE_CODEC_JSON )
 endif( Scarab_BUILD_CODEC_JSON )
