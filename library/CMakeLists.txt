@@ -51,45 +51,42 @@ endif()
 # Scarab dependencies #
 #######################
 
-if( Scarab_BUILD_CODEC_JSON )
-	# filesystem and system for param_value's use of boost::filesystem::path
-	# thread and date_time for concurrent_queue
-	set( boost_components filesystem system thread date_time )
+set( PUBLIC_EXT_LIBS )
+set( PRIVATE_EXT_LIBS )
 
-    # RapidJSON
-    option( RAPIDJSON_BUILD_DOC "Build rapidjson documentation." OFF )
-    option( RAPIDJSON_BUILD_EXAMPLES "Build rapidjson examples." OFF )
-    option( RAPIDJSON_BUILD_TESTS "Build rapidjson perftests and unittests." OFF )
-    option( RAPIDJSON_BUILD_THIRDPARTY_GTEST "Use gtest installation in `thirdparty/gtest` by default if available" OFF )
-    option( RAPIDJSON_BUILD_CXX11 "Build rapidjson with C++11 (gcc/clang)" ON )
-    option( RAPIDJSON_BUILD_ASAN "Build rapidjson with address sanitizer (gcc/clang)" OFF )
-    option( RAPIDJSON_BUILD_UBSAN "Build rapidjson with undefined behavior sanitizer (gcc/clang)" OFF )
+if( Scarab_BUILD_CODEC_JSON )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
     
     add_definitions( -DRAPIDJSON_FILE_BUFFER_SIZE=${RAPIDJSON_FILE_BUFFER_SIZE} )
     add_definitions( -DUSE_CODEC_JSON )
     
-    add_subdirectory( param/codec/json/rapidjson )
-    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json/rapidjson/include/ )
+    # have to use a module find here to use the custom FindRapidJSON.cmake provided with Scarab
+    find_package( RapidJSON MODULE REQUIRED )
+
+    list( APPEND PUBLIC_EXT_LIBS RapidJSON::RapidJSON )
 else( Scarab_BUILD_CODEC_JSON )
     remove_definitions( -DUSE_CODEC_JSON )
 endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_YAML )
-	set_option( USE_CPP11 TRUE )
+    find_package( yaml-cpp CONFIG REQUIRED )
+	#set_option( USE_CPP11 TRUE )
 
     # Yaml-cpp
-    option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
-	option( YAML_CPP_BUILD_TESTS "Enable parse tools" OFF )
-    option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
-    option( BUILD_SHARED_LIBS "yaml-cpp option setting" ON )
-    add_subdirectory( param/codec/yaml/yaml-cpp )
+    #option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
+	#option( YAML_CPP_BUILD_TESTS "Enable parse tools" OFF )
+    #option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
+    #option( BUILD_SHARED_LIBS "yaml-cpp option setting" ON )
+    #add_subdirectory( param/codec/yaml/yaml-cpp )
     # I'm hard-coding the include directory and library because I ran into an error when I tried to include ${CMAKE_CURRENT_BINARY_DIR}/param/codec/yaml/yaml-cpp/yaml-cpp-config.cmake )
-    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
-    pbuilder_add_ext_libraries( yaml-cpp )
+    #include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
+    #pbuilder_add_ext_libraries( yaml-cpp )
+
+    list( APPEND PUBLIC_EXT_LIBS yaml-cpp )
 endif( Scarab_BUILD_CODEC_YAML )
 
 list( APPEND boost_components filesystem system )
+list( APPEND PUBLIC_EXT_LIBS Boost::filesystem )
 
 # making sure boost_components is not empty and remove duplicate
 if (boost_components)
@@ -105,7 +102,7 @@ set( Boost_USE_STATIC_RUNTIME OFF )
 set( Boost_ALL_DYN_LINK ON )
 include_directories( ${Boost_INCLUDE_DIRS} )
 # No compiled libraries are currently required
-pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
+###pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
     
 # For gethostname in version_semantic
 if( WIN32 )
@@ -122,9 +119,7 @@ endif( Scarab_BUILD_CLI )
 
 # Pybind11
 if( Scarab_BUILD_PYTHON )
-    set( PYBIND11_INSTALL ON CACHE BOOL "Pybind11 option to install itself" FORCE )
-    add_subdirectory( external/pybind11 )
-    include_directories( external/pybind11/include )    
+    find_package( pybind11 REQUIRED )
 endif( Scarab_BUILD_PYTHON )
 
 
@@ -178,7 +173,6 @@ endif( Scarab_BUILD_AUTHENTICATION )
 if( Scarab_BUILD_CLI )
     include_directories( BEFORE 
         ${PROJECT_SOURCE_DIR}/cli
-        ${PROJECT_SOURCE_DIR}/cli/deprecated
     )
     add_subdirectory( cli )
 endif( Scarab_BUILD_CLI )
@@ -186,10 +180,6 @@ endif( Scarab_BUILD_CLI )
 ##########
 
 set( PACKAGE_LIBS )
-set( PUBLIC_EXT_LIBS 
-    Boost::filesystem
-)
-set( PRIVATE_EXT_LIBS )
 
 pbuilder_library( Scarab Scarab_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
 

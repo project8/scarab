@@ -52,7 +52,7 @@ if( Scarab_ENABLE_TESTING )
         )
         set( test_configs
             ${test_configs}
-            test_yaml.yaml.cc
+            test_yaml.yaml
         )
     endif( Scarab_BUILD_CODEC_YAML )
 
