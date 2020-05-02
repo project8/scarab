@@ -32,7 +32,7 @@ if( Scarab_BUILD_PYTHON )
     endif( Scarab_BUILD_PARAM )
 
     set( LIB_DEPENDENCIES Scarab )
-    pbuilder_expand_lib_names( FULL_LIB_DEPENDENCIES ${LIB_DEPENDENCIES} )
+    pbuilder_expand_lib_names( ${LIB_DEPENDENCIES} )
 
     configure_file( add_lib_python_path.sh.in add_lib_python_path.sh @ONLY)
     install( FILES ${CMAKE_CURRENT_BINARY_DIR}/add_lib_python_path.sh DESTINATION ${BIN_INSTALL_DIR} )

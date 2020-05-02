@@ -51,6 +51,9 @@ endif()
 # Scarab dependencies #
 #######################
 
+set( PUBLIC_EXT_LIBS )
+set( PRIVATE_EXT_LIBS )
+
 if( Scarab_BUILD_CODEC_JSON )
 	# filesystem and system for param_value's use of boost::filesystem::path
 	# thread and date_time for concurrent_queue
@@ -76,20 +79,24 @@ else( Scarab_BUILD_CODEC_JSON )
 endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_YAML )
-	set_option( USE_CPP11 TRUE )
+    find_package( yaml-cpp CONFIG REQUIRED )
+	#set_option( USE_CPP11 TRUE )
 
     # Yaml-cpp
-    option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
-	option( YAML_CPP_BUILD_TESTS "Enable parse tools" OFF )
-    option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
-    option( BUILD_SHARED_LIBS "yaml-cpp option setting" ON )
-    add_subdirectory( param/codec/yaml/yaml-cpp )
+    #option( YAML_CPP_BUILD_TOOLS "yaml-cpp option setting" OFF )
+	#option( YAML_CPP_BUILD_TESTS "Enable parse tools" OFF )
+    #option( YAML_CPP_BUILD_CONTRIB "yaml-cpp option setting" OFF )
+    #option( BUILD_SHARED_LIBS "yaml-cpp option setting" ON )
+    #add_subdirectory( param/codec/yaml/yaml-cpp )
     # I'm hard-coding the include directory and library because I ran into an error when I tried to include ${CMAKE_CURRENT_BINARY_DIR}/param/codec/yaml/yaml-cpp/yaml-cpp-config.cmake )
-    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
-    pbuilder_add_ext_libraries( yaml-cpp )
+    #include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml/yaml-cpp/include )
+    #pbuilder_add_ext_libraries( yaml-cpp )
+
+    list( APPEND PUBLIC_EXT_LIBS yaml-cpp )
 endif( Scarab_BUILD_CODEC_YAML )
 
 list( APPEND boost_components filesystem system )
+list( APPEND PUBLIC_EXT_LIBS Boost::filesystem )
 
 # making sure boost_components is not empty and remove duplicate
 if (boost_components)
@@ -105,7 +112,7 @@ set( Boost_USE_STATIC_RUNTIME OFF )
 set( Boost_ALL_DYN_LINK ON )
 include_directories( ${Boost_INCLUDE_DIRS} )
 # No compiled libraries are currently required
-pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
+###pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
     
 # For gethostname in version_semantic
 if( WIN32 )
@@ -183,10 +190,6 @@ endif( Scarab_BUILD_CLI )
 ##########
 
 set( PACKAGE_LIBS )
-set( PUBLIC_EXT_LIBS 
-    Boost::filesystem
-)
-set( PRIVATE_EXT_LIBS )
 
 pbuilder_library( Scarab Scarab_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
 
