@@ -272,19 +272,26 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
     # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_NAME} INCLUDE_DIRECTORIES )
-    message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_DIR}" )
+    message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
+    set_target_properties( ${FULL_LIB_NAME} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "" )
     target_include_directories( ${FULL_LIB_NAME} 
-        INTERFACE
-            $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
-            $<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>
+        INTERFACE 
+            "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
+            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
     )
+    get_target_property(debug ${FULL_LIB_NAME} INTERFACE_INCLUDE_DIRECTORIES)
+    message( STATUS ">>>>>> ${debug}")
 
     target_link_libraries( ${FULL_LIB_NAME} 
         PUBLIC
             ${${FULL_PROJECT_LIBRARIES}} ${${PUBLIC_EXTERNAL_LIBRARIES}}
         PRIVATE
             ${${PRIVATE_EXTERNAL_LIBRARIES}} 
+    )
+
+    export( TARGETS ${FULL_LIB_NAME}
+        FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
     )
 
     pbuilder_install_libraries( ${FULL_LIB_NAME} )
@@ -357,6 +364,10 @@ macro( pbuilder_executable THIS_PROGRAM SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNA
             ${FULL_PROJECT_LIBRARIES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
         PRIVATE
             ${${PRIVATE_EXTERNAL_LIBRARIES}} 
+    )
+
+    export( TARGETS ${THIS_PROGRAM}
+        FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
     )
 
     pbuilder_install_executables( ${THIS_PROGRAM} )
@@ -438,7 +449,7 @@ macro( pbuilder_do_package_config CONFIG_PATH )
     endif()
 
     if( NOT EXISTS ${CONFIG_PATH} )
-        message( FATAL "Package config file does not exist: ${CONFIG_PATH}" )
+        message( FATAL_ERROR "Package config file does not exist: ${CONFIG_PATH}" )
     endif()
 
     install( EXPORT ${PROJECT_NAME}Targets
@@ -449,8 +460,20 @@ macro( pbuilder_do_package_config CONFIG_PATH )
         DESTINATION
             ${PACKAGE_CONFIG_INSTALL_DIR}
     )
+    #[[export( EXPORT ${PROJECT_NAME}Targets
+        FILE
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
+        NAMESPACE
+            ${PROJECT_NAME}::
+    )
+    if( EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake )
+        message( STATUS "&&&&& created ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
+    else()
+        message( FATAL_ERROR "&&&&& failed to create ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
+    endif()]]
 
     include( CMakePackageConfigHelpers )
+    message( STATUS "$$$$$$$ ${PROJECT_VERSION} -- ${PROJECT_NAME}_VERSION -- ${${PROJECT_NAME}_VERSION}" )
     write_basic_package_version_file(
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
         COMPATIBILITY SameMajorVersion

@@ -4,9 +4,9 @@
 
 
 include_directories( BEFORE
-    ${PROJECT_SOURCE_DIR}/utility
-    ${PROJECT_SOURCE_DIR}/logger
-    ${PROJECT_SOURCE_DIR}/version
+    ${CMAKE_CURRENT_SOURCE_DIR}/utility
+    ${CMAKE_CURRENT_SOURCE_DIR}/logger
+    ${CMAKE_CURRENT_SOURCE_DIR}/version
 )
 
 ##########
@@ -23,28 +23,28 @@ add_subdirectory( version )
 add_subdirectory( logger )
 
 if( Scarab_BUILD_PARAM )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param )
     add_subdirectory( param )
 endif( Scarab_BUILD_PARAM )
 
 if( Scarab_BUILD_CODEC_JSON )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/json )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/json )
     add_subdirectory( param/codec/json )
 endif( Scarab_BUILD_CODEC_JSON )
 
 if( Scarab_BUILD_CODEC_YAML )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/param/codec/yaml )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param/codec/yaml )
     add_subdirectory( param/codec/yaml )
 endif( Scarab_BUILD_CODEC_YAML )
 
 if( Scarab_BUILD_AUTHENTICATION )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/authentication )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/authentication )
     add_subdirectory( authentication )
 endif( Scarab_BUILD_AUTHENTICATION )
 
 if( Scarab_BUILD_CLI )
     include_directories( BEFORE 
-        ${PROJECT_SOURCE_DIR}/cli
+        ${CMAKE_CURRENT_SOURCE_DIR}/cli
     )
     add_subdirectory( cli )
 endif( Scarab_BUILD_CLI )

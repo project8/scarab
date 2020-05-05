@@ -35,7 +35,6 @@ Common C++ utilities.
 
 Basic installation procedure for linux and mac:
 ```
-> cd library
 > mkdir build
 > cd build
 > ccmake ..

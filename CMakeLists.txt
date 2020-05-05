@@ -10,7 +10,7 @@ cmake_minimum_required (VERSION 3.1)
 #########
 
 # load the version number from the Scarab/VERSION file
-file( STRINGS ${PROJECT_SOURCE_DIR}/VERSION scarab_version_from_file )
+file( STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/VERSION scarab_version_from_file )
 string( REPLACE " " "." scarab_version ${scarab_version_from_file} )
 
 cmake_policy( SET CMP0048 NEW ) # version in project()
@@ -110,11 +110,11 @@ if( WIN32 )
 endif( WIN32 )
 
 # date library
-include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/date )
+include_directories( BEFORE ${PROJECT_SOURCE_DIR}/library/external/date )
 
 # cli11 library
 if( Scarab_BUILD_CLI )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/cli11 )
+    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/library/external/cli11 )
 endif( Scarab_BUILD_CLI )
 
 # Pybind11
@@ -128,7 +128,6 @@ endif( Scarab_BUILD_PYTHON )
 ########################
 
 add_subdirectory( library )
-
 
 ##########
 # Python #
@@ -152,7 +151,12 @@ add_subdirectory( library/test )
 # Package Config #
 ##################
 
-configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
+configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake @ONLY )
+if( EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
+    message( STATUS "###### Created ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake" )
+else()
+    message( ERROR "###### Did not create ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake" )
+endif()
 
 pbuilder_do_package_config( ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
 
@@ -162,4 +166,3 @@ pbuilder_do_package_config( ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
 ################################
 
 #pbuilder_variables_for_parent()
-
