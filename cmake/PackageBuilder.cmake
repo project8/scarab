@@ -449,7 +449,6 @@ macro( pbuilder_do_package_config CONFIG_PATH )
     )
 
     include( CMakePackageConfigHelpers )
-    message( STATUS "$$$$$$$ ${PROJECT_VERSION} -- ${PROJECT_NAME}_VERSION -- ${${PROJECT_NAME}_VERSION}" )
     write_basic_package_version_file(
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
         COMPATIBILITY SameMajorVersion
