@@ -284,12 +284,12 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
     ###target_compile_options( ${FULL_LIB_NAME} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
 
-    # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
-    # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_NAME} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
-    set_target_properties( ${FULL_LIB_NAME} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "" )
+
+    # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
+    # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
     target_include_directories( ${FULL_LIB_NAME} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
@@ -300,7 +300,7 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
 
     target_link_libraries( ${FULL_LIB_NAME} 
         PUBLIC
-            ${${PROJECT_NAME}_SM_LIBRARIES} ${${FULL_PROJECT_LIBRARIES}} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${${PROJECT_NAME}_SM_LIBRARIES} ${FULL_PROJECT_LIBRARIES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
         PRIVATE
             ${${PRIVATE_EXTERNAL_LIBRARIES}} 
     )
