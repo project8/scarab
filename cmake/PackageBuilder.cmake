@@ -73,6 +73,7 @@ set( DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_SUBDIR}" )
 
 if( NOT DEFINED TOP_PROJECT_INCLUDE_INSTALL_DIR )
     set( TOP_PROJECT_INCLUDE_INSTALL_DIR "${INCLUDE_INSTALL_DIR}" CACHE INTERNAL "Top-project include installation path" )
+    set( TOP_PROJECT_INCLUDE_INSTALL_SUBDIR "${INCLUDE_INSTALL_SUBDIR}" CACHE INTERNAL "Top-project include installation subdirectory" )
     message( STATUS "TOP_PROJECT_INCLUDE_INSTALL_DIR being set to ${TOP_PROJECT_INCLUDE_INSTALL_DIR}" )
 endif()
 
@@ -175,62 +176,49 @@ macro( pbuilder_prepare_project )
 
     # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
     set( ${PROJECT_NAME}_PACKAGE_STRING "${PROJECT_NAME} ${${PROJECT_NAME}_VERSION}" )
-    
-    # Configuration header file
-    if( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.hh.in )
-        configure_file( 
-            ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.hh.in
-            ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.hh
-        )
-        # Add the binary tree to the search path for include files so that the config file is found during the build
-        include_directories( ${PROJECT_BINARY_DIR} )
-    endif( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.hh.in ) 
-    
 endmacro()
 
 macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
-    #message( STATUS "Checking submodule ${SM_NAME}_FOUND and ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
-    if( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
-        message( STATUS "Building submodule ${SM_NAME} at ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
+    if( NOT IS_ABSOLUTE ${SM_LOCATION} )
+        set( SM_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${SM_LOCATION}" )
+    endif()
 
-        if( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
-            set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}" CACHE INTERNAL "Library name suffix for submodules" )
-        else( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
-            set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "" )
-        endif( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
-        #message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${PARENT_LIB_NAME_SUFFIX}" )
-        
-        if( NOT DEFINED PARENT_INC_DIR_PATH )
-            set( PARENT_INC_DIR_PATH "/${SM_NAME}" CACHE INTERNAL "Include directory path for submodules" )
-        else( NOT DEFINED PARENT_INC_DIR_PATH )
-            set( PARENT_INC_DIR_PATH "${PARENT_INC_DIR_PATH}/${SM_NAME}" CACHE INTERNAL "" )
-        endif( NOT DEFINED PARENT_INC_DIR_PATH )
-        #message( STATUS "PARENT_INC_DIR_PATH being set for SM ${SM_NAME}: ${PARENT_INC_DIR_PATH}" )
-        
-        set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX ${PARENT_LIB_NAME_SUFFIX} CACHE INTERNAL "Scoped library name suffix for submodules" )
-        set( ${SM_NAME}_PARENT_INC_DIR_PATH ${PARENT_INC_DIR_PATH} CACHE INTERNAL "Scoped include directory path for submodules" )
-        #message( STATUS "Just created ${SM_NAME}_PARENT_LIB_NAME_SUFFIX as ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
-        
-        add_subdirectory( ${SM_LOCATION} )
+    # Conditions that let us in this loop:
+    #  1. Submodule SM_NAME has not yet been found
+    #  2. This is the location of the submodule SM_NAME
+    message( STATUS "${SM_NAME}_LOCATION: ${${SM_NAME}_LOCATION}" )
+    message( STATUS "SM_LOCATION: ${SM_LOCATION}" )
+    if( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
+        message( "Adding submodule ${SM_NAME} in location ${SM_LOCATION}" )
+
+        set( ${SM_NAME}_FOUND TRUE CACHE INTERNAL "" )
+        set( ${SM_NAME}_LOCATION ${SM_LOCATION} CACHE INTERNAL "" )
+
+        # Determine the library name suffix for this submodule with respect to its parent if it's not already defined
+        if( NOT DEFINED ${SM_NAME}_PARENT_LIB_NAME_SUFFIX )
+            set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "Scoped libraryname suffix for submodule ${SM_NAME}" )
+            message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+        endif()
+
+        # Set the library name suffix that will be used by the submodule
+        set( PARENT_LIB_NAME_SUFFIX ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX} )
+
+        # Set submodule include subdirectory
+        set( SM_INCLUDE_SUBDIR "/${SM_NAME}" )
+        message( STATUS "Include files for submodule ${SM_NAME} will be installed in ${TOP_PROJECT_INCLUDE_INSTALL_DIR}/${SM_NAME}" )
+
         message( STATUS "SM ${SM_NAME} cached variables:" )
         message( STATUS "${SM_NAME}_FOUND: ${${SM_NAME}_FOUND}" )
         message( STATUS "${SM_NAME}_LOCATION: ${${SM_NAME}_LOCATION}" )
-        message( STATUS "${SM_NAME}_LIBRARIES: ${${SM_NAME}_LIBRARIES}" )
-        message( STATUS "${SM_NAME}_LIBRARY_DIR: ${${SM_NAME}_LIBRARY_DIR}" )
-        message( STATUS "${SM_NAME}_INCLUDE_DIR: ${${SM_NAME}_INCLUDE_DIR}" )
-        message( STATUS "${SM_NAME}_DEP_INCLUDE_DIRS: ${${SM_NAME}_DEP_INCLUDE_DIRS}" )
-        
-        pbuilder_add_submodule_libraries( ${${SM_NAME}_LIBRARIES} )
-        
-        include_directories( BEFORE ${${SM_NAME}_DEP_INCLUDE_DIRS} )
-        
-        unset( PARENT_LIB_NAME_SUFFIX CACHE )
-        unset( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX CACHE )
-    
-        unset( PARENT_INC_DIR_PATH CACHE )
-        unset( ${SM_NAME}_PARENT_INC_DIR_PATH )
-        
-    endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
+        message( STATUS "${SM_NAME}_PARENT_LIB_NAME_SUFFIX: ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}")
+
+        message( STATUS "Proceeding into subdirectory: ${SM_LOCATION}" )
+        add_subdirectory( ${SM_LOCATION} )
+
+        # Need to unset the submodule include subdirectory since we're in a macro
+        unset( SM_INCLUDE_SUBDIR )
+
+    endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
 endmacro()
 
 macro( pbuilder_add_ext_libraries )
@@ -291,7 +279,7 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     ###target_compile_options( ${FULL_LIB_NAME} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
 
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_NAME} INCLUDE_DIRECTORIES )
-    message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_SUBDIR}" )
+    message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
 
     # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
@@ -299,10 +287,8 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     target_include_directories( ${FULL_LIB_NAME} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
-            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
+            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
     )
-    get_target_property(debug ${FULL_LIB_NAME} INTERFACE_INCLUDE_DIRECTORIES)
-    message( STATUS ">>>>>> ${debug}")
 
     target_link_libraries( ${FULL_LIB_NAME} 
         PUBLIC
@@ -329,9 +315,6 @@ macro( pbuilder_install_libraries )
         EXPORT ${PROJECT_NAME}Targets 
         LIBRARY DESTINATION ${LIB_INSTALL_DIR} 
     )
-    #list( APPEND ${PROJECT_NAME}_LIBRARIES ${ARGN} )
-    ###set_property( GLOBAL APPEND PROPERTY ${PROJECT_NAME}_LIBRARIES ${ARGN} )
-    ###set_target_properties( ${ARGN} PROPERTIES INSTALL_NAME_DIR ${LIB_INSTALL_DIR} )
 endmacro()
 
 ### Updated for Scarab3
@@ -350,26 +333,6 @@ macro( pbuilder_executables SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES 
             message( FATAL "Duplicate target: ${program}" )
         endif()
     endforeach( source )
-
-    #[[message( STATUS "pbuilder: will build the following executables: ${${PROGRAMS}}" )
-    foreach( program ${${PROGRAMS}} )
-        if( NOT TARGET ${program} )
-            if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
-                add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc )
-            elseif( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cxx )
-                add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cxx )
-            elseif( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cpp )
-                add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cpp )
-            elseif( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${program}.c )
-                add_executable( ${program} ${CMAKE_CURRENT_SOURCE_DIR}/${program}.c )
-            else ()
-                message( FATAL_ERROR "No ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc, .cxx, .cpp, or .c to be built")
-            endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${program}.cc)
-            target_compile_options( ${program} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
-            target_link_libraries( ${program} ${FULL_PROJECT_LIBRARIES} ${OLD_EXTERNAL_LIBRARIES} )
-            pbuilder_install_executables( ${program} )
-        endif( NOT TARGET ${program} )
-    endforeach( program )]]
 endmacro()
 
 ### Updated for Scarab3
@@ -410,7 +373,6 @@ macro( pbuilder_install_headers )
     #message( STATUS "installing headers in ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH}" )
     install( FILES ${ARGN} 
         DESTINATION ${TOP_PROJECT_INCLUDE_INSTALL_DIR}${SM_INCLUDE_SUBDIR}
-        #DESTINATION ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH} 
     )
 endmacro()
 
@@ -485,17 +447,6 @@ macro( pbuilder_do_package_config CONFIG_PATH )
         DESTINATION
             ${PACKAGE_CONFIG_INSTALL_DIR}
     )
-    #[[export( EXPORT ${PROJECT_NAME}Targets
-        FILE
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-        NAMESPACE
-            ${PROJECT_NAME}::
-    )
-    if( EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake )
-        message( STATUS "&&&&& created ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
-    else()
-        message( FATAL_ERROR "&&&&& failed to create ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
-    endif()]]
 
     include( CMakePackageConfigHelpers )
     message( STATUS "$$$$$$$ ${PROJECT_VERSION} -- ${PROJECT_NAME}_VERSION -- ${${PROJECT_NAME}_VERSION}" )

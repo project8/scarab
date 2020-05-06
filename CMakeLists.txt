@@ -152,11 +152,6 @@ add_subdirectory( library/test )
 ##################
 
 configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake @ONLY )
-if( EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
-    message( STATUS "###### Created ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake" )
-else()
-    message( ERROR "###### Did not create ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake" )
-endif()
 
 pbuilder_do_package_config( ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
 
