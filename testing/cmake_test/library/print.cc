@@ -10,9 +10,9 @@ LOGGER( plog, "print" );
 
 namespace pbtest
 {
-    void print( scarab::param& a_param )
+    void print( const scarab::param& a_param )
     {
-        LPROD( plog, a_param );
+        LINFO( plog, a_param );
         return;
     }
 }

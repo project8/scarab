@@ -6,7 +6,7 @@
 
 int main()
 {
-    pbtest::print( "Hello, World" );
+    pbtest::print( scarab::param_value("Hello, World") );
 
     return 0;
 }

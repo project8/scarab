@@ -37,22 +37,83 @@ set( PRIVATE_EXT_LIBS )
 # Scarab
 ########
 
-add_subdirectory( scarab )
+# mockup of what will go in package builder
+# call will be: 
+## pbuilder_add_submodule( Scarab scarab )
+# mock up the input parameters
+set( SM_NAME "Scarab" )
+set( SM_LOCATION "scarab" )
+
+# start macro
+
+if( NOT IS_ABSOLUTE ${SM_LOCATION} )
+    set( SM_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${SM_LOCATION}" )
+endif()
+
+# Conditions that let us in this loop:
+#  1. Submodule SM_NAME has not yet been found
+#  2. This is the location of the submodule SM_NAME
+message( STATUS "${SM_NAME}_LOCATION: ${${SM_NAME}_LOCATION}" )
+message( STATUS "SM_LOCATION: ${SM_LOCATION}" )
+if( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
+    message( "Adding submodule ${SM_NAME} in location ${SM_LOCATION}" )
+
+    set( ${SM_NAME}_FOUND TRUE CACHE INTERNAL "" )
+    set( ${SM_NAME}_LOCATION ${SM_LOCATION} CACHE INTERNAL "" )
+
+    if( NOT DEFINED ${SM_NAME}_PARENT_LIB_NAME_SUFFIX )
+        set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "Scoped libraryname suffix for submodule ${SM_NAME}" )
+        message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+    endif()
+
+    # Set the library name suffix that will be used by the submodule
+    set( PARENT_LIB_NAME_SUFFIX ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX} )
+#[[
+    if( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
+        #set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}" CACHE INTERNAL "Library name suffix for submodules" )
+        set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}" )
+    else( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
+        #set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "" )
+        set( PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" )
+    endif( NOT DEFINED PARENT_LIB_NAME_SUFFIX )
+    message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${PARENT_LIB_NAME_SUFFIX}" )
+
+    set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX ${PARENT_LIB_NAME_SUFFIX} CACHE INTERNAL "Scoped library name suffix for submodule ${SM_NAME}" )
+]]
+
+    message( STATUS "SM ${SM_NAME} cached variables:" )
+    message( STATUS "${SM_NAME}_FOUND: ${${SM_NAME}_FOUND}" )
+    message( STATUS "${SM_NAME}_LOCATION: ${${SM_NAME}_LOCATION}" )
+    message( STATUS "${SM_NAME}_PARENT_LIB_NAME_SUFFIX: ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}")
+
+    message( STATUS "Proceeding into subdirectory: ${SM_LOCATION}" )
+    add_subdirectory( ${SM_LOCATION} )
+
+    # Now that we're going back up the stack of submodules, unset these cache variables
+    #unset( PARENT_LIB_NAME_SUFFIX CACHE )
+
+
+endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
 
 if( TARGET Scarab )
     message( STATUS "******* Target Scarab exists" )
 endif()
 
+#end macro
+
+# after package builder; this stuff is for the parent project
 
 #find_package( Scarab )
 
-list( APPEND PRIVATE_EXT_LIBS Scarab )
+#list( APPEND PUBLIC_EXT_LIBS Scarab )
 
 #########
 # Library
 #########
 
 include_directories( BEFORE library )
+
+pbuilder_use_sm_library( Scarab Scarab )
 
 set( PACKAGE_LIBS )
 

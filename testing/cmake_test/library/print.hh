@@ -10,8 +10,8 @@
 namespace pbtest
 {
 
-    void print( scarab::param& a_param );
+    void print( const scarab::param& a_param );
 
 } /* end namespace pbtest */
 
-#endif /* PBTEST_PRINT_HH_
+#endif /* PBTEST_PRINT_HH_ */

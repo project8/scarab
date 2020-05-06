@@ -237,8 +237,20 @@ macro( pbuilder_add_submodule_libraries )
 endmacro()
 
 ### Updated for Scarab3
+macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
+    set( FULL_LIB_NAME "${LIB_NAME}${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+endmacro()
+
+### Updated for Scarab3
 macro( pbuilder_expand_lib_name LIB_NAME )
-    set( FULL_LIB_NAME "${LIB_NAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+    pbuilder_expand_lib_name_2( ${LIB_NAME} ${PROJECT_NAME} )
+endmacro()
+
+### Updated for Scarab3
+macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
+    pbuilder_expand_lib_name_2( ${LIB_NAME} ${SM_NAME} )
+    list( APPEND ${PROJECT_NAME}_SM_LIBRARIES ${FULL_LIB_NAME} )
+    message( STATUS "Added SM library ${FULL_LIB_NAME} to ${PROJECT_NAME}_SM_LIBRARIES" )
 endmacro()
 
 ### Updated for Scarab3
@@ -261,6 +273,9 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     pbuilder_expand_lib_name( ${LIB_BASENAME} )
     #message( STATUS "lib basename: ${LIB_BASENAME}" )
     message( STATUS "full lib name: ${FULL_LIB_NAME}" )
+    message( STATUS "SM libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
+    message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
 
     pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
     message( STATUS "full project libraries (lib): ${FULL_PROJECT_LIBRARIES}" )
@@ -285,10 +300,13 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
 
     target_link_libraries( ${FULL_LIB_NAME} 
         PUBLIC
-            ${${FULL_PROJECT_LIBRARIES}} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${${PROJECT_NAME}_SM_LIBRARIES} ${${FULL_PROJECT_LIBRARIES}} ${${PUBLIC_EXTERNAL_LIBRARIES}}
         PRIVATE
             ${${PRIVATE_EXTERNAL_LIBRARIES}} 
     )
+
+    message( STATUS "Resetting ${PROJECT_NAME}_SM_LIBRARIES" )
+    set( ${PROJECT_NAME}_SM_LIBRARIES )
 
     export( TARGETS ${FULL_LIB_NAME}
         FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
