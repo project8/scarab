@@ -521,3 +521,37 @@ endmacro()
         set( ${PROJECT_NAME}_COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS} CACHE INTERNAL "" )
     endif( NOT ${PBUILDER_STANDALONE} )
 endmacro()]]
+
+macro( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
+    # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
+    # Installs the library in the standard lib directory
+
+    pbuilder_expand_lib_names( ${PROJECT_LIBRARIES} )
+
+    set( PROJECT_INCLUDE_DIRS )
+    foreach( LIBRARY ${FULL_PROJECT_LIBRARIES} )
+        get_target_property( LIB_INCLUDE_DIRS ${FULL_PROJECT_LIBRARIES} INTERFACE_INCLUDE_DIRECTORIES )
+        list( APPEND PROJECT_INCLUDE_DIRS ${LIB_INCLUDE_DIRS} )
+    endforeach()
+    list( REMOVE_DUPLICATES PROJECT_INCLUDE_DIRS )
+    #message( STATUS "Main project library include directories: ${PROJECT_INCLUDE_DIRS}")
+
+    include_directories( ${PROJECT_INCLUDE_DIRS} )
+
+    # Potential point of confusion: the C++ library is "Scarab" and the python library is "scarab"
+    # Other possible naming schemes seemed less desirable, and we'll hopefully avoid confusion with these comments
+    pybind11_add_module( ${PY_MODULE_NAME} ${PYBINDING_SOURCEFILES} )
+
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${PY_MODULE_NAME} INCLUDE_DIRECTORIES )
+    message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_SUBDIR}" )
+    message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
+
+    target_include_directories( ${PY_MODULE_NAME}
+        INTERFACE 
+            "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
+            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
+    )
+
+    target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${${PROJECT_NAME}_SM_LIBRARIES} ${FULL_PROJECT_LIBRARIES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
+    install( TARGETS ${PY_MODULE_NAME} DESTINATION ${LIB_INSTALL_DIR} )
+endmacro()
