@@ -1,11 +1,18 @@
 # ScarabConfig.cmake
 
 get_filename_component( Scarab_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
+
+# Find the dependencies
 include( CMakeFindDependencyMacro )
-
 find_dependency( Boost 1.46 REQUIRED COMPONENTS @boost_components@ )
-#find_dependency(RapidJSON 1.0 REQUIRED MODULE)
+if( @Scarab_BUILD_CODEC_JSON@ )
+    find_dependency( RapidJSON REQUIRED MODULE )
+endif()
+if( @Scarab_BUILD_CODEC_YAML@ )
+    find_dependency( yaml-cpp REQUIRED )
+endif()
 
-if(NOT TARGET Scarab::Scarab)
+# Import targets if they're not already present
+if( NOT TARGET Scarab::Scarab )
     include("${Scarab_CMAKE_DIR}/ScarabTargets.cmake")
 endif()
