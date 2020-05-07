@@ -196,12 +196,9 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
 
         # Determine the library name suffix for this submodule with respect to its parent if it's not already defined
         if( NOT DEFINED ${SM_NAME}_PARENT_LIB_NAME_SUFFIX )
-            set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "Scoped libraryname suffix for submodule ${SM_NAME}" )
+            set( ${SM_NAME}_PARENT_LIB_NAME_SUFFIX "_${PROJECT_NAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" CACHE INTERNAL "Scoped library name suffix for submodule ${SM_NAME}" )
             message( STATUS "PARENT_LIB_NAME_SUFFIX being set for SM ${SM_NAME}: ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
         endif()
-
-        # Set the library name suffix that will be used by the submodule
-        set( PARENT_LIB_NAME_SUFFIX ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX} )
 
         # Set submodule include subdirectory
         set( SM_INCLUDE_SUBDIR "/${SM_NAME}" )
@@ -221,10 +218,12 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
     endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
 endmacro()
 
+### to be removed
 macro( pbuilder_add_ext_libraries )
     list( APPEND OLD_EXTERNAL_LIBRARIES ${ARGN} )
 endmacro()
 
+### to be removed
 macro( pbuilder_add_submodule_libraries )
     list( APPEND OLD_EXTERNAL_LIBRARIES ${ARGN} )
     list( APPEND SUBMODULE_LIBRARIES ${ARGN} )
@@ -278,6 +277,7 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
     ###target_compile_options( ${FULL_LIB_NAME} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
 
+    # Grab the include directories, which will be used for the build-interface target includes
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_NAME} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
@@ -300,6 +300,7 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     message( STATUS "Resetting ${PROJECT_NAME}_SM_LIBRARIES" )
     set( ${PROJECT_NAME}_SM_LIBRARIES )
 
+    # Make exporeted targets available during the build phase
     export( TARGETS ${FULL_LIB_NAME}
         FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
     )
