@@ -60,10 +60,9 @@ if( Scarab_BUILD_CODEC_JSON )
     add_definitions( -DRAPIDJSON_FILE_BUFFER_SIZE=${RAPIDJSON_FILE_BUFFER_SIZE} )
     add_definitions( -DUSE_CODEC_JSON )
     
-    # have to use a module find here to use the custom FindRapidJSON.cmake provided with Scarab
-    find_package( RapidJSON MODULE REQUIRED )
+    find_package( RapidJSON 1.0 REQUIRED )
 
-    list( APPEND PUBLIC_EXT_LIBS RapidJSON::RapidJSON )
+    list( APPEND PUBLIC_EXT_LIBS rapidjson )
 else( Scarab_BUILD_CODEC_JSON )
     remove_definitions( -DUSE_CODEC_JSON )
 endif( Scarab_BUILD_CODEC_JSON )
