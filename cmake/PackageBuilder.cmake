@@ -11,6 +11,8 @@ cmake_policy( SET CMP0012 NEW ) # how if-statements work
 cmake_policy( SET CMP0042 NEW ) # rpath on mac os x
 cmake_policy( SET CMP0048 NEW ) # version in project()
 
+include( CMakeParseArguments )
+
 # check if this is a stand-alone build
 set( PBUILDER_STANDALONE FALSE CACHE INTERNAL "Flag for whether or not this is a stand-alone build" )
 set( PBUILDER_CHILD_NAME_EXTENSION "${PROJECT_NAME}" CACHE INTERNAL "Submodule library name modifier" )
@@ -212,6 +214,19 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
         message( STATUS "Proceeding into subdirectory: ${SM_LOCATION}" )
         add_subdirectory( ${SM_LOCATION} )
 
+        if( TARGET Scarab_Dripline )
+            message( STATUS ">>>>>>>> we have target Scarab_Dripline" )
+        else()
+            message( STATUS ">>>>>>>> don't have Scarab Scarab_Dripline" )
+        endif()
+
+        if( EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${SM_LOCATION}/${SM_NAME}Config.cmake )
+            message( STATUS "Loading config file for submodule ${SM_NAME}" )
+            include( ${CMAKE_CURRENT_BINARY_DIR}/${SM_LOCATION}/${SM_NAME}Config.cmake )
+        else()
+            message( STATUS "No config file present for submodule ${SM_NAME} (${CMAKE_CURRENT_BINARY_DIR}/${SM_LOCATION}/${SM_NAME}Config.cmake)" )
+        endif()
+
         # Need to unset the submodule include subdirectory since we're in a macro
         unset( SM_INCLUDE_SUBDIR )
 
@@ -240,13 +255,6 @@ macro( pbuilder_expand_lib_name LIB_NAME )
 endmacro()
 
 ### Updated for Scarab3
-macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
-    pbuilder_expand_lib_name_2( ${LIB_NAME} ${SM_NAME} )
-    list( APPEND ${PROJECT_NAME}_SM_LIBRARIES ${FULL_LIB_NAME} )
-    message( STATUS "Added SM library ${FULL_LIB_NAME} to ${PROJECT_NAME}_SM_LIBRARIES" )
-endmacro()
-
-### Updated for Scarab3
 macro( pbuilder_expand_lib_names )
     # Supply library targets as additional macro arguments
     set( PROJECT_LIBRARIES ${ARGN} )
@@ -257,6 +265,13 @@ macro( pbuilder_expand_lib_names )
         list( APPEND FULL_PROJECT_LIBRARIES ${FULL_LIB_NAME} )
     endforeach( project_lib )
     message( STATUS "expanded to full project library names: ${FULL_PROJECT_LIBRARIES}" )
+endmacro()
+
+### Updated for Scarab3
+macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
+    pbuilder_expand_lib_name_2( ${LIB_NAME} ${SM_NAME} )
+    list( APPEND ${PROJECT_NAME}_SM_LIBRARIES ${FULL_LIB_NAME} )
+    message( STATUS "Added SM library ${FULL_LIB_NAME} to ${PROJECT_NAME}_SM_LIBRARIES" )
 endmacro()
 
 ### Updated for Scarab3
@@ -300,9 +315,10 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
     message( STATUS "Resetting ${PROJECT_NAME}_SM_LIBRARIES" )
     set( ${PROJECT_NAME}_SM_LIBRARIES )
 
-    # Make exporeted targets available during the build phase
+    # Make exported targets available during the build phase
+    message( STATUS "####### build-phase targets file going to: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
     export( TARGETS ${FULL_LIB_NAME}
-        FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
+        FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
     )
 
     pbuilder_install_libraries( ${FULL_LIB_NAME} )
@@ -427,22 +443,59 @@ macro( pbuilder_install_config_files )
 endmacro()]]
 
 ### Updated for Scarab3
-macro( pbuilder_do_package_config CONFIG_PATH )
-    # The argument CONFIG_PATH can optionally specify the locaiton of the package config file.
+macro( pbuilder_do_package_config )
+    # This macro sets up and installs the configuration files used tospecify the install information for the project.
+    # It installs an already-created "config" file.
+    # It creates andinstallsthe "version-config" and "targets" files.
+    # Arguments: 
+    #   CONFIG_LOCATION -- Directory in which to find the already-created config file.
+    #                      If not specified, the default is ${PROJECT_BINARY_DIR}.
+    #   FILE_PREFIX -- Portion of the filename that preceeds `Config.cmake`, `Targets.cmake`, and `ConfigVersion.cmake` for the 
+    #                  config, targets, and config-version files, respectively.  If not specified, the default is ${PROJECT_NAME}.
+    #   CONFIG_FILENAME -- Optional specification of the full config filename.  If specified, overrules the default described above.
+    #   TARGETS_FILENAME -- Optional specification of the full targets filename.  If specified, overrules the default described above.
+    #   VERSION_FILENAME -- Optional specification of the full version-config filename.  If specified, overrules the default described above.
+
+    # The argument CONFIG_PATH can optionally specify the location of the package config file.
     # The default location is ${PROJECT_SOURCE_DIR}/${PACKAGE_NAME}Config.cmake.
     # If something other than the default is to be used, it should be specified with that argument.
 
-    if( NOT ${CONFIG_PATH} )
-        set( CONFIG_PATH ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake )
+    # Parse macro arguments
+    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
+    cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
+
+    # Handle arguments and apply defaults
+    if( NOT PKG_CONF_CONFIG_LOCATION )
+        set( PKG_CONF_CONFIG_LOCATION ${PROJECT_BINARY_DIR} )
     endif()
 
+    message( STATUS "!!!!! pkg_conf_file_prefix: ${PKG_CONF_FILE_PREFIX}" )
+    if( NOT PKG_CONF_FILE_PREFIX )
+        set( PKG_CONF_FILE_PREFIX ${PROJECT_NAME} )
+    endif()
+    message( STATUS "!!!!! pkg_conf_file_prefix: ${PKG_CONF_FILE_PREFIX}" )
+
+    if( NOT PKG_CONF_CONFIG_FILENAME )
+        set( PKG_CONF_CONFIG_FILENAME ${PKG_CONF_FILE_PREFIX}Config.cmake )
+    endif()
+    set( CONFIG_PATH ${PKG_CONF_CONFIG_LOCATION}/${PKG_CONF_CONFIG_FILENAME} )
+
+    if( NOT PKG_CONF_TARGETS_FILENAME )
+        set( PKG_CONF_TARGETS_FILENAME ${PKG_CONF_FILE_PREFIX}Targets.cmake )
+    endif()
+
+    if( NOT PKG_CONF_VERSION_FILENAME )
+        set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
+    endif()
+
+    # Config file must exist already
     if( NOT EXISTS ${CONFIG_PATH} )
         message( FATAL_ERROR "Package config file does not exist: ${CONFIG_PATH}" )
     endif()
 
     install( EXPORT ${PROJECT_NAME}Targets
         FILE
-            ${PROJECT_NAME}Targets.cmake
+            ${PKG_CONF_TARGETS_FILENAME}
         NAMESPACE
             ${PROJECT_NAME}::
         DESTINATION
@@ -451,13 +504,13 @@ macro( pbuilder_do_package_config CONFIG_PATH )
 
     include( CMakePackageConfigHelpers )
     write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
         COMPATIBILITY SameMajorVersion
     )
 
     install( 
         FILES 
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
             ${CONFIG_PATH}
         DESTINATION 
             ${PACKAGE_CONFIG_INSTALL_DIR}
@@ -488,7 +541,7 @@ macro( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
 
     set( PROJECT_INCLUDE_DIRS )
     foreach( LIBRARY ${FULL_PROJECT_LIBRARIES} )
-        get_target_property( LIB_INCLUDE_DIRS ${FULL_PROJECT_LIBRARIES} INTERFACE_INCLUDE_DIRECTORIES )
+        get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
         list( APPEND PROJECT_INCLUDE_DIRS ${LIB_INCLUDE_DIRS} )
     endforeach()
     list( REMOVE_DUPLICATES PROJECT_INCLUDE_DIRS )

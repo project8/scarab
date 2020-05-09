@@ -22,6 +22,9 @@ include( PackageBuilder )
 
 pbuilder_prepare_project()
 
+pbuilder_expand_lib_name( Scarab )
+set( Scarab_FULL_TARGET_NAME ${FULL_LIB_NAME} )
+message( STATUS "@@@@@@@ scarab full target name: ${Scarab_FULL_TARGET_NAME}" )
 
 ##################
 # Scarab options #
@@ -61,6 +64,17 @@ if( Scarab_BUILD_CODEC_JSON )
     add_definitions( -DUSE_CODEC_JSON )
     
     find_package( RapidJSON 1.0 REQUIRED )
+
+    # The config file that comes with RapidJSON does not define an interface target, so we'll do so here.
+    # We use the name `rapidjson` to match the post-v1.1.0 version.
+    # The v1-1.1 include-dir variable is RAPIDJSON_INCLUDE_DIRS.
+    if( NOT TARGET rapidjson )
+        add_library(rapidjson INTERFACE IMPORTED)
+        set_target_properties(rapidjson PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${RAPIDJSON_INCLUDE_DIRS}"
+        )
+    endif()
+
 
     list( APPEND PUBLIC_EXT_LIBS rapidjson )
 else( Scarab_BUILD_CODEC_JSON )
@@ -118,7 +132,14 @@ endif( Scarab_BUILD_CLI )
 
 # Pybind11
 if( Scarab_BUILD_PYTHON )
+    find_package( Python REQUIRED COMPONENTS Development )
     find_package( pybind11 REQUIRED )
+    if( TARGET Python::Python )
+        message( STATUS "%%%%% Found Python::Python" )
+    else()
+        message( STATUS "%%%%% Did NOT find Python::Python" )
+    endif()
+    include_directories( ${Python_INCLUDE_DIRS} )
 endif( Scarab_BUILD_PYTHON )
 
 
@@ -150,9 +171,10 @@ add_subdirectory( library/test )
 # Package Config #
 ##################
 
-configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake @ONLY )
+configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/${Scarab_FULL_TARGET_NAME}Config.cmake @ONLY )
 
-pbuilder_do_package_config( ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake )
+message( STATUS "@@@@@@@!! scarab full target name: ${Scarab_FULL_TARGET_NAME}" )
+pbuilder_do_package_config( FILE_PREFIX ${Scarab_FULL_TARGET_NAME} )
 
 
 ################################
