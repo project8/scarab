@@ -174,7 +174,7 @@ add_subdirectory( library/test )
 configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/${Scarab_FULL_TARGET_NAME}Config.cmake @ONLY )
 
 message( STATUS "@@@@@@@!! scarab full target name: ${Scarab_FULL_TARGET_NAME}" )
-pbuilder_do_package_config( FILE_PREFIX ${Scarab_FULL_TARGET_NAME} )
+pbuilder_do_package_config( FILE_PREFIX ${Scarab_FULL_TARGET_NAME} INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/${Scarab_FULL_TARGET_NAME} )
 
 
 ################################

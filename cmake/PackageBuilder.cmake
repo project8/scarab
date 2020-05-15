@@ -68,7 +68,7 @@ set( DATA_INSTALL_SUBDIR "data" CACHE PATH "Install subdirectory for data files"
 
 set( INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${INCLUDE_INSTALL_SUBDIR}" )
 set( LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_SUBDIR}" )
-set( PACKAGE_CONFIG_INSTALL_DIR "${LIB_INSTALL_DIR}/cmake/${PROJECT_NAME}" )
+set( PACKAGE_CONFIG_PREFIX "${LIB_INSTALL_DIR}/cmake" )
 set( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${BIN_INSTALL_SUBDIR}" )
 set( CONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONFIG_INSTALL_SUBDIR}" )
 set( DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_SUBDIR}" )
@@ -448,6 +448,7 @@ macro( pbuilder_do_package_config )
     # It installs an already-created "config" file.
     # It creates andinstallsthe "version-config" and "targets" files.
     # Arguments: 
+    #   
     #   CONFIG_LOCATION -- Directory in which to find the already-created config file.
     #                      If not specified, the default is ${PROJECT_BINARY_DIR}.
     #   FILE_PREFIX -- Portion of the filename that preceeds `Config.cmake`, `Targets.cmake`, and `ConfigVersion.cmake` for the 
@@ -461,10 +462,15 @@ macro( pbuilder_do_package_config )
     # If something other than the default is to be used, it should be specified with that argument.
 
     # Parse macro arguments
-    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
+    set( oneValueArgs INSTALL_SUBDIR CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
     cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
 
     # Handle arguments and apply defaults
+    if( NOT PKG_CONF_INSTALL_SUBDIR )
+        set( PKG_CONF_INSTALL_SUBDIR ${PROJECT_NAME} )
+    endif()
+    set( INSTALL_PATH ${PACKAGE_CONFIG_PREFIX}/${PKG_CONF_INSTALL_SUBDIR} )
+
     if( NOT PKG_CONF_CONFIG_LOCATION )
         set( PKG_CONF_CONFIG_LOCATION ${PROJECT_BINARY_DIR} )
     endif()
@@ -487,6 +493,7 @@ macro( pbuilder_do_package_config )
     if( NOT PKG_CONF_VERSION_FILENAME )
         set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
     endif()
+    set( CONFIG_VERSION_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME} )
 
     # Config file must exist already
     if( NOT EXISTS ${CONFIG_PATH} )
@@ -499,21 +506,21 @@ macro( pbuilder_do_package_config )
         NAMESPACE
             ${PROJECT_NAME}::
         DESTINATION
-            ${PACKAGE_CONFIG_INSTALL_DIR}
+            ${INSTALL_PATH}
     )
 
     include( CMakePackageConfigHelpers )
     write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
+        ${CONFIG_VERSION_PATH}
         COMPATIBILITY SameMajorVersion
     )
 
     install( 
         FILES 
-            ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
+            ${PKG_CONF_VERSION_FILENAME}
             ${CONFIG_PATH}
         DESTINATION 
-            ${PACKAGE_CONFIG_INSTALL_DIR}
+            ${INSTALL_PATH}
     )
 endmacro()
 
