@@ -22,6 +22,9 @@ include( PackageBuilder )
 
 pbuilder_prepare_project()
 
+message( STATUS "@@@@@@@ pbtest full project name: ${PBTest_FULL_PROJECT_NAME}" )
+
+
 #########
 # Options
 #########
@@ -79,3 +82,13 @@ if( PBTest_ENABLE_EXECUTABLES )
 
     pbuilder_executables( PBTest_sources PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
 endif()
+
+########
+# Config
+########
+
+configure_file( ${PROJECT_SOURCE_DIR}/PBTestConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/PBTestConfig.cmake @ONLY )
+
+message( STATUS "@@@@@@@!! PBTest full project name: ${PBTest_FULL_PROJECT_NAME}" )
+pbuilder_do_package_config()
+

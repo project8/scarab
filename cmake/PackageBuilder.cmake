@@ -62,21 +62,27 @@ if( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
 else( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
     set( LIB_INSTALL_SUBDIR "lib" CACHE PATH "Install subdirectory for libraries" )
 endif( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
+set( PACKAGE_CONFIG_SUBDIR "${LIB_INSTALL_SUBDIR}/cmake/${PROJECT_NAME}" CACHE PATH "Install subdirectory for CMake config files" )
 set( BIN_INSTALL_SUBDIR "bin" CACHE PATH "Install subdirectory for binaries" )
 set( CONFIG_INSTALL_SUBDIR "config" CACHE PATH "Install subdirectory for config files" )
 set( DATA_INSTALL_SUBDIR "data" CACHE PATH "Install subdirectory for data files" )
 
 set( INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${INCLUDE_INSTALL_SUBDIR}" )
 set( LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_SUBDIR}" )
-set( PACKAGE_CONFIG_PREFIX "${LIB_INSTALL_DIR}/cmake" )
+set( PACKAGE_CONFIG_PREFIX "${CMAKE_INSTALL_PREFIX}/${PACKAGE_CONFIG_SUBDIR}" )
 set( BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${BIN_INSTALL_SUBDIR}" )
 set( CONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONFIG_INSTALL_SUBDIR}" )
 set( DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_SUBDIR}" )
 
-if( NOT DEFINED TOP_PROJECT_INCLUDE_INSTALL_DIR )
+#if( NOT DEFINED TOP_PROJECT_INCLUDE_INSTALL_DIR )
+if( PBUILDER_STANDALONE )
+    # this is for standalone builds, but has to be done down here rather than in the standalone if block above
     set( TOP_PROJECT_INCLUDE_INSTALL_DIR "${INCLUDE_INSTALL_DIR}" CACHE INTERNAL "Top-project include installation path" )
     set( TOP_PROJECT_INCLUDE_INSTALL_SUBDIR "${INCLUDE_INSTALL_SUBDIR}" CACHE INTERNAL "Top-project include installation subdirectory" )
     message( STATUS "TOP_PROJECT_INCLUDE_INSTALL_DIR being set to ${TOP_PROJECT_INCLUDE_INSTALL_DIR}" )
+
+    set( TOP_PROJECT_CMAKE_CONFIG_DIR "${PACKAGE_CONFIG_PREFIX}" CACHE INTERNAL "Top-project CMake config installation path" )
+    message( STATUS "TOP_PROJECT_CMAKE_CONFIG_DIR being set to ${TOP_PROJECT_CMAKE_CONFIG_DIR}" )
 endif()
 
 
@@ -153,6 +159,11 @@ macro( pbuilder_prepare_project )
     # default package name is the project name
     set( ${PROJECT_NAME}_PACKAGE_NAME "${PROJECT_NAME}" )
 
+    # Full project name, expanded according to the submodule hierarchy
+    pbuilder_expand_lib_name( ${PROJECT_NAME} )
+    set( ${PROJECT_NAME}_FULL_PROJECT_NAME ${FULL_LIB_NAME} )
+    message( STATUS "?????? Full project name: ${PROJECT_NAME}_FULL_PROJECT_NAME = ${${PROJECT_NAME}_FULL_PROJECT_NAME}" )
+
     # if git is used, get the commit SHA1
     find_package( Git )
     if( GIT_FOUND )
@@ -204,7 +215,11 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
 
         # Set submodule include subdirectory
         set( SM_INCLUDE_SUBDIR "/${SM_NAME}" )
-        message( STATUS "Include files for submodule ${SM_NAME} will be installed in ${TOP_PROJECT_INCLUDE_INSTALL_DIR}/${SM_NAME}" )
+        message( STATUS "Include files for submodule ${SM_NAME} will be installed in ${TOP_PROJECT_INCLUDE_INSTALL_DIR}${SM_INCLUDE_SUBDIR}" )
+
+        # Set CMake config subdirectory
+        set( SM_CMAKE_CONFIG_SUBDIR "/${SM_NAME}" )
+        message( STATUS "CMake config files for submodule ${SM_NAME} will be installed in ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}" )
 
         message( STATUS "SM ${SM_NAME} cached variables:" )
         message( STATUS "${SM_NAME}_FOUND: ${${SM_NAME}_FOUND}" )
@@ -214,12 +229,6 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
         message( STATUS "Proceeding into subdirectory: ${SM_LOCATION}" )
         add_subdirectory( ${SM_LOCATION} )
 
-        if( TARGET Scarab_Dripline )
-            message( STATUS ">>>>>>>> we have target Scarab_Dripline" )
-        else()
-            message( STATUS ">>>>>>>> don't have Scarab Scarab_Dripline" )
-        endif()
-
         if( EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${SM_LOCATION}/${SM_NAME}Config.cmake )
             message( STATUS "Loading config file for submodule ${SM_NAME}" )
             include( ${CMAKE_CURRENT_BINARY_DIR}/${SM_LOCATION}/${SM_NAME}Config.cmake )
@@ -227,8 +236,9 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
             message( STATUS "No config file present for submodule ${SM_NAME} (${CMAKE_CURRENT_BINARY_DIR}/${SM_LOCATION}/${SM_NAME}Config.cmake)" )
         endif()
 
-        # Need to unset the submodule include subdirectory since we're in a macro
+        # Need to unset the submodule subdirectories since we're in a macro
         unset( SM_INCLUDE_SUBDIR )
+        unset( SM_CMAKE_CONFIG_SUBDIR )
 
     endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
 endmacro()
@@ -462,14 +472,14 @@ macro( pbuilder_do_package_config )
     # If something other than the default is to be used, it should be specified with that argument.
 
     # Parse macro arguments
-    set( oneValueArgs INSTALL_SUBDIR CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
+    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
     cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
 
     # Handle arguments and apply defaults
-    if( NOT PKG_CONF_INSTALL_SUBDIR )
-        set( PKG_CONF_INSTALL_SUBDIR ${PROJECT_NAME} )
-    endif()
-    set( INSTALL_PATH ${PACKAGE_CONFIG_PREFIX}/${PKG_CONF_INSTALL_SUBDIR} )
+    #if( NOT PKG_CONF_INSTALL_SUBDIR )
+    #    set( PKG_CONF_INSTALL_SUBDIR ${PROJECT_NAME} )
+    #endif()
+    #set( INSTALL_PATH ${PACKAGE_CONFIG_PREFIX}/${PKG_CONF_INSTALL_SUBDIR} )
 
     if( NOT PKG_CONF_CONFIG_LOCATION )
         set( PKG_CONF_CONFIG_LOCATION ${PROJECT_BINARY_DIR} )
@@ -485,6 +495,7 @@ macro( pbuilder_do_package_config )
         set( PKG_CONF_CONFIG_FILENAME ${PKG_CONF_FILE_PREFIX}Config.cmake )
     endif()
     set( CONFIG_PATH ${PKG_CONF_CONFIG_LOCATION}/${PKG_CONF_CONFIG_FILENAME} )
+    message( STATUS "Config file path: ${CONFIG_PATH}" )
 
     if( NOT PKG_CONF_TARGETS_FILENAME )
         set( PKG_CONF_TARGETS_FILENAME ${PKG_CONF_FILE_PREFIX}Targets.cmake )
@@ -494,6 +505,7 @@ macro( pbuilder_do_package_config )
         set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
     endif()
     set( CONFIG_VERSION_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME} )
+    message( STATUS "Config version file path: ${CONFIG_VERSION_PATH}" )
 
     # Config file must exist already
     if( NOT EXISTS ${CONFIG_PATH} )
@@ -506,7 +518,7 @@ macro( pbuilder_do_package_config )
         NAMESPACE
             ${PROJECT_NAME}::
         DESTINATION
-            ${INSTALL_PATH}
+            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
     )
 
     include( CMakePackageConfigHelpers )
@@ -517,10 +529,10 @@ macro( pbuilder_do_package_config )
 
     install( 
         FILES 
-            ${PKG_CONF_VERSION_FILENAME}
+            ${CONFIG_VERSION_PATH}
             ${CONFIG_PATH}
         DESTINATION 
-            ${INSTALL_PATH}
+            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
     )
 endmacro()
 

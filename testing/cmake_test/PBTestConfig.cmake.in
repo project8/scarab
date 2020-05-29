@@ -1,0 +1,18 @@
+# PBTestConfig.cmake
+
+get_filename_component( PBTest_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
+
+# Find the dependencies
+include( CMakeFindDependencyMacro )
+find_dependency( Scarab REQUIRED PATHS ${PBTest_CMAKE_DIR}/Scarab )
+
+# Import targets if they're not already present
+if( NOT TARGET PBTest::@PBTest_FULL_PROJECT_NAME@ )
+    if( TARGET @PBTest_FULL_PROJECT_NAME@ )
+        message( STATUS "******** we have target @PBTest_FULL_PROJECT_NAME@" )
+        add_library( Scarab::@PBTest_FULL_PROJECT_NAME@ ALIAS @PBTest_FULL_PROJECT_NAME@ )
+    else()
+        message( STATUS "******** don't have @PBTest_FULL_PROJECT_NAME@ target; including the targets file" )
+        include("${PBTest_CMAKE_DIR}/PBTestTargets.cmake")
+    endif()
+endif()

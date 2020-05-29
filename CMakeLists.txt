@@ -2,8 +2,8 @@
 # Author: N. Oblath
 # Created: Jan 4, 2016
 
-# Minimum cmake verison 3.1 required for the variable CMAKE_CXX_STANDARD
-cmake_minimum_required (VERSION 3.1)
+# Minimum cmake verison 3.12 required for FindPython3
+cmake_minimum_required (VERSION 3.12)
 
 #########
 # setup #
@@ -22,9 +22,7 @@ include( PackageBuilder )
 
 pbuilder_prepare_project()
 
-pbuilder_expand_lib_name( Scarab )
-set( Scarab_FULL_TARGET_NAME ${FULL_LIB_NAME} )
-message( STATUS "@@@@@@@ scarab full target name: ${Scarab_FULL_TARGET_NAME}" )
+message( STATUS "@@@@@@@ scarab full project name: ${Scarab_FULL_PROJECT_NAME}" )
 
 ##################
 # Scarab options #
@@ -132,14 +130,14 @@ endif( Scarab_BUILD_CLI )
 
 # Pybind11
 if( Scarab_BUILD_PYTHON )
-    find_package( Python REQUIRED COMPONENTS Development )
+    find_package( Python3 REQUIRED COMPONENTS Development )
     find_package( pybind11 REQUIRED )
-    if( TARGET Python::Python )
+    if( TARGET Python3::Python )
         message( STATUS "%%%%% Found Python::Python" )
     else()
         message( STATUS "%%%%% Did NOT find Python::Python" )
     endif()
-    include_directories( ${Python_INCLUDE_DIRS} )
+    include_directories( ${Python3_INCLUDE_DIRS} )
 endif( Scarab_BUILD_PYTHON )
 
 
@@ -171,10 +169,10 @@ add_subdirectory( library/test )
 # Package Config #
 ##################
 
-configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/${Scarab_FULL_TARGET_NAME}Config.cmake @ONLY )
+configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake @ONLY )
 
-message( STATUS "@@@@@@@!! scarab full target name: ${Scarab_FULL_TARGET_NAME}" )
-pbuilder_do_package_config( FILE_PREFIX ${Scarab_FULL_TARGET_NAME} INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/${Scarab_FULL_TARGET_NAME} )
+message( STATUS "@@@@@@@!! scarab full project name: ${Scarab_FULL_PROJECT_NAME}" )
+pbuilder_do_package_config()
 
 
 ################################
