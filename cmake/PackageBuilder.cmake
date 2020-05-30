@@ -243,17 +243,6 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
     endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
 endmacro()
 
-### to be removed
-macro( pbuilder_add_ext_libraries )
-    list( APPEND OLD_EXTERNAL_LIBRARIES ${ARGN} )
-endmacro()
-
-### to be removed
-macro( pbuilder_add_submodule_libraries )
-    list( APPEND OLD_EXTERNAL_LIBRARIES ${ARGN} )
-    list( APPEND SUBMODULE_LIBRARIES ${ARGN} )
-endmacro()
-
 ### Updated for Scarab3
 macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
     set( FULL_LIB_NAME "${LIB_NAME}${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
@@ -432,31 +421,11 @@ macro( pbuilder_install_files DEST_DIR )
     )
 endmacro()
 
-# This should be called AFTER all subdirectories with libraries have been called, and all include directories added.
-#[[
-macro( pbuilder_install_config_files )
-    # Configuration header file
-    if( EXISTS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.hh )
-        # Install location for the configuration header
-        pbuilder_install_headers( ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.hh )
-    endif( EXISTS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.hh )
-
-    # CMake configuration file
-    get_property(${PROJECT_NAME}_LIBRARIES GLOBAL PROPERTY ${PROJECT_NAME}_LIBRARIES )
-    if( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in )
-        # the awkwardness of the following four lines is because for some reason cmake wouldn't just go from .cmake.tmp to .cmake when I tested it.
-        configure_file(${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake.tmp @ONLY )
-        configure_file(${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake.tmp ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake.ppp @ONLY )
-        file( REMOVE ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake.tmp )
-        file( RENAME ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake.ppp ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}Config.cmake )
-    endif( EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in )
-endmacro()]]
-
 ### Updated for Scarab3
 macro( pbuilder_do_package_config )
     # This macro sets up and installs the configuration files used tospecify the install information for the project.
     # It installs an already-created "config" file.
-    # It creates andinstallsthe "version-config" and "targets" files.
+    # It creates and installs the "version-config" and "targets" files.
     # Arguments: 
     #   
     #   CONFIG_LOCATION -- Directory in which to find the already-created config file.
@@ -467,29 +436,19 @@ macro( pbuilder_do_package_config )
     #   TARGETS_FILENAME -- Optional specification of the full targets filename.  If specified, overrules the default described above.
     #   VERSION_FILENAME -- Optional specification of the full version-config filename.  If specified, overrules the default described above.
 
-    # The argument CONFIG_PATH can optionally specify the location of the package config file.
-    # The default location is ${PROJECT_SOURCE_DIR}/${PACKAGE_NAME}Config.cmake.
-    # If something other than the default is to be used, it should be specified with that argument.
-
     # Parse macro arguments
     set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
     cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
 
     # Handle arguments and apply defaults
-    #if( NOT PKG_CONF_INSTALL_SUBDIR )
-    #    set( PKG_CONF_INSTALL_SUBDIR ${PROJECT_NAME} )
-    #endif()
-    #set( INSTALL_PATH ${PACKAGE_CONFIG_PREFIX}/${PKG_CONF_INSTALL_SUBDIR} )
 
     if( NOT PKG_CONF_CONFIG_LOCATION )
         set( PKG_CONF_CONFIG_LOCATION ${PROJECT_BINARY_DIR} )
     endif()
 
-    message( STATUS "!!!!! pkg_conf_file_prefix: ${PKG_CONF_FILE_PREFIX}" )
     if( NOT PKG_CONF_FILE_PREFIX )
         set( PKG_CONF_FILE_PREFIX ${PROJECT_NAME} )
     endif()
-    message( STATUS "!!!!! pkg_conf_file_prefix: ${PKG_CONF_FILE_PREFIX}" )
 
     if( NOT PKG_CONF_CONFIG_FILENAME )
         set( PKG_CONF_CONFIG_FILENAME ${PKG_CONF_FILE_PREFIX}Config.cmake )
