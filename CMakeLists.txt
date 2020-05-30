@@ -73,7 +73,6 @@ if( Scarab_BUILD_CODEC_JSON )
         )
     endif()
 
-
     list( APPEND PUBLIC_EXT_LIBS rapidjson )
 else( Scarab_BUILD_CODEC_JSON )
     remove_definitions( -DUSE_CODEC_JSON )
@@ -111,7 +110,7 @@ find_package( Boost 1.46.0 REQUIRED COMPONENTS ${boost_components} )
 set( Boost_USE_STATIC_LIBS OFF )
 set( Boost_USE_STATIC_RUNTIME OFF )
 set( Boost_ALL_DYN_LINK ON )
-include_directories( ${Boost_INCLUDE_DIRS} )
+#include_directories( ${Boost_INCLUDE_DIRS} )
 # No compiled libraries are currently required
 ###pbuilder_add_ext_libraries( ${Boost_LIBRARIES} )
     
@@ -119,14 +118,6 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 if( WIN32 )
     pbuilder_add_ext_libraries( "Ws2_32.lib" )
 endif( WIN32 )
-
-# date library
-include_directories( BEFORE ${PROJECT_SOURCE_DIR}/library/external/date )
-
-# cli11 library
-if( Scarab_BUILD_CLI )
-    include_directories( BEFORE ${PROJECT_SOURCE_DIR}/library/external/cli11 )
-endif( Scarab_BUILD_CLI )
 
 # Pybind11
 if( Scarab_BUILD_PYTHON )

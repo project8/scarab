@@ -3,16 +3,22 @@
 # Created: Jan 4, 2016
 
 
+set( Scarab_HEADERS )
+set( Scarab_SOURCES )
+
+include_directories( BEFORE
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/date
+)
+if( Scarab_BUILD_CLI )
+    include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/external/cli11 )
+endif( Scarab_BUILD_CLI )
+add_subdirectory( external )
+
 include_directories( BEFORE
     ${CMAKE_CURRENT_SOURCE_DIR}/utility
     ${CMAKE_CURRENT_SOURCE_DIR}/logger
     ${CMAKE_CURRENT_SOURCE_DIR}/version
 )
-
-##########
-
-set( Scarab_HEADERS )
-set( Scarab_SOURCES )
 
 include_directories( BEFORE
     ${CMAKE_CURRENT_BINARY_DIR}/utility 
