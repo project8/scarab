@@ -200,12 +200,12 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
     #  1. Submodule SM_NAME has not yet been found
     #  2. This is the location of the submodule SM_NAME
     message( STATUS "${SM_NAME}_LOCATION: ${${SM_NAME}_LOCATION}" )
-    message( STATUS "SM_LOCATION: ${SM_LOCATION}" )
-    if( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
-        message( "Adding submodule ${SM_NAME} in location ${SM_LOCATION}" )
+    message( STATUS "CMAKE_CURRENT_LIST_DIR/SM_LOCATION: ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
+    if( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
+        message( "Adding submodule ${SM_NAME} in location ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 
         set( ${SM_NAME}_FOUND TRUE CACHE INTERNAL "" )
-        set( ${SM_NAME}_LOCATION ${SM_LOCATION} CACHE INTERNAL "" )
+        set( ${SM_NAME}_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION} CACHE INTERNAL "" )
 
         # Determine the library name suffix for this submodule with respect to its parent if it's not already defined
         if( NOT DEFINED ${SM_NAME}_PARENT_LIB_NAME_SUFFIX )
@@ -240,7 +240,7 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
         unset( SM_INCLUDE_SUBDIR )
         unset( SM_CMAKE_CONFIG_SUBDIR )
 
-    endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${SM_LOCATION}" )
+    endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 endmacro()
 
 ### Updated for Scarab3
