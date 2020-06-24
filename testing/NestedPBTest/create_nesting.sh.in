@@ -7,4 +7,4 @@ echo "Copying PBTest"
 rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/../PBTest @CMAKE_CURRENT_SOURCE_DIR@
 
 echo "Copying PBTest/scarab"
-cp -r @CMAKE_CURRENT_SOURCE_DIR@/scarab @CMAKE_CURRENT_SOURCE_DIR@/PBTest
+rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/scarab @CMAKE_CURRENT_SOURCE_DIR@/PBTest
