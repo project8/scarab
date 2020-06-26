@@ -206,6 +206,7 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
 
         set( ${SM_NAME}_FOUND TRUE CACHE INTERNAL "" )
         set( ${SM_NAME}_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION} CACHE INTERNAL "" )
+        set( ${SM_NAME}_BINARY_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${SM_LOCATION} CACHE INTERNAL "" )
 
         # Determine the library name suffix for this submodule with respect to its parent if it's not already defined
         if( NOT DEFINED ${SM_NAME}_PARENT_LIB_NAME_SUFFIX )
