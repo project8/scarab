@@ -162,7 +162,7 @@ macro( pbuilder_prepare_project )
     # Full project name, expanded according to the submodule hierarchy
     pbuilder_expand_lib_name( ${PROJECT_NAME} )
     set( ${PROJECT_NAME}_FULL_PROJECT_NAME ${FULL_LIB_NAME} )
-    message( STATUS "?????? Full project name: ${PROJECT_NAME}_FULL_PROJECT_NAME = ${${PROJECT_NAME}_FULL_PROJECT_NAME}" )
+    message( STATUS "Full project name: ${PROJECT_NAME}_FULL_PROJECT_NAME = ${${PROJECT_NAME}_FULL_PROJECT_NAME}" )
 
     # if git is used, get the commit SHA1
     find_package( Git )
@@ -276,10 +276,10 @@ endmacro()
 
 ### Updated for Scarab3
 macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
-    #message( STATUS "Building library ${LIB_BASENAME}; PARENT_LIB_NAME_SUFFIX is ${PARENT_LIB_NAME_SUFFIX}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
-    #set( FULL_LIB_NAME "${LIB_BASENAME}${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+    message( "Building library ${LIB_BASENAME}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+
     pbuilder_expand_lib_name( ${LIB_BASENAME} )
-    #message( STATUS "lib basename: ${LIB_BASENAME}" )
+    message( STATUS "lib basename: ${LIB_BASENAME}" )
     message( STATUS "full lib name: ${FULL_LIB_NAME}" )
     message( STATUS "SM libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
     message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
@@ -290,7 +290,6 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
 
     message( STATUS "pbuilder: will build library <${FULL_LIB_NAME}>" )
     add_library( ${FULL_LIB_NAME} ${${SOURCES}} )
-    ###target_compile_options( ${FULL_LIB_NAME} INTERFACE ${GLOBAL_COMPILE_OPTIONS} )
 
     # Grab the include directories, which will be used for the build-interface target includes
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_NAME} INCLUDE_DIRECTORIES )
@@ -312,11 +311,9 @@ macro( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_L
             ${${PRIVATE_EXTERNAL_LIBRARIES}} 
     )
 
-    message( STATUS "Resetting ${PROJECT_NAME}_SM_LIBRARIES" )
     set( ${PROJECT_NAME}_SM_LIBRARIES )
 
     # Make exported targets available during the build phase
-    message( STATUS "####### build-phase targets file going to: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
     export( TARGETS ${FULL_LIB_NAME}
         FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
     )
@@ -496,22 +493,7 @@ macro( pbuilder_do_package_config )
     )
 endmacro()
 
-#[[macro( pbuilder_variables_for_parent )
-    if( NOT ${PBUILDER_STANDALONE} )
-        set( ${PROJECT_NAME}_FOUND TRUE CACHE INTERNAL "" )
-        set( ${PROJECT_NAME}_LOCATION ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "" )
-        get_property( LIBRARIES GLOBAL PROPERTY ${PROJECT_NAME}_LIBRARIES )
-        set( ${PROJECT_NAME}_LIBRARIES ${LIBRARIES} ${SUBMODULE_LIBRARIES} CACHE INTERNAL "" )
-        set( ${PROJECT_NAME}_LIBRARY_DIR ${LIB_INSTALL_DIR} CACHE INTERNAL "" )
-        set( ${PROJECT_NAME}_INCLUDE_DIR ${INCLUDE_INSTALL_DIR} CACHE INTERNAL "" )
-        get_property( DEP_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES )
-        list( REMOVE_DUPLICATES DEP_INCLUDE_DIRS )
-        set( ${PROJECT_NAME}_DEP_INCLUDE_DIRS ${DEP_INCLUDE_DIRS} CACHE INTERNAL "" )
-        get_directory_property( COMPILE_DEFINITIONS COMPILE_DEFINITIONS )
-        set( ${PROJECT_NAME}_COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS} CACHE INTERNAL "" )
-    endif( NOT ${PBUILDER_STANDALONE} )
-endmacro()]]
-
+### Updated for Scarab3
 macro( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
     # Installs the library in the standard lib directory

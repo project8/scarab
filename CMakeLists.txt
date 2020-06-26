@@ -22,7 +22,6 @@ include( PackageBuilder )
 
 pbuilder_prepare_project()
 
-message( STATUS "@@@@@@@ scarab full project name: ${Scarab_FULL_PROJECT_NAME}" )
 
 ##################
 # Scarab options #

@@ -22,8 +22,6 @@ include( PackageBuilder )
 
 pbuilder_prepare_project()
 
-message( STATUS "@@@@@@@ NestedPBTEst full project name: ${NestedPBTest_FULL_PROJECT_NAME}" )
-
 
 #########
 # Options
@@ -91,6 +89,5 @@ endif()
 
 configure_file( ${PROJECT_SOURCE_DIR}/NestedPBTestConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/NestedPBTestConfig.cmake @ONLY )
 
-message( STATUS "@@@@@@@!! NestedPBTest full project name: ${NestedPBTest_FULL_PROJECT_NAME}" )
 pbuilder_do_package_config()
 
