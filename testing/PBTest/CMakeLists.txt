@@ -22,7 +22,7 @@ include( PackageBuilder )
 
 pbuilder_prepare_project()
 
-message( STATUS "@@@@@@@ PBTest full project name: ${PBTest_FULL_PROJECT_NAME}" )
+message( STATUS "Full project name for <${PROJECT_NAME}: ${${PROJECT_NAME}_FULL_PROJECT_NAME}" )
 
 
 #########
