@@ -42,7 +42,7 @@ namespace scarab
                 f_ord_args.push_back( std::move(t_parsed) );
                 return;
             }
-            // if it's not negtive, then it's an option and shouldn't be considered here
+            // if it's not a negtive number, then it's an option and shouldn't be considered here
             throw error() << "Cannot parse an option with the nonoption_parser: " << an_arg;
         }
 
