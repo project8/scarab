@@ -121,23 +121,3 @@ TEST_CASE( "digital", "[utility]" )
         }
     }
 }
-/*
-#include <iostream>
-#include <vector>
-
-using namespace scarab;
-
-int main()
-{
-
-
-    std::cout << "DAC Signed Test" << std::endl;
-    for( auto t_output : t_outputs_2 )
-    {
-        std::cout << t_output << " --> " << d2a< signed, double >( t_output, &t_params_2 ) << std::endl;
-    }
-
-    return 0;
-}
-
-*/
