@@ -41,6 +41,13 @@
 
     we : 2
 }
+
+2020-07-06 10:37:15 [ INFO] (tid 0x1117845c0) option_parser.cc(79): Testing negative number vs illegal option
+2020-07-06 10:37:15 [ INFO] (tid 0x1117845c0) option_parser.cc(83): Parsing `-5`
+2020-07-06 10:37:15 [ INFO] (tid 0x1117845c0) option_parser.cc(85): Is ord_args[0] == -5? 1
+2020-07-06 10:37:15 [ INFO] (tid 0x1117845c0) option_parser.cc(89): Parsing `-five`
+2020-07-06 10:37:15 [ INFO] (tid 0x1117845c0) option_parser.cc(97): Caught exception while parsing:
+Cannot parse an option with the nonoption_parser: -five
  *
  */
 
@@ -75,6 +82,27 @@ int main()
     LINFO( testlog, "\tOrdered args:\n" << t_parser.ord_args() );
     LINFO( testlog, "\tKeyword args:\n" << t_parser.kw_args() );
 
+
+    LINFO( testlog, "Testing negative number vs illegal option" );
+    std::vector< std::string > t_args_2;
+    t_args_2.push_back( "-5" );
+
+    LINFO( testlog, "Parsing `-5`" );
+    nonoption_parser t_parser_2( t_args_2 );
+    LINFO( testlog, "Is ord_args[0] == -5? " << (t_parser_2.ord_args()[0]().as_int() == -5) );
+
+    t_args_2[0] = "-five";
+
+    LINFO( testlog, "Parsing `-five`" );
+    try
+    {
+        nonoption_parser t_parser_2_2( t_args_2 );
+        LERROR( testlog, "Did not catch exception while parsing;\nord_args: " << t_parser_2_2.ord_args() << "\nkw_args: " << t_parser_2_2.kw_args() );
+    } 
+    catch( error& e )
+    {
+        LINFO( testlog, "Caught exception while parsing:\n" << e.what() );
+    }
     return 0;
 }
 
