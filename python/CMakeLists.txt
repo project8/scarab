@@ -3,6 +3,7 @@
 # Created on: Sept 2, 2019
 
 if( Scarab_BUILD_PYTHON )
+    message( "Building Python bindings" )
 
     set( dir ${CMAKE_CURRENT_SOURCE_DIR} )
 
@@ -31,17 +32,14 @@ if( Scarab_BUILD_PYTHON )
         )
     endif( Scarab_BUILD_PARAM )
 
-    set( LIB_DEPENDENCIES Scarab )
-    pbuilder_expand_lib_names( ${LIB_DEPENDENCIES} )
+    set( PROJECT_LIBRARIES Scarab )
+
+    pbuilder_add_pybind11_module( scarab ${PROJECT_LIBRARIES} )
+
+    pbuilder_install_headers( ${PYBINDING_HEADERFILES} )
 
     configure_file( add_lib_python_path.sh.in add_lib_python_path.sh @ONLY)
     install( FILES ${CMAKE_CURRENT_BINARY_DIR}/add_lib_python_path.sh DESTINATION ${BIN_INSTALL_DIR} )
 
-    # Potential point of confusion: the C++ library is "Scarab" and the python library is "scarab"
-    # Other possible naming schemes seemed less desirable, and we'll hopefully avoid confusion with these comments
-    pybind11_add_module( scarab ${PYBINDING_SOURCEFILES} )
-    target_link_libraries( scarab PRIVATE ${FULL_LIB_DEPENDENCIES} ${EXTERNAL_LIBRARIES} )
-    install( TARGETS scarab DESTINATION ${LIB_INSTALL_DIR} )
-    pbuilder_install_headers( ${PYBINDING_HEADERFILES} )
-
+    message( "Done with Python bindings" )
 endif( Scarab_BUILD_PYTHON )

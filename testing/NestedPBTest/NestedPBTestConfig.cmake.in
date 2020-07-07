@@ -1,0 +1,17 @@
+# NestedPBTestConfig.cmake
+
+get_filename_component( NestedPBTest_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
+
+# Find the dependencies
+include( CMakeFindDependencyMacro )
+find_dependency( PBTest REQUIRED PATHS ${NestedPBTest_CMAKE_DIR}/PBTest @PBTest_BINARY_LOCATION@ )
+find_dependency( Scarab REQUIRED PATHS ${NestedPBTest_CMAKE_DIR}/Scarab @Scarab_BINARY_LOCATION@ )
+
+# Import targets if they're not already present
+if( NOT TARGET NestedPBTest::@NestedPBTest_FULL_PROJECT_NAME@ )
+    if( TARGET @NestedPBTest_FULL_PROJECT_NAME@ )
+        add_library( NestedPBTest::@NestedPBTest_FULL_PROJECT_NAME@ ALIAS @NestedPBTest_FULL_PROJECT_NAME@ )
+    else()
+        include("${NestedPBTest_CMAKE_DIR}/NestedPBTestTargets.cmake")
+    endif()
+endif()
