@@ -17,7 +17,6 @@ if( Scarab_ENABLE_TESTING )
     set( PRIVATE_EXT_LIBS )
 
     set( test_sources
-        test_digital.cc
         test_member_variables.cc
         test_logger.cc
         test_terminate.cc

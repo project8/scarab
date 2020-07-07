@@ -136,8 +136,9 @@ endif( Scarab_BUILD_PYTHON )
 # Testing #
 ###########
 
-#add_subdirectory( testing )
-add_subdirectory( library/test )
+if( Scarab_ENABLE_TESTING )
+    add_subdirectory( testing )
+endif()
 
 
 ##################
