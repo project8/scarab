@@ -33,7 +33,6 @@ if( Scarab_ENABLE_TESTING )
             test_param_array.cc
             test_param_by_pointer.cc
             test_param_node.cc
-            test_param_value.cc
         )
     endif( Scarab_BUILD_PARAM )
 
