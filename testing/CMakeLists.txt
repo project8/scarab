@@ -5,14 +5,66 @@
 ##########
 
 set( testing_HEADERS
+    test_member_variables.hh
 )
 
-set( testing_SOURCES
-    test_digital.cc
-    use_catch.cc
-)
+pbuilder_install_headers( ${testing_HEADERS} )
 
-set( lib_dependencies 
+
+    set( testing_SOURCES
+        use_catch.cc
+        test_digital.cc
+#        test_member_variables.cc
+#        test_logger.cc
+#        test_terminate.cc
+#        test_time.cc
+#        test_verbosity.cc
+    )
+
+    set( testing_CONFIGS
+    )
+    
+    if( Scarab_BUILD_PARAM )
+        set( testing_SOURCES
+            ${testing_SOURCES}
+#            test_param_array.cc
+#            test_param_by_pointer.cc
+#            test_param_node.cc
+#            test_param_value.cc
+        )
+    endif( Scarab_BUILD_PARAM )
+
+    if( Scarab_BUILD_CODEC_JSON )
+        set( testing_SOURCES
+            ${testing_SOURCES}
+#            test_json.cc
+        )
+    endif( Scarab_BUILD_CODEC_JSON )
+    
+    if( Scarab_BUILD_CODEC_YAML )
+        set( testing_SOURCES
+            ${testing_SOURCES}
+#            test_yaml.cc
+        )
+        set( testing_CONFIGS
+            ${testing_CONFIGS}
+            test_yaml.yaml
+        )
+    endif( Scarab_BUILD_CODEC_YAML )
+
+    if( Scarab_BUILD_CLI )
+        set( testing_SOURCES
+            ${testing_SOURCES}
+#            test_app_with_callback.cc
+#            test_app_with_options.cc
+#            test_app_with_subcommands.cc
+#            test_basic_application.cc
+            test_nonoption_parser.cc
+        )
+    endif( Scarab_BUILD_CLI )
+
+
+set( testing_LIB_DEPENDENCIES 
     Scarab
     Catch
 )
@@ -23,7 +75,11 @@ add_library( Catch INTERFACE )
 target_include_directories( Catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/catch )
 
 add_executable( run_tests ${testing_SOURCES} )
-target_link_libraries( run_tests ${lib_dependencies} )
+target_link_libraries( run_tests ${testing_LIB_DEPENDENCIES} )
+
+
+pbuilder_install_config( ${testing_CONFIGS} )
+
 
 # So far it seems sufficient to use Catch2's ability to run tests, and not CTest.
 # Here are two ways it could potentially be integrated with CTest, if we change our minds.

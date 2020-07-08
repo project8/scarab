@@ -62,7 +62,6 @@ if( Scarab_ENABLE_TESTING )
             test_app_with_options.cc
             test_app_with_subcommands.cc
             test_basic_application.cc
-            test_nonoption_parser.cc
         )
     endif( Scarab_BUILD_CLI )
 
