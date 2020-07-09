@@ -19,7 +19,6 @@ if( Scarab_ENABLE_TESTING )
     set( test_sources
         test_member_variables.cc
         test_terminate.cc
-        test_verbosity.cc
     )
 
     set( test_configs
@@ -29,7 +28,6 @@ if( Scarab_ENABLE_TESTING )
         set( test_sources
             ${test_sources}
             test_param_by_pointer.cc
-            test_param_node.cc
         )
     endif( Scarab_BUILD_PARAM )
 

@@ -114,6 +114,12 @@ TEST_CASE( "param_array", "[param]" )
     REQUIRE( array.size() == 4 );
     REQUIRE( array[0]().as_int() == -2 );
 
+    // iterator, begin, and end
+    param_array::iterator it = array.begin();
+    unsigned count = 0;
+    for( ; it != array.end(); ++it, ++count );
+    REQUIRE( count == array.size() );
+
     // remove, erase and clear
     param_ptr_t removed = array.remove( 0 );
     REQUIRE( removed->is_value() );

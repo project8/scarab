@@ -7,6 +7,40 @@
 
 #include "application.hh"
 
+#include "catch.hpp"
+
+
+TEST_CASE( "verbosity", "[cli][logger]" )
+{
+    LOGGER( tlog, "test_verbosity" );
+
+    scarab::main_app t_app;
+
+    // test default verbosity
+    REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eProg );
+
+    // test increasing verbosity
+    t_app.increase_global_verbosity( 1 );
+    REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eInfo );
+
+    // test increasing past the end
+    t_app.increase_global_verbosity( 10 );
+    REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eTrace );
+
+    // test decreasing past the beginning
+    t_app.decrease_global_verbosity( 100 );
+    REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eFatal );
+
+    // test setting verbosity
+    t_app.set_global_verbosity( 30 );
+    REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eWarn );
+
+    // test decreasing past the beginning
+    t_app.set_global_verbosity( 100 );
+    REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eFatal );
+
+}
+/*
 using namespace scarab;
 
 LOGGER( tlog, "test_verbosity" );
@@ -40,5 +74,5 @@ int main()
 
     return 0;
 }
-
+*/
 
