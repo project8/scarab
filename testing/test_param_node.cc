@@ -3,52 +3,12 @@
  *
  *  Created on: Jul 13, 2018
  *      Author: N.S. Oblath
- *
- *  Output should be something like:
- *
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(18): Creating param node
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(21): Adding a value
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(24): Adding an array
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(33): Printing contents:
-{
-    five : 5
-    subarray1 :
-    [
-        500
-    ]
-
-    subarray2 :
-    [
-        5000
-    ]
-
-}
-
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(35): After copy, should be full:
-[
-    500
-]
-
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(36): After move, should be empty:
-[
-]
-
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(38): Access:
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(39): 5
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(40): 5
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(41): 500
-2018-07-13 15:53:19 [ INFO] (tid 0x7fff9c9dc380) st_param_node.cc(42): 5000
- *
  */
 
 #include "param.hh"
 
 #include "catch.hpp"
 
-#include <type_traits>
-#include <iostream>
-
-using scarab::param;
 using scarab::param_array;
 using scarab::param_node;
 using scarab::param_value;

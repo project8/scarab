@@ -27,7 +27,6 @@ if( Scarab_ENABLE_TESTING )
     if( Scarab_BUILD_PARAM )
         set( test_sources
             ${test_sources}
-            test_param_by_pointer.cc
         )
     endif( Scarab_BUILD_PARAM )
 
