@@ -15,9 +15,9 @@ pbuilder_install_headers( ${testing_HEADERS} )
         use_catch.cc
         test_digital.cc
 #        test_member_variables.cc
-#        test_logger.cc
+        test_logger.cc
 #        test_terminate.cc
-#        test_time.cc
+        test_time.cc
 #        test_verbosity.cc
     )
 

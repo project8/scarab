@@ -18,9 +18,7 @@ if( Scarab_ENABLE_TESTING )
 
     set( test_sources
         test_member_variables.cc
-        test_logger.cc
         test_terminate.cc
-        test_time.cc
         test_verbosity.cc
     )
 
