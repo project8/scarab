@@ -21,9 +21,6 @@ pbuilder_install_headers( ${testing_HEADERS} )
         test_verbosity.cc
     )
 
-    set( testing_CONFIGS
-    )
-    
     if( Scarab_BUILD_PARAM )
         set( testing_SOURCES
             ${testing_SOURCES}
@@ -37,18 +34,14 @@ pbuilder_install_headers( ${testing_HEADERS} )
     if( Scarab_BUILD_CODEC_JSON )
         set( testing_SOURCES
             ${testing_SOURCES}
-#            test_json.cc
+            test_json.cc
         )
     endif( Scarab_BUILD_CODEC_JSON )
     
     if( Scarab_BUILD_CODEC_YAML )
         set( testing_SOURCES
             ${testing_SOURCES}
-#            test_yaml.cc
-        )
-        set( testing_CONFIGS
-            ${testing_CONFIGS}
-            test_yaml.yaml
+            test_yaml.cc
         )
     endif( Scarab_BUILD_CODEC_YAML )
 
@@ -76,9 +69,6 @@ target_include_directories( Catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/catch )
 
 add_executable( run_tests ${testing_SOURCES} )
 target_link_libraries( run_tests ${testing_LIB_DEPENDENCIES} )
-
-
-pbuilder_install_config( ${testing_CONFIGS} )
 
 
 # So far it seems sufficient to use Catch2's ability to run tests, and not CTest.

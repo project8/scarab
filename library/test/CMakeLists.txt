@@ -21,33 +21,7 @@ if( Scarab_ENABLE_TESTING )
         test_terminate.cc
     )
 
-    set( test_configs
-    )
     
-    if( Scarab_BUILD_PARAM )
-        set( test_sources
-            ${test_sources}
-        )
-    endif( Scarab_BUILD_PARAM )
-
-    if( Scarab_BUILD_CODEC_JSON )
-        set( test_sources
-            ${test_sources}
-            test_json.cc
-        )
-    endif( Scarab_BUILD_CODEC_JSON )
-    
-    if( Scarab_BUILD_CODEC_YAML )
-        set( test_sources
-            ${test_sources}
-            test_yaml.cc
-        )
-        set( test_configs
-            ${test_configs}
-            test_yaml.yaml
-        )
-    endif( Scarab_BUILD_CODEC_YAML )
-
     if( Scarab_BUILD_CLI )
         set( test_sources
             ${test_sources}
@@ -59,7 +33,5 @@ if( Scarab_ENABLE_TESTING )
     endif( Scarab_BUILD_CLI )
 
     pbuilder_executables( test_sources PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
-
-    pbuilder_install_config( ${test_configs} )
 
 endif( Scarab_ENABLE_TESTING )
