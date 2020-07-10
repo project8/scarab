@@ -71,6 +71,10 @@ add_executable( run_tests ${testing_SOURCES} )
 target_link_libraries( run_tests ${testing_LIB_DEPENDENCIES} )
 
 
+if( Scarab_BUILD_CLI )
+    add_subdirectory( applications )
+endif( Scarab_BUILD_CLI )
+
 # So far it seems sufficient to use Catch2's ability to run tests, and not CTest.
 # Here are two ways it could potentially be integrated with CTest, if we change our minds.
 

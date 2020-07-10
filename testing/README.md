@@ -37,9 +37,20 @@ Or if you want to run a specific test, you can do:
 
 For further documentation on using Catch2, see the [tutorial](https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md)
 
-## CMake
+## Applications
 
-Tests of the package builder framework are included in these subdirectories:
+Four example applications are included in the `applications` directory, demonstrating different ways in which the CLI portion of the library can be used:
+
+* test_app_with_callback
+* test_app_with_options
+* test_app_with_subcommands
+* test_basic_application
+
+To build these examples, ensure that the CMake flags `Scarab_ENABLE_TESTING` AND `Scarab_BUILD_CLI` are set to `TRUE`.
+
+## Package Builder
+
+Tests of the package builder framework are included in the `package_builder` directory, in these subdirectories:
 
 * NestedPBTest
 * PBTest

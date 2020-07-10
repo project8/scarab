@@ -247,7 +247,7 @@ namespace scarab
      - API: https://cliutils.github.io/CLI11/index.html
 
      There are several test examples that can be used as useful references on different ways that
-     applications can be setup.  You'll find them in the scarab/library/test directory.
+     applications can be setup.  You'll find them in the scarab/testing/applications directory.
      - test_app_with_callback.cc -- an example that runs a program using a callback function
      - test_app_with_options.cc -- an example using basic CLI11 options (i.e. options that don't modify the configuration)
      - test_app_with_subcommands.cc -- an example with two subcommands.  e.g. my_app do_action_A --an_option=6

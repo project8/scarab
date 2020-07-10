@@ -22,16 +22,5 @@ if( Scarab_ENABLE_TESTING )
     )
 
     
-    if( Scarab_BUILD_CLI )
-        set( test_sources
-            ${test_sources}
-            test_app_with_callback.cc
-            test_app_with_options.cc
-            test_app_with_subcommands.cc
-            test_basic_application.cc
-        )
-    endif( Scarab_BUILD_CLI )
-
-    pbuilder_executables( test_sources PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
 
 endif( Scarab_ENABLE_TESTING )
