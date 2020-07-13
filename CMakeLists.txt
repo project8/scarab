@@ -122,6 +122,7 @@ endif( Scarab_BUILD_PYTHON )
 
 add_subdirectory( library )
 
+
 ##########
 # Python #
 ##########
@@ -132,9 +133,20 @@ if( Scarab_BUILD_PYTHON )
 endif( Scarab_BUILD_PYTHON )
 
 
+###############
+# Executables #
+###############
+
+if( Scarab_ENABLE_EXECUTABLES )
+    add_subdirectory( executables )
+endif( Scarab_ENABLE_EXECUTABLES )
+
 ###########
 # Testing #
 ###########
+
+# deprecated
+add_subdirectory( library/test )
 
 if( Scarab_ENABLE_TESTING )
     add_subdirectory( testing )
