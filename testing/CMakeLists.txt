@@ -14,7 +14,7 @@ pbuilder_install_headers( ${testing_HEADERS} )
     set( testing_SOURCES
         use_catch.cc
         test_digital.cc
-#        test_member_variables.cc
+        test_member_variables.cc
         test_logger.cc
 #        test_terminate.cc
         test_time.cc
@@ -48,10 +48,6 @@ pbuilder_install_headers( ${testing_HEADERS} )
     if( Scarab_BUILD_CLI )
         set( testing_SOURCES
             ${testing_SOURCES}
-#            test_app_with_callback.cc
-#            test_app_with_options.cc
-#            test_app_with_subcommands.cc
-#            test_basic_application.cc
             test_nonoption_parser.cc
         )
     endif( Scarab_BUILD_CLI )

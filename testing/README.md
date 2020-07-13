@@ -54,3 +54,14 @@ Tests of the package builder framework are included in the `package_builder` dir
 
 * NestedPBTest
 * PBTest
+
+## Doxygen Documentation
+
+A Doxygen configuration file has been included in the `testing` directory to allow testing of Doxygen documentation generation.
+
+To use:
+
+1. Enter into the `testing` source directory
+1. Run `doxygen Doxyfile`
+1. Open `testing/user_doxygen_out/html/index.html` in a web browser
+1. When finished, remember to delete `testing/user_doxygen_out` so that it doesn't get committed to the repo
