@@ -83,6 +83,8 @@ namespace scarab_testing
 
     struct test_ptr
     {
+        test_ptr() : f_mv_ptr_ns_int( new int(10) ), f_mv_ptr_int( new int(0) ) {}
+        ~test_ptr() {delete f_mv_ptr_ns_int; delete f_mv_ptr_int;}
         mv_assignable_noset( int, mv_ptr_ns_int )
         mv_assignable( int, mv_ptr_int )
     };
@@ -93,8 +95,13 @@ namespace scarab_testing
         mv_assignable_static( int, mv_ptr_int )
     };
 
+    int* test_ptr_static::s_mv_ptr_ns_int = new int(10);
+    int* test_ptr_static::s_mv_ptr_int = new int(0);
+
     struct test_ptr_mutable
     {
+        test_ptr_mutable() : f_mv_ptr_ns_int( new int(10) ), f_mv_ptr_int( new int(0) ) {}
+        ~test_ptr_mutable() {delete f_mv_ptr_ns_int; delete f_mv_ptr_int;}
         mv_assignable_mutable_noset( int, mv_ptr_ns_int )
         mv_assignable_mutable( int, mv_ptr_int )
     };
@@ -106,6 +113,7 @@ namespace scarab_testing
 
     struct test_shptr
     {
+        test_shptr() : f_mv_shptr_c_int( new int(10) ), f_mv_shptr_int( new int(0) ) {}
         mv_shared_ptr_const( int, mv_shptr_c_int )
         mv_shared_ptr( int, mv_shptr_int )
     };
@@ -115,8 +123,12 @@ namespace scarab_testing
         mv_shared_ptr_static( int, mv_shptr_int )
     };
 
+    std::shared_ptr< int > test_shptr_static::s_mv_shptr_int = std::make_shared< int >( 0 );
+
     struct test_shptr_mutable
     {
+        test_shptr_mutable() : f_mv_shptr_c_int( new int(10) ), f_mv_shptr_int( new int(0) ) {}
+        mv_shared_ptr_mutable_const( int, mv_shptr_c_int )
         mv_shared_ptr_mutable( int, mv_shptr_int )
     };
 
@@ -127,6 +139,7 @@ namespace scarab_testing
 
     struct test_atm
     {
+        test_atm() : f_mv_atm_ns_int( 10 ), f_mv_atm_int( 0 ) {}
         mv_atomic_noset( int, mv_atm_ns_int )
         mv_atomic( int, mv_atm_int )
     };
@@ -137,8 +150,12 @@ namespace scarab_testing
         mv_atomic_static( int, mv_atm_int )
     };
 
+    std::atomic< int > test_atm_static::s_mv_atm_ns_int( 10 );
+    std::atomic< int > test_atm_static::s_mv_atm_int( 0 );
+
     struct test_atm_mutable
     {
+        test_atm_mutable() : f_mv_atm_ns_int( 10 ), f_mv_atm_int( 0 ) {}
         mv_atomic_mutable_noset( int, mv_atm_ns_int )
         mv_atomic_mutable( int, mv_atm_int )
     };
