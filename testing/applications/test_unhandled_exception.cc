@@ -1,0 +1,48 @@
+/*
+ * test_unhandled_exception.cc
+ *
+ *  Created on: May 23, 2017
+ *      Author: N.S. Oblath
+ * 
+ *  Use: 
+ *    > bin/terminate
+ * 
+ *  The unhandled exception should result in terminate() being called.
+ *  The exception should be printed, and a stack trace displayed.
+ */
+
+#include "terminate.hh"
+
+#include "logger.hh"
+
+LOGGER( slog, "test_terminate" );
+
+namespace scarab
+{
+    int throw_exception()
+    {
+        // throw an unhandled runtime error
+        throw std::runtime_error("RUNTIME ERROR!");
+        return 0;
+    }
+
+    int foo2()
+    {
+        throw_exception();
+        return 0;
+    }
+
+    int foo1()
+    {
+        foo2();
+        return 0;
+    }
+}
+
+int main(int , char ** )
+{
+    // cause the exception to be thrown
+    scarab::foo1();
+
+    exit(EXIT_SUCCESS);
+}
