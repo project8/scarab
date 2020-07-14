@@ -16,7 +16,7 @@ pbuilder_install_headers( ${testing_HEADERS} )
         test_digital.cc
         test_member_variables.cc
         test_logger.cc
-#        test_terminate.cc
+        test_terminate.cc
         test_time.cc
         test_verbosity.cc
     )

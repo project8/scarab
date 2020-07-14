@@ -145,9 +145,6 @@ endif( Scarab_ENABLE_EXECUTABLES )
 # Testing #
 ###########
 
-# deprecated
-add_subdirectory( library/test )
-
 if( Scarab_ENABLE_TESTING )
     add_subdirectory( testing )
 endif()
