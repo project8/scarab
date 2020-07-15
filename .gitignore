@@ -7,3 +7,5 @@
 # Build directories
 build*/
 
+# PackageBuilder test submodule
+testing/cmake_test/scarab
