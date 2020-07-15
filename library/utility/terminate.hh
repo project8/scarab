@@ -3,6 +3,9 @@
  *
  *  Created on: May 23, 2017
  *      Author: N.S. Oblath
+ * 
+ *  The terminate() function is called in the event of an unhandled exception.
+ *  It can also be called manually to abort with a stack trace printed.
  */
 
 #ifndef SCARAB_TERMINATE_HH_
@@ -15,6 +18,7 @@
 #ifndef __USE_GNU
 #define __USE_GNU
 #endif
+
 
 namespace scarab
 {

@@ -26,6 +26,8 @@ namespace {
     // invoke set_terminate as part of global constant initialization
     static const bool SET_TERMINATE = std::set_terminate( scarab::terminate );
 }
+// flag to control whether abort() is called (turned off for unit testing, for example)
+bool DO_ABORT_ON_TERMINATE = true;
 
 LOGGER( slog, "terminate" );
 
@@ -37,24 +39,29 @@ namespace scarab
         static std::mutex t_using_terminate;
         std::unique_lock< std::mutex > t_terminate_locked( t_using_terminate );
 
-        static bool t_tried_throw = false;
+        // if there's a current exception, rethrow to print out what()
+        std::exception_ptr t_exc_ptr = std::current_exception();
+        if( t_exc_ptr )
+        {
+            static bool t_tried_throw = false;
 
-        try
-        {
-            // try once to re-throw currently active exception
-            if( ! t_tried_throw )
+            try
             {
-                t_tried_throw = true;
-                throw;
+                // try once to re-throw currently active exception
+                if( ! t_tried_throw )
+                {
+                    t_tried_throw = true;
+                    throw;
+                }
             }
-        }
-        catch( const std::exception &e )
-        {
-            LERROR( slog, "Caught unhandled exception. what(): " << e.what() );
-        }
-        catch (...)
-        {
-            LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." );
+            catch( const std::exception &e )
+            {
+                LERROR( slog, "Caught unhandled exception. what(): " << e.what() );
+            }
+            catch (...)
+            {
+                LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." );
+            }
         }
 
         void* t_bt_array[50];
@@ -74,7 +81,11 @@ namespace scarab
 
         free( t_messages );
 
-        abort();
+        if( DO_ABORT_ON_TERMINATE )
+        {
+            LERROR( slog, "Aborting" );
+            abort();
+        }
     }
 
     // Option 2: Handle SIGABRT

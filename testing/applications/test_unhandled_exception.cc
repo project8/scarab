@@ -1,8 +1,14 @@
 /*
- * test_terminate.cc
+ * test_unhandled_exception.cc
  *
  *  Created on: May 23, 2017
  *      Author: N.S. Oblath
+ * 
+ *  Use: 
+ *    > bin/terminate
+ * 
+ *  The unhandled exception should result in terminate() being called.
+ *  The exception should be printed, and a stack trace displayed.
  */
 
 #include "terminate.hh"
@@ -35,20 +41,6 @@ namespace scarab
 
 int main(int , char ** )
 {
-    // Use for option 2 (signal handling)
-    //struct sigaction sigact;
-
-    //sigact.sa_sigaction = scarab::crit_err_hdlr;
-    //sigact.sa_flags = SA_RESTART | SA_SIGINFO;
-
-    // set the error handler
-    //if( sigaction(SIGABRT, &sigact, (struct sigaction *)NULL) != 0 )
-    //{
-    //    LERROR( slog, "error setting handler for signal " << SIGABRT
-    //            << " (" << strsignal(SIGABRT) << ")" );
-    //    exit(EXIT_FAILURE);
-    //}
-
     // cause the exception to be thrown
     scarab::foo1();
 
