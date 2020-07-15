@@ -6,14 +6,21 @@ What is the Package Builder (PB)?
 
 Package Builder (PB) is a framework built on top of CMake for putting together software packages that specializes in nesting packages.
 
-PB is implemented in a series of CMake macros that standardize how things like building a library, or building an executable.  Part of the motivation behind PB is to simplify the process of making a software package.  
+PB is implemented in a series of CMake macros that standardize how things like building a library, or building an executable.  
+Part of the motivation behind PB is to simplify the process of making a software package.  
 
-While CMake is extremely powerful, it has a lot of options for how to make a software package, and those choices can make the process more complicated.  PB tries to find a particular balance between how complicated or simple it is to build a package, and how many choices are left available to the user or are made by PB.  For cases not handled by the vanilla PB interface, the user always has the option to use the raw CMake interface.
+While CMake is extremely powerful, it has a lot of options for how to make a software package, 
+and those choices can make the process more complicated.  PB tries to find a particular balance between how complicated or 
+simple it is to build a package, and how many choices are left available to the user or are made by PB.  
+For cases not handled by the vanilla PB interface, the user always has the option to use the raw CMake interface.
 
 Submodules
 ^^^^^^^^^^
 
-The nesting infrastructure in PB assumes one is using git submodules, or something similar.  It assumes packages will use submodules for internal (i.e. within the same codebase) dependencies.  For example, the Scarab package in which PB lives is the base utility package for all of the C++ packages used by Project 8, and Scarab is included as a submodule (or as a nested submodule) in all of the organization's C++ packages.
+The nesting infrastructure in PB assumes one is using git submodules, or something similar.  
+It assumes packages will use submodules for internal (i.e. within the same codebase) dependencies.  
+For example, the Scarab package in which PB lives is the base utility package for all of the C++ packages used by Project 8, 
+and Scarab is included as a submodule (or as a nested submodule) in all of the organization's C++ packages.
 
 
 Requirements
@@ -30,7 +37,8 @@ This section will explain the basic usage of PB by setting up an example softwar
 Package Structure
 ^^^^^^^^^^^^^^^^^
 
-Since Insecta is a PB-based package, it requires Scarab.  So Scarab should be setup as a submodule of Insecta.  The file structure should look like this::
+Since Insecta is a PB-based package, it requires Scarab.  So Scarab should be setup as a submodule of Insecta.  
+The file structure should look like this::
 
     Insecta
     |
@@ -55,7 +63,8 @@ Note that the Scarab directory listing is incomplete, and there are probably goi
 Install Structure
 ^^^^^^^^^^^^^^^^^
 
-PB uses the variable ``CMAKE_INSTALL_PREFIX`` to control where headers/libraries/binaries/etc are installed.  The default install prefix is set to ``${PROJECT_BINARY_DIR}``.
+PB uses the variable ``CMAKE_INSTALL_PREFIX`` to control where headers/libraries/binaries/etc are installed.  
+The default install prefix is set to ``${PROJECT_BINARY_DIR}``.
 
 A number of different types of installed files are handled specifically by PB:
 
@@ -96,7 +105,8 @@ The initial part of the CMakeList file should be setup as follows::
 Building a Library
 ^^^^^^^^^^^^^^^^^^
 
-Depending on the size and organization of a project, the library definition might be in the main CMakeList file, or it might be in a subdirectory with its own CMakeList file.
+Depending on the size and organization of a project, the library definition might be in the main CMakeList file, 
+or it might be in a subdirectory with its own CMakeList file.
 
 Directory inclusion should be setup in the main CMakeList file::
 
@@ -164,7 +174,8 @@ For the Insecta project, the executable section of the build (again, in its own 
 Nesting with Submodules
 -----------------------
 
-PB was designed with submodules in mind.  It takes care of avoiding conflicts between repeated submodules (i.e. diamond dependency pattern).  It also avoids conflicting library names and include installation between packages with the same submodules, as is explained in the following sections.
+PB was designed with submodules in mind.  It takes care of avoiding conflicts between repeated submodules (i.e. diamond dependency pattern).  
+It also avoids conflicting library names and include installation between packages with the same submodules, as is explained in the following sections.
 
 Submodules are added with a PB macro::
 
@@ -176,7 +187,8 @@ This macro will make PB aware of the submodule, and take care of determining the
 Repeated Submodules
 ^^^^^^^^^^^^^^^^^^^
 
-Imagine a situation where Package A includes packages B and C as submodules, and both B and C include package D as a submodule.  PB defines which version of package D is used: whichever is encountered by CMake first.  So if A's CMakeList file includes this::
+Imagine a situation where Package A includes packages B and C as submodules, and both B and C include package D as a submodule.  
+PB defines which version of package D is used: whichever is encountered by CMake first.  So if A's CMakeList file includes this::
 
     pbuilder_add_submodule( B B )
     pbuilder_add_submodule( C C )
@@ -186,7 +198,10 @@ then package A's version of D will be used.  It's up to the developer to ensure 
 Library Names
 ^^^^^^^^^^^^^
 
-PB manages library file names to avoid conflicts between libraries installed as submodules of different packages.  For example, if both packages B and C have package D as a submodule, they both would generate libD.so (assuming a system that uses .so libraries).  So PB renames the library file according to the parent packages.  If a user builds and installs packages B and C, if they install to a common location, they will find these libraries:
+PB manages library file names to avoid conflicts between libraries installed as submodules of different packages.  
+For example, if both packages B and C have package D as a submodule, they both would generate libD.so (assuming a system that uses .so libraries).  
+So PB renames the library file according to the parent packages.  If a user builds and installs packages B and C, 
+if they install to a common location, they will find these libraries:
 
 - ``libB.so``
 - ``libD_B.so``
@@ -206,7 +221,8 @@ PB supports arbitrary levels of nesting for library names.  In the example in th
 Include Install Directories
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-PB manages include install directories to avoid conflicts between headers installed as submodules of different packages.  Headers from all submodules of a parent project are installed in subdirectories of the parent project's header install directory.
+PB manages include install directories to avoid conflicts between headers installed as submodules of different packages.  
+Headers from all submodules of a parent project are installed in subdirectories of the parent project's header install directory.
 
 Continuing the A/B/C/D example from above, the include directories would be structured like this::
 
@@ -227,7 +243,11 @@ Continuing the A/B/C/D example from above, the include directories would be stru
         + D
           + <D's header files>
 
-Unlike with the library naming, the submodule include-directory structure does not follow the structure of the submodule nesting: all submodules are setup as subdirectories of the top parent project's include directory.  Unlike with libraries, which tend to be installed in a single directory (if using a common install prefix), header files are installed in project-specific subdirectories of the ``include`` directory, so submodule include subdirectories will avoid conflicts by being all within the parent project's directory.
+Unlike with the library naming, the submodule include-directory structure does not follow the structure of the submodule nesting: 
+all submodules are setup as subdirectories of the top parent project's include directory.  Unlike with libraries, 
+which tend to be installed in a single directory (if using a common install prefix), header files are installed in 
+project-specific subdirectories of the ``include`` directory, so submodule include subdirectories will avoid conflicts by being 
+all within the parent project's directory.
 
 
 CMake Configure Scripts
@@ -239,13 +259,18 @@ Please refer to the next section.
 CMake Configuration Setup
 -------------------------
 
-In modern CMake usage, package configurations for installed packages are discovered by loading ``.cmake`` files describing the installed package, rather than by using ``FindPackage`` scripts.  PB supports the creation of CMake configuration scripts.  PB uses one of the standard configuration-file locations for installing the package-config files:  ``<prefix>/${LIB_INSTALL_SUBDIR}/cmake/${PROJECT_NAME}``.
+In modern CMake usage, package configurations for installed packages are discovered by loading ``.cmake`` files describing the installed package, 
+rather than by using ``FindPackage`` scripts.  PB supports the creation of CMake configuration scripts.  
+PB uses one of the standard configuration-file locations for installing the package-config files:  ``<prefix>/${LIB_INSTALL_SUBDIR}/cmake/${PROJECT_NAME}``.
 
-The package author is responsible for creating a configurable package-config file (apologies for the confusing wording).  The file is "configurable" in that CMake will customize the file using the ``configure_file()`` command during the CMake configure stage.  The user should include this in their main CMakeList file::
+The package author is responsible for creating a configurable package-config file (apologies for the confusing wording).  
+The file is "configurable" in that CMake will customize the file using the ``configure_file()`` command during the CMake configure stage.  
+The user should include this in their main CMakeList file::
 
     configure_file( ${PROJECT_SOURCE_DIR}/[project name]Config.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/[project name]Config.cmake @ONLY )
 
-Then the user calls a PB macro that will install the above configuration file, and create configuration files that describe the version and targets of the package::
+Then the user calls a PB macro that will install the above configuration file, and create configuration files that 
+describe the version and targets of the package::
 
     pbuilder_do_package_config()
 
@@ -268,6 +293,12 @@ Here is an example of a simple package-config template file, taken from the PBTe
         endif()
     endif()
 
-For packages that include PB-based submodules, those are considered dependencies in this context.  In the above example, Scarab is a subumodule of PBTest, and it required to be found by PBTest.  It provides two path hints: ``${PBTest_CMAKE_DIR}/Scarab`` for occasions when PBTest has been installed, and ``@Scarab_BINARY_LOCATION@`` for occasions when PBTest is itself being used as a submodule.
+For packages that include PB-based submodules, those are considered dependencies in this context.  
+In the above example, Scarab is a subumodule of PBTest, and it required to be found by PBTest.  
+It provides two path hints: ``${PBTest_CMAKE_DIR}/Scarab`` for occasions when PBTest has been installed, and ``@Scarab_BINARY_LOCATION@`` 
+for occasions when PBTest is itself being used as a submodule.
 
-The last section ensures that all of the expected library targets are present.  If they're not there, then usually the ``Targets`` config file is included.  If, for some reason, the library target is present but not with the expected namespace, then an alias target with the namespace is created.  For a project with multiple libraries, only one ``Targets`` config file would be included, but multiple alias libraries would need to be created, one per real library.
+The last section ensures that all of the expected library targets are present.  If they're not there, then usually the ``Targets`` 
+config file is included.  If, for some reason, the library target is present but not with the expected namespace, 
+then an alias target with the namespace is created.  For a project with multiple libraries, only one ``Targets`` 
+config file would be included, but multiple alias libraries would need to be created, one per real library.
