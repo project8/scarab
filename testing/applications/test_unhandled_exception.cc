@@ -11,11 +11,11 @@
  *  The exception should be printed, and a stack trace displayed.
  */
 
-#include "terminate.hh"
+#include "signal_handler.hh"
 
 #include "logger.hh"
 
-LOGGER( slog, "test_terminate" );
+LOGGER( slog, "test_unhandled_exception" );
 
 namespace scarab
 {

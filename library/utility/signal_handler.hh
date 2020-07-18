@@ -9,10 +9,20 @@
 #define SCARAB_SIGNAL_HANDLER_HH_
 
 #include "scarab_api.hh"
+#include "member_variables.hh"
 
 #include <memory>
 #include <mutex>
 #include <set>
+
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#ifndef __USE_GNU
+#define __USE_GNU
+#endif
+
 
 namespace scarab
 {
@@ -29,36 +39,46 @@ namespace scarab
             /// Remove a cancelable object
             void remove_cancelable( cancelable* a_cancelable );
 
-            /// Remove all cancelables
+            /// Remove all cancelables and signal handling
             void reset();
 
-            /// Check whether an exit signal has been received
-            static bool got_exit_signal();
+            static void handle_termination();
 
-            /// Get the return code provided
-            static int get_return_code();
+            /// Handler for error signals
+            static void handle_terminate_error( int a_sig );
 
-            /// Signal handler function
-            static void handler_cancel_threads( int _ignored );
+            /// Handler for success signals
+            static void handle_terminate_success( int a_sig );
 
-            /// Asynchronous call to exit the process with the given exit code
+            /// Main termination function
+            static void terminate( int a_code );
+
+            /// Prints the current exception, if there is one
+            static void print_current_exception();
+
+            /// Prints the stack trace
+            static void print_stack_trace();
+
+            /// Asynchronous call to cancel all cancelables with the given exit code
             static void cancel_all( int a_code );
 
         private:
-            static void print_message();
 
             typedef std::set< cancelable* > cancelers;
             typedef cancelers::const_iterator cancelers_cit_t;
             typedef cancelers::iterator cancelers_it_t;
 
-            static cancelers f_cancelers;
-            static std::mutex f_mutex;
+            static cancelers s_cancelers;
+            static std::recursive_mutex s_mutex;
 
-            static bool f_got_exit_signal;
-            static int f_return_code;
+        public:
+            mv_accessible_static_noset( bool, terminated );
+            mv_accessible_static( int, return_code );
 
-            static bool f_handling_sig_quit;
-            static bool f_handling_sig_int;
+            mv_accessible_static_noset( bool, handling_sig_abrt );
+            mv_accessible_static_noset( bool, handling_sig_term );
+            mv_accessible_static_noset( bool, handling_sig_int );
+            mv_accessible_static_noset( bool, handling_sig_quit );
 
     };
 
