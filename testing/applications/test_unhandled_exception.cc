@@ -41,8 +41,10 @@ namespace scarab
 
 int main(int , char ** )
 {
-    // cause the exception to be thrown
+    // cause the unhandled exception to be thrown, which should exit immediately
     scarab::foo1();
 
-    exit(EXIT_SUCCESS);
+    LERROR( slog, "This should never print" );
+
+    return( EXIT_SUCCESS );
 }

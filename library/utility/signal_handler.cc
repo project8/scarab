@@ -33,7 +33,7 @@
 namespace {
     // function to catch unhandled exceptions
     // invoke set_terminate as part of global constant initialization
-    static const bool SET_TERMINATE = std::set_terminate( scarab::signal_handler::handle_termination );
+    static const bool SET_TERMINATE = std::set_terminate( scarab::signal_handler::handle_terminate );
     static const scarab::signal_handler HANDLER;
 }
 
@@ -42,7 +42,7 @@ namespace scarab
 {
     LOGGER( slog, "signal_handler" );
 
-    bool signal_handler::s_terminated = false;
+    bool signal_handler::s_exited = false;
     int signal_handler::s_return_code = RETURN_SUCCESS;
 
     bool signal_handler::s_handling_sig_abrt = false;
@@ -55,48 +55,50 @@ namespace scarab
 
     signal_handler::signal_handler()
     {
+        LOGGER( slog_constr, "signal_handler constructor" );
+
         // setup to handle SIGABRT
-        if( ! s_handling_sig_abrt && signal( SIGABRT, signal_handler::handle_terminate_error ) == SIG_ERR )
+        if( ! s_handling_sig_abrt && signal( SIGABRT, signal_handler::handle_exit_error ) == SIG_ERR )
         {
-            LWARN( slog, "Unable to setup handling of SIGABRT: abort() and unhandled exceptions will result in an unclean exit" );
+            LWARN( slog_constr, "Unable to setup handling of SIGABRT: abort() and unhandled exceptions will result in an unclean exit" );
         }
         else
         {
-            LDEBUG( slog, "Handling SIGABRT (abort() and unhandled exceptions)" );
+            LDEBUG( slog_constr, "Handling SIGABRT (abort() and unhandled exceptions)" );
             s_handling_sig_abrt = true;
         }
 
         // setup to handle SIGTERM
-        if( ! s_handling_sig_term && signal( SIGTERM, signal_handler::handle_terminate_error ) == SIG_ERR )
+        if( ! s_handling_sig_term && signal( SIGTERM, signal_handler::handle_exit_error ) == SIG_ERR )
         {
-            LWARN( slog, "Unable to setup handling of SIGTERM: SIGTERM will result in an unclean exit" );
+            LWARN( slog_constr, "Unable to setup handling of SIGTERM: SIGTERM will result in an unclean exit" );
         }
         else
         {
-            LDEBUG( slog, "Handling SIGTERM" );
+            LDEBUG( slog_constr, "Handling SIGTERM" );
             s_handling_sig_term = true;
         }
 
         // setup to handle SIGINT
-        if( ! s_handling_sig_int && signal( SIGINT, signal_handler::handle_terminate_success ) == SIG_ERR )
+        if( ! s_handling_sig_int && signal( SIGINT, signal_handler::handle_exit_success ) == SIG_ERR )
         {
-            LWARN( slog, "Unable to setup handling of SIGINT: ctrl-c cancellation will result in an unclean exit" );
+            LWARN( slog_constr, "Unable to setup handling of SIGINT: ctrl-c cancellation will result in an unclean exit" );
         }
         else
         {
-            LDEBUG( slog, "Handling SIGINT (ctrl-c)" );
+            LDEBUG( slog_constr, "Handling SIGINT (ctrl-c)" );
             s_handling_sig_int = true;
         }
 
 #ifndef _WIN32
         // setup to handle SIGQUIT
-        if( ! s_handling_sig_quit && signal( SIGQUIT, signal_handler::handle_terminate_success ) == SIG_ERR )
+        if( ! s_handling_sig_quit && signal( SIGQUIT, signal_handler::handle_exit_success ) == SIG_ERR )
         {
-            LWARN( slog, "Unable to setup handling of SIGQUIT: ctrl-\\ cancellation will result in an unclean exit" );
+            LWARN( slog_constr, "Unable to setup handling of SIGQUIT: ctrl-\\ cancellation will result in an unclean exit" );
         }
         else
         {
-            LDEBUG( slog, "Handling SIGQUIT (ctrl-\\)" );
+            LDEBUG( slog_constr, "Handling SIGQUIT (ctrl-\\)" );
             s_handling_sig_quit = true;
         }
 
@@ -109,7 +111,6 @@ namespace scarab
 
     signal_handler::~signal_handler()
     {
-        reset();
     }
 
     void signal_handler::add_cancelable( scarab::cancelable* a_cancelable )
@@ -130,7 +131,7 @@ namespace scarab
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         LDEBUG( slog, "Resetting signal_handler" );
-        s_terminated = false;
+        s_exited = false;
         s_return_code = RETURN_SUCCESS;
         s_cancelers.clear();
         if( s_handling_sig_abrt && signal( SIGABRT, SIG_DFL ) == SIG_ERR )
@@ -174,83 +175,88 @@ namespace scarab
         return;
     }
 
-    void signal_handler::handle_termination()
+    [[noreturn]] void signal_handler::handle_terminate() noexcept
     {
-        handle_terminate_error( SIGABRT );
-        return;
+        terminate( RETURN_ERROR );
     }
 
-    void signal_handler::handle_terminate_error( int a_sig )
+    void signal_handler::handle_exit_error( int a_sig )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         LERROR( slog, "Handling termination due to an error condition; signal <" << a_sig << ">" );
-        terminate( RETURN_ERROR );
+        exit( RETURN_ERROR );
         return;
     }
 
-    void signal_handler::handle_terminate_success( int a_sig )
+    void signal_handler::handle_exit_success( int a_sig )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         LPROG( slog, "Handling termination; signal <" << a_sig << ">" );
-        terminate( RETURN_SUCCESS );
+        exit( RETURN_SUCCESS );
         return;
     }
 
-    void signal_handler::terminate( int a_code )
+    [[noreturn]] void signal_handler::terminate( int a_code ) noexcept
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        s_terminated = true;
-        s_return_code = a_code;
-        print_current_exception();
+        print_current_exception( false );
         if( a_code > 0 )
         {
-            print_stack_trace();
+            print_stack_trace( false );
+        }
+        std::cerr << "Exiting abruptly" << std::endl;
+        std::_Exit( a_code );
+    }
+
+    void signal_handler::exit( int a_code )
+    {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        s_exited = true;
+        s_return_code = a_code;
+        print_current_exception( true );
+        if( a_code > 0 )
+        {
+            print_stack_trace( true );
         }
         cancel_all( a_code );
         return;
     }
 
-    void signal_handler::print_current_exception()
+    void signal_handler::print_current_exception( bool a_use_logging )
     {
         // no mutex locking needed here
 
         // if there's a current exception, rethrow to print out what()
-        std::exception_ptr t_exc_ptr = std::current_exception();
-        if( t_exc_ptr )
-        {
-            static bool t_tried_throw = false;
-
+        if( auto t_exc_ptr = std::current_exception() ) 
+        { 
+            // we have an exception
             try
             {
-                // try once to re-throw currently active exception
-                if( ! t_tried_throw )
-                {
-                    LDEBUG( slog, "Rethrowing current exception" );
-                    //t_tried_throw = true;
-                    throw;
-                }
+                if( a_use_logging ) { LDEBUG( slog, "Rethrowing current exception" ); }
+                else { std::cerr << "Rethrowing current exception" << std::endl; }
+                rethrow_exception( t_exc_ptr ); // throw to recognize the type
             }
-            catch( const std::exception &e )
-            {
-                LERROR( slog, "Caught unhandled exception. what(): " << e.what() );
+            catch( const std::exception& e ) {
+                if( a_use_logging ) { LERROR( slog, "Caught unhandled exception. what(): " << e.what() ); }
+                else { std::cerr << "Caught unhandled exception. what(): " << e.what() << std::endl; }
             }
-            catch (...)
-            {
-                LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." );
+            catch( ... ) {
+                if( a_use_logging ) LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." )
+                else { std::cerr << "Caught unknown (non-std::exception) & unhandled exception." << std::endl; }
             }
         }
         return;
     }
 
-    void signal_handler::print_stack_trace()
+    void signal_handler::print_stack_trace( bool a_use_logging )
     {
         // no mutex locking needed here
 #ifndef _WIN32 // stack trace printing not implemented for windows
         void* t_bt_array[50];
         int t_size = backtrace( t_bt_array, 50 );
 
-        LERROR( slog, "Backtrace from terminate() returned "
-                << t_size << " frames\n" );
+        if( a_use_logging ) { LERROR( slog, "Backtrace returned " << t_size << " frames\n" ); }
+        else { std::cerr << "Backtrace returned " << t_size << " frames\n" << std::endl; }
 
         char** t_messages = backtrace_symbols( t_bt_array, t_size );
 
@@ -259,7 +265,8 @@ namespace scarab
         {
             t_bt_str << "[bt]: (" << i << ") " << t_messages[i] << '\n';
         }
-        LERROR( slog, "Backtrace:\n" << t_bt_str.str() );
+        if( a_use_logging ) { LERROR( slog, "Backtrace:\n" << t_bt_str.str() ); }
+        else { std::cerr << "Backtrace:\n" << t_bt_str.str() << std::endl; }
 
         free( t_messages );
 #endif

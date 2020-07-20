@@ -7,6 +7,10 @@ set( testing_applications_SOURCES
     test_app_with_options.cc
     test_app_with_subcommands.cc
     test_basic_application.cc
+    test_raise_sigabrt.cc
+    test_raise_sigint.cc
+    test_raise_sigquit.cc
+    test_raise_sigterm.cc
     test_unhandled_exception.cc
 )
 
