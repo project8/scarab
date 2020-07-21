@@ -48,7 +48,11 @@ namespace scarab
         return *this;
     }
 
+#ifdef NDEBUG
+    void cancelable::do_cancellation( int )
+#else
     void cancelable::do_cancellation( int a_code )
+#endif
     {
         // override in derived class
         LDEBUG( slog, "cancelable::do_cancellation with code <" << a_code << ">" );
