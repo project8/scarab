@@ -5,6 +5,7 @@
 ##########
 
 set( testing_HEADERS
+    stream_check.hh
     test_member_variables.hh
 )
 
@@ -13,10 +14,11 @@ pbuilder_install_headers( ${testing_HEADERS} )
 
     set( testing_SOURCES
         use_catch.cc
+        stream_check.cc
         test_digital.cc
         test_member_variables.cc
         test_logger.cc
-        test_terminate.cc
+        test_signal_handler.cc
         test_time.cc
         test_verbosity.cc
     )
@@ -76,7 +78,7 @@ endif( Scarab_BUILD_CLI )
 
 # Normal CMake Integration
 #enable_testing()
-#add_test(NAME test_test COMMAND run_tests )
+add_test(NAME unit_tests COMMAND run_tests )
 
 # Automated CMake Integration
 #include(CTest)

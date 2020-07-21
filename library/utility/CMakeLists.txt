@@ -20,7 +20,6 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/scarab_api.hh
     ${dir}/signal_handler.hh
     ${dir}/singleton.hh
-    ${dir}/terminate.hh
     ${dir}/thread_singleton.hh
     ${dir}/time.hh
     ${dir}/typename.hh
@@ -32,7 +31,6 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/digital.cc
     ${dir}/path.cc
     ${dir}/signal_handler.cc
-    ${dir}/terminate.cc
     ${dir}/time.cc
     ${dir}/typename.cc
     PARENT_SCOPE 
