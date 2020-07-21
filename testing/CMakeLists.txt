@@ -78,7 +78,7 @@ endif( Scarab_BUILD_CLI )
 
 # Normal CMake Integration
 #enable_testing()
-#add_test(NAME test_test COMMAND run_tests )
+add_test(NAME unit_tests COMMAND run_tests )
 
 # Automated CMake Integration
 #include(CTest)

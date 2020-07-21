@@ -47,6 +47,11 @@ if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
     message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the JSON Codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
 endif()
 
+if( Scarab_ENABLE_TESTING )
+    enable_testing()
+endif()
+
+
 #######################
 # Scarab dependencies #
 #######################
