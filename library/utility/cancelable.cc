@@ -10,6 +10,7 @@
 #include "cancelable.hh"
 
 #include "logger.hh"
+#include "signal_handler.hh"
 
 namespace scarab
 {
@@ -30,7 +31,9 @@ namespace scarab
     }
 
     cancelable::~cancelable()
-    {}
+    {
+        signal_handler::remove_cancelable_s( this );
+    }
 
     cancelable& cancelable::operator=( const cancelable& a_orig )
     {
