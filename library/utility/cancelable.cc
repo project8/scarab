@@ -10,6 +10,7 @@
 #include "cancelable.hh"
 
 #include "logger.hh"
+#include "signal_handler.hh"
 
 namespace scarab
 {
@@ -30,7 +31,9 @@ namespace scarab
     }
 
     cancelable::~cancelable()
-    {}
+    {
+        signal_handler::remove_cancelable_s( this );
+    }
 
     cancelable& cancelable::operator=( const cancelable& a_orig )
     {
@@ -45,7 +48,11 @@ namespace scarab
         return *this;
     }
 
+#ifdef NDEBUG
+    void cancelable::do_cancellation( int )
+#else
     void cancelable::do_cancellation( int a_code )
+#endif
     {
         // override in derived class
         LDEBUG( slog, "cancelable::do_cancellation with code <" << a_code << ">" );

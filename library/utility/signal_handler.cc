@@ -110,17 +110,28 @@ namespace scarab
     }
 
     signal_handler::~signal_handler()
-    {
-    }
+    {}
 
     void signal_handler::add_cancelable( scarab::cancelable* a_cancelable )
+    {
+        signal_handler::add_cancelable_s( a_cancelable );
+        return;
+    }
+
+    void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
+    {
+        signal_handler::remove_cancelable_s( a_cancelable );
+        return;
+    }
+
+    void signal_handler::add_cancelable_s( scarab::cancelable* a_cancelable )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         s_cancelers.insert( a_cancelable );
         return;
     }
 
-    void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
+    void signal_handler::remove_cancelable_s( scarab::cancelable* a_cancelable )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         s_cancelers.erase( a_cancelable );
