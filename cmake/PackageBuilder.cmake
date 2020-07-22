@@ -501,7 +501,7 @@ endfunction()
 ### Updated for Scarab3
 function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
-    # Installs the library in the standard lib directory
+    # Installs the library in the standard lib directory unless indicated by the definition of the variable PBUILDER_PY_INSTALL_IN_SITELIB
 
     pbuilder_expand_lib_names( ${PROJECT_LIBRARIES} )
 
@@ -530,5 +530,13 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     )
 
     target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${${PROJECT_NAME}_SM_LIBRARIES} ${FULL_LIB_NAMES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
-    install( TARGETS ${PY_MODULE_NAME} DESTINATION ${LIB_INSTALL_DIR} )
+
+    set( PY_MODULE_INSTALL_DIR ${LIB_INSTALL_DIR} )
+    # Override that install location if specified by the user
+    if( DEFINED PBUILDER_PY_INSTALL_IN_SITELIB AND DEFINED Python3_SITELIB )
+        set( PY_MODULE_INSTALL_DIR ${Python3_SITELIB} )
+    endif( DEFINED PBUILDER_PY_INSTALL_IN_SITELIB AND DEFINED Python3_SITELIB )
+    message( STATUS "Installing module ${PY_MODULE_NAME} in ${PY_MODULE_INSTALL_DIR}" )
+
+    install( TARGETS ${PY_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
 endfunction()
