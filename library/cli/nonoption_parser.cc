@@ -34,7 +34,7 @@ namespace scarab
         // if an_arg starts with '-', then it's either an option or it's a negative number.
         if( an_arg[0] == f_option_starter ) 
         {
-            param_ptr_t t_parsed( std::move( simple_parser::parse_value( an_arg ) ) );
+            param_ptr_t t_parsed( simple_parser::parse_value( an_arg ) );
             param_value& t_value = (*t_parsed)();
             if( t_value.is_int() || t_value.is_double() )
             {

@@ -75,6 +75,11 @@ namespace scarab
             /// Remove all cancelables and signal handling
             void reset();
 
+            /// Static version: add a cancelable object
+            static void add_cancelable_s( cancelable* a_cancelable );
+            /// Static version: remove a cancelable object
+            static void remove_cancelable_s( cancelable* a_cancelable );
+
             /// Handler for std::terminate -- does not cleanup memory or threads
             [[noreturn]] static void handle_terminate() noexcept;
 
