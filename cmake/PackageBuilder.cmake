@@ -119,9 +119,6 @@ endif()
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
 
-# global property to hold the names of nymph library targets
-set_property( GLOBAL PROPERTY ${PROJECT_NAME}_LIBRARIES )
-
 # turn on RPATH for Mac OSX
 set( CMAKE_MACOSX_RPATH ON )
 
@@ -279,6 +276,18 @@ macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
 endmacro()
 
 ### Updated for Scarab3
+function( get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
+    # Supply output variable as first argument
+    # Supply library targets as additional arguments
+    foreach( LIBRARY ${${VAR_IN_LIBRARIES}} )
+        get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
+        list( APPEND ${VAR_OUT_INCLUDE_DIRS} ${LIB_INCLUDE_DIRS} )
+    endforeach()
+    list( REMOVE_DUPLICATES ${VAR_OUT_INCLUDE_DIRS} )
+    message( STATUS "###### lib include dirs: ${${VAR_OUT_INCLUDE_DIRS}}" )
+endfunction()
+
+### Updated for Scarab3
 function( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
     message( "Building library ${LIB_BASENAME}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
 
@@ -291,7 +300,15 @@ function( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNA
     message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
 
     pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
-    message( STATUS "full project libraries (lib): ${FULL_LIB_NAMES}" )
+    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
+    message( STATUS "full project libraries (lib): ${FULL_PROJECT_LIBRARIES}" )
+
+    set( PROJECT_INCLUDE_DIRS )
+    get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+    message( STATUS "&&&&&&& project include dirs: ${PROJECT_INCLUDE_DIRS}" )
+    if( PROJECT_INCLUDE_DIRS )
+        include_directories( ${PROJECT_INCLUDE_DIRS} )
+    endif()
 
     message( STATUS "pbuilder: will build library <${NEW_FULL_LIB_NAME}>" )
     add_library( ${NEW_FULL_LIB_NAME} ${${SOURCES}} )
@@ -309,14 +326,12 @@ function( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNA
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
     )
 
-    target_link_libraries( ${FULL_LIB_NAME} 
+    target_link_libraries( ${NEW_FULL_LIB_NAME} 
         PUBLIC
-            ${${PROJECT_NAME}_SM_LIBRARIES} ${FULL_LIB_NAMES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
         PRIVATE
             ${${PRIVATE_EXTERNAL_LIBRARIES}} 
     )
-
-    set( ${PROJECT_NAME}_SM_LIBRARIES )
 
     # Make exported targets available during the build phase
     export( TARGETS ${NEW_FULL_LIB_NAME}
@@ -341,6 +356,7 @@ function( pbuilder_executables SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARI
     ###message( STATUS "programs: ${${PROGRAMS}}" )
     message( STATUS "executable source files: ${${SOURCES}}" )
     message( STATUS "project libraries: ${${PROJECT_LIBRARIES}}" )
+    message( STATUS "submodule libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
     message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
     message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
 
@@ -358,16 +374,22 @@ endfunction()
 function( pbuilder_executable THIS_PROGRAM SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
     # Builds a single executable from one or more source files
     message( STATUS "pbuilder will build executable ${THIS_PROGRAM} with ${${SOURCES}}" )
-    message( STATUS "\tlinking with: (project) ${${PROJECT_LIBRARIES}} -- (public ext) ${${PUBLIC_EXTERNAL_LIBRARIES}} -- (private ext) ${${PRIVATE_EXTERNAL_LIBRARIES}}")
+    message( STATUS "\tlinking with: (project) ${${PROJECT_LIBRARIES}} -- (submodule) ${${PROJECT_NAME}_SM_LIBRARIES} --  (public ext) ${${PUBLIC_EXTERNAL_LIBRARIES}} -- (private ext) ${${PRIVATE_EXTERNAL_LIBRARIES}}")
 
     add_executable( ${THIS_PROGRAM} ${${SOURCES}} )
 
     pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
-    message( STATUS "full project libraries (exe): ${FULL_LIB_NAMES}" )
+    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
+    message( STATUS "full project libraries (exe): ${FULL_PROJECT_LIBRARIES}" )
+
+    set( PROJECT_INCLUDE_DIRS )
+    get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+
+    include_directories( ${PROJECT_INCLUDE_DIRS} )
 
     target_link_libraries( ${THIS_PROGRAM} 
         PUBLIC
-            ${FULL_LIB_NAMES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
         PRIVATE
             ${${PRIVATE_EXTERNAL_LIBRARIES}} 
     )
@@ -504,13 +526,18 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     # Installs the library in the standard lib directory unless indicated by the definition of the variable PBUILDER_PY_INSTALL_IN_SITELIB
 
     pbuilder_expand_lib_names( ${PROJECT_LIBRARIES} )
+    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
+    message( STATUS "full project libraries (pybind11): ${FULL_PROJECT_LIBRARIES}" )
+
+    message( STATUS "submodule libraries (pybind11): ${${PROJECT_NAME}_SM_LIBRARIES}" )
 
     set( PROJECT_INCLUDE_DIRS )
-    foreach( LIBRARY ${FULL_LIB_NAMES} )
-        get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
-        list( APPEND PROJECT_INCLUDE_DIRS ${LIB_INCLUDE_DIRS} )
-    endforeach()
-    list( REMOVE_DUPLICATES PROJECT_INCLUDE_DIRS )
+    get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+    #foreach( LIBRARY ${FULL_PROJECT_LIBRARIES} )
+    #    get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
+    #    list( APPEND PROJECT_INCLUDE_DIRS ${LIB_INCLUDE_DIRS} )
+    #endforeach()
+    #list( REMOVE_DUPLICATES PROJECT_INCLUDE_DIRS )
     #message( STATUS "Main project library include directories: ${PROJECT_INCLUDE_DIRS}")
 
     include_directories( ${PROJECT_INCLUDE_DIRS} )
@@ -529,7 +556,7 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
     )
 
-    target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${${PROJECT_NAME}_SM_LIBRARIES} ${FULL_LIB_NAMES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
+    target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
 
     set( PY_MODULE_INSTALL_DIR ${LIB_INSTALL_DIR} )
     # Override that install location if specified by the user
