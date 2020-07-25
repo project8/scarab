@@ -7,7 +7,20 @@
 set( lib_dependencies 
     Scarab
 )
-set( programs
-    scarab-parse
+
+set( sources
+    scarab-parse.cc
 )
-pbuilder_executables( programs lib_dependencies PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+
+set( programs )
+pbuilder_executables( 
+    SOURCES ${sources}
+    TARGETS_VAR programs
+    PROJECT_LIBRARIES ${lib_dependencies}
+    PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+    PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+)
+message( STATUS "++++++++ ${programs}")
+pbuilder_component_install_and_export( COMPONENT executables
+    EXETARGETS ${programs}
+)

@@ -12,7 +12,7 @@ cmake_policy( SET CMP0042 NEW ) # rpath on mac os x
 cmake_policy( SET CMP0048 NEW ) # version in project()
 cmake_policy( SET CMP0079 NEW ) # link libraries from other directories (requires CMake v3.13 or better)
 
-include( CMakeParseArguments )
+include( CMakeParseArguments ) # required until cmake v3.5, when this was added as a built-in command
 
 # check if this is a stand-alone build
 set( PBUILDER_STANDALONE FALSE CACHE INTERNAL "Flag for whether or not this is a stand-alone build" )
@@ -276,69 +276,77 @@ macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
 endmacro()
 
 ### Updated for Scarab3
-function( get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
+function( pbuilder_get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
     # Supply output variable as first argument
     # Supply library targets as additional arguments
+    set( include_dirs )
     foreach( LIBRARY ${${VAR_IN_LIBRARIES}} )
         get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
-        list( APPEND ${VAR_OUT_INCLUDE_DIRS} ${LIB_INCLUDE_DIRS} )
+        list( APPEND include_dirs ${LIB_INCLUDE_DIRS} )
     endforeach()
-    list( REMOVE_DUPLICATES ${VAR_OUT_INCLUDE_DIRS} )
-    message( STATUS "###### lib include dirs: ${${VAR_OUT_INCLUDE_DIRS}}" )
+    list( REMOVE_DUPLICATES include_dirs )
+    set( ${VAR_OUT_INCLUDE_DIRS} ${include_dirs} PARENT_SCOPE )
+    message( STATUS "###### lib include dirs: ${include_dirs}" )
 endfunction()
 
 ### Updated for Scarab3
-function( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
-    message( "Building library ${LIB_BASENAME}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+function( pbuilder_library )
 
-    pbuilder_expand_lib_name( ${LIB_BASENAME} )
-    set( NEW_FULL_LIB_NAME ${FULL_LIB_NAME} )
-    message( STATUS "lib basename: ${LIB_BASENAME}" )
-    message( STATUS "full lib name: ${NEW_FULL_LIB_NAME}" )
+    set( OPTIONS )
+    set( ONEVALUEARGS TARGET )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    cmake_parse_arguments( LIB "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    message( "Building library ${LIB_TARGET}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+
+    pbuilder_expand_lib_name( ${LIB_TARGET} )
+    set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
+    message( STATUS "lib target: ${LIB_TARGET}" )
+    message( STATUS "full lib target: ${FULL_LIB_TARGET}" )
     message( STATUS "SM libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
-    message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
-    message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
+    message( STATUS "external libraries (public): ${LIB_PUBLIC_EXTERNAL_LIBRARIES}" )
+    message( STATUS "external libraries (private): ${LIB_PRIVATE_EXTERNAL_LIBRARIES}" )
 
-    pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
+    pbuilder_expand_lib_names( ${LIB_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project libraries (lib): ${FULL_PROJECT_LIBRARIES}" )
 
     set( PROJECT_INCLUDE_DIRS )
-    get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
     message( STATUS "&&&&&&& project include dirs: ${PROJECT_INCLUDE_DIRS}" )
     if( PROJECT_INCLUDE_DIRS )
         include_directories( ${PROJECT_INCLUDE_DIRS} )
     endif()
 
-    message( STATUS "pbuilder: will build library <${NEW_FULL_LIB_NAME}>" )
-    add_library( ${NEW_FULL_LIB_NAME} ${${SOURCES}} )
+    message( STATUS "pbuilder: will build library <${FULL_LIB_TARGET}>" )
+    add_library( ${FULL_LIB_TARGET} ${LIB_SOURCES} )
 
     # Grab the include directories, which will be used for the build-interface target includes
-    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${NEW_FULL_LIB_NAME} INCLUDE_DIRECTORIES )
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_TARGET} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
 
     # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
     # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
-    target_include_directories( ${NEW_FULL_LIB_NAME} 
+    target_include_directories( ${FULL_LIB_TARGET} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
     )
 
-    target_link_libraries( ${NEW_FULL_LIB_NAME} 
+    target_link_libraries( ${FULL_LIB_TARGET} 
         PUBLIC
-            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${LIB_PUBLIC_EXTERNAL_LIBRARIES}
         PRIVATE
-            ${${PRIVATE_EXTERNAL_LIBRARIES}} 
+            ${LIB_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
     # Make exported targets available during the build phase
-    export( TARGETS ${NEW_FULL_LIB_NAME}
-        FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-    )
+#    export( TARGETS ${NEW_FULL_LIB_NAME}
+#        FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
+#    )
 
-    pbuilder_install_libraries( ${NEW_FULL_LIB_NAME} )
+#    pbuilder_install_libraries( ${NEW_FULL_LIB_NAME} )
 endfunction()
 
 ### Updated for Scarab3
@@ -352,53 +360,80 @@ macro( pbuilder_install_libraries )
 endmacro()
 
 ### Updated for Scarab3
-function( pbuilder_executables SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
-    ###message( STATUS "programs: ${${PROGRAMS}}" )
-    message( STATUS "executable source files: ${${SOURCES}}" )
-    message( STATUS "project libraries: ${${PROJECT_LIBRARIES}}" )
-    message( STATUS "submodule libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
-    message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
-    message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
+function( pbuilder_executables )
 
-    foreach( source ${${SOURCES}} )
+    set( OPTIONS )
+    set( ONEVALUEARGS TARGETS_VAR )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    cmake_parse_arguments( EXES "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    ###message( STATUS "programs: ${${PROGRAMS}}" )
+    message( STATUS "executable source files: ${EXES_SOURCES}" )
+    message( STATUS "project libraries: ${EXES_PROJECT_LIBRARIES}" )
+    message( STATUS "submodule libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "external libraries (public): ${EXES_PUBLIC_EXTERNAL_LIBRARIES}" )
+    message( STATUS "external libraries (private): ${EXES_PRIVATE_EXTERNAL_LIBRARIES}" )
+
+    set( targets )
+
+    foreach( source ${EXES_SOURCES} )
         get_filename_component( program ${source} NAME_WE )
         if( NOT TARGET ${program} )
-            pbuilder_executable( ${program} source ${PROJECT_LIBRARIES} ${PUBLIC_EXTERNAL_LIBRARIES} ${PRIVATE_EXTERNAL_LIBRARIES} )
+            pbuilder_executable( EXECUTABLE ${program} 
+                SOURCES ${source} 
+                PROJECT_LIBRARIES ${EXES_PROJECT_LIBRARIES} 
+                PUBLIC_EXTERNAL_LIBRARIES ${EXES_PUBLIC_EXTERNAL_LIBRARIES} 
+                PRIVATE_EXTERNAL_LIBRARIES ${EXES_PRIVATE_EXTERNAL_LIBRARIES} 
+            )
+            list( APPEND targets ${program} )
         else()
             message( FATAL "Duplicate target: ${program}" )
         endif()
     endforeach( source )
+
+    message( STATUS "Targets produced: ${targets}" )
+    if( EXES_TARGETS_VAR )
+        message( STATUS "output var for targets: ${EXES_TARGETS_VAR}" )
+        set( ${EXES_TARGETS_VAR} ${targets} PARENT_SCOPE )
+    endif()
+
 endfunction()
 
 ### Updated for Scarab3
-function( pbuilder_executable THIS_PROGRAM SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+function( pbuilder_executable )
     # Builds a single executable from one or more source files
-    message( STATUS "pbuilder will build executable ${THIS_PROGRAM} with ${${SOURCES}}" )
-    message( STATUS "\tlinking with: (project) ${${PROJECT_LIBRARIES}} -- (submodule) ${${PROJECT_NAME}_SM_LIBRARIES} --  (public ext) ${${PUBLIC_EXTERNAL_LIBRARIES}} -- (private ext) ${${PRIVATE_EXTERNAL_LIBRARIES}}")
 
-    add_executable( ${THIS_PROGRAM} ${${SOURCES}} )
+    set( OPTIONS )
+    set( ONEVALUEARGS EXECUTABLE )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    cmake_parse_arguments( EXE "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
-    pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
+    message( STATUS "pbuilder will build executable ${EXE_EXECUTABLE} with ${EXE_SOURCES}" )
+    message( STATUS "\tlinking with: (project) ${EXE_PROJECT_LIBRARIES} -- (submodule) ${${PROJECT_NAME}_SM_LIBRARIES} --  (public ext) ${EXE_PUBLIC_EXTERNAL_LIBRARIES} -- (private ext) ${EXE_PRIVATE_EXTERNAL_LIBRARIES}")
+
+    add_executable( ${EXE_EXECUTABLE} ${EXE_SOURCES} )
+
+    pbuilder_expand_lib_names( ${EXE_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project libraries (exe): ${FULL_PROJECT_LIBRARIES}" )
 
     set( PROJECT_INCLUDE_DIRS )
-    get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
 
     include_directories( ${PROJECT_INCLUDE_DIRS} )
 
-    target_link_libraries( ${THIS_PROGRAM} 
+    target_link_libraries( ${EXE_EXECUTABLE} 
         PUBLIC
-            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${EXE_PUBLIC_EXTERNAL_LIBRARIES}
         PRIVATE
-            ${${PRIVATE_EXTERNAL_LIBRARIES}} 
+            ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
-    export( TARGETS ${THIS_PROGRAM}
-        FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-    )
+    #export( TARGETS ${THIS_PROGRAM}
+    #    FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
+    #)
 
-    pbuilder_install_executables( ${THIS_PROGRAM} )
+    #pbuilder_install_executables( ${THIS_PROGRAM} )
 endfunction()
 
 ### Updated for Scarab3
@@ -408,6 +443,75 @@ macro( pbuilder_install_executables )
         RUNTIME DESTINATION ${BIN_INSTALL_DIR} 
     )
 endmacro()
+
+function( pbuilder_component_install_and_export )
+    set( OPTIONS )
+    set( ONEVALUEARGS COMPONENT )
+    set( MULTIVALUEARGS LIBTARGETS EXETARGETS )
+    cmake_parse_arguments( CIE "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    if( CIE_COMPONENT )
+        set( INSERT_COMPONENT "_${CIE_COMPONENT}" )
+    endif()
+
+    # Libraries
+    if( CIE_LIBTARGETS )
+        message( "Installing and exporting libraries for component <${CIE_COMPONENT}>" )
+        message( STATUS "Targets are: ${CIE_LIBTARGETS}" )
+
+        # expand library names
+        pbuilder_expand_lib_names( ${CIE_LIBTARGETS} )
+        set( FULL_LIBTARGETS ${FULL_LIB_NAMES} )
+        message( STATUS "Expanded lib names: ${FULL_LIBTARGETS}" )
+
+        # make targets available at build time
+        message( STATUS "******* build-time lib targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+        export( TARGETS ${FULL_LIBTARGETS}
+            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+        )
+
+        # install libraries and add to export for installation
+        message( STATUS "******* installed lib targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
+        install( TARGETS ${FULL_LIBTARGETS} 
+            EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
+            COMPONENT ${CIE_COMPONENT}
+            LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+        )
+    endif()
+
+    # Executables
+    if( CIE_EXETARGETS )
+        message( "Installing and exporting executables for component <${CIE_COMPONENT}>" )
+        message( STATUS "Targets are: ${CIE_EXETARGETS}" )
+
+        # make targets available at build time
+        message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+        export( TARGETS ${CIE_EXETARGETS} 
+            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+        )
+        
+        # install executables and add to export for installation
+        message( STATUS "******* installed exe targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets")
+        install( TARGETS ${CIE_EXETARGETS}
+            EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
+            COMPONENT ${CIE_COMPONENT}
+            RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+        )
+
+        # Export installation
+        message( "Installing export ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
+        message( STATUS "Output file will be ${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+    endif()
+
+    install( EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}Targets
+        NAMESPACE
+            ${PROJECT_NAME}::
+        DESTINATION
+            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
+    )
+
+
+endfunction()
 
 ### Updated for Scarab3
 macro( pbuilder_install_headers )
@@ -532,7 +636,7 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     message( STATUS "submodule libraries (pybind11): ${${PROJECT_NAME}_SM_LIBRARIES}" )
 
     set( PROJECT_INCLUDE_DIRS )
-    get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
     #foreach( LIBRARY ${FULL_PROJECT_LIBRARIES} )
     #    get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
     #    list( APPEND PROJECT_INCLUDE_DIRS ${LIB_INCLUDE_DIRS} )

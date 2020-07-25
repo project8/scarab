@@ -59,6 +59,16 @@ endif( Scarab_BUILD_CLI )
 
 set( PACKAGE_LIBS )
 
-pbuilder_library( Scarab Scarab_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+pbuilder_library( 
+    TARGET Scarab 
+    SOURCES ${Scarab_SOURCES}
+    PROJECT_LIBRARIES ${PACKAGE_LIBS} 
+    PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+    PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+)
+
+pbuilder_component_install_and_export( COMPONENT library
+    LIBTARGETS Scarab
+)
 
 pbuilder_install_headers( ${Scarab_HEADERS} )
