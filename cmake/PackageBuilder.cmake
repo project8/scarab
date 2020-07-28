@@ -321,6 +321,9 @@ function( pbuilder_library )
     message( STATUS "pbuilder: will build library <${FULL_LIB_TARGET}>" )
     add_library( ${FULL_LIB_TARGET} ${LIB_SOURCES} )
 
+    # Set the version of the library
+    set_target_properties( ${FULL_LIB_TARGET} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION} )
+
     # Grab the include directories, which will be used for the build-interface target includes
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_TARGET} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
