@@ -65,7 +65,8 @@ pbuilder_library(
 #    PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
 
-pbuilder_component_install_and_export( COMPONENT Library
+pbuilder_component_install_and_export( 
+    COMPONENT Library
     LIBTARGETS PBTest
 )
 
@@ -93,10 +94,11 @@ if( PBTest_ENABLE_EXECUTABLES )
 #        PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
     )
 
-    pbuilder_component_install_and_export( COMPONENT Executables
+    pbuilder_component_install_and_export( 
+        COMPONENT Executables
         EXETARGETS ${programs}
     )
-    endif()
+endif()
 
 ########
 # Config

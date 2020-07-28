@@ -14,7 +14,7 @@ Scarab's PackageBuilder provides the framework for using multiply-nested submodu
 > make install
 ```
 
-For development, if working on Scarab and building in a subdirectory of `testing/NestedPBTest`, be sure to clean scarab and PBTEst before re-testing the CMake process:
+For development, if working on Scarab and building in a subdirectory of `testing/package_builder/NestedPBTest`, be sure to clean scarab and PBTEst before re-testing the CMake process:
 
 ```
 rm -rf ../scarab ../PBTest
@@ -24,6 +24,6 @@ cmake ..
 ## Cleanup
 
 ```
-> cd /top/level/of/Scarab/testing/NestedPBTest
+> cd /top/level/of/Scarab/testing/package_builder/NestedPBTest
 > rm -rf scarab PBTest
 ```
