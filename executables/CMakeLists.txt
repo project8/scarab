@@ -20,7 +20,7 @@ pbuilder_executables(
     PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
     PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
-message( STATUS "++++++++ ${programs}")
+
 pbuilder_component_install_and_export( COMPONENT Executables
     EXETARGETS ${programs}
 )

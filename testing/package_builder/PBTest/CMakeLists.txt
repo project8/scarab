@@ -106,6 +106,4 @@ endif()
 
 configure_file( ${PROJECT_SOURCE_DIR}/PBTestConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/PBTestConfig.cmake @ONLY )
 
-message( STATUS "@@@@@@@!! PBTest full project name: ${PBTest_FULL_PROJECT_NAME}" )
 pbuilder_do_package_config()
-
