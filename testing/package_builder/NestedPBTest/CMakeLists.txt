@@ -31,8 +31,6 @@ pbuilder_prepare_project()
 # Dependencies
 ##############
 
-set( PUBLIC_EXT_LIBS )
-set( PRIVATE_EXT_LIBS )
 
 ########
 # Scarab
@@ -51,8 +49,6 @@ include_directories( BEFORE library )
 pbuilder_use_sm_library( Scarab Scarab )
 pbuilder_use_sm_library( PBTest PBTest )
 
-set( PACKAGE_LIBS )
-
 set( NestedPBTest_HEADERS
     library/nested_print.hh
 )
@@ -61,7 +57,18 @@ set( NestedPBTest_SOURCES
     library/nested_print.cc
 )
 
-pbuilder_library( NestedPBTest NestedPBTest_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+pbuilder_library( 
+    TARGET NestedPBTest 
+    SOURCES ${NestedPBTest_SOURCES}
+#    PROJECT_LIBRARIES ${PACKAGE_LIBS} 
+#    PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+#    PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+)
+
+pbuilder_component_install_and_export( 
+    COMPONENT Library
+    LIBTARGETS NestedPBTest
+)
 
 pbuilder_install_headers( ${NestedPBTest_HEADERS} )
 
@@ -73,14 +80,25 @@ if( NestedPBTest_ENABLE_EXECUTABLES )
     set( PACKAGE_LIBS
         NestedPBTest
     )
-    set( PUBLIC_EXT_LIBS )
-    set( PRIVATE_EXT_LIBS )
 
     set( NestedPBTest_sources
         executable/nested_do_print.cc
     )
 
     pbuilder_executables( NestedPBTest_sources PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+    set( programs )
+    pbuilder_executables( 
+        SOURCES ${NestedPBTest_sources}
+        TARGETS_VAR programs
+        PROJECT_LIBRARIES ${PACKAGE_LIBS}
+#        PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+#        PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+    )
+
+    pbuilder_component_install_and_export( 
+        COMPONENT Executables
+        EXETARGETS ${programs}
+    )
 endif()
 
 ########
