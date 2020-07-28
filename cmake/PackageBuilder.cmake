@@ -288,7 +288,7 @@ function( pbuilder_get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
         list( REMOVE_DUPLICATES include_dirs )
     endif()
     set( ${VAR_OUT_INCLUDE_DIRS} ${include_dirs} PARENT_SCOPE )
-    message( STATUS "###### lib include dirs: ${include_dirs}" )
+    #message( STATUS "###### lib include dirs: ${include_dirs}" )
 endfunction()
 
 ### Updated for Scarab3
@@ -315,7 +315,7 @@ function( pbuilder_library )
 
     set( PROJECT_INCLUDE_DIRS )
     pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
-    message( STATUS "&&&&&&& project include dirs (from proj lib deps): ${PROJECT_INCLUDE_DIRS}" )
+    #message( STATUS "&&&&&&& project include dirs (from proj lib deps): ${PROJECT_INCLUDE_DIRS}" )
     if( PROJECT_INCLUDE_DIRS )
         include_directories( ${PROJECT_INCLUDE_DIRS} )
     endif()
@@ -346,23 +346,7 @@ function( pbuilder_library )
             ${LIB_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
-    # Make exported targets available during the build phase
-#    export( TARGETS ${NEW_FULL_LIB_NAME}
-#        FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-#    )
-
-#    pbuilder_install_libraries( ${NEW_FULL_LIB_NAME} )
 endfunction()
-
-### Updated for Scarab3
-macro( pbuilder_install_libraries )
-    # Unspecified arguments: any libraries to install
-    #message( STATUS "installing libs: ${ARGN}" )
-#    install( TARGETS ${ARGN} 
-#        EXPORT ${PROJECT_NAME}Targets 
-#        LIBRARY DESTINATION ${LIB_INSTALL_DIR} 
-#    )
-endmacro()
 
 ### Updated for Scarab3
 function( pbuilder_executables )
@@ -434,20 +418,7 @@ function( pbuilder_executable )
             ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
-    #export( TARGETS ${THIS_PROGRAM}
-    #    FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-    #)
-
-    #pbuilder_install_executables( ${THIS_PROGRAM} )
 endfunction()
-
-### Updated for Scarab3
-macro( pbuilder_install_executables )
-#    install( TARGETS ${ARGN} 
-#        EXPORT ${PROJECT_NAME}Targets 
-#        RUNTIME DESTINATION ${BIN_INSTALL_DIR} 
-#    )
-endmacro()
 
 function( pbuilder_component_install_and_export )
     set( OPTIONS )
@@ -470,13 +441,13 @@ function( pbuilder_component_install_and_export )
         message( STATUS "Expanded lib names: ${FULL_LIBTARGETS}" )
 
         # make targets available at build time
-        message( STATUS "******* build-time lib targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+        #message( STATUS "******* build-time lib targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
         export( TARGETS ${FULL_LIBTARGETS}
             FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
         )
 
         # install libraries and add to export for installation
-        message( STATUS "******* installed lib targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
+        #message( STATUS "******* installed lib targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
         install( TARGETS ${FULL_LIBTARGETS} 
             EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
             COMPONENT ${CIE_COMPONENT}
@@ -490,13 +461,13 @@ function( pbuilder_component_install_and_export )
         message( STATUS "Targets are: ${CIE_EXETARGETS}" )
 
         # make targets available at build time
-        message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+        #message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
         export( TARGETS ${CIE_EXETARGETS} 
             FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
         )
         
         # install executables and add to export for installation
-        message( STATUS "******* installed exe targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets")
+        #message( STATUS "******* installed exe targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets")
         install( TARGETS ${CIE_EXETARGETS}
             EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
             COMPONENT ${CIE_COMPONENT}
@@ -567,11 +538,10 @@ function( pbuilder_do_package_config )
     #   FILE_PREFIX -- Portion of the filename that preceeds `Config.cmake`, `Targets.cmake`, and `ConfigVersion.cmake` for the 
     #                  config, targets, and config-version files, respectively.  If not specified, the default is ${PROJECT_NAME}.
     #   CONFIG_FILENAME -- Optional specification of the full config filename.  If specified, overrules the default described above.
-    #   TARGETS_FILENAME -- Optional specification of the full targets filename.  If specified, overrules the default described above.
     #   VERSION_FILENAME -- Optional specification of the full version-config filename.  If specified, overrules the default described above.
 
     # Parse macro arguments
-    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
+    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME VERSION_FILENAME )
     cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
 
     # Handle arguments and apply defaults
@@ -590,10 +560,6 @@ function( pbuilder_do_package_config )
     set( CONFIG_PATH ${PKG_CONF_CONFIG_LOCATION}/${PKG_CONF_CONFIG_FILENAME} )
     message( STATUS "Config file path: ${CONFIG_PATH}" )
 
-#    if( NOT PKG_CONF_TARGETS_FILENAME )
-#        set( PKG_CONF_TARGETS_FILENAME ${PKG_CONF_FILE_PREFIX}Targets.cmake )
-#    endif()
-
     if( NOT PKG_CONF_VERSION_FILENAME )
         set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
     endif()
@@ -604,15 +570,6 @@ function( pbuilder_do_package_config )
     if( NOT EXISTS ${CONFIG_PATH} )
         message( FATAL_ERROR "Package config file does not exist: ${CONFIG_PATH}" )
     endif()
-
-#    install( EXPORT ${PROJECT_NAME}Targets
-#        FILE
-#            ${PKG_CONF_TARGETS_FILENAME}
-#        NAMESPACE
-#            ${PROJECT_NAME}::
-#        DESTINATION
-#            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
-#    )
 
     include( CMakePackageConfigHelpers )
     write_basic_package_version_file(
@@ -627,6 +584,7 @@ function( pbuilder_do_package_config )
         DESTINATION 
             ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
     )
+
 endfunction()
 
 ### Updated for Scarab3
@@ -642,12 +600,6 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
 
     set( PROJECT_INCLUDE_DIRS )
     pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
-    #foreach( LIBRARY ${FULL_PROJECT_LIBRARIES} )
-    #    get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
-    #    list( APPEND PROJECT_INCLUDE_DIRS ${LIB_INCLUDE_DIRS} )
-    #endforeach()
-    #list( REMOVE_DUPLICATES PROJECT_INCLUDE_DIRS )
-    #message( STATUS "Main project library include directories: ${PROJECT_INCLUDE_DIRS}")
 
     include_directories( ${PROJECT_INCLUDE_DIRS} )
 
@@ -675,4 +627,5 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     message( STATUS "Installing module ${PY_MODULE_NAME} in ${PY_MODULE_INSTALL_DIR}" )
 
     install( TARGETS ${PY_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
+    
 endfunction()
