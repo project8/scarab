@@ -303,17 +303,17 @@ function( pbuilder_library )
     set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
     message( STATUS "lib target: ${LIB_TARGET}" )
     message( STATUS "full lib target: ${FULL_LIB_TARGET}" )
-    message( STATUS "SM libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
-    message( STATUS "external libraries (public): ${LIB_PUBLIC_EXTERNAL_LIBRARIES}" )
-    message( STATUS "external libraries (private): ${LIB_PRIVATE_EXTERNAL_LIBRARIES}" )
+    message( STATUS "SM library dependencies (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "external library dependencies (public): ${LIB_PUBLIC_EXTERNAL_LIBRARIES}" )
+    message( STATUS "external library dependencies (private): ${LIB_PRIVATE_EXTERNAL_LIBRARIES}" )
 
     pbuilder_expand_lib_names( ${LIB_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
-    message( STATUS "full project libraries (lib): ${FULL_PROJECT_LIBRARIES}" )
+    message( STATUS "full project library dependencies (lib): ${FULL_PROJECT_LIBRARIES}" )
 
     set( PROJECT_INCLUDE_DIRS )
     pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
-    message( STATUS "&&&&&&& project include dirs: ${PROJECT_INCLUDE_DIRS}" )
+    message( STATUS "&&&&&&& project include dirs (from proj lib deps): ${PROJECT_INCLUDE_DIRS}" )
     if( PROJECT_INCLUDE_DIRS )
         include_directories( ${PROJECT_INCLUDE_DIRS} )
     endif()
@@ -353,10 +353,10 @@ endfunction()
 macro( pbuilder_install_libraries )
     # Unspecified arguments: any libraries to install
     #message( STATUS "installing libs: ${ARGN}" )
-    install( TARGETS ${ARGN} 
-        EXPORT ${PROJECT_NAME}Targets 
-        LIBRARY DESTINATION ${LIB_INSTALL_DIR} 
-    )
+#    install( TARGETS ${ARGN} 
+#        EXPORT ${PROJECT_NAME}Targets 
+#        LIBRARY DESTINATION ${LIB_INSTALL_DIR} 
+#    )
 endmacro()
 
 ### Updated for Scarab3
@@ -369,10 +369,10 @@ function( pbuilder_executables )
 
     ###message( STATUS "programs: ${${PROGRAMS}}" )
     message( STATUS "executable source files: ${EXES_SOURCES}" )
-    message( STATUS "project libraries: ${EXES_PROJECT_LIBRARIES}" )
-    message( STATUS "submodule libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
-    message( STATUS "external libraries (public): ${EXES_PUBLIC_EXTERNAL_LIBRARIES}" )
-    message( STATUS "external libraries (private): ${EXES_PRIVATE_EXTERNAL_LIBRARIES}" )
+    message( STATUS "project library dependencies: ${EXES_PROJECT_LIBRARIES}" )
+    message( STATUS "submodule library dependencies (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "external library dependencies (public): ${EXES_PUBLIC_EXTERNAL_LIBRARIES}" )
+    message( STATUS "external library dependencies (private): ${EXES_PRIVATE_EXTERNAL_LIBRARIES}" )
 
     set( targets )
 
@@ -415,7 +415,7 @@ function( pbuilder_executable )
 
     pbuilder_expand_lib_names( ${EXE_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
-    message( STATUS "full project libraries (exe): ${FULL_PROJECT_LIBRARIES}" )
+    message( STATUS "full project library dependencies (exe): ${FULL_PROJECT_LIBRARIES}" )
 
     set( PROJECT_INCLUDE_DIRS )
     pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
@@ -438,10 +438,10 @@ endfunction()
 
 ### Updated for Scarab3
 macro( pbuilder_install_executables )
-    install( TARGETS ${ARGN} 
-        EXPORT ${PROJECT_NAME}Targets 
-        RUNTIME DESTINATION ${BIN_INSTALL_DIR} 
-    )
+#    install( TARGETS ${ARGN} 
+#        EXPORT ${PROJECT_NAME}Targets 
+#        RUNTIME DESTINATION ${BIN_INSTALL_DIR} 
+#    )
 endmacro()
 
 function( pbuilder_component_install_and_export )
@@ -503,7 +503,7 @@ function( pbuilder_component_install_and_export )
         message( STATUS "Output file will be ${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
     endif()
 
-    install( EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}Targets
+    install( EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
         NAMESPACE
             ${PROJECT_NAME}::
         DESTINATION
@@ -585,9 +585,9 @@ function( pbuilder_do_package_config )
     set( CONFIG_PATH ${PKG_CONF_CONFIG_LOCATION}/${PKG_CONF_CONFIG_FILENAME} )
     message( STATUS "Config file path: ${CONFIG_PATH}" )
 
-    if( NOT PKG_CONF_TARGETS_FILENAME )
-        set( PKG_CONF_TARGETS_FILENAME ${PKG_CONF_FILE_PREFIX}Targets.cmake )
-    endif()
+#    if( NOT PKG_CONF_TARGETS_FILENAME )
+#        set( PKG_CONF_TARGETS_FILENAME ${PKG_CONF_FILE_PREFIX}Targets.cmake )
+#    endif()
 
     if( NOT PKG_CONF_VERSION_FILENAME )
         set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
@@ -600,14 +600,14 @@ function( pbuilder_do_package_config )
         message( FATAL_ERROR "Package config file does not exist: ${CONFIG_PATH}" )
     endif()
 
-    install( EXPORT ${PROJECT_NAME}Targets
-        FILE
-            ${PKG_CONF_TARGETS_FILENAME}
-        NAMESPACE
-            ${PROJECT_NAME}::
-        DESTINATION
-            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
-    )
+#    install( EXPORT ${PROJECT_NAME}Targets
+#        FILE
+#            ${PKG_CONF_TARGETS_FILENAME}
+#        NAMESPACE
+#            ${PROJECT_NAME}::
+#        DESTINATION
+#            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
+#    )
 
     include( CMakePackageConfigHelpers )
     write_basic_package_version_file(

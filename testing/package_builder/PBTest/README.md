@@ -7,7 +7,7 @@ Scarab's PackageBuilder provides the framework for using multiply-nested submodu
 ## Usage
 
 ```
-> cd /top/level/of/Scarab/testing/PBTest
+> cd /top/level/of/Scarab/testing/package_builder/PBTest
 > mkdir build
 > cd build
 > cmake ..

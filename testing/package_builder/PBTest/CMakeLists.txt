@@ -33,8 +33,6 @@ message( STATUS "Full project name for <${PROJECT_NAME}: ${${PROJECT_NAME}_FULL_
 # Dependencies
 ##############
 
-set( PUBLIC_EXT_LIBS )
-set( PRIVATE_EXT_LIBS )
 
 ########
 # Scarab
@@ -51,8 +49,6 @@ include_directories( BEFORE library )
 
 pbuilder_use_sm_library( Scarab Scarab )
 
-set( PACKAGE_LIBS )
-
 set( PBTest_HEADERS
     library/print.hh
 )
@@ -61,7 +57,17 @@ set( PBTest_SOURCES
     library/print.cc
 )
 
-pbuilder_library( PBTest PBTest_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+pbuilder_library( 
+    TARGET PBTest 
+    SOURCES ${PBTest_SOURCES}
+#    PROJECT_LIBRARIES ${PACKAGE_LIBS} 
+#    PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+#    PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+)
+
+pbuilder_component_install_and_export( COMPONENT Library
+    LIBTARGETS PBTest
+)
 
 pbuilder_install_headers( ${PBTest_HEADERS} )
 
@@ -73,15 +79,24 @@ if( PBTest_ENABLE_EXECUTABLES )
     set( PACKAGE_LIBS
         PBTest
     )
-    set( PUBLIC_EXT_LIBS )
-    set( PRIVATE_EXT_LIBS )
 
     set( PBTest_sources
         executable/do_print.cc
     )
 
-    pbuilder_executables( PBTest_sources PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
-endif()
+    set( programs )
+    pbuilder_executables( 
+        SOURCES ${PBTest_sources}
+        TARGETS_VAR programs
+        PROJECT_LIBRARIES ${PACKAGE_LIBS}
+#        PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+#        PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+    )
+
+    pbuilder_component_install_and_export( COMPONENT Executables
+        EXETARGETS ${programs}
+    )
+    endif()
 
 ########
 # Config

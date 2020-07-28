@@ -57,17 +57,14 @@ endif( Scarab_BUILD_CLI )
 
 ##########
 
-set( PACKAGE_LIBS )
-
 pbuilder_library( 
     TARGET Scarab 
     SOURCES ${Scarab_SOURCES}
-    PROJECT_LIBRARIES ${PACKAGE_LIBS} 
     PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
     PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
 
-pbuilder_component_install_and_export( COMPONENT library
+pbuilder_component_install_and_export( COMPONENT Library
     LIBTARGETS Scarab
 )
 
