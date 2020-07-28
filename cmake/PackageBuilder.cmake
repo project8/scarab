@@ -10,7 +10,7 @@ cmake_policy( SET CMP0011 NEW )
 cmake_policy( SET CMP0012 NEW ) # how if-statements work
 cmake_policy( SET CMP0042 NEW ) # rpath on mac os x
 cmake_policy( SET CMP0048 NEW ) # version in project()
-cmake_policy( SET CMP0079 NEW ) # link libraries from other directories (requires CMake v3.13 or better)
+#cmake_policy( SET CMP0079 NEW ) # link libraries from other directories (requires CMake v3.13 or better)
 
 include( CMakeParseArguments ) # required until cmake v3.5, when this was added as a built-in command
 
