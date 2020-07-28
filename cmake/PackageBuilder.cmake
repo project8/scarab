@@ -241,19 +241,16 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
     endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
     # Output is in the form of the variable FULL_LIB_NAME
     set( FULL_LIB_NAME "${LIB_NAME}${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_expand_lib_name LIB_NAME )
     # Output is in the form of the variable FULL_LIB_NAME
     pbuilder_expand_lib_name_2( ${LIB_NAME} ${PROJECT_NAME} )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_expand_lib_names )
     # Supply library targets as additional macro arguments
     # Output is in the form of the variable FULL_LIB_NAMES
@@ -267,14 +264,12 @@ macro( pbuilder_expand_lib_names )
     message( STATUS "expanded to full project library names: ${FULL_LIB_NAMES}" )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
     pbuilder_expand_lib_name_2( ${LIB_NAME} ${SM_NAME} )
     list( APPEND ${PROJECT_NAME}_SM_LIBRARIES ${FULL_LIB_NAME} )
     message( STATUS "Added SM library ${FULL_LIB_NAME} to ${PROJECT_NAME}_SM_LIBRARIES" )
 endmacro()
 
-### Updated for Scarab3
 function( pbuilder_get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
     # Supply output variable as first argument
     # Supply library targets as additional arguments
@@ -290,8 +285,16 @@ function( pbuilder_get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
     #message( STATUS "###### lib include dirs: ${include_dirs}" )
 endfunction()
 
-### Updated for Scarab3
 function( pbuilder_library )
+    # Builds a shared-object library
+    #
+    # Parameters:
+    #     TARGET: library target name
+    #     SOURCES: source files to include
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
+
 
     set( OPTIONS )
     set( ONEVALUEARGS TARGET )
@@ -347,8 +350,17 @@ function( pbuilder_library )
 
 endfunction()
 
-### Updated for Scarab3
 function( pbuilder_executables )
+    # Builds multiple executables, assuming one executable per source file
+    # Strips extensino from source file and uses that as the executable name (target and file)
+    #
+    # Parameters
+    #     TARGETS_VAR (output, optional): variable in which to store the names of the executables created
+    #     SOURCES: source files to be builT
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
+
 
     set( OPTIONS )
     set( ONEVALUEARGS TARGETS_VAR )
@@ -387,9 +399,15 @@ function( pbuilder_executables )
 
 endfunction()
 
-### Updated for Scarab3
 function( pbuilder_executable )
     # Builds a single executable from one or more source files
+    #
+    # Parameters
+    #     EXECUTABLE: executable target
+    #     SOURCES: list of sources to be built into one executable
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
     set( OPTIONS )
     set( ONEVALUEARGS EXECUTABLE )
@@ -420,6 +438,15 @@ function( pbuilder_executable )
 endfunction()
 
 function( pbuilder_component_install_and_export )
+    # This function installs library and executable targets, and makes sure they're exported correctly.
+    #
+    # Parameters:
+    #     COMPONENT: build component being installed; required if this function is used multiple times in a project
+    #                if a build does not actually have multiple components, a name still needs to be given (e.g. "library")
+    #     LIBTARGETS: all library targets to be installed
+    #     EXETARGETS: all executable targets to be installed
+
+
     set( OPTIONS )
     set( ONEVALUEARGS COMPONENT )
     set( MULTIVALUEARGS LIBTARGETS EXETARGETS )
@@ -488,7 +515,6 @@ function( pbuilder_component_install_and_export )
 
 endfunction()
 
-### Updated for Scarab3
 macro( pbuilder_install_headers )
     #message( STATUS "installing headers in ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH}" )
     install( FILES ${ARGN} 
@@ -496,7 +522,6 @@ macro( pbuilder_install_headers )
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_header_dirs FILE_PATTERN )
     install( DIRECTORY ${ARGN} 
         DESTINATION ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH} 
@@ -504,28 +529,24 @@ macro( pbuilder_install_header_dirs FILE_PATTERN )
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_config )
     install( FILES ${ARGN} 
         DESTINATION ${CONFIG_INSTALL_DIR} 
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_data )
     install( FILES ${ARGN} 
         DESTINATION ${DATA_INSTALL_DIR} 
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_files DEST_DIR )
     install( FILES ${ARGN} 
         DESTINATION ${DEST_DIR} 
     )
 endmacro()
 
-### Updated for Scarab3
 function( pbuilder_do_package_config )
     # This macro sets up and installs the configuration files used tospecify the install information for the project.
     # It installs an already-created "config" file.
@@ -586,7 +607,6 @@ function( pbuilder_do_package_config )
 
 endfunction()
 
-### Updated for Scarab3
 function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
     # Installs the library in the standard lib directory unless indicated by the definition of the variable PBUILDER_PY_INSTALL_IN_SITELIB
