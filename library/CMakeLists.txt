@@ -64,7 +64,8 @@ pbuilder_library(
     PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
 
-pbuilder_component_install_and_export( COMPONENT Library
+pbuilder_component_install_and_export( 
+    COMPONENT Library
     LIBTARGETS Scarab
 )
 

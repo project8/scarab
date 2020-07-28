@@ -21,6 +21,7 @@ pbuilder_executables(
     PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
 
-pbuilder_component_install_and_export( COMPONENT Executables
+pbuilder_component_install_and_export( 
+    COMPONENT Executables
     EXETARGETS ${programs}
 )
