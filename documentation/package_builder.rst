@@ -133,9 +133,21 @@ The remainder should go wherever the library is being defined::
         file2.cc
     )
 
-    # Variables storing library dependencies are passed as variables, not variable values
-    # This function adds the library, sets the include directories as a target property, links the library, exports the target, and installs the library.
-    pbuilder_library( Insecta Insecta_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+    # This function adds the library, sets the include directories as a target property and links the library.
+    pbuilder_library( 
+        TARGET Insecta 
+        SOURCES ${Insecta_SOURCES}
+        PACKAGE_LIBRARIES ${PACKAGE_LIBS}
+        PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+        PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS} 
+    )
+
+    # If the build does not actually use components, but this function is being used multiple times in the project (we'll use it below), 
+    # then specifying a component is required.  Here, since we're building the library, we'll call it ``Library``.
+    pbuilder_component_install_and_export( 
+        COMPONENT Library
+        LIBTARGETS Insecta
+    )
 
     # Headers are passed as a list, so we pass the value of the HEADERS variable
     # This function installs the headers
@@ -167,7 +179,21 @@ For the Insecta project, the executable section of the build (again, in its own 
 
         # All variables are passed as variables, not their contents
         # This will create the executables and link it
-        pbuilder_executables( Insecta_SOURCES PACKAGE_LIBS PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+        set( programs )
+        pbuilder_executables( 
+            TARGETS_VAR programs
+            SOURCES ${Insecta_SOURCES}
+            PACKAGE_LIBRARIES ${PACKAGE_LIBS}
+            PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+            PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS} 
+        )
+
+    # If the build does not actually use components, but this function is being used multiple times in the project (we used it above), 
+    # then specifying a component is required.  Here, since we're building the executables, we'll call it ``Library``.
+    pbuilder_component_install_and_export( 
+        COMPONENT Executables
+        LIBTARGETS ${programs}
+    )
 
     endif( Insecta_ENABLE_EXECUTABLES )
 
@@ -285,6 +311,7 @@ Here is an example of a simple package-config template file, taken from the PBTe
     find_dependency( Scarab REQUIRED PATHS ${PBTest_CMAKE_DIR}/Scarab @Scarab_BINARY_LOCATION@ )
 
     # Import targets if they're not already present
+    # This nested setup allows the import to be used both in the build tree (i.e. as a submodule) and after installation
     if( NOT TARGET PBTest::@PBTest_FULL_PROJECT_NAME@ )
         if( TARGET @PBTest_FULL_PROJECT_NAME@ )
             add_library( PBTest::@PBTest_FULL_PROJECT_NAME@ ALIAS @PBTest_FULL_PROJECT_NAME@ )

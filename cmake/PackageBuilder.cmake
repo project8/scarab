@@ -10,9 +10,8 @@ cmake_policy( SET CMP0011 NEW )
 cmake_policy( SET CMP0012 NEW ) # how if-statements work
 cmake_policy( SET CMP0042 NEW ) # rpath on mac os x
 cmake_policy( SET CMP0048 NEW ) # version in project()
-cmake_policy( SET CMP0079 NEW ) # link libraries from other directories (requires CMake v3.13 or better)
 
-include( CMakeParseArguments )
+include( CMakeParseArguments ) # required until cmake v3.5, when this was added as a built-in command
 
 # check if this is a stand-alone build
 set( PBUILDER_STANDALONE FALSE CACHE INTERNAL "Flag for whether or not this is a stand-alone build" )
@@ -118,9 +117,6 @@ endif()
 
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
-
-# global property to hold the names of nymph library targets
-set_property( GLOBAL PROPERTY ${PROJECT_NAME}_LIBRARIES )
 
 # turn on RPATH for Mac OSX
 set( CMAKE_MACOSX_RPATH ON )
@@ -245,19 +241,16 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
     endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
     # Output is in the form of the variable FULL_LIB_NAME
     set( FULL_LIB_NAME "${LIB_NAME}${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_expand_lib_name LIB_NAME )
     # Output is in the form of the variable FULL_LIB_NAME
     pbuilder_expand_lib_name_2( ${LIB_NAME} ${PROJECT_NAME} )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_expand_lib_names )
     # Supply library targets as additional macro arguments
     # Output is in the form of the variable FULL_LIB_NAMES
@@ -271,123 +264,257 @@ macro( pbuilder_expand_lib_names )
     message( STATUS "expanded to full project library names: ${FULL_LIB_NAMES}" )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
     pbuilder_expand_lib_name_2( ${LIB_NAME} ${SM_NAME} )
     list( APPEND ${PROJECT_NAME}_SM_LIBRARIES ${FULL_LIB_NAME} )
     message( STATUS "Added SM library ${FULL_LIB_NAME} to ${PROJECT_NAME}_SM_LIBRARIES" )
 endmacro()
 
-### Updated for Scarab3
-function( pbuilder_library LIB_BASENAME SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
-    message( "Building library ${LIB_BASENAME}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+function( pbuilder_get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
+    # Supply output variable as first argument
+    # Supply library targets as additional arguments
+    set( include_dirs )
+    foreach( LIBRARY ${${VAR_IN_LIBRARIES}} )
+        get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
+        list( APPEND include_dirs ${LIB_INCLUDE_DIRS} )
+    endforeach()
+    if( include_dirs )
+        list( REMOVE_DUPLICATES include_dirs )
+    endif()
+    set( ${VAR_OUT_INCLUDE_DIRS} ${include_dirs} PARENT_SCOPE )
+    #message( STATUS "###### lib include dirs: ${include_dirs}" )
+endfunction()
 
-    pbuilder_expand_lib_name( ${LIB_BASENAME} )
-    set( NEW_FULL_LIB_NAME ${FULL_LIB_NAME} )
-    message( STATUS "lib basename: ${LIB_BASENAME}" )
-    message( STATUS "full lib name: ${NEW_FULL_LIB_NAME}" )
-    message( STATUS "SM libraries (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
-    message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
-    message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
+function( pbuilder_library )
+    # Builds a shared-object library
+    #
+    # Parameters:
+    #     TARGET: library target name
+    #     SOURCES: source files to include
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
-    pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
-    message( STATUS "full project libraries (lib): ${FULL_LIB_NAMES}" )
 
-    message( STATUS "pbuilder: will build library <${NEW_FULL_LIB_NAME}>" )
-    add_library( ${NEW_FULL_LIB_NAME} ${${SOURCES}} )
+    set( OPTIONS )
+    set( ONEVALUEARGS TARGET )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    cmake_parse_arguments( LIB "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    message( "Building library ${LIB_TARGET}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+
+    pbuilder_expand_lib_name( ${LIB_TARGET} )
+    set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
+    message( STATUS "lib target: ${LIB_TARGET}" )
+    message( STATUS "full lib target: ${FULL_LIB_TARGET}" )
+    message( STATUS "SM library dependencies (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "external library dependencies (public): ${LIB_PUBLIC_EXTERNAL_LIBRARIES}" )
+    message( STATUS "external library dependencies (private): ${LIB_PRIVATE_EXTERNAL_LIBRARIES}" )
+
+    pbuilder_expand_lib_names( ${LIB_PROJECT_LIBRARIES} )
+    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
+    message( STATUS "full project library dependencies (lib): ${FULL_PROJECT_LIBRARIES}" )
+
+    set( PROJECT_INCLUDE_DIRS )
+    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+    #message( STATUS "&&&&&&& project include dirs (from proj lib deps): ${PROJECT_INCLUDE_DIRS}" )
+    if( PROJECT_INCLUDE_DIRS )
+        include_directories( ${PROJECT_INCLUDE_DIRS} )
+    endif()
+
+    message( STATUS "pbuilder: will build library <${FULL_LIB_TARGET}>" )
+    add_library( ${FULL_LIB_TARGET} ${LIB_SOURCES} )
+
+    # Set the version of the library
+    set_target_properties( ${FULL_LIB_TARGET} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION} )
 
     # Grab the include directories, which will be used for the build-interface target includes
-    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${NEW_FULL_LIB_NAME} INCLUDE_DIRECTORIES )
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_TARGET} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
 
     # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
     # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
-    target_include_directories( ${NEW_FULL_LIB_NAME} 
+    target_include_directories( ${FULL_LIB_TARGET} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
     )
 
-    target_link_libraries( ${FULL_LIB_NAME} 
+    target_link_libraries( ${FULL_LIB_TARGET} 
         PUBLIC
-            ${${PROJECT_NAME}_SM_LIBRARIES} ${FULL_LIB_NAMES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${LIB_PUBLIC_EXTERNAL_LIBRARIES}
         PRIVATE
-            ${${PRIVATE_EXTERNAL_LIBRARIES}} 
+            ${LIB_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
-    set( ${PROJECT_NAME}_SM_LIBRARIES )
-
-    # Make exported targets available during the build phase
-    export( TARGETS ${NEW_FULL_LIB_NAME}
-        FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-    )
-
-    pbuilder_install_libraries( ${NEW_FULL_LIB_NAME} )
 endfunction()
 
-### Updated for Scarab3
-macro( pbuilder_install_libraries )
-    # Unspecified arguments: any libraries to install
-    #message( STATUS "installing libs: ${ARGN}" )
-    install( TARGETS ${ARGN} 
-        EXPORT ${PROJECT_NAME}Targets 
-        LIBRARY DESTINATION ${LIB_INSTALL_DIR} 
-    )
-endmacro()
+function( pbuilder_executables )
+    # Builds multiple executables, assuming one executable per source file
+    # Strips extensino from source file and uses that as the executable name (target and file)
+    #
+    # Parameters
+    #     TARGETS_VAR (output, optional): variable in which to store the names of the executables created
+    #     SOURCES: source files to be builT
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
-### Updated for Scarab3
-function( pbuilder_executables SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+
+    set( OPTIONS )
+    set( ONEVALUEARGS TARGETS_VAR )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    cmake_parse_arguments( EXES "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
     ###message( STATUS "programs: ${${PROGRAMS}}" )
-    message( STATUS "executable source files: ${${SOURCES}}" )
-    message( STATUS "project libraries: ${${PROJECT_LIBRARIES}}" )
-    message( STATUS "external libraries (public): ${${PUBLIC_EXTERNAL_LIBRARIES}}" )
-    message( STATUS "external libraries (private): ${${PRIVATE_EXTERNAL_LIBRARIES}}" )
+    message( STATUS "executable source files: ${EXES_SOURCES}" )
+    message( STATUS "project library dependencies: ${EXES_PROJECT_LIBRARIES}" )
+    message( STATUS "submodule library dependencies (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "external library dependencies (public): ${EXES_PUBLIC_EXTERNAL_LIBRARIES}" )
+    message( STATUS "external library dependencies (private): ${EXES_PRIVATE_EXTERNAL_LIBRARIES}" )
 
-    foreach( source ${${SOURCES}} )
+    set( targets )
+
+    foreach( source ${EXES_SOURCES} )
         get_filename_component( program ${source} NAME_WE )
         if( NOT TARGET ${program} )
-            pbuilder_executable( ${program} source ${PROJECT_LIBRARIES} ${PUBLIC_EXTERNAL_LIBRARIES} ${PRIVATE_EXTERNAL_LIBRARIES} )
+            pbuilder_executable( EXECUTABLE ${program} 
+                SOURCES ${source} 
+                PROJECT_LIBRARIES ${EXES_PROJECT_LIBRARIES} 
+                PUBLIC_EXTERNAL_LIBRARIES ${EXES_PUBLIC_EXTERNAL_LIBRARIES} 
+                PRIVATE_EXTERNAL_LIBRARIES ${EXES_PRIVATE_EXTERNAL_LIBRARIES} 
+            )
+            list( APPEND targets ${program} )
         else()
             message( FATAL "Duplicate target: ${program}" )
         endif()
     endforeach( source )
+
+    message( STATUS "Targets produced: ${targets}" )
+    if( EXES_TARGETS_VAR )
+        message( STATUS "output var for targets: ${EXES_TARGETS_VAR}" )
+        set( ${EXES_TARGETS_VAR} ${targets} PARENT_SCOPE )
+    endif()
+
 endfunction()
 
-### Updated for Scarab3
-function( pbuilder_executable THIS_PROGRAM SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+function( pbuilder_executable )
     # Builds a single executable from one or more source files
-    message( STATUS "pbuilder will build executable ${THIS_PROGRAM} with ${${SOURCES}}" )
-    message( STATUS "\tlinking with: (project) ${${PROJECT_LIBRARIES}} -- (public ext) ${${PUBLIC_EXTERNAL_LIBRARIES}} -- (private ext) ${${PRIVATE_EXTERNAL_LIBRARIES}}")
+    #
+    # Parameters
+    #     EXECUTABLE: executable target
+    #     SOURCES: list of sources to be built into one executable
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
-    add_executable( ${THIS_PROGRAM} ${${SOURCES}} )
+    set( OPTIONS )
+    set( ONEVALUEARGS EXECUTABLE )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
+    cmake_parse_arguments( EXE "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
-    pbuilder_expand_lib_names( ${${PROJECT_LIBRARIES}} )
-    message( STATUS "full project libraries (exe): ${FULL_LIB_NAMES}" )
+    message( STATUS "pbuilder will build executable ${EXE_EXECUTABLE} with ${EXE_SOURCES}" )
+    message( STATUS "\tlinking with: (project) ${EXE_PROJECT_LIBRARIES} -- (submodule) ${${PROJECT_NAME}_SM_LIBRARIES} --  (public ext) ${EXE_PUBLIC_EXTERNAL_LIBRARIES} -- (private ext) ${EXE_PRIVATE_EXTERNAL_LIBRARIES}")
 
-    target_link_libraries( ${THIS_PROGRAM} 
+    add_executable( ${EXE_EXECUTABLE} ${EXE_SOURCES} )
+
+    pbuilder_expand_lib_names( ${EXE_PROJECT_LIBRARIES} )
+    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
+    message( STATUS "full project library dependencies (exe): ${FULL_PROJECT_LIBRARIES}" )
+
+    set( PROJECT_INCLUDE_DIRS )
+    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
+
+    include_directories( ${PROJECT_INCLUDE_DIRS} )
+
+    target_link_libraries( ${EXE_EXECUTABLE} 
         PUBLIC
-            ${FULL_LIB_NAMES} ${${PUBLIC_EXTERNAL_LIBRARIES}}
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${EXE_PUBLIC_EXTERNAL_LIBRARIES}
         PRIVATE
-            ${${PRIVATE_EXTERNAL_LIBRARIES}} 
+            ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
-    export( TARGETS ${THIS_PROGRAM}
-        FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-    )
-
-    pbuilder_install_executables( ${THIS_PROGRAM} )
 endfunction()
 
-### Updated for Scarab3
-macro( pbuilder_install_executables )
-    install( TARGETS ${ARGN} 
-        EXPORT ${PROJECT_NAME}Targets 
-        RUNTIME DESTINATION ${BIN_INSTALL_DIR} 
-    )
-endmacro()
+function( pbuilder_component_install_and_export )
+    # This function installs library and executable targets, and makes sure they're exported correctly.
+    #
+    # Parameters:
+    #     COMPONENT: build component being installed; required if this function is used multiple times in a project
+    #                if a build does not actually have multiple components, a name still needs to be given (e.g. "library")
+    #     LIBTARGETS: all library targets to be installed
+    #     EXETARGETS: all executable targets to be installed
 
-### Updated for Scarab3
+
+    set( OPTIONS )
+    set( ONEVALUEARGS COMPONENT )
+    set( MULTIVALUEARGS LIBTARGETS EXETARGETS )
+    cmake_parse_arguments( CIE "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    if( CIE_COMPONENT )
+        set( INSERT_COMPONENT "_${CIE_COMPONENT}" )
+    endif()
+
+    # Libraries
+    if( CIE_LIBTARGETS )
+        message( "Installing and exporting libraries for component <${CIE_COMPONENT}>" )
+        message( STATUS "Targets are: ${CIE_LIBTARGETS}" )
+
+        # expand library names
+        pbuilder_expand_lib_names( ${CIE_LIBTARGETS} )
+        set( FULL_LIBTARGETS ${FULL_LIB_NAMES} )
+        message( STATUS "Expanded lib names: ${FULL_LIBTARGETS}" )
+
+        # make targets available at build time
+        #message( STATUS "******* build-time lib targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+        export( TARGETS ${FULL_LIBTARGETS}
+            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+        )
+
+        # install libraries and add to export for installation
+        #message( STATUS "******* installed lib targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
+        install( TARGETS ${FULL_LIBTARGETS} 
+            EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
+            COMPONENT ${CIE_COMPONENT}
+            LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+        )
+    endif()
+
+    # Executables
+    if( CIE_EXETARGETS )
+        message( "Installing and exporting executables for component <${CIE_COMPONENT}>" )
+        message( STATUS "Targets are: ${CIE_EXETARGETS}" )
+
+        # make targets available at build time
+        #message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+        export( TARGETS ${CIE_EXETARGETS} 
+            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+        )
+        
+        # install executables and add to export for installation
+        #message( STATUS "******* installed exe targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets")
+        install( TARGETS ${CIE_EXETARGETS}
+            EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
+            COMPONENT ${CIE_COMPONENT}
+            RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+        )
+
+        # Export installation
+        message( "Installing export ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
+        message( STATUS "Output file will be ${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+    endif()
+
+    install( EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
+        NAMESPACE
+            ${PROJECT_NAME}::
+        DESTINATION
+            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
+    )
+
+
+endfunction()
+
 macro( pbuilder_install_headers )
     #message( STATUS "installing headers in ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH}" )
     install( FILES ${ARGN} 
@@ -395,7 +522,6 @@ macro( pbuilder_install_headers )
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_header_dirs FILE_PATTERN )
     install( DIRECTORY ${ARGN} 
         DESTINATION ${INCLUDE_INSTALL_DIR}${${PROJECT_NAME}_PARENT_INC_DIR_PATH} 
@@ -403,28 +529,24 @@ macro( pbuilder_install_header_dirs FILE_PATTERN )
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_config )
     install( FILES ${ARGN} 
         DESTINATION ${CONFIG_INSTALL_DIR} 
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_data )
     install( FILES ${ARGN} 
         DESTINATION ${DATA_INSTALL_DIR} 
     )
 endmacro()
 
-### Updated for Scarab3
 macro( pbuilder_install_files DEST_DIR )
     install( FILES ${ARGN} 
         DESTINATION ${DEST_DIR} 
     )
 endmacro()
 
-### Updated for Scarab3
 function( pbuilder_do_package_config )
     # This macro sets up and installs the configuration files used tospecify the install information for the project.
     # It installs an already-created "config" file.
@@ -436,11 +558,10 @@ function( pbuilder_do_package_config )
     #   FILE_PREFIX -- Portion of the filename that preceeds `Config.cmake`, `Targets.cmake`, and `ConfigVersion.cmake` for the 
     #                  config, targets, and config-version files, respectively.  If not specified, the default is ${PROJECT_NAME}.
     #   CONFIG_FILENAME -- Optional specification of the full config filename.  If specified, overrules the default described above.
-    #   TARGETS_FILENAME -- Optional specification of the full targets filename.  If specified, overrules the default described above.
     #   VERSION_FILENAME -- Optional specification of the full version-config filename.  If specified, overrules the default described above.
 
     # Parse macro arguments
-    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME TARGETS_FILENAME VERSION_FILENAME )
+    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME VERSION_FILENAME )
     cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
 
     # Handle arguments and apply defaults
@@ -459,10 +580,6 @@ function( pbuilder_do_package_config )
     set( CONFIG_PATH ${PKG_CONF_CONFIG_LOCATION}/${PKG_CONF_CONFIG_FILENAME} )
     message( STATUS "Config file path: ${CONFIG_PATH}" )
 
-    if( NOT PKG_CONF_TARGETS_FILENAME )
-        set( PKG_CONF_TARGETS_FILENAME ${PKG_CONF_FILE_PREFIX}Targets.cmake )
-    endif()
-
     if( NOT PKG_CONF_VERSION_FILENAME )
         set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
     endif()
@@ -473,15 +590,6 @@ function( pbuilder_do_package_config )
     if( NOT EXISTS ${CONFIG_PATH} )
         message( FATAL_ERROR "Package config file does not exist: ${CONFIG_PATH}" )
     endif()
-
-    install( EXPORT ${PROJECT_NAME}Targets
-        FILE
-            ${PKG_CONF_TARGETS_FILENAME}
-        NAMESPACE
-            ${PROJECT_NAME}::
-        DESTINATION
-            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
-    )
 
     include( CMakePackageConfigHelpers )
     write_basic_package_version_file(
@@ -496,22 +604,21 @@ function( pbuilder_do_package_config )
         DESTINATION 
             ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
     )
+
 endfunction()
 
-### Updated for Scarab3
 function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
     # Installs the library in the standard lib directory unless indicated by the definition of the variable PBUILDER_PY_INSTALL_IN_SITELIB
 
     pbuilder_expand_lib_names( ${PROJECT_LIBRARIES} )
+    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
+    message( STATUS "full project libraries (pybind11): ${FULL_PROJECT_LIBRARIES}" )
+
+    message( STATUS "submodule libraries (pybind11): ${${PROJECT_NAME}_SM_LIBRARIES}" )
 
     set( PROJECT_INCLUDE_DIRS )
-    foreach( LIBRARY ${FULL_LIB_NAMES} )
-        get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
-        list( APPEND PROJECT_INCLUDE_DIRS ${LIB_INCLUDE_DIRS} )
-    endforeach()
-    list( REMOVE_DUPLICATES PROJECT_INCLUDE_DIRS )
-    #message( STATUS "Main project library include directories: ${PROJECT_INCLUDE_DIRS}")
+    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
 
     include_directories( ${PROJECT_INCLUDE_DIRS} )
 
@@ -529,7 +636,7 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
     )
 
-    target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${${PROJECT_NAME}_SM_LIBRARIES} ${FULL_LIB_NAMES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
+    target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
 
     set( PY_MODULE_INSTALL_DIR ${LIB_INSTALL_DIR} )
     # Override that install location if specified by the user
@@ -539,4 +646,5 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     message( STATUS "Installing module ${PY_MODULE_NAME} in ${PY_MODULE_INSTALL_DIR}" )
 
     install( TARGETS ${PY_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
+    
 endfunction()

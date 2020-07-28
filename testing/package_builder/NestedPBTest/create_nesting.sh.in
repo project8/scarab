@@ -1,10 +1,10 @@
 #! /bin/bash
 
 echo "Copying scarab"
-rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/../.. @CMAKE_CURRENT_SOURCE_DIR@/scarab
+rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/../../.. @CMAKE_CURRENT_SOURCE_DIR@/scarab
 
 echo "Copying PBTest"
-rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/../PBTest @CMAKE_CURRENT_SOURCE_DIR@
+rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/../PBTest @CMAKE_CURRENT_SOURCE_DIR@
 
 echo "Copying PBTest/scarab"
-rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/scarab @CMAKE_CURRENT_SOURCE_DIR@/PBTest
+rsync -a --exclude-from='@CMAKE_CURRENT_SOURCE_DIR@/../../../.gitignore' @CMAKE_CURRENT_SOURCE_DIR@/scarab @CMAKE_CURRENT_SOURCE_DIR@/PBTest

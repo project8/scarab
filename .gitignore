@@ -8,4 +8,6 @@
 build*/
 
 # PackageBuilder test submodule
-testing/cmake_test/scarab
+testing/package_builder/PBTest/scarab
+testing/package_builder/NestedPBTest/PBTest
+testing/package_builder/NestedPBTest/scarab

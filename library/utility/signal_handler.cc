@@ -245,7 +245,7 @@ namespace scarab
             {
                 if( a_use_logging ) { LDEBUG( slog, "Rethrowing current exception" ); }
                 else { std::cerr << "Rethrowing current exception" << std::endl; }
-                rethrow_exception( t_exc_ptr ); // throw to recognize the type
+                std::rethrow_exception( t_exc_ptr ); // throw to recognize the type
             }
             catch( const std::exception& e ) {
                 if( a_use_logging ) { LERROR( slog, "Caught unhandled exception. what(): " << e.what() ); }

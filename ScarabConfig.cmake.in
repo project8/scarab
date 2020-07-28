@@ -5,21 +5,21 @@ get_filename_component( Scarab_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
 # Find the dependencies
 include( CMakeFindDependencyMacro )
 find_dependency( Boost 1.46 REQUIRED COMPONENTS @boost_components@ )
-if( @Scarab_BUILD_CODEC_JSON@ )
+if( @Scarab_BUILD_CODEC_JSON@ ) #Scarab_BUILD_CODEC_JSON
     find_dependency( RapidJSON REQUIRED )
 endif()
-if( @Scarab_BUILD_CODEC_YAML@ )
+if( @Scarab_BUILD_CODEC_YAML@ ) # Scarab_BUILD_CODEC_YAML
     find_dependency( yaml-cpp REQUIRED )
 endif()
-if( @Scarab_BUILD_PYTHON@ )
+if( @Scarab_BUILD_PYTHON@ ) # Scarab_BUILD_PYTHON
     find_dependency( Python REQUIRED COMPONENTS Development )
 endif()
 
-# Import targets if they're not already present
+# Import library targets if it's not already present (usable at build time or as installed)
 if( NOT TARGET Scarab::@Scarab_FULL_PROJECT_NAME@ )
     if( TARGET @Scarab_FULL_PROJECT_NAME@ )
         add_library( Scarab::@Scarab_FULL_PROJECT_NAME@ ALIAS @Scarab_FULL_PROJECT_NAME@ )
     else()
-        include("${Scarab_CMAKE_DIR}/ScarabTargets.cmake")
+        include( "${Scarab_CMAKE_DIR}/Scarab_Library_Targets.cmake" )
     endif()
 endif()
