@@ -295,13 +295,13 @@ function( pbuilder_library )
     #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
     #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
-
     set( OPTIONS )
     set( ONEVALUEARGS TARGET )
     set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
     cmake_parse_arguments( LIB "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
-    message( "Building library ${LIB_TARGET}; ${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
+    message( "Building library ${LIB_TARGET}" )
+    message( STATUS "${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
 
     pbuilder_expand_lib_name( ${LIB_TARGET} )
     set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
@@ -368,6 +368,7 @@ function( pbuilder_executables )
     cmake_parse_arguments( EXES "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
     ###message( STATUS "programs: ${${PROGRAMS}}" )
+    message( "Building multiple executables" )
     message( STATUS "executable source files: ${EXES_SOURCES}" )
     message( STATUS "project library dependencies: ${EXES_PROJECT_LIBRARIES}" )
     message( STATUS "submodule library dependencies (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
@@ -414,7 +415,7 @@ function( pbuilder_executable )
     set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
     cmake_parse_arguments( EXE "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
-    message( STATUS "pbuilder will build executable ${EXE_EXECUTABLE} with ${EXE_SOURCES}" )
+    message( "Building executable ${EXE_EXECUTABLE} with ${EXE_SOURCES}" )
     message( STATUS "\tlinking with: (project) ${EXE_PROJECT_LIBRARIES} -- (submodule) ${${PROJECT_NAME}_SM_LIBRARIES} --  (public ext) ${EXE_PUBLIC_EXTERNAL_LIBRARIES} -- (private ext) ${EXE_PRIVATE_EXTERNAL_LIBRARIES}")
 
     add_executable( ${EXE_EXECUTABLE} ${EXE_SOURCES} )
@@ -499,12 +500,11 @@ function( pbuilder_component_install_and_export )
             COMPONENT ${CIE_COMPONENT}
             RUNTIME DESTINATION ${BIN_INSTALL_DIR}
         )
-
-        # Export installation
-        message( "Installing export ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
-        message( STATUS "Output file will be ${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
     endif()
 
+    # Export installation
+    message( "Installing export ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
+    message( STATUS "Output file will be ${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
     install( EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
         NAMESPACE
             ${PROJECT_NAME}::
