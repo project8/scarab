@@ -16,9 +16,9 @@ if( @Scarab_BUILD_PYTHON@ ) # Scarab_BUILD_PYTHON
 endif()
 
 # Import library targets if it's not already present (usable at build time or as installed)
-if( NOT TARGET Scarab::@Scarab_FULL_PROJECT_NAME@ )
-    if( TARGET @Scarab_FULL_PROJECT_NAME@ )
-        add_library( Scarab::@Scarab_FULL_PROJECT_NAME@ ALIAS @Scarab_FULL_PROJECT_NAME@ )
+if( NOT TARGET Scarab::@Scarab_FULL_TARGET_NAME@ )
+    if( TARGET @Scarab_FULL_TARGET_NAME@ )
+        add_library( Scarab::@Scarab_FULL_TARGET_NAME@ ALIAS @Scarab_FULL_TARGET_NAME@ )
     else()
         include( "${Scarab_CMAKE_DIR}/Scarab_Library_Targets.cmake" )
     endif()
