@@ -317,13 +317,6 @@ function( pbuilder_library )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project library dependencies (lib): ${FULL_PROJECT_LIBRARIES}" )
 
-    set( PROJECT_INCLUDE_DIRS )
-    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
-    #message( STATUS "&&&&&&& project include dirs (from proj lib deps): ${PROJECT_INCLUDE_DIRS}" )
-    if( PROJECT_INCLUDE_DIRS )
-        include_directories( ${PROJECT_INCLUDE_DIRS} )
-    endif()
-
     message( STATUS "pbuilder: will build library <${FULL_LIB_TARGET}>" )
     add_library( ${FULL_LIB_TARGET} ${LIB_SOURCES} )
 
