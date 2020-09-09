@@ -419,11 +419,6 @@ function( pbuilder_executable )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project library dependencies (exe): ${FULL_PROJECT_LIBRARIES}" )
 
-    set( PROJECT_INCLUDE_DIRS )
-    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
-
-    include_directories( ${PROJECT_INCLUDE_DIRS} )
-
     target_link_libraries( ${EXE_EXECUTABLE} 
         PUBLIC
             ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${EXE_PUBLIC_EXTERNAL_LIBRARIES}
