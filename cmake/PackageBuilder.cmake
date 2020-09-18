@@ -83,6 +83,8 @@ if( PBUILDER_STANDALONE )
 
     set( TOP_PROJECT_CMAKE_CONFIG_DIR "${PACKAGE_CONFIG_PREFIX}" CACHE INTERNAL "Top-project CMake config installation path" )
     message( STATUS "TOP_PROJECT_CMAKE_CONFIG_DIR being set to ${TOP_PROJECT_CMAKE_CONFIG_DIR}" )
+    set( ${PROJECT_NAME}_CMAKE_CONFIG_DIR "${PACKAGE_CONFIG_PREFIX}" CACHE INTERNAL "${PROJECT_NAME} CMake config installation path" )
+    message( STATUS "${PROJECT_NAME}_CMAKE_CONFIG_DIR being set to ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}" )
 endif()
 
 
@@ -216,13 +218,14 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
         message( STATUS "Include files for submodule ${SM_NAME} will be installed in ${TOP_PROJECT_INCLUDE_INSTALL_DIR}${SM_INCLUDE_SUBDIR}" )
 
         # Set CMake config subdirectory
-        set( SM_CMAKE_CONFIG_SUBDIR "/${SM_NAME}" )
-        message( STATUS "CMake config files for submodule ${SM_NAME} will be installed in ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}" )
-
+        set( ${SM_NAME}_CMAKE_CONFIG_DIR "${PACKAGE_CONFIG_PREFIX}/${SM_NAME}" CACHE INTERNAL "${SM_NAME} CMake config installation path" )
+    
         message( STATUS "SM ${SM_NAME} cached variables:" )
         message( STATUS "${SM_NAME}_FOUND: ${${SM_NAME}_FOUND}" )
         message( STATUS "${SM_NAME}_LOCATION: ${${SM_NAME}_LOCATION}" )
+        message( STATUS "${SM_NAME}_BINARY_LOCATION: ${${SM_NAME}_BINARY_LOCATION}" )
         message( STATUS "${SM_NAME}_PARENT_LIB_NAME_SUFFIX: ${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}")
+        message( STATUS "${SM_NAME}_CMAKE_CONFIG_DIR: ${${SM_NAME}_CMAKE_CONFIG_DIR}" )
 
         message( STATUS "Proceeding into subdirectory: ${SM_LOCATION}" )
         add_subdirectory( ${SM_LOCATION} )
@@ -255,7 +258,7 @@ macro( pbuilder_expand_lib_names )
     # Supply library targets as additional macro arguments
     # Output is in the form of the variable FULL_LIB_NAMES
     set( LIB_NAMES ${ARGN} )
-    message( STATUS "expanding these project libraries: ${LIB_NAMES}" )
+    #message( STATUS "expanding these project libraries: ${LIB_NAMES}" )
     set( FULL_LIB_NAMES )
     foreach( lib ${LIB_NAMES} )
         pbuilder_expand_lib_name( ${lib} )
@@ -267,23 +270,8 @@ endmacro()
 macro( pbuilder_use_sm_library LIB_NAME SM_NAME )
     pbuilder_expand_lib_name_2( ${LIB_NAME} ${SM_NAME} )
     list( APPEND ${PROJECT_NAME}_SM_LIBRARIES ${FULL_LIB_NAME} )
-    message( STATUS "Added SM library ${FULL_LIB_NAME} to ${PROJECT_NAME}_SM_LIBRARIES" )
+    #message( STATUS "Added SM library ${FULL_LIB_NAME} to ${PROJECT_NAME}_SM_LIBRARIES" )
 endmacro()
-
-function( pbuilder_get_lib_include_dirs VAR_OUT_INCLUDE_DIRS VAR_IN_LIBRARIES )
-    # Supply output variable as first argument
-    # Supply library targets as additional arguments
-    set( include_dirs )
-    foreach( LIBRARY ${${VAR_IN_LIBRARIES}} )
-        get_target_property( LIB_INCLUDE_DIRS ${LIBRARY} INTERFACE_INCLUDE_DIRECTORIES )
-        list( APPEND include_dirs ${LIB_INCLUDE_DIRS} )
-    endforeach()
-    if( include_dirs )
-        list( REMOVE_DUPLICATES include_dirs )
-    endif()
-    set( ${VAR_OUT_INCLUDE_DIRS} ${include_dirs} PARENT_SCOPE )
-    #message( STATUS "###### lib include dirs: ${include_dirs}" )
-endfunction()
 
 function( pbuilder_library )
     # Builds a shared-object library
@@ -371,7 +359,6 @@ function( pbuilder_executables )
     set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES )
     cmake_parse_arguments( EXES "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
-    ###message( STATUS "programs: ${${PROGRAMS}}" )
     message( "Building multiple executables" )
     message( STATUS "executable source files: ${EXES_SOURCES}" )
     message( STATUS "project library dependencies: ${EXES_PROJECT_LIBRARIES}" )
@@ -446,7 +433,6 @@ function( pbuilder_component_install_and_export )
     #     LIBTARGETS: all library targets to be installed
     #     EXETARGETS: all executable targets to be installed
 
-
     set( OPTIONS )
     set( ONEVALUEARGS COMPONENT )
     set( MULTIVALUEARGS LIBTARGETS EXETARGETS )
@@ -467,13 +453,11 @@ function( pbuilder_component_install_and_export )
         message( STATUS "Expanded lib names: ${FULL_LIBTARGETS}" )
 
         # make targets available at build time
-        #message( STATUS "******* build-time lib targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
         export( TARGETS ${FULL_LIBTARGETS}
             FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
         )
 
         # install libraries and add to export for installation
-        #message( STATUS "******* installed lib targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
         install( TARGETS ${FULL_LIBTARGETS} 
             EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
             COMPONENT ${CIE_COMPONENT}
@@ -503,12 +487,12 @@ function( pbuilder_component_install_and_export )
 
     # Export installation
     message( "Installing export ${PROJECT_NAME}${INSERT_COMPONENT}_Targets" )
-    message( STATUS "Output file will be ${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
+    message( STATUS "Output file will be ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
     install( EXPORT ${PROJECT_NAME}${INSERT_COMPONENT}_Targets
         NAMESPACE
             ${PROJECT_NAME}::
         DESTINATION
-            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
+            ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}
     )
 
 
@@ -601,7 +585,7 @@ function( pbuilder_do_package_config )
             ${CONFIG_VERSION_PATH}
             ${CONFIG_PATH}
         DESTINATION 
-            ${TOP_PROJECT_CMAKE_CONFIG_DIR}${SM_CMAKE_CONFIG_SUBDIR}
+            ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}
     )
 
 endfunction()
@@ -615,11 +599,6 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     message( STATUS "full project libraries (pybind11): ${FULL_PROJECT_LIBRARIES}" )
 
     message( STATUS "submodule libraries (pybind11): ${${PROJECT_NAME}_SM_LIBRARIES}" )
-
-    set( PROJECT_INCLUDE_DIRS )
-    pbuilder_get_lib_include_dirs( PROJECT_INCLUDE_DIRS FULL_PROJECT_LIBRARIES )
-
-    include_directories( ${PROJECT_INCLUDE_DIRS} )
 
     # Potential point of confusion: the C++ library is "Scarab" and the python library is "scarab"
     # Other possible naming schemes seemed less desirable, and we'll hopefully avoid confusion with these comments
