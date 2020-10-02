@@ -29,7 +29,7 @@ namespace scarab
      @class config_decorator
      @author N. S. Oblath
 
-     @brief Adds the ability to create options and subcommands that are tied to a main_app's master config
+     @brief Adds the ability to create options and subcommands that are tied to a main_app's primary config
 
      @details
      Note that while this class is called a decorator, it does not follow the actual decorator pattern.
@@ -48,7 +48,7 @@ namespace scarab
      config_decorator.  So main_app is also the top of the config_decorator hierarchy.
 
      Options, on the other hand, do not form their own hierarchy.  Each App owns its options.  On the Scarab side,
-     though, even options that belong to subcommands contribute to the main_app's master config.  Therefore when
+     though, even options that belong to subcommands contribute to the main_app's primary config.  Therefore when
      config_decorator::add_config_option() is used, the app_option_holder that corresponds to the new option is
      given directly to the main_app.
     */
@@ -66,33 +66,33 @@ namespace scarab
             main_app* main() const;
             app* this_app() const;
 
-            /// Add a subcommand that is linked to a particular main_app and can create options that modify that main_app's master config
+            /// Add a subcommand that is linked to a particular main_app and can create options that modify that main_app's primary config
             config_decorator* add_config_subcommand( std::string a_subcommand_name, std::string a_description="" );
 
-            /// Add an option that gets automatically added to the master config of a main_app
+            /// Add an option that gets automatically added to the primary config of a main_app
             template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
             CLI::Option* add_config_option( std::string a_name,
-                                            std::string a_master_config_addr,
+                                            std::string a_primary_config_addr,
                                             std::string a_description = "" );
 
-            /// Add an option that gets automatically added to the master config of a main_app
+            /// Add an option that gets automatically added to the primary config of a main_app
             template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
             CLI::Option* add_config_multi_option( std::string a_name,
-                                                  std::string a_master_config_addr,
+                                                  std::string a_primary_config_addr,
                                                   std::string a_description = "" );
 
-            /// Add a flag that gets automatically added to the master config of a main_app
+            /// Add a flag that gets automatically added to the primary config of a main_app
             /// The flag can be passed multiple times, and the number of instances will be recorded in the config
             template< typename T, CLI::enable_if_t< std::is_integral<T>::value && ! CLI::is_bool<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
             CLI::Option* add_config_flag( std::string a_name,
-                                          std::string a_master_config_addr,
+                                          std::string a_primary_config_addr,
                                           std::string a_description = "" );
 
-            /// Add a flag that gets automatically added to the master config of a main_app
+            /// Add a flag that gets automatically added to the primary config of a main_app
             /// This flag is recorded in the config as a boolean: false if it doesn't appear in the command line, and true if it does
             template< typename T, CLI::enable_if_t< CLI::is_bool<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
             CLI::Option* add_config_flag( std::string a_name,
-                                          std::string a_master_config_addr,
+                                          std::string a_primary_config_addr,
                                           std::string a_description = "" );
 
         public:
@@ -103,7 +103,7 @@ namespace scarab
             {
                 virtual void add_to_app_options( param_node& a_app_options ) = 0;
                 CLI::Option* f_option;
-                std::string f_master_config_addr;
+                std::string f_primary_config_addr;
                 virtual ~app_option_holder() {}
             };
 
@@ -114,7 +114,7 @@ namespace scarab
                 {
                     if( ! (*f_option) ) return;
                     param_ptr_t t_new_config_ptr = simple_parser::parse_address(
-                            f_master_config_addr,
+                            f_primary_config_addr,
                             param_ptr_t( new param_value(f_value) ) ); // throws scarab::error if top-level param object is not a node
                     a_app_options.merge( t_new_config_ptr->as_node() );
                     return;
@@ -132,7 +132,7 @@ namespace scarab
                     param_array t_array;
                     std::for_each( f_values.begin(), f_values.end(), [&t_array]( T a_value ){ t_array.push_back( a_value ); } );
                     param_ptr_t t_new_config_ptr = simple_parser::parse_address(
-                            f_master_config_addr,
+                            f_primary_config_addr,
                             param_ptr_t( new param_array(std::move(t_array)) ) ); // throws scarab::error if top-level param object is not a node
                     a_app_options.merge( t_new_config_ptr->as_node() );
                     return;
@@ -147,7 +147,7 @@ namespace scarab
                 {
                     if( ! (*f_option) ) return;
                     param_ptr_t t_new_config_ptr = simple_parser::parse_address(
-                            f_master_config_addr,
+                            f_primary_config_addr,
                             param_ptr_t( new param_value(*f_option) ) ); // throws scarab::error if top-level param object is not a node
                     a_app_options.merge( t_new_config_ptr->as_node() );
                     return;
@@ -175,7 +175,7 @@ namespace scarab
      This class is designed to provide an entry point for an application, and to setup the application's configuration
      based on information provided by the user at the command line.
 
-     The application's master "configuration" is in the form of a scarab::param_node object that takes input from
+     The application's primary "configuration" is in the form of a scarab::param_node object that takes input from
      default values, a configuration file, directly-addressed arguments, and application-specific options.
 
      The `main_app` class uses and makes available all of the functionality of the CLI11 library, and
@@ -219,15 +219,15 @@ namespace scarab
        4. Application-specified options
 
        In stage 3, arguments can have two forms:
-         - Keyword arguments, in the form [name]=[value], are merged with the master config.
+         - Keyword arguments, in the form [name]=[value], are merged with the primary config.
            They're also separately accessible as `nonoption_kw_args`
-         - Ordered arguments, in the form [value], are not merged with the master config.
+         - Ordered arguments, in the form [value], are not merged with the primary config.
            They're accessible as `nonoption_ord_args`
 
        Application specified options (stage 4) are merged with the config and
        are separately accessible as `app_options`.  They have to be specified
        in the application using `add_config_option()`, which will map
-       the option name to an address in the master config.
+       the option name to an address in the primary config.
 
        The functionality for each stage is implemented in its own virtual function,
        so a subclass can customize the procedure as needed.
@@ -238,7 +238,7 @@ namespace scarab
          What happens:
          1. my_app will have default values hard-coded
          2. File `config.yaml` will be parsed and merged with the defaults
-         3. Configuration `nested { value: "hello" }` will be merged with the master config
+         3. Configuration `nested { value: "hello" }` will be merged with the primary config
          4. Option `an_opt` will set something specified in the config to 20
 
      See CLI11 documentation for the CLI::App class:
@@ -277,7 +277,7 @@ namespace scarab
             void set_version( scarab::version_semantic_ptr_t a_ver );
 
             /// Master configuration tree for the application
-            mv_referrable( param_node, master_config );
+            mv_referrable( param_node, primary_config );
 
             // configuration stage 1
             /// Default configuration values
@@ -328,48 +328,48 @@ namespace scarab
 
     template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
     CLI::Option* config_decorator::add_config_option( std::string a_name,
-                                                      std::string a_master_config_addr,
+                                                      std::string a_primary_config_addr,
                                                       std::string a_description )
     {
         auto t_opt_holder_ptr = std::make_shared< app_option_holder_typed<T> >();
         t_opt_holder_ptr->f_option = f_this->add_option( a_name, t_opt_holder_ptr->f_value, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
-        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
+        t_opt_holder_ptr->f_primary_config_addr = a_primary_config_addr;
         f_main->app_option_holders().push_back( t_opt_holder_ptr );
         return t_opt_holder_ptr->f_option;
     }
 
     template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
     CLI::Option* config_decorator::add_config_multi_option( std::string a_name,
-                                                            std::string a_master_config_addr,
+                                                            std::string a_primary_config_addr,
                                                             std::string a_description )
     {
         auto t_opt_holder_ptr = std::make_shared< app_option_holder_vector_typed<T> >();
         t_opt_holder_ptr->f_option = f_this->add_option( a_name, t_opt_holder_ptr->f_values, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
-        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
+        t_opt_holder_ptr->f_primary_config_addr = a_primary_config_addr;
         f_main->app_option_holders().push_back( t_opt_holder_ptr );
         return t_opt_holder_ptr->f_option;
     }
 
     template< typename T, CLI::enable_if_t< std::is_integral<T>::value && ! CLI::is_bool<T>::value, CLI::detail::enabler > >
     CLI::Option* config_decorator::add_config_flag( std::string a_name,
-                                                    std::string a_master_config_addr,
+                                                    std::string a_primary_config_addr,
                                                     std::string a_description )
     {
         auto t_opt_holder_ptr = std::make_shared< app_option_holder_typed<T> >();
         t_opt_holder_ptr->f_option = f_this->add_flag( a_name, t_opt_holder_ptr->f_value, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
-        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
+        t_opt_holder_ptr->f_primary_config_addr = a_primary_config_addr;
         f_main->app_option_holders().push_back( t_opt_holder_ptr );
         return t_opt_holder_ptr->f_option;
     }
 
     template< typename T, CLI::enable_if_t< CLI::is_bool<T>::value, CLI::detail::enabler > >
     CLI::Option* config_decorator::add_config_flag( std::string a_name,
-                                                    std::string a_master_config_addr,
+                                                    std::string a_primary_config_addr,
                                                     std::string a_description )
     {
         auto t_opt_holder_ptr = std::make_shared< app_option_holder_bool_flag >();
         t_opt_holder_ptr->f_option = f_this->add_flag( a_name, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
-        t_opt_holder_ptr->f_master_config_addr = a_master_config_addr;
+        t_opt_holder_ptr->f_primary_config_addr = a_primary_config_addr;
         f_main->app_option_holders().push_back( t_opt_holder_ptr );
         return t_opt_holder_ptr->f_option;
     }

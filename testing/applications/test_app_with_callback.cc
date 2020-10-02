@@ -51,7 +51,7 @@ namespace scarab
         void execute( const main_app& an_app )
         {
             // configure to run
-            f_value = an_app.master_config().get_value( "value", f_value );
+            f_value = an_app.primary_config().get_value( "value", f_value );
 
             // do a thing!
             LPROG( testlog, "My value is: " << f_value );

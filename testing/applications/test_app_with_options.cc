@@ -47,7 +47,7 @@ class test_app : public main_app
             add_option( "-s,--second-value", [this](std::vector< std::string > args) { f_second_value = args[0]; return true; }, "Set the second value" );
 
             // Add an option that sets the value into the configuration via callback
-            add_option( "-t,--third-value", [this](std::vector< std::string > args) { f_master_config.add( "third-value", args[0] ); return true; }, "Set the third value" );
+            add_option( "-t,--third-value", [this](std::vector< std::string > args) { f_primary_config.add( "third-value", args[0] ); return true; }, "Set the third value" );
         }
         virtual ~test_app() {}
 
@@ -70,7 +70,7 @@ int main( int argc, char **argv )
 
     LPROG( testlog, "First value: " << the_main.get_first_value() );
     LPROG( testlog, "Second value: " << the_main.second_value() );
-    LPROG( testlog, "Third value: " << the_main.master_config()["third-value"]() );
+    LPROG( testlog, "Third value: " << the_main.primary_config()["third-value"]() );
 
     return 0;
 }

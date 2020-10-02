@@ -34,11 +34,11 @@ namespace scarab
         {
             scarab::config_decorator* t_sc_json = an_app.add_config_subcommand( "json",  "Parse a JSON file" );
             t_sc_json->add_config_option< std::string >( "filename", "filename", "File to parse" )->required();
-            t_sc_json->this_app()->callback([&an_app,  this]() { this->json( an_app.master_config() ); } );
+            t_sc_json->this_app()->callback([&an_app,  this]() { this->json( an_app.primary_config() ); } );
 
             scarab::config_decorator* t_sc_yaml = an_app.add_config_subcommand( "yaml", "Parse a YAML file" );
             t_sc_yaml->add_config_option< std::string >( "filename", "filename", "File to parse" )->required();
-            t_sc_yaml->this_app()->callback([&an_app, this]() { this->yaml( an_app.master_config() ); } );
+            t_sc_yaml->this_app()->callback([&an_app, this]() { this->yaml( an_app.primary_config() ); } );
 
             return;
         }

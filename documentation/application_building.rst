@@ -12,14 +12,14 @@ The main set of classes that a developer will encounter are:
 Configuring an Application
 --------------------------
 
-The user tells the application how to run using its configuration.  The master configuration can be put together using several stages of input:
+The user tells the application how to run using its configuration.  The primary configuration can be put together using several stages of input:
 
     #. Default configuration: the developer of the application can provide a default hard-coded configuration via ``main_app::default_config()``
     #. Configuration file: supplied via the command line (``-c`` or ``--config``)
     #. Non-option command-line arguments (see below)
     #. Option arguments setup to modify the configuration
 
-Starting from the top down, successive stages of configuration will add to or overwrite (for duplicated configuration keys) the master configuration.  The configuration can be accessed with ``main_app::master_config()``.
+Starting from the top down, successive stages of configuration will add to or overwrite (for duplicated configuration keys) the primary configuration.  The configuration can be accessed with ``main_app::primary_config()``.
 
 Using the Command Line
 ----------------------
@@ -125,7 +125,7 @@ This example captures the behavior of the application in a class, and then runs 
             void execute( const main_app& an_app )
             {
                 // configure to run
-                f_value = an_app.master_config().get_value( "value", f_value );
+                f_value = an_app.primary_config().get_value( "value", f_value );
 
                 // do a thing!
                 LPROG( testlog, "My value is: " << f_value );
@@ -192,7 +192,7 @@ This example uses a class with two functions that are implemented as subcommands
 
             void set( const main_app& an_app )
             {
-                f_value = an_app.master_config().get_value( "value", f_value );
+                f_value = an_app.primary_config().get_value( "value", f_value );
                 LPROG( testlog, "Just to check: " << f_value );
                 return;
             }
