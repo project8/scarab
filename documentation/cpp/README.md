@@ -26,7 +26,7 @@ The software stack used to generate the documentation is:
 1. Customize `index.rst` and `conf.py` with the name and description of your project.
 1. Customize `conf.py` with the relevant directories in your project (`DOXYGEN_INPUT`, `DOXYGEN_EXCLUDE`, and `PREPROC_INCLUDE_PATH`).
 1. If you have a favicon file, put it in the documentation directory and specify it in `conf.py`; otherwise comment out the `html_favicon` variable in that file.
-1. Recommendation: don't merge these changes into the master branch just yet; test the creation of the documentation (described below) first.
+1. Recommendation: don't merge these changes into the main branch just yet; test the creation of the documentation (described below) first.
 
 ### On readthedocs
 1. Create an RTD project for your software project by importing from GitHub (this will automatically create a webhook directed to RTD).
@@ -38,10 +38,10 @@ The software stack used to generate the documentation is:
     1. Specify the branch where your documentation currently resides as "Default branch".
 1. Under Admin:Maintainers, add Noah as an additional maintainer so we can maintain access if you're unavailable.
 1. Under Builds you should see the `latest` build building.  Once it's done, check the documentation to make sure it worked.  If it worked great, carry on. If not, go back and fix whatever's wrong.
-1. Under Admin:Advanced Settings, switch the "Default branch" to `master`.
+1. Under Admin:Advanced Settings, switch the "Default branch" to `main`.
 
 ### In your project repo
-1. Merge your changes to the master branch with a new release; this should trigger a new build of the documentation, which you should then go and check.
+1. Merge your changes to the main branch with a new release; this should trigger a new build of the documentation, which you should then go and check.
 1. If it doesn't already exist, create an orphan branch in your repo called `gh-pages` and clear it of all files.
 1. Populate the `gh-pages` branch with an empty file called `.nojekyll` and the following in `index.html`:
     ```
