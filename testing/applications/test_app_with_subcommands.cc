@@ -75,7 +75,7 @@ namespace scarab
 
         void set( const main_app& an_app )
         {
-            f_value = an_app.master_config().get_value( "value", f_value );
+            f_value = an_app.primary_config().get_value( "value", f_value );
             LPROG( testlog, "Just to check: " << f_value );
             return;
         }
