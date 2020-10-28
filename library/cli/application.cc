@@ -60,7 +60,7 @@ namespace scarab
     main_app::main_app() :
             config_decorator( this, this ),
             app(),
-            f_master_config(),
+            f_primary_config(),
             f_default_config(),
             f_config_filename(),
             f_nonoption_kw_args(),
@@ -125,7 +125,7 @@ namespace scarab
 
         do_config_stage_4();
 
-        LPROG( applog, "Final configuration:\n" << f_master_config );
+        LPROG( applog, "Final configuration:\n" << f_primary_config );
         LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
     }
 
@@ -133,7 +133,7 @@ namespace scarab
     {
         // first configuration stage: defaults
         LDEBUG( applog, "first configuration stage" );
-        f_master_config.merge( f_default_config );
+        f_primary_config.merge( f_default_config );
         return;
     }
 
@@ -155,7 +155,7 @@ namespace scarab
             {
                 throw error() << "[application] configuration file must consist of an object/node";
             }
-            f_master_config.merge( t_config_from_file->as_node() );
+            f_primary_config.merge( t_config_from_file->as_node() );
         }
         return;
     }
@@ -164,7 +164,7 @@ namespace scarab
     {
         // third configuration stage: keyword args
         LDEBUG( applog, "third configuration stage" );
-        f_master_config.merge( f_nonoption_kw_args );
+        f_primary_config.merge( f_nonoption_kw_args );
         return;
     }
 
@@ -173,7 +173,7 @@ namespace scarab
         // fourth configuration stage: application options
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
-        f_master_config.merge( f_app_options );
+        f_primary_config.merge( f_app_options );
         return;
     }
 

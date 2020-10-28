@@ -20,7 +20,7 @@ namespace scarab_pybind
             .def( "set_callback", [](scarab::main_app* an_app, std::function< void() > a_fun){ an_app->callback( a_fun );} )
 
             // member variables
-            .def_property_readonly( "master_config", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::master_config )
+            .def_property_readonly( "primary_config", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::primary_config )
             .def_property( "default_config", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::default_config,
                            [](scarab::main_app& an_obj, scarab::param_node& a_config){ an_obj.default_config() = a_config; } )
             .def_property_readonly( "config_filename", (const std::string& (scarab::main_app::*)()) &scarab::main_app::config_filename )
