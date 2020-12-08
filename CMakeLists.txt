@@ -20,8 +20,6 @@ list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
 include( PackageBuilder )
 
-pbuilder_prepare_project()
-
 
 ##################
 # Scarab options #
@@ -50,6 +48,9 @@ endif()
 if( Scarab_ENABLE_TESTING )
     enable_testing()
 endif()
+
+# Scarab needs C++11
+set( CMAKE_CXX_STANDARD 11 )
 
 
 #######################
@@ -119,6 +120,13 @@ if( Scarab_BUILD_PYTHON )
     #endif()
     include_directories( ${Python3_INCLUDE_DIRS} )
 endif( Scarab_BUILD_PYTHON )
+
+
+###################
+# Process options #
+###################
+
+pbuilder_prepare_project()
 
 
 ########################
