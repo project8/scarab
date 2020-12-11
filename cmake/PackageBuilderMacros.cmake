@@ -10,7 +10,7 @@ macro( set_option VARIABLE VALUE )
     set( ${VARIABLE} ${VALUE} CACHE BOOL "" FORCE )
 endmacro()
 
-# This should be called immediately after setting the project name
+# This should be called after setting options, and before adding submodules and building the project
 macro( pbuilder_prepare_project )
 
     # Deprecated C++ version options
