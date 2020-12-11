@@ -20,8 +20,6 @@ list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/scarab/cmake )
 
 include( PackageBuilder )
 
-pbuilder_prepare_project()
-
 
 #########
 # Options
@@ -31,6 +29,9 @@ pbuilder_prepare_project()
 # Dependencies
 ##############
 
+
+# before adding submodules and building the project
+pbuilder_prepare_project()
 
 ########
 # Scarab
