@@ -15,7 +15,8 @@ namespace scarab_pybind
 
         all_members.push_back( "MainApp" );
         pybind11::class_< scarab::main_app >( mod, "MainApp", "Base class for creating CLI utilities" )
-            .def( pybind11::init< >() )
+            .def( pybind11::init< bool >(),
+                  pybind11::arg( "no_config" ) = false )
 
             .def( "set_callback", [](scarab::main_app* an_app, std::function< void() > a_fun){ an_app->callback( a_fun );} )
 
@@ -28,6 +29,7 @@ namespace scarab_pybind
             .def_property_readonly( "nonoption_kw_args", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::nonoption_kw_args )
             .def_property_readonly( "nonoption_ord_args", (scarab::param_array& (scarab::main_app::*)()) &scarab::main_app::nonoption_ord_args )
             .def_property_readonly( "app_options", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::app_options )
+            .def_property_readonly( "no_config", &scarab::main_app::get_no_config )
 
             .def( "do_config_stage_1", &scarab::main_app::do_config_stage_1 )
             .def( "do_config_stage_2", &scarab::main_app::do_config_stage_2 )

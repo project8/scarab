@@ -47,7 +47,7 @@ using namespace scarab;
 
 int main( int argc, char **argv )
 {
-    main_app the_main;
+    main_app the_main( false );
 
     CLI11_PARSE( the_main, argc, argv );
 

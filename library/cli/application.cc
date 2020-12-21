@@ -57,7 +57,7 @@ namespace scarab
 
     main_app::verbosity_map_t main_app::s_verbosities( fill_verbosities() );
 
-    main_app::main_app() :
+    main_app::main_app( bool a_no_config ) :
             config_decorator( this, this ),
             app(),
             f_primary_config(),
@@ -66,13 +66,17 @@ namespace scarab
             f_nonoption_kw_args(),
             f_nonoption_ord_args(),
             f_app_options(),
-            f_app_option_holders()
+            f_app_option_holders(),
+            f_no_config( a_no_config )
     {
         set_global_verbosity( logger::ELevel::eProg );
 
         allow_extras(); // allow unrecognized options, which are parsed into the nonoption args
 
-        add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
+        if( ! f_no_config )
+        {
+            add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
+        }
 
         auto t_verbose_callback = [this]( unsigned a_count )
             {
@@ -132,6 +136,9 @@ namespace scarab
     void main_app::do_config_stage_1()
     {
         // first configuration stage: defaults
+
+        if( f_no_config ) return;
+
         LDEBUG( applog, "first configuration stage" );
         f_primary_config.merge( f_default_config );
         return;
@@ -140,6 +147,9 @@ namespace scarab
     void main_app::do_config_stage_2()
     {
         // second configuration stage: config file
+
+        if( f_no_config ) return;
+
         LDEBUG( applog, "second configuration stage" );
         if( ! f_config_filename.empty() )
         {
@@ -163,6 +173,9 @@ namespace scarab
     void main_app::do_config_stage_3()
     {
         // third configuration stage: keyword args
+
+        if( f_no_config ) return;
+
         LDEBUG( applog, "third configuration stage" );
         f_primary_config.merge( f_nonoption_kw_args );
         return;
@@ -171,6 +184,9 @@ namespace scarab
     void main_app::do_config_stage_4()
     {
         // fourth configuration stage: application options
+
+        if( f_no_config ) return;
+
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
         f_primary_config.merge( f_app_options );
