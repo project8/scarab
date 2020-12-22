@@ -109,28 +109,32 @@ namespace scarab
 
     void main_app::pre_callback()
     {
-        do_config_stage_1();
-
-        do_config_stage_2();
-
-        try
+        if( ! f_no_config )
         {
-            nonoption_parser t_no_parser( remaining() );
-            f_nonoption_kw_args = t_no_parser.kw_args();
-            f_nonoption_ord_args = t_no_parser.ord_args();
+            do_config_stage_1();
+
+            do_config_stage_2();
+
+            try
+            {
+                nonoption_parser t_no_parser( remaining() );
+                f_nonoption_kw_args = t_no_parser.kw_args();
+                f_nonoption_ord_args = t_no_parser.ord_args();
+            }
+            catch( error& e )
+            {
+                LERROR( applog, "Unable to parse remaining arguments: " << e.what() );
+                throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
+            }
+
+            do_config_stage_3();
+
+            do_config_stage_4();
+
+            LPROG( applog, "Final configuration:\n" << f_primary_config );
+            LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
         }
-        catch( error& e )
-        {
-            LERROR( applog, "Unable to parse remaining arguments: " << e.what() );
-            throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
-        }
-
-        do_config_stage_3();
-
-        do_config_stage_4();
-
-        LPROG( applog, "Final configuration:\n" << f_primary_config );
-        LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
+        return;
     }
 
     void main_app::do_config_stage_1()
