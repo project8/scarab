@@ -20,8 +20,6 @@ list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/scarab/cmake )
 
 include( PackageBuilder )
 
-pbuilder_prepare_project()
-
 message( STATUS "Full project name for <${PROJECT_NAME}: ${${PROJECT_NAME}_FULL_PROJECT_NAME}" )
 
 
@@ -33,6 +31,10 @@ message( STATUS "Full project name for <${PROJECT_NAME}: ${${PROJECT_NAME}_FULL_
 # Dependencies
 ##############
 
+
+
+# before adding submodules and building the project
+pbuilder_prepare_project()
 
 ########
 # Scarab

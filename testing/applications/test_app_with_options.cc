@@ -64,7 +64,7 @@ class test_app : public main_app
 
 int main( int argc, char **argv )
 {
-    test_app the_main;
+    test_app the_main( true ); // boolean option is for skipping use of a config file
 
     CLI11_PARSE( the_main, argc, argv );
 

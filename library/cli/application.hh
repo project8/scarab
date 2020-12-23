@@ -175,6 +175,10 @@ namespace scarab
      This class is designed to provide an entry point for an application, and to setup the application's configuration
      based on information provided by the user at the command line.
 
+     Note that there is a constructor option, `no_config`, which allows `main_app` to be used without using the configuration file. 
+     There will not be a `-c` CLI option, and the configuration steps will not be run.  Functionality is much closer 
+     to that of `CLI::App` in this case.
+
      The application's primary "configuration" is in the form of a scarab::param_node object that takes input from
      default values, a configuration file, directly-addressed arguments, and application-specific options.
 
@@ -256,7 +260,7 @@ namespace scarab
     class SCARAB_API main_app : public config_decorator, public app
     {
         public:
-            main_app();
+            main_app( bool a_no_config = false );
             virtual ~main_app();
 
         public:
@@ -299,6 +303,8 @@ namespace scarab
 
             /// Store the app option holder structs from this app and any subcommands
             mv_referrable( std::vector< std::shared_ptr< app_option_holder > >, app_option_holders );
+
+            mv_accessible_noset( bool, no_config );
 
             //*************************
             // Verbosity
