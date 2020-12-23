@@ -26,13 +26,14 @@ and Scarab is included as a submodule (or as a nested submodule) in all of the o
 Requirements
 ------------
 
-PB requires CMake v3.1 because it uses ``CMAKE_CXX_STANDARD``.
+PB requires CMake v3.12 because it uses FindPython3.
 
 
 Basic Usage
 -----------
 
 This section will explain the basic usage of PB by setting up an example software package called Insecta.
+
 
 Package Structure
 ^^^^^^^^^^^^^^^^^
@@ -91,14 +92,18 @@ Initial Setup
 
 The initial part of the CMakeList file should be setup as follows::
 
-    cmake_minimum_version( VERSION 3.1 )  # Minimum CMake version mentioned above
+    cmake_minimum_version( VERSION 3.12 )  # Minimum CMake version mentioned above
     cmake_policy( SET CMP0048 NEW )  # Package version to be specified in the project() command (optional but recommended)
     project( Insecta VERSION 1.0.0 )  # Setup the package.  Package name is `Insecta`
 
     list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/Scarab/cmake )  # This is required so that PB can be included
     include( PackageBuilder )  # Loads the PackageBuilder.cmake file
 
-    pbuilder_prepare_project()  # Sets up the PB environment
+    # Create options or set options from submodules
+
+    # Find other dependencies
+
+    pbuilder_prepare_project()  # Processes PB options
 
     pbuilder_add_submodule( Scarab Scarab )  # Insecta will use the Scarab library.  See below for more details on this macro.
 
