@@ -102,9 +102,6 @@ option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of execu
 # default version of C++
 # acceptable values are any used by the CXX_STANDARD property of your CMake
 set( CMAKE_CXX_STANDARD 11 )
-#option( USE_CPP11 "Flag for building with C++11" ON )
-#option( USE_CPP14 "Flag for building with C++14" OFF )
-#option( USE_CPP17 "Flag for building with C++17" OFF )
 
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
