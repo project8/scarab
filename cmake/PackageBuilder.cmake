@@ -163,6 +163,10 @@ if( GIT_FOUND )
         set( ${PROJECT_NAME}_PACKAGE_NAME "${GIT_PACKAGE}" )
     endif( IS_GIT_REPO )
 endif( GIT_FOUND )
+# check if we set the _PACKAGE_NAME variable; if we didn't, then we'll use an alternate setting
+if( NOT ${PROJECT_NAME}_PACKAGE_NAME )
+    set( ${PROJECT_NAME}_PACKAGE_NAME "${PROJECT_NAME}" )
+endif()
 
 # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
 set( ${PROJECT_NAME}_PACKAGE_STRING "${PROJECT_NAME} ${${PROJECT_NAME}_VERSION}" )
