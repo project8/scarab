@@ -102,9 +102,6 @@ option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of execu
 # default version of C++
 # acceptable values are any used by the CXX_STANDARD property of your CMake
 set( CMAKE_CXX_STANDARD 11 )
-#option( USE_CPP11 "Flag for building with C++11" ON )
-#option( USE_CPP14 "Flag for building with C++14" OFF )
-#option( USE_CPP17 "Flag for building with C++17" OFF )
 
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
@@ -163,6 +160,10 @@ if( GIT_FOUND )
         set( ${PROJECT_NAME}_PACKAGE_NAME "${GIT_PACKAGE}" )
     endif( IS_GIT_REPO )
 endif( GIT_FOUND )
+# check if we set the _PACKAGE_NAME variable; if we didn't, then we'll use an alternate setting
+if( NOT ${PROJECT_NAME}_PACKAGE_NAME )
+    set( ${PROJECT_NAME}_PACKAGE_NAME "${PROJECT_NAME}" )
+endif()
 
 # define the variables to describe the package (will go in the [ProjectName]Config.hh file)
 set( ${PROJECT_NAME}_PACKAGE_STRING "${PROJECT_NAME} ${${PROJECT_NAME}_VERSION}" )
