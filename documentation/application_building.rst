@@ -97,7 +97,7 @@ The simplest example
 
     int main( int argc, char **argv )
     {
-        main_app the_main( true );
+        main_app the_main( false );
 
         CLI11_PARSE( the_main, argc, argv );
 
@@ -105,7 +105,7 @@ The simplest example
     }
 
 In this example we create the app (``main_app``), parse the CL input, and then return.  Note that the ``main_app`` constructor 
-includes a single argument, passing ``true`` to disable the use of a config file.  
+includes a single argument, passing ``false`` to disable the use of a config file.  
 
 Example with a callback
 #######################
@@ -158,8 +158,8 @@ This example captures the behavior of the application in a class, and then runs 
         return 0;
     }
 
-Note that in the ``main_app`` constructor we did not pass an argument as we did in the previous example.  In this case we use the default value, which enables 
-the use of a config file.
+Note that in the ``main_app`` constructor we did not pass an argument as we did in the previous example.  
+In this case we use the default value, which enables the use of a config file.
 
 
 Example with subcommands

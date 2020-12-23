@@ -57,7 +57,7 @@ namespace scarab
 
     main_app::verbosity_map_t main_app::s_verbosities( fill_verbosities() );
 
-    main_app::main_app( bool a_no_config ) :
+    main_app::main_app( bool a_use_config ) :
             config_decorator( this, this ),
             app(),
             f_primary_config(),
@@ -67,13 +67,13 @@ namespace scarab
             f_nonoption_ord_args(),
             f_app_options(),
             f_app_option_holders(),
-            f_no_config( a_no_config )
+            f_use_config( a_use_config )
     {
         set_global_verbosity( logger::ELevel::eProg );
 
         allow_extras(); // allow unrecognized options, which are parsed into the nonoption args
 
-        if( ! f_no_config )
+        if( f_use_config )
         {
             add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
         }
@@ -109,7 +109,7 @@ namespace scarab
 
     void main_app::pre_callback()
     {
-        if( ! f_no_config )
+        if( f_use_config )
         {
             do_config_stage_1();
 
@@ -141,7 +141,7 @@ namespace scarab
     {
         // first configuration stage: defaults
 
-        if( f_no_config ) return;
+        if( ! f_use_config ) return;
 
         LDEBUG( applog, "first configuration stage" );
         f_primary_config.merge( f_default_config );
@@ -152,7 +152,7 @@ namespace scarab
     {
         // second configuration stage: config file
 
-        if( f_no_config ) return;
+        if( ! f_use_config ) return;
 
         LDEBUG( applog, "second configuration stage" );
         if( ! f_config_filename.empty() )
@@ -178,7 +178,7 @@ namespace scarab
     {
         // third configuration stage: keyword args
 
-        if( f_no_config ) return;
+        if( ! f_use_config ) return;
 
         LDEBUG( applog, "third configuration stage" );
         f_primary_config.merge( f_nonoption_kw_args );
@@ -189,7 +189,7 @@ namespace scarab
     {
         // fourth configuration stage: application options
 
-        if( f_no_config ) return;
+        if( ! f_use_config ) return;
 
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
