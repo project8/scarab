@@ -30,7 +30,7 @@ jobs:
     script: testing/run_tests
   - stage: Testing
     os: linux
-    dist: bionic
+    dist: buster
     compiler: gcc
     addons:
       apt:
@@ -53,7 +53,7 @@ jobs:
     script: testing/run_tests
   - stage: Testing
     os: linux
-    dist: bionic
+    dist: buster
     compiler: clang
     addons:
       apt:
