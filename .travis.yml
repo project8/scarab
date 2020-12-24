@@ -37,14 +37,13 @@ jobs:
         sources:
         - ubuntu-toolchain-r-test
         packages:
-        - g++-5
         - libboost-all-dev
         - rapidjson-dev
         - libyaml-cpp-dev
         - pybind11-dev
     before_install:
     - cmake --version
-    - export CC=gcc-5 && export CXX=g++-5
+    - export CC=gcc-7 && export CXX=g++-7
     - mkdir build
     install:
     - cd build
@@ -60,7 +59,6 @@ jobs:
         sources:
         - ubuntu-toolchain-r-test
         packages:
-        - clang
         - libboost-all-dev
         - rapidjson-dev
         - libyaml-cpp-dev
