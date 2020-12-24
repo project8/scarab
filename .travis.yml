@@ -24,7 +24,7 @@ jobs:
     - mkdir build
     install:
     - cd build
-    - cmake ..
+    - cmake .. -DScarab_ENABLE_TESTING
     - make install
     script: testing/run_tests
   - stage: Testing
@@ -46,7 +46,7 @@ jobs:
     - mkdir build
     install:
     - cd build
-    - cmake ..
+    - cmake .. -DScarab_ENABLE_TESTING
     - make install
     script: testing/run_tests
   - stage: Testing
@@ -67,6 +67,6 @@ jobs:
     - mkdir build
     install:
     - cd build
-    - cmake ..
+    - cmake .. -DScarab_ENABLE_TESTING
     - make
     script: testing/run_tests
