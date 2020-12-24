@@ -43,7 +43,7 @@ jobs:
         - pybind11-dev
     before_install:
     - cmake --version
-    - export CC=gcc-7 && export CXX=g++-7
+    - export CC=gcc && export CXX=g++
     - mkdir build
     install:
     - cd build
