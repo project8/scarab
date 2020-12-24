@@ -19,6 +19,7 @@ jobs:
         packages:
         - rapidjson
         - yaml-cpp
+        - pybind11
         update: true
     before_install:
     - mkdir build
@@ -40,6 +41,7 @@ jobs:
         - libboost-all-dev
         - rapidjson-dev
         - libyaml-cpp-dev
+        - pybind11-dev
     before_install:
     - cmake --version
     - export CC=gcc-5 && export CXX=g++-5
@@ -62,6 +64,7 @@ jobs:
         - libboost-all-dev
         - rapidjson-dev
         - libyaml-cpp-dev
+        - pybind11-dev
     before_install:
     - export CC=clang && export CXX=clang++
     - mkdir build
