@@ -30,7 +30,7 @@ jobs:
     script: testing/run_tests
   - stage: Testing
     os: linux
-    dist: xenial
+    dist: focal
     compiler: gcc
     addons:
       apt:
@@ -52,7 +52,7 @@ jobs:
     script: testing/run_tests
   - stage: Testing
     os: linux
-    dist: xenial
+    dist: focal
     compiler: clang
     addons:
       apt:
