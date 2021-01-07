@@ -12,6 +12,8 @@
 #include "macros.hh"
 #include "scarab_api.hh"
 
+#include <memory>
+
 /**
  * @file
  * @brief Contains the logger class and macros, based on Kasper's KLogger class.
