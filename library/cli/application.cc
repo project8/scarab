@@ -217,7 +217,7 @@ namespace scarab
         f_global_verbosity = t_it;
 
         // set the global verbosity in the logger
-        applog.SetGlobalLevel( f_global_verbosity->second );
+        logger::SetGlobalLevel( f_global_verbosity->second );
         return;
     }
 

@@ -39,125 +39,147 @@ namespace scarab
 
     struct logger::Private
     {
-            static std::mutex sMutex;
+        static std::mutex sMutex;
 
-            typedef std::set< logger* > LoggerSet;
-            static LoggerSet* AllLoggers()
+        typedef std::set< logger* > LoggerSet;
+        static std::shared_ptr<LoggerSet> AllLoggers()
+        {
+            // construct-on-first-use strategy to avoid static initialization fiasco
+            static std::shared_ptr<LoggerSet> sAllLoggers = std::make_shared< LoggerSet >();
+            return sAllLoggers;
+        }
+
+        static char sDateTimeFormat[16];
+        static time_t sRawTime;
+        static tm* sProcessedTime;
+        static char sTimeBuff[512];
+        static size_t getTimeAbsoluteStr()
+        {
+            time(&logger::Private::sRawTime);
+
+            sProcessedTime = localtime(&logger::Private::sRawTime);
+            return strftime(logger::Private::sTimeBuff, 512,
+                logger::Private::sDateTimeFormat,
+                logger::Private::sProcessedTime);
+        }
+
+
+        const char* fLogger;
+
+        static bool fColored;
+
+        static std::ostream* fOut;
+        static std::ostream* fErr;
+
+        ELevel fThreshold;
+        bool fThresholdIsGlobal;
+
+        static ELevel& GlobalThreshold()
+        {
+            // construct-on-first-use strategy to avoid static initialization fiasco
+            static ELevel sGlobalThreshold = logger::Private::filterMinimumLevel(ELevel::eDebug);
+            return sGlobalThreshold;
+        }
+
+        static const char* level2Str(ELevel level)
+        {
+            switch(level)
             {
-                static LoggerSet* sAllLoggers = new LoggerSet();
-                return sAllLoggers;
+                case ELevel::eTrace : return "TRACE"; break;
+                case ELevel::eDebug : return "DEBUG"; break;
+                case ELevel::eInfo  : return "INFO"; break;
+                case ELevel::eProg  : return "PROG"; break;
+                case ELevel::eWarn  : return "WARN"; break;
+                case ELevel::eError : return "ERROR"; break;
+                case ELevel::eFatal : return "FATAL"; break;
+                default     : return "XXX";
             }
+        }
 
-            static char sDateTimeFormat[16];
-			static time_t sRawTime;
-            static tm* sProcessedTime;
-            static char sTimeBuff[512];
-            static size_t getTimeAbsoluteStr()
+        static string level2Color(ELevel level)
+        {
+            switch(level)
             {
-                time(&logger::Private::sRawTime);
-
-				sProcessedTime = localtime(&logger::Private::sRawTime);
-				return strftime(logger::Private::sTimeBuff, 512,
-					logger::Private::sDateTimeFormat,
-					logger::Private::sProcessedTime);
+                case ELevel::eTrace : return TraceColor(); break;
+                case ELevel::eDebug : return DebugColor(); break;
+                case ELevel::eInfo  : return InfoColor(); break;
+                case ELevel::eProg  : return ProgColor(); break;
+                case ELevel::eWarn  : return WarnColor(); break;
+                case ELevel::eError : return ErrorColor(); break;
+                case ELevel::eFatal : return FatalColor(); break;
+                default     : return OtherColor();
             }
+        }
 
-
-            const char* fLogger;
-            static bool fColored;
-            ELevel fThreshold;
-
-            static std::ostream* fOut;
-            static std::ostream* fErr;
-
-            static const char* level2Str(ELevel level)
-            {
-                switch(level)
-                {
-                    case ELevel::eTrace : return "TRACE"; break;
-                    case ELevel::eDebug : return "DEBUG"; break;
-                    case ELevel::eInfo  : return "INFO"; break;
-                    case ELevel::eProg  : return "PROG"; break;
-                    case ELevel::eWarn  : return "WARN"; break;
-                    case ELevel::eError : return "ERROR"; break;
-                    case ELevel::eFatal : return "FATAL"; break;
-                    default     : return "XXX";
-                }
-            }
-
-            static string level2Color(ELevel level)
-            {
-                switch(level)
-                {
-                    case ELevel::eTrace : return TraceColor(); break;
-                    case ELevel::eDebug : return DebugColor(); break;
-                    case ELevel::eInfo  : return InfoColor(); break;
-                    case ELevel::eProg  : return ProgColor(); break;
-                    case ELevel::eWarn  : return WarnColor(); break;
-                    case ELevel::eError : return ErrorColor(); break;
-                    case ELevel::eFatal : return FatalColor(); break;
-                    default     : return OtherColor();
-                }
-            }
-
-
-            void logCout(ELevel level, const string& message, const Location& loc)
-            {
-                logger::Private::sMutex.lock();
-                logger::Private::getTimeAbsoluteStr();
-                if (fColored)
-                {
-                    //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                    (*fOut) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
-#ifndef NDEBUG
-                    (*fOut) << "(tid " << std::this_thread::get_id() << ") ";
+        static ELevel filterMinimumLevel(ELevel level)
+        {
+#if defined(NDEBUG) && defined(STANDARD)
+            return level >= ELevel::eInfo ? level : ELevel::eInfo;
+#elif defined(NDEBUG)
+            return level >= ELevel::eProg ? level : ELevel::eProg;
+#else
+            return level;
 #endif
-                    copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fOut));
-                    (*fOut) << "(" << loc.fLineNumber  << "): ";
-                    (*fOut) << message << EndColor() << endl;
-                }
-                else
-                {
-                    //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                    (*fOut) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
-#ifndef NDEBUG
-                    (*fOut) << "(tid " << std::this_thread::get_id() << ") ";
-#endif
-                    copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fOut));
-                    (*fOut) << "(" << loc.fLineNumber  << "): ";
-                    (*fOut) << message << endl;
-                }
-                logger::Private::sMutex.unlock();
-            }
+        }
 
-            void logCerr(ELevel level, const string& message, const Location& loc)
+
+        void logCout(ELevel level, const string& message, const Location& loc)
+        {
+            logger::Private::sMutex.lock();
+            logger::Private::getTimeAbsoluteStr();
+            if (fColored)
             {
-                logger::Private::sMutex.lock();
-                logger::Private::getTimeAbsoluteStr();
-                if (fColored)
-                {
-                    //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                    (*fErr) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+                //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
+                (*fOut) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
-                    (*fErr) << "(tid " << std::this_thread::get_id() << ") ";
+                (*fOut) << "(tid " << std::this_thread::get_id() << ") ";
 #endif
-                    copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fErr));
-                    (*fErr) << "(" << loc.fLineNumber  << "): ";
-                    (*fErr) << message << EndColor() << endl;
-                }
-                else
-                {
-                    //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                    (*fErr) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
-#ifndef NDEBUG
-                    (*fErr) << "(tid " << std::this_thread::get_id() << ") ";
-#endif
-                    copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fErr));
-                    (*fErr) << "(" << loc.fLineNumber  << "): ";
-                    (*fErr) << message << endl;
-                }
-                logger::Private::sMutex.unlock();
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fOut));
+                (*fOut) << "(" << loc.fLineNumber  << "): ";
+                (*fOut) << message << EndColor() << endl;
             }
+            else
+            {
+                //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
+                (*fOut) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+#ifndef NDEBUG
+                (*fOut) << "(tid " << std::this_thread::get_id() << ") ";
+#endif
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fOut));
+                (*fOut) << "(" << loc.fLineNumber  << "): ";
+                (*fOut) << message << endl;
+            }
+            logger::Private::sMutex.unlock();
+        }
+
+        void logCerr(ELevel level, const string& message, const Location& loc)
+        {
+            logger::Private::sMutex.lock();
+            logger::Private::getTimeAbsoluteStr();
+            if (fColored)
+            {
+                //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
+                (*fErr) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+#ifndef NDEBUG
+                (*fErr) << "(tid " << std::this_thread::get_id() << ") ";
+#endif
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fErr));
+                (*fErr) << "(" << loc.fLineNumber  << "): ";
+                (*fErr) << message << EndColor() << endl;
+            }
+            else
+            {
+                //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
+                (*fErr) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+#ifndef NDEBUG
+                (*fErr) << "(tid " << std::this_thread::get_id() << ") ";
+#endif
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*fErr));
+                (*fErr) << "(" << loc.fLineNumber  << "): ";
+                (*fErr) << message << endl;
+            }
+            logger::Private::sMutex.unlock();
+        }
     };
 
     mutex logger::Private::sMutex;
@@ -190,7 +212,7 @@ namespace scarab
         fPrivate->fColored = false;
 #endif
         sprintf(logger::Private::sDateTimeFormat,  "%%Y-%%m-%%d %%T");
-        SetLevel(ELevel::eDebug);
+        UseGlobalLevel();
         logger::Private::AllLoggers()->insert(this);
     }
 
@@ -203,13 +225,13 @@ namespace scarab
         fPrivate->fColored = false;
 #endif
         sprintf(logger::Private::sDateTimeFormat, "%%Y-%%m-%%d %%T");
-		SetLevel(ELevel::eDebug);
+		UseGlobalLevel();
 		logger::Private::AllLoggers()->insert(this);
     }
 
     logger::~logger()
     {
-        delete fPrivate;
+        logger::Private::AllLoggers()->erase(this);
     }
 
     bool logger::IsLevelEnabled(ELevel level) const
@@ -224,20 +246,32 @@ namespace scarab
 
     void logger::SetLevel(ELevel level) const
     {
-#if defined(NDEBUG) && defined(STANDARD)
-                fPrivate->fThreshold = level >= ELevel::eInfo ? level : ELevel::eInfo;
-#elif defined(NDEBUG)
-                fPrivate->fThreshold = level >= ELevel::eProg ? level : ELevel::eProg;
-#else
-                fPrivate->fThreshold = level;
-#endif
+        fPrivate->fThreshold = logger::Private::filterMinimumLevel(level);
+        fPrivate->fThresholdIsGlobal = false;
     }
 
-    void logger::SetGlobalLevel(ELevel level) const
+    void logger::UseGlobalLevel() const
     {
-        for( std::set< logger* >::iterator logIt = logger::Private::AllLoggers()->begin(); logIt != logger::Private::AllLoggers()->end(); ++logIt)
+        fPrivate->fThreshold = logger::Private::filterMinimumLevel(logger::Private::GlobalThreshold());
+        fPrivate->fThresholdIsGlobal = true;
+    }
+
+    // static function
+    logger::ELevel logger::GetGlobalLevel()
+    {
+        return logger::Private::GlobalThreshold();
+    }
+
+    // static function
+    void logger::SetGlobalLevel(ELevel level)
+    {
+        logger::Private::GlobalThreshold() = logger::Private::filterMinimumLevel(level);
+        for( logger::Private::LoggerSet::iterator logIt = logger::Private::AllLoggers()->begin(); logIt != logger::Private::AllLoggers()->end(); ++logIt)
         {
-            (*logIt)->SetLevel(level);
+            if( (*logIt)->fPrivate->fThresholdIsGlobal )
+            {
+                (*logIt)->fPrivate->fThreshold = logger::Private::GlobalThreshold();
+            }
         }
         return;
     }
