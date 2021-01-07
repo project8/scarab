@@ -25,7 +25,7 @@ TEST_CASE( "logger", "[logger]" )
     scarab::logger::SetErrStream( t_errstream );
 
     // all levels enabled
-    tlog.SetGlobalLevel( scarab::logger::ELevel::eTrace );
+    scarab::logger::SetGlobalLevel( scarab::logger::ELevel::eTrace );
 
     // log
 
