@@ -179,10 +179,20 @@ namespace scarab
             void SetLevel(ELevel level) const;
 
             /**
+             * Set a logger's minimum logging level to the global level
+             */
+            void UseGlobalLevel() const;
+
+            /**
+             * Get the global minimum logging level
+             */
+            static logger::ELevel GetGlobalLevel();
+
+            /**
              * Set all loggers' minimum logging level
              * @param level The log level
              */
-            void SetGlobalLevel(ELevel level) const;
+            static void SetGlobalLevel(ELevel level);
 
             /**
              * Set whether colored text will be used
@@ -284,7 +294,7 @@ namespace scarab
 
         private:
             struct Private;
-            Private* fPrivate;
+            std::shared_ptr<Private> fPrivate;
     };
 
 }
