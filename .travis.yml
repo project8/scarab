@@ -26,7 +26,7 @@ jobs:
     install:
     - cd build
     - cmake .. -DScarab_ENABLE_TESTING=TRUE
-    - make install
+    - make -j2 install
     script: testing/run_tests
   - stage: Testing
     os: linux
@@ -49,7 +49,7 @@ jobs:
     install:
     - cd build
     - cmake .. -DScarab_ENABLE_TESTING=TRUE -DPYTHON_EXECUTABLE=$(which python)
-    - make install
+    - make -j2 install
     script: testing/run_tests
   - stage: Testing
     os: linux
@@ -71,5 +71,5 @@ jobs:
     install:
     - cd build
     - cmake .. -DScarab_ENABLE_TESTING=TRUE -DPYTHON_EXECUTABLE=$(which python)
-    - make
+    - make -j2 install
     script: testing/run_tests
