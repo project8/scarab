@@ -48,7 +48,7 @@ jobs:
     - mkdir build
     install:
     - cd build
-    - cmake .. -DScarab_ENABLE_TESTING=TRUE
+    - cmake .. -DScarab_ENABLE_TESTING=TRUE -DPYTHON_EXECUTABLE=$(which python)
     - make install
     script: testing/run_tests
   - stage: Testing
@@ -70,6 +70,6 @@ jobs:
     - mkdir build
     install:
     - cd build
-    - cmake .. -DScarab_ENABLE_TESTING=TRUE
+    - cmake .. -DScarab_ENABLE_TESTING=TRUE -DPYTHON_EXECUTABLE=$(which python)
     - make
     script: testing/run_tests
