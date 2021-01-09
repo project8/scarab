@@ -20,7 +20,7 @@ jobs:
         - rapidjson
         - yaml-cpp
         - pybind11
-        update: true
+#        update: true
     before_install:
     - mkdir build
     install:
