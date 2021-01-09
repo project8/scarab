@@ -231,7 +231,9 @@ namespace scarab
 
     logger::~logger()
     {
+        std::cerr << "destructing logger " << fPrivate->fLogger << std::endl;
         logger::Private::AllLoggers()->erase(this);
+        std::cerr << "logger removed from set: " << fPrivate->fLogger << std::endl;
     }
 
     bool logger::IsLevelEnabled(ELevel level) const
