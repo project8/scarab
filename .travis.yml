@@ -37,6 +37,7 @@ jobs:
         sources:
         - ubuntu-toolchain-r-test
         packages:
+        - python3-all
         - libboost-all-dev
         - rapidjson-dev
         - libyaml-cpp-dev
@@ -59,6 +60,7 @@ jobs:
         sources:
         - ubuntu-toolchain-r-test
         packages:
+        - python3-all
         - libboost-all-dev
         - rapidjson-dev
         - libyaml-cpp-dev
