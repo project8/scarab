@@ -241,7 +241,7 @@ namespace scarab
         UseGlobalLevel();
         logger::Private::AllLoggers()->insert(this);
 
-        std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
+        //std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
     }
 
     logger::logger(const std::string& name) : fPrivate(new Private())
@@ -259,16 +259,16 @@ namespace scarab
 
 		logger::Private::AllLoggers()->insert(this);
 
-        std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
+        //std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
     }
 
     logger::~logger()
     {
         fPrivate->count()--;
         
-        std::cerr << "destructing logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
+        //std::cerr << "destructing logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
         logger::Private::AllLoggers()->erase(this);
-        std::cerr << "logger removed from set: " << fPrivate->fLogger << std::endl;
+        //std::cerr << "logger removed from set: " << fPrivate->fLogger << std::endl;
     }
 
     bool logger::IsLevelEnabled(ELevel level) const
