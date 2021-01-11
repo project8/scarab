@@ -59,18 +59,27 @@ namespace scarab
             return sAllLoggers;
         }
 
-        static char sDateTimeFormat[16];
-        static time_t sRawTime;
-        static tm* sProcessedTime;
-        static char sTimeBuff[512];
-        static size_t getTimeAbsoluteStr()
+        static char* dateTimeFormat()
         {
+            static char sDateTimeFormat[16];
+
+            return sDateTimeFormat;
+        }
+
+        static char* getTimeAbsoluteStr( bool aGetNewTime = false )
+        {
+            static char sTimeBuff[512];
+            static time_t sRawTime;
+            static tm* sProcessedTime;
+
+            if( ! aGetNewTime ) return sTimeBuff;
+
             time(&logger::Private::sRawTime);
 
-            sProcessedTime = localtime(&logger::Private::sRawTime);
-            return strftime(logger::Private::sTimeBuff, 512,
-                logger::Private::sDateTimeFormat,
-                logger::Private::sProcessedTime);
+            sProcessedTime = localtime(&sRawTime);
+            strftime(sTimeBuff, 512, logger::Private::dateTimeFormat(), sProcessedTime);
+
+            return sTimeBuff;
         }
 
 
@@ -153,11 +162,11 @@ namespace scarab
         void logCout(ELevel level, const string& message, const Location& loc)
         {
             logger::Private::mutex().lock();
-            logger::Private::getTimeAbsoluteStr();
+            logger::Private::getTimeAbsoluteStr( true );
             if (logger::Private::colored())
             {
                 //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                logger::Private::out() << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+                logger::Private::out() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
                 logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
@@ -168,7 +177,7 @@ namespace scarab
             else
             {
                 //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                logger::Private::out() << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+                logger::Private::out() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
                 logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
@@ -186,7 +195,7 @@ namespace scarab
             if (logger::Private::colored())
             {
                 //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                logger::Private::err() << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+                logger::Private::err() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
                 logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
@@ -197,7 +206,7 @@ namespace scarab
             else
             {
                 //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                logger::Private::err() << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
+                logger::Private::err() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
                 logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
@@ -209,15 +218,15 @@ namespace scarab
         }
     };
 
-    char logger::Private::sDateTimeFormat[16];
-	time_t logger::Private::sRawTime;
-	tm* logger::Private::sProcessedTime;
-	char logger::Private::sTimeBuff[512];
-
 
     logger::logger(const char* name) : fPrivate(new Private())
     {
-        fPrivate->count()++;
+        if( logger::Private::count == 0 )
+        {
+            sprintf( logger::Private::dateTimeFormat(),  "%%Y-%%m-%%d %%T" );
+        }
+
+        logger::Private::count()++;
 
         if (name == 0)
         {
@@ -229,7 +238,6 @@ namespace scarab
             fPrivate->fLogger = logName;
         }
 
-        sprintf(logger::Private::sDateTimeFormat,  "%%Y-%%m-%%d %%T");
         UseGlobalLevel();
         logger::Private::AllLoggers()->insert(this);
 
@@ -238,12 +246,17 @@ namespace scarab
 
     logger::logger(const std::string& name) : fPrivate(new Private())
     {
-        fPrivate->count()++;
+        if( logger::Private::count == 0 )
+        {
+            sprintf( logger::Private::dateTimeFormat(),  "%%Y-%%m-%%d %%T" );
+        }
+
+        logger::Private::count()++;
         
         fPrivate->fLogger = name.c_str();
 
-        sprintf(logger::Private::sDateTimeFormat, "%%Y-%%m-%%d %%T");
 		UseGlobalLevel();
+
 		logger::Private::AllLoggers()->insert(this);
 
         std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
