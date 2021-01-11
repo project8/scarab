@@ -39,6 +39,12 @@ namespace scarab
 
     struct logger::Private
     {
+        static unsigned& count()
+        {
+            static unsigned sCount = 0;
+            return sCount;
+        }
+
         static std::mutex sMutex;
 
         typedef std::set< logger* > LoggerSet;
@@ -197,6 +203,8 @@ namespace scarab
 
     logger::logger(const char* name) : fPrivate(new Private())
     {
+        fPrivate->count()++;
+
         if (name == 0)
         {
             fPrivate->fLogger = "root";
@@ -214,10 +222,14 @@ namespace scarab
         sprintf(logger::Private::sDateTimeFormat,  "%%Y-%%m-%%d %%T");
         UseGlobalLevel();
         logger::Private::AllLoggers()->insert(this);
+
+        std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
     }
 
     logger::logger(const std::string& name) : fPrivate(new Private())
     {
+        fPrivate->count()++;
+        
         fPrivate->fLogger = name.c_str();
 #ifndef _WIN32
         fPrivate->fColored = true;
@@ -227,11 +239,15 @@ namespace scarab
         sprintf(logger::Private::sDateTimeFormat, "%%Y-%%m-%%d %%T");
 		UseGlobalLevel();
 		logger::Private::AllLoggers()->insert(this);
+
+        std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
     }
 
     logger::~logger()
     {
-        std::cerr << "destructing logger " << fPrivate->fLogger << std::endl;
+        fPrivate->count()--;
+        
+        std::cerr << "destructing logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
         logger::Private::AllLoggers()->erase(this);
         std::cerr << "logger removed from set: " << fPrivate->fLogger << std::endl;
     }
