@@ -45,10 +45,14 @@ namespace scarab
             return sCount;
         }
 
-        static std::mutex sMutex;
+        static std::mutex& mutex()
+        {
+            static std::mutex sMutex;
+            return sMutex;
+        }
 
         typedef std::set< logger* > LoggerSet;
-        static std::shared_ptr<LoggerSet> AllLoggers()
+        static std::shared_ptr<LoggerSet>& AllLoggers()
         {
             // construct-on-first-use strategy to avoid static initialization fiasco
             static std::shared_ptr<LoggerSet> sAllLoggers = std::make_shared< LoggerSet >();
@@ -131,7 +135,7 @@ namespace scarab
 
         void logCout(ELevel level, const string& message, const Location& loc)
         {
-            logger::Private::sMutex.lock();
+            logger::Private::mutex().lock();
             logger::Private::getTimeAbsoluteStr();
             if (fColored)
             {
@@ -155,12 +159,12 @@ namespace scarab
                 (*fOut) << "(" << loc.fLineNumber  << "): ";
                 (*fOut) << message << endl;
             }
-            logger::Private::sMutex.unlock();
+            logger::Private::mutex().unlock();
         }
 
         void logCerr(ELevel level, const string& message, const Location& loc)
         {
-            logger::Private::sMutex.lock();
+            logger::Private::mutex().lock();
             logger::Private::getTimeAbsoluteStr();
             if (fColored)
             {
@@ -184,11 +188,9 @@ namespace scarab
                 (*fErr) << "(" << loc.fLineNumber  << "): ";
                 (*fErr) << message << endl;
             }
-            logger::Private::sMutex.unlock();
+            logger::Private::mutex().unlock();
         }
     };
-
-    mutex logger::Private::sMutex;
 
     char logger::Private::sDateTimeFormat[16];
 	time_t logger::Private::sRawTime;
