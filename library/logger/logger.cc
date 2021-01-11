@@ -76,7 +76,15 @@ namespace scarab
 
         const char* fLogger;
 
-        static bool fColored;
+        static bool& colored()
+        {
+#ifndef _WIN32
+            static bool sColored = true;
+#else
+            static bool sColored = false;
+#endif
+            return sColored;
+        }
 
         static std::ostream* fOut;
         static std::ostream* fErr;
@@ -137,7 +145,7 @@ namespace scarab
         {
             logger::Private::mutex().lock();
             logger::Private::getTimeAbsoluteStr();
-            if (fColored)
+            if (logger::Private::colored())
             {
                 //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
                 (*fOut) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
@@ -166,7 +174,7 @@ namespace scarab
         {
             logger::Private::mutex().lock();
             logger::Private::getTimeAbsoluteStr();
-            if (fColored)
+            if (logger::Private::colored())
             {
                 //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
                 (*fErr) << Private::level2Color(level) << logger::Private::sTimeBuff << " [" << setw(5) << Private::level2Str(level) << "] ";
@@ -197,8 +205,6 @@ namespace scarab
 	tm* logger::Private::sProcessedTime;
 	char logger::Private::sTimeBuff[512];
 
-    bool logger::Private::fColored = true;
-
     std::ostream* logger::Private::fOut = &cout;
     std::ostream* logger::Private::fErr = &cerr;
 
@@ -216,11 +222,7 @@ namespace scarab
             const char* logName = strrchr(name, '/') ? strrchr(name, '/') + 1 : name;
             fPrivate->fLogger = logName;
         }
-#ifndef _WIN32
-        fPrivate->fColored = true;
-#else
-        fPrivate->fColored = false;
-#endif
+
         sprintf(logger::Private::sDateTimeFormat,  "%%Y-%%m-%%d %%T");
         UseGlobalLevel();
         logger::Private::AllLoggers()->insert(this);
@@ -233,11 +235,7 @@ namespace scarab
         fPrivate->count()++;
         
         fPrivate->fLogger = name.c_str();
-#ifndef _WIN32
-        fPrivate->fColored = true;
-#else
-        fPrivate->fColored = false;
-#endif
+
         sprintf(logger::Private::sDateTimeFormat, "%%Y-%%m-%%d %%T");
 		UseGlobalLevel();
 		logger::Private::AllLoggers()->insert(this);
@@ -299,7 +297,7 @@ namespace scarab
     void logger::SetColored(bool flag)
     {
 #ifndef _WIN32
-        logger::Private::fColored = flag;
+        logger::Private::colored() = flag;
 #else
         std::cerr << "Colored logging is not enabled in Windows" << std::endl;
 #endif
