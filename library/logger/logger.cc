@@ -95,13 +95,13 @@ namespace scarab
             return sColored;
         }
 
-        static std::ostream& out
+        static std::ostream& out()
         {
             static std::ostream* sOut = &cout;
             return *sOut;
         }
 
-        static std::ostream& err
+        static std::ostream& err()
         {
             static std::ostream* sErr = &cerr;
             return *sErr;
