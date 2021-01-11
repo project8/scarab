@@ -5,8 +5,6 @@ stages:
   if: branch = main OR 
     branch = develop OR 
     branch =~ /.*\.(?i:build)$/ OR 
-    branch = feature/testing OR
-    branch = feature/logger_debug OR
     type = pull_request 
 
 jobs:
