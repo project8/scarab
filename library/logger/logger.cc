@@ -74,7 +74,7 @@ namespace scarab
 
             if( ! aGetNewTime ) return sTimeBuff;
 
-            time(&logger::Private::sRawTime);
+            time(&sRawTime);
 
             sProcessedTime = localtime(&sRawTime);
             strftime(sTimeBuff, 512, logger::Private::dateTimeFormat(), sProcessedTime);
@@ -95,16 +95,16 @@ namespace scarab
             return sColored;
         }
 
-        static std::ostream& out()
+        static std::ostream*& out()
         {
-            static std::ostream* sOut = &cout;
-            return *sOut;
+            static std::ostream* sOut = &std::cout;
+            return sOut;
         }
 
-        static std::ostream& err()
+        static std::ostream*& err()
         {
-            static std::ostream* sErr = &cerr;
-            return *sErr;
+            static std::ostream* sErr = &std::cerr;
+            return sErr;
         }
 
         ELevel fThreshold;
@@ -166,24 +166,24 @@ namespace scarab
             if (logger::Private::colored())
             {
                 //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                logger::Private::out() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
+                *logger::Private::out() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
-                logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
+                *logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(out()));
-                logger::Private::out() << "(" << loc.fLineNumber  << "): ";
-                logger::Private::out() << message << EndColor() << endl;
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::out()));
+                *logger::Private::out() << "(" << loc.fLineNumber  << "): ";
+                *logger::Private::out() << message << EndColor() << endl;
             }
             else
             {
                 //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                logger::Private::out() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
+                *logger::Private::out() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
-                logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
+                *logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(out()));
-                logger::Private::out() << "(" << loc.fLineNumber  << "): ";
-                logger::Private::out() << message << endl;
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::out()));
+                *logger::Private::out() << "(" << loc.fLineNumber  << "): ";
+                *logger::Private::out() << message << endl;
             }
             logger::Private::mutex().unlock();
         }
@@ -195,24 +195,24 @@ namespace scarab
             if (logger::Private::colored())
             {
                 //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                logger::Private::err() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
+                *logger::Private::err() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
-                logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
+                *logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(err()));
-                logger::Private::err() << "(" << loc.fLineNumber  << "): ";
-                logger::Private::err() << message << EndColor() << endl;
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::err()));
+                *logger::Private::err() << "(" << loc.fLineNumber  << "): ";
+                *logger::Private::err() << message << EndColor() << endl;
             }
             else
             {
                 //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                logger::Private::err() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
+                *logger::Private::err() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
 #ifndef NDEBUG
-                logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
+                *logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
 #endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(err()));
-                logger::Private::err() << "(" << loc.fLineNumber  << "): ";
-                logger::Private::err() << message << endl;
+                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::err()));
+                *logger::Private::err() << "(" << loc.fLineNumber  << "): ";
+                *logger::Private::err() << message << endl;
             }
             logger::Private::mutex().unlock();
         }
@@ -325,13 +325,13 @@ namespace scarab
 
     void logger::SetOutStream(std::ostream* stream)
     {
-        logger::Private::out() = *stream;
+        logger::Private::out() = stream;
         return;
     }
 
     void logger::SetErrStream(std::ostream* stream)
     {
-        logger::Private::err() = *stream;
+        logger::Private::err() = stream;
         return;
     }
 
