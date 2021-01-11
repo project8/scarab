@@ -1,0 +1,74 @@
+language: cpp
+
+stages:
+- name: Testing
+  if: branch = main OR 
+    branch = develop OR 
+    branch =~ /.*\.(?i:build)$/ OR 
+    type = pull_request 
+
+jobs:
+  include:
+  - stage: Testing
+    os: osx
+    compiler: clang
+    osx_image: xcode11.3
+    addons:
+      homebrew:
+        packages:
+        - rapidjson
+        - yaml-cpp
+        - pybind11
+#        update: true
+    before_install:
+    - mkdir build
+    install:
+    - cd build
+    - cmake .. -DScarab_ENABLE_TESTING=TRUE
+    - make -j2 install
+    script: testing/run_tests
+  - stage: Testing
+    os: linux
+    dist: focal
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - python3-all
+        - libboost-all-dev
+        - rapidjson-dev
+        - libyaml-cpp-dev
+        - pybind11-dev
+    before_install:
+    - cmake --version
+    - export CC=gcc && export CXX=g++
+    - mkdir build
+    install:
+    - cd build
+    - cmake .. -DScarab_ENABLE_TESTING=TRUE -DPYTHON_EXECUTABLE=$(which python)
+    - make -j2 install
+    script: testing/run_tests
+  - stage: Testing
+    os: linux
+    dist: focal
+    compiler: clang
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - python3-all
+        - libboost-all-dev
+        - rapidjson-dev
+        - libyaml-cpp-dev
+        - pybind11-dev
+    before_install:
+    - export CC=clang && export CXX=clang++
+    - mkdir build
+    install:
+    - cd build
+    - cmake .. -DScarab_ENABLE_TESTING=TRUE -DPYTHON_EXECUTABLE=$(which python)
+    - make -j2 install
+    script: testing/run_tests
