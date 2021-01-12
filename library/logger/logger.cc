@@ -221,7 +221,7 @@ namespace scarab
 
     logger::logger(const char* name) : fPrivate(new Private())
     {
-        if( logger::Private::count == 0 )
+        if( logger::Private::count() == 0 )
         {
             sprintf( logger::Private::dateTimeFormat(),  "%%Y-%%m-%%d %%T" );
         }
@@ -246,7 +246,7 @@ namespace scarab
 
     logger::logger(const std::string& name) : fPrivate(new Private())
     {
-        if( logger::Private::count == 0 )
+        if( logger::Private::count() == 0 )
         {
             sprintf( logger::Private::dateTimeFormat(),  "%%Y-%%m-%%d %%T" );
         }
