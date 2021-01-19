@@ -27,6 +27,8 @@ namespace scarab
     class SCARAB_API param_value : public param
     {
         public:
+            typedef boost::variant< bool, uint64_t, int64_t, double, std::string > variant_type;
+
             param_value();
             param_value( bool a_value );
             param_value( uint8_t a_value );
@@ -75,9 +77,11 @@ namespace scarab
             bool as_bool() const;
             uint64_t as_uint() const;
             int64_t as_int() const;
-            double as_double() const;
+            double as_double() const; // TODO: if type is string, then interpret as expression
             std::string as_string() const;
             path as_path() const;
+            double as_expr() const;
+            // TODO: version with arguments; use variable templates for arguments?
 
             template< typename XValType >
             XValType as() const;
@@ -92,8 +96,12 @@ namespace scarab
 
             void clear();
 
+            /// access to the variant itself
+            variant_type& value();
+            const variant_type& value() const;
+
         private:
-            boost::variant< bool, uint64_t, int64_t, double, std::string > f_value;
+            variant_type f_value;
 
             //*********************
             // Visitor Classes
@@ -561,6 +569,15 @@ namespace scarab
         return;
     }
 
+    inline param_value::variant_type& param_value::value()
+    {
+        return f_value;
+    }
+
+    inline const param_value::variant_type& param_value::value() const
+    {
+        return f_value;
+    }
 } /* namespace scarab */
 
 #endif /* SCARAB_PARAM_VALUE_HH_ */
