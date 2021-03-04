@@ -89,16 +89,19 @@ if( Scarab_BUILD_CODEC_YAML )
     list( APPEND PUBLIC_EXT_LIBS yaml-cpp )
 endif( Scarab_BUILD_CODEC_YAML )
 
-list( APPEND boost_components filesystem system )
+# Create a cache variable for boost components that can be set from dependent projects
+set( Scarab_BOOST_COMPONENTS "${Scarab_BOOST_COMPONENTS};filesystem;system" CACHE INTERNAL "Boost components to be found by Scarab" )
+
+#list( APPEND Scarab_BOOST_COMPONENTS filesystem system )
 list( APPEND PUBLIC_EXT_LIBS Boost::filesystem )
 
-# making sure boost_components is not empty and remove duplicate
-if (boost_components)
-    list( REMOVE_DUPLICATES boost_components )
-endif ( boost_components)
+# making sure Scarab_BOOST_COMPONENTS is not empty and remove duplicate
+if( Scarab_BOOST_COMPONENTS )
+    list( REMOVE_DUPLICATES Scarab_BOOST_COMPONENTS )
+endif( Scarab_BOOST_COMPONENTS )
 
 # Boost (1.46 required for filesystem version 3)
-find_package( Boost 1.46.0 REQUIRED COMPONENTS ${boost_components} )
+find_package( Boost 1.46.0 REQUIRED COMPONENTS ${Scarab_BOOST_COMPONENTS} )
 # make sure dynamic linking is assumed for all boost libraries
 set( Boost_USE_STATIC_LIBS OFF )
 set( Boost_USE_STATIC_RUNTIME OFF )
