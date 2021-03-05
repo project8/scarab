@@ -62,7 +62,10 @@ namespace scarab
         // deal with variables
         for( auto var_it = a_vars.begin(); var_it != a_vars.end(); ++var_it )
         {
-            f_vars.emplace_back( te_variable{ var_it->name(), })
+            // create a te_variable with vector::emplace()
+            // (*var_it)().value() gets the low-level access to the boost::variant behind the param_value; this will throw scarab::error if the param object is not a param_value
+            // 
+            f_vars.emplace_back( te_variable{ var_it->name(), boost::get<double>((*var_it)().value()) } );
         }
 
         f_comp_expr = te_compile( f_expr, f_vars.data(), f_vars.size(), &t_error );
