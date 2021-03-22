@@ -329,7 +329,8 @@ function( pbuilder_component_install_and_export )
 
         # make targets available at build time
         #message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
-        export( TARGETS ${CIE_EXETARGETS} 
+        export( TARGETS ${CIE_EXETARGETS}
+            APPEND
             FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
         )
         
