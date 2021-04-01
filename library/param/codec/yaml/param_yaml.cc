@@ -138,27 +138,34 @@ namespace scarab
             {
                 return std::unique_ptr< param_value >( new param_value( a_node.as< unsigned >() ) );
             }
-            catch( const YAML::BadConversion& )
+            catch( YAML::TypedBadConversion<unsigned>& )
             {
                 try
                 {
                     return std::unique_ptr< param_value >( new param_value( a_node.as< int >() ) );
                 }
-                catch( const YAML::BadConversion& )
+                catch( const YAML::TypedBadConversion<int>& )
                 {
                     try
                     {
                         return std::unique_ptr< param_value >( new param_value( a_node.as< double >() ) );
                     }
-                    catch( const YAML::BadConversion& )
+                    catch( const YAML::TypedBadConversion<double>& )
                     {
                         try
                         {
                             return std::unique_ptr< param_value >( new param_value( a_node.as< bool >() ) );
                         }
-                        catch( const YAML::BadConversion& )
+                        catch( const YAML::TypedBadConversion<bool>& )
                         {
-                            return std::unique_ptr< param_value >( new param_value( a_node.Scalar() ) );
+                            try
+                            {
+                                return std::unique_ptr< param_value >( new param_value( a_node.as< std::string >() ) );
+                            }
+                            catch( const YAML::TypedBadConversion<std::string>& )
+                            {
+                                return std::unique_ptr< param_value >( new param_value( a_node.Scalar() ) );
+                            }
                         }
                     }
                 }
