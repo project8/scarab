@@ -35,8 +35,8 @@ LOGGER( testlog, "test_app_with_options" );
 class test_app : public main_app
 {
     public:
-        test_app() :
-            main_app(),
+        test_app(bool a_use_config = true) :
+            main_app(a_use_config),
             f_first_value(),
             f_second_value()
         {
