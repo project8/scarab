@@ -66,8 +66,7 @@ add_library( Catch INTERFACE )
 target_include_directories( Catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/catch )
 
 add_executable( run_tests ${testing_SOURCES} )
-target_link_libraries( run_tests ${testing_LIB_DEPENDENCIES} )
-
+target_link_libraries( run_tests PUBLIC ${testing_LIB_DEPENDENCIES} )
 
 if( Scarab_BUILD_CLI )
     add_subdirectory( applications )

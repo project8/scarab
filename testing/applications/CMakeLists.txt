@@ -14,7 +14,10 @@ set( testing_applications_SOURCES
     test_unhandled_exception.cc
 )
 
-pbuilder_executables( testing_applications_SOURCES testing_LIB_DEPENDENCIES PUBLIC_EXT_LIBS PRIVATE_EXT_LIBS )
+pbuilder_executables( SOURCES ${testing_applications_SOURCES}
+        TARGETS_VAR programs
+        PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
+        )
 
 if( Scarab_ENABLE_TESTING )
     add_test( NAME app_with_callback COMMAND test_app_with_callback WORKING_DIRECTORY ${Scarab_BINARY_DIR} )
