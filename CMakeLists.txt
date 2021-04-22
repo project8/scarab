@@ -115,6 +115,7 @@ endif( WIN32 )
 # Pybind11
 if( Scarab_BUILD_PYTHON )
     find_package( Python3 REQUIRED COMPONENTS Interpreter Development )
+    set(PYBIND11_PYTHON_VERSION ${Python3_VERSION} CACHE STRING "")
     find_package( pybind11 REQUIRED )
     #if( TARGET Python3::Python )
     #    message( STATUS "%%%%% Found Python::Python" )
