@@ -65,4 +65,19 @@ namespace scarab
         return;
     }
 
+    // cancelable_wrapper
+    cancelable_wrapper::cancelable_wrapper( cancelable& a_cancelable ) :
+            f_wrapped( &a_cancelable )
+    {}
+
+    cancelable_wrapper::~cancelable_wrapper() 
+    {}
+
+    // wrap_cancelable
+    SCARAB_API std::shared_ptr< cancelable_wrapper > wrap_cancelable( cancelable& a_cancelable )
+    {
+        return std::make_shared< cancelable_wrapper >( a_cancelable );
+    }
+
+
 } /* namespace scarab */
