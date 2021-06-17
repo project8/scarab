@@ -68,10 +68,10 @@ namespace scarab
         LWARN( expbacklog_hh, "function called first time: " << t_success );
         while( ! t_success && t_retries < f_max_retries )
         {
-            LWARN( expbacklog_hh, "retries: " << t_retries << "   delay: " << 1<<t_retries * t_retries );
+            LWARN( expbacklog_hh, "retries: " << t_retries << "   delay: " << (1<<t_retries) * f_base_delay_ms );
             std::this_thread::sleep_for( std::chrono::milliseconds(1<<t_retries * f_base_delay_ms) );
             t_success = f_action( args... );
-            LWARN( expbacklog_hh, "function called first time: " << t_success );
+            LWARN( expbacklog_hh, "function called: " << t_success );
             ++t_retries;
         }
 
