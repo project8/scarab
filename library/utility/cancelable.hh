@@ -22,7 +22,7 @@ namespace scarab
      @class cancelable
      @author N. S. Oblath
 
-     @brief Base class for a cancelable object (i.e. an object that can be canceled by scarab::signal_handler)
+     @brief Base class for a cancelable object (i.e. an object that can be canceled by scarab::signal_handler or other client code)
 
      @details
      A cancelable object is one which has some execution operation that should be asynchronously cancelable.  
