@@ -21,9 +21,9 @@ namespace scarab_pybind
             .def( pybind11::init< >() )
 
             .def( "add_cancelable", &scarab::signal_handler::add_cancelable, "add a cancelable object to the list to be canceled in the event of a SIGINT" )
-            .def( "remove_cancelable", &scarab::signal_handler::remove_cancelable, "remove a cancelable object from the list to be canceled in the event of a SIGINT" )
+            .def( "remove_cancelable", static_cast<void (scarab::signal_handler::*)(std::shared_ptr<scarab::cancelable>)>( &scarab::signal_handler::remove_cancelable ), "remove a cancelable object from the list to be canceled in the event of a SIGINT" )
             .def( "reset", &scarab::signal_handler::reset, "remove all cancelable objects" )
-
+            .def_static( "cancel_all", &scarab::signal_handler::cancel_all, "cancel all cancelable objects known to the signal_handler" )
             ;
 
         return all_members;

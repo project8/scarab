@@ -112,9 +112,15 @@ namespace scarab
     signal_handler::~signal_handler()
     {}
 
-    void signal_handler::add_cancelable( scarab::cancelable* a_cancelable )
+    void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
         signal_handler::add_cancelable_s( a_cancelable );
+        return;
+    }
+
+    void signal_handler::remove_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
+    {
+        signal_handler::remove_cancelable_s( a_cancelable );
         return;
     }
 
@@ -124,10 +130,17 @@ namespace scarab
         return;
     }
 
-    void signal_handler::add_cancelable_s( scarab::cancelable* a_cancelable )
+    void signal_handler::add_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        s_cancelers.insert( a_cancelable );
+        s_cancelers.insert( std::make_pair(a_cancelable.get(), cancelable_wptr_t(a_cancelable) ) );
+        return;
+    }
+
+    void signal_handler::remove_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
+    {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        s_cancelers.erase( a_cancelable.get() );
         return;
     }
 
@@ -291,8 +304,12 @@ namespace scarab
 
         while( ! s_cancelers.empty() )
         {
-            (*s_cancelers.begin())->cancel( a_code );
-            s_cancelers.erase( s_cancelers.begin() );
+            auto t_canceler_it = s_cancelers.begin();
+            if( ! t_canceler_it->second.expired() )
+            {
+                t_canceler_it->second.lock()->cancel( a_code );
+            }
+            s_cancelers.erase( t_canceler_it );
             std::this_thread::sleep_for( std::chrono::seconds(1) );
         }
 
