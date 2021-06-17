@@ -62,7 +62,10 @@ TEST_CASE( "signal_handler", "[utility]" )
 
     scarab::cancelable t_cancel;
     REQUIRE_FALSE( t_cancel.is_canceled() );
-    t_handler.add_cancelable( &t_cancel );
+
+    // we use cancelable_wrapper to wrap t_cancel in a shared_ptr
+    auto t_cwrap = scarab::wrap_cancelable( t_cancel );
+    t_handler.add_cancelable( t_cwrap );
 
     SECTION( "canceling" )
     {
@@ -74,6 +77,15 @@ TEST_CASE( "signal_handler", "[utility]" )
     {
         t_handler.exit( 0 );
         REQUIRE( t_cancel.is_canceled() );
+    }
+
+    // delete the cancelable_wrapper, which removes it from the signal_handler
+    t_cwrap.reset();
+
+    SECTION( "not canceling" )
+    {
+        t_handler.cancel_all( 0 );
+        REQUIRE_FALSE( t_cancel.is_canceled() );
     }
 
 }

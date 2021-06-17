@@ -13,7 +13,7 @@
 
 #include <memory>
 #include <mutex>
-#include <set>
+#include <map>
 
 
 #ifndef _GNU_SOURCE
@@ -60,6 +60,12 @@ namespace scarab
      - Catching SIGINT (usually ctrl-c) or SIGQUIT (usually ctrl-\) (exits with a success code)
      - Client code calling signal_handler::exit( code )
 
+     To cleanly exit, signal_handler takes responsibility for canceling the cancelable objects that it knows about.  
+     Responsibility for canceling a cancelable is given to the signal_handler using add_cancelable(), and it's taken away 
+     using remove_cancelable().
+
+     While add_cancelable() takes a std::shared_ptr<cancelable> as an argument, it stores only std::weak_ptr<cancelable>, and 
+     claims no ownership or responsibility for the lifetime of the cancelable object.
     */
     class SCARAB_API signal_handler
     {
@@ -68,16 +74,20 @@ namespace scarab
             virtual ~signal_handler();
 
             /// Add a cancelable object
-            void add_cancelable( cancelable* a_cancelable );
+            void add_cancelable( std::shared_ptr< cancelable > a_cancelable );
             /// Remove a cancelable object
+            void remove_cancelable( std::shared_ptr< cancelable > a_cancelable );
+            /// Remove a cancelable object with a plain pointer
             void remove_cancelable( cancelable* a_cancelable );
 
             /// Remove all cancelables and signal handling
             void reset();
 
             /// Static version: add a cancelable object
-            static void add_cancelable_s( cancelable* a_cancelable );
+            static void add_cancelable_s( std::shared_ptr< cancelable > a_cancelable );
             /// Static version: remove a cancelable object
+            static void remove_cancelable_s( std::shared_ptr< cancelable > a_cancelable );
+            /// Static version: remove a cancelable object with a plain pointer
             static void remove_cancelable_s( cancelable* a_cancelable );
 
             /// Handler for std::terminate -- does not cleanup memory or threads
@@ -106,7 +116,11 @@ namespace scarab
 
         private:
 
-            typedef std::set< cancelable* > cancelers;
+            typedef std::weak_ptr< cancelable > cancelable_wptr_t;
+            // technical note: std::map<cancelable*, cancelable_wptr_t> is used instead of std::set<cancelable_wptr_t> because 
+            // weak_ptr cannot be used as a key because weak_ptrs are not immutable (see, e.g. https://stackoverflow.com/a/32668849 and one of the comments therein).
+            // the raw pointer is only used as a key here.  the weak_ptr is used for accessing the cancelable.
+            typedef std::map< cancelable*, cancelable_wptr_t > cancelers;
             typedef cancelers::const_iterator cancelers_cit_t;
             typedef cancelers::iterator cancelers_it_t;
 
