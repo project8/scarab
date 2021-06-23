@@ -2,6 +2,7 @@
 #define CANCELABLE_PYBIND_HH_
 
 #include "cancelable.hh"
+#include "scarab_binding_helpers.hh"
 
 #include "pybind11/pybind11.h"
 
@@ -15,8 +16,8 @@ namespace scarab_pybind
         pybind11::class_< scarab::cancelable, std::shared_ptr<scarab::cancelable> >( mod, "Cancelable" )
             .def( pybind11::init< >() )
 
-            .def( "cancel", &scarab::cancelable::cancel )
-            .def( "reset_cancel", &scarab::cancelable::reset_cancel )
+            .def( "cancel", &scarab::cancelable::cancel, SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
+            .def( "reset_cancel", &scarab::cancelable::reset_cancel, SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
             .def( "is_canceled", &scarab::cancelable::is_canceled )
 
             ;

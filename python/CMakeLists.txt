@@ -9,6 +9,7 @@ if( Scarab_BUILD_PYTHON )
 
     # Python binding headers
     set( PYBINDING_HEADERFILES
+        ${dir}/scarab_binding_helpers.hh
         ${dir}/cancelable_pybind.hh
         ${dir}/signal_handler_pybind.hh
         ${dir}/application_pybind.hh
