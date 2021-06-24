@@ -17,7 +17,8 @@ namespace scarab_pybind
         all_members.push_back( "MainApp" );
         pybind11::class_< scarab::main_app >( mod, "MainApp", "Base class for creating CLI utilities" )
             .def( pybind11::init< bool >(),
-                  pybind11::arg( "use_config" ) = true )
+                  pybind11::arg( "use_config" ) = true,
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
 
             .def( "set_callback", [](scarab::main_app* an_app, std::function< void() > a_fun){ an_app->callback( a_fun );} )
 
@@ -124,7 +125,7 @@ namespace scarab_pybind
                     CLI11_PARSE( an_app, args.size(), argv );
                     return 0;
                   },
-                  "parse arguments and execute the application", 
+                  "parse arguments and execute the application",
                   SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
 
             ;
