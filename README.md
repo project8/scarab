@@ -12,3 +12,5 @@ It contains three main components:
   * Logger
   * Authentication class
   * A variety of utilities
+* python: Python bindings for a subset of the C++ library
+  * Requires pybind11 v2.3.0 or greater
