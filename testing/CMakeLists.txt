@@ -16,6 +16,7 @@ pbuilder_install_headers( ${testing_HEADERS} )
         use_catch.cc
         stream_check.cc
         test_digital.cc
+        test_exceptions.cc
         test_member_variables.cc
         test_logger.cc
         test_signal_handler.cc
