@@ -47,6 +47,8 @@ else( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
     remove_definitions(-D${PROJECT_NAME}_DEBUG )    
 endif( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
 
+message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
+
 # Setup the default install prefix
 # This gets set to the binary directory upon first configuring.
 # If the user changes the prefix, but leaves the flag OFF, then it will remain as the user specified.
