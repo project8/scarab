@@ -68,8 +68,3 @@ jobs:
         run: |
           cd build/testing
           ./run_tests
-
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-        
