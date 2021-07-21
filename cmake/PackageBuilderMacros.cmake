@@ -133,6 +133,8 @@ endmacro()
 function( pbuilder_library )
     # Builds a shared-object library
     #
+    # Combines pbuilder_add_library() and pbuilder_link_library()
+    #
     # Parameters:
     #     TARGET: library target name
     #     SOURCES: source files to include
@@ -149,6 +151,35 @@ function( pbuilder_library )
     message( "Building library ${LIB_TARGET}" )
     message( STATUS "${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX is ${${PROJECT_NAME}_PARENT_LIB_NAME_SUFFIX}" )
 
+    pbuilder_add_library(
+        TARGET ${LIB_TARGET}
+        SOURCES ${LIB_SOURCES}
+    )
+
+    pbuilder_link_library(
+        TARGET ${LIB_TARGET}
+        PROJECT_LIBRARIES ${LIB_PROJECT_LIBRARIES}
+        PUBLIC_EXTERNAL_LIBRARIES ${LIB_PUBLIC_EXTERNAL_LIBRARIES}
+        PRIVATE_EXTERNAL_LIBRARIES ${LIB_PRIVATE_EXTERNAL_LIBRARIES}
+        COMPILE_DEFINITIONS ${LIB_COMPILE_DEFINITIONS}
+    )
+
+endfunction()
+
+function( pbuilder_add_library )
+    # Adding a shared-object library
+    #
+    # Parameters:
+    #     TARGET: library target name
+    #     SOURCES: source files to include
+
+    set( OPTIONS )
+    set( ONEVALUEARGS TARGET )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES COMPILE_DEFINITIONS )
+    cmake_parse_arguments( LIB "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    message( "Adding library ${LIB_TARGET}" )
+
     pbuilder_expand_lib_name( ${LIB_TARGET} )
     set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
     set( ${LIB_TARGET}_FULL_TARGET_NAME  ${FULL_LIB_NAME} CACHE INTERNAL "Full target name for library ${LIB_TARGET}" )
@@ -158,10 +189,6 @@ function( pbuilder_library )
     message( STATUS "SM library dependencies (public): ${${PROJECT_NAME}_SM_LIBRARIES}" )
     message( STATUS "external library dependencies (public): ${LIB_PUBLIC_EXTERNAL_LIBRARIES}" )
     message( STATUS "external library dependencies (private): ${LIB_PRIVATE_EXTERNAL_LIBRARIES}" )
-
-    pbuilder_expand_lib_names( ${LIB_PROJECT_LIBRARIES} )
-    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
-    message( STATUS "full project library dependencies (lib): ${FULL_PROJECT_LIBRARIES}" )
 
     message( STATUS "pbuilder: will build library <${FULL_LIB_TARGET}>" )
     add_library( ${FULL_LIB_TARGET} ${LIB_SOURCES} )
@@ -173,20 +200,47 @@ function( pbuilder_library )
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${FULL_LIB_TARGET} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
-
-    target_link_libraries( ${FULL_LIB_TARGET} 
-        PUBLIC
-            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${LIB_PUBLIC_EXTERNAL_LIBRARIES}
-        PRIVATE
-            ${LIB_PRIVATE_EXTERNAL_LIBRARIES} 
-    )
-
+    
     # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
     # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
     target_include_directories( ${FULL_LIB_TARGET} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
+    )
+
+
+endfunction()
+
+function( pbuilder_link_library )
+    # Linking a shared-object library
+    #
+    # Parameters:
+    #     TARGET: library target name
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
+    #     COMPILE_DEFINITIONS: compile definitions to add to this target
+
+    set( OPTIONS )
+    set( ONEVALUEARGS TARGET )
+    set( MULTIVALUEARGS SOURCES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_EXTERNAL_LIBRARIES COMPILE_DEFINITIONS )
+    cmake_parse_arguments( LIB "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    message( "Linking library ${LIB_TARGET}" )
+
+    pbuilder_expand_lib_name( ${LIB_TARGET} )
+    set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
+
+    pbuilder_expand_lib_names( ${LIB_PROJECT_LIBRARIES} )
+    set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
+    message( STATUS "full project library dependencies (lib): ${FULL_PROJECT_LIBRARIES}" )
+
+    target_link_libraries( ${FULL_LIB_TARGET} 
+        PUBLIC
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${LIB_PUBLIC_EXTERNAL_LIBRARIES}
+        PRIVATE
+            ${LIB_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
     # Add target compile definitions
