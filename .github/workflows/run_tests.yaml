@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies -- Linux
         # pybind11 is manually installed because the minimum version is 2.6.2, and Ubuntu 20.04 only has v2.4.3
-        if: startsWith(matrix.os, 'linux')
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
@@ -57,7 +57,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DDripline_ENABLE_TESTING=TRUE -DScarab_BUILD_PYTHON=FALSE 
+          cmake .. -DScarab_ENABLE_TESTING=TRUE -DScarab_BUILD_PYTHON=TRUE
 
       - name: Build
         run: |
