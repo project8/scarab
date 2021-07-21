@@ -12,7 +12,6 @@ if( Scarab_BUILD_PYTHON )
         ${dir}/scarab_binding_helpers.hh
         ${dir}/cancelable_pybind.hh
         ${dir}/signal_handler_pybind.hh
-        ${dir}/application_pybind.hh
         ${dir}/version_pybind.hh
     )
 
@@ -20,6 +19,14 @@ if( Scarab_BUILD_PYTHON )
     set( PYBINDING_SOURCEFILES
         ${dir}/scarab_namespace_pybind.cc
     )
+
+    if( Scarab_BUILD_CLI )
+        add_definitions( -DBUILD_CLI_PYBINDING )
+        set( PYBINDING_HEADERFILES
+            ${PYBINDING_HEADERFILES}
+            ${dir}/application_pybind.hh
+        )
+    endif( Scarab_BUILD_CLI )
 
     if( Scarab_BUILD_PARAM )
         add_definitions( -DBUILD_PARAM_PYBINDING )

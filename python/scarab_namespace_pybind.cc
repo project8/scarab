@@ -7,7 +7,10 @@
 
 #include "pybind11/stl.h"
 
+#ifdef BUILD_CLI_PYBINDING
 #include "application_pybind.hh"
+#endif
+
 #include "cancelable_pybind.hh"
 #include "signal_handler_pybind.hh"
 #include "version_pybind.hh"
@@ -26,8 +29,10 @@ PYBIND11_MODULE( scarab, scarab_mod )
     all_members.splice( all_members.end(), scarab_pybind::export_cancelable( scarab_mod ) );
     // signal handler
     all_members.splice( all_members.end(), scarab_pybind::export_signal_handler( scarab_mod ) );
+#ifdef BUILD_CLI_PYBINDING
     // application
     all_members.splice( all_members.end(), scarab_pybind::export_application( scarab_mod ) );
+#endif
     // utility
     all_members.splice( all_members.end(), scarab_pybind::export_version( scarab_mod ) );
 #ifdef BUILD_PARAM_PYBINDING
