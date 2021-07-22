@@ -68,7 +68,7 @@ namespace scarab
         signal_handler::unhandle_signals();
         --signal_handler::s_ref_count;
     }
-
+/*
     void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
         signal_handler::add_cancelable_s( a_cancelable );
@@ -86,22 +86,22 @@ namespace scarab
         signal_handler::remove_cancelable_s( a_cancelable );
         return;
     }
-
-    void signal_handler::add_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
+*/
+    void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         s_cancelers.insert( std::make_pair(a_cancelable.get(), cancelable_wptr_t(a_cancelable) ) );
         return;
     }
 
-    void signal_handler::remove_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
+    void signal_handler::remove_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         s_cancelers.erase( a_cancelable.get() );
         return;
     }
 
-    void signal_handler::remove_cancelable_s( scarab::cancelable* a_cancelable )
+    void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         s_cancelers.erase( a_cancelable );
