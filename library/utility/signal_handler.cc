@@ -65,28 +65,13 @@ namespace scarab
     signal_handler::~signal_handler()
     {
         //std::cerr << "signal_handler destructor" << std::endl;
-        signal_handler::unhandle_signals();
         --signal_handler::s_ref_count;
-    }
-/*
-    void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
-    {
-        signal_handler::add_cancelable_s( a_cancelable );
-        return;
+        if( signal_handler::s_ref_count == 0 )
+        {
+            signal_handler::unhandle_signals();
+        }
     }
 
-    void signal_handler::remove_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
-    {
-        signal_handler::remove_cancelable_s( a_cancelable );
-        return;
-    }
-
-    void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
-    {
-        signal_handler::remove_cancelable_s( a_cancelable );
-        return;
-    }
-*/
     void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
@@ -115,6 +100,8 @@ namespace scarab
         // we create a new logger here so that handle_signals() can be called from the signal_handler constructor during static initalization
         LOGGER( slog_constr, "signal_handler handle_signals" );
 
+        LDEBUG( slog_constr, "Taking over signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
+
         // setup to handle SIGABRT
         if( ! s_handling_sig_abrt && signal( SIGABRT, signal_handler::handle_exit_error ) == SIG_ERR )
         {
@@ -122,7 +109,7 @@ namespace scarab
         }
         else
         {
-            LDEBUG( slog_constr, "Handling SIGABRT (abort() and unhandled exceptions)" );
+            LTRACE( slog_constr, "Handling SIGABRT (abort() and unhandled exceptions)" );
             s_handling_sig_abrt = true;
         }
 
@@ -133,7 +120,7 @@ namespace scarab
         }
         else
         {
-            LDEBUG( slog_constr, "Handling SIGTERM" );
+            LTRACE( slog_constr, "Handling SIGTERM" );
             s_handling_sig_term = true;
         }
 
@@ -144,7 +131,7 @@ namespace scarab
         }
         else
         {
-            LDEBUG( slog_constr, "Handling SIGINT (ctrl-c)" );
+            LTRACE( slog_constr, "Handling SIGINT (ctrl-c)" );
             s_handling_sig_int = true;
         }
 
@@ -156,7 +143,7 @@ namespace scarab
         }
         else
         {
-            LDEBUG( slog_constr, "Handling SIGQUIT (ctrl-\\)" );
+            LTRACE( slog_constr, "Handling SIGQUIT (ctrl-\\)" );
             s_handling_sig_quit = true;
         }
 
@@ -171,6 +158,8 @@ namespace scarab
     void signal_handler::unhandle_signals()
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+
+        LDEBUG( slog, "Returning signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
 
         if( s_handling_sig_abrt && signal( SIGABRT, SIG_DFL ) == SIG_ERR )
         {

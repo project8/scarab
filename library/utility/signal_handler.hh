@@ -114,13 +114,6 @@ namespace scarab
             signal_handler();
             virtual ~signal_handler();
 
-            /// Add a cancelable object
-            //void add_cancelable( std::shared_ptr< cancelable > a_cancelable );
-            /// Remove a cancelable object
-            //void remove_cancelable( std::shared_ptr< cancelable > a_cancelable );
-            /// Remove a cancelable object with a plain pointer
-            //void remove_cancelable( cancelable* a_cancelable );
-
             /// Static version: add a cancelable object
             static void add_cancelable( std::shared_ptr< cancelable > a_cancelable );
             /// Static version: remove a cancelable object
