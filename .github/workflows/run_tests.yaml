@@ -49,8 +49,8 @@ jobs:
           git checkout v2.7.0
           mkdir build
           cd build
-          cmake -DPYBIND11_TEST=FALSE ..
-          make -j2 install
+          sudo cmake -DPYBIND11_TEST=FALSE ..
+          sudo make -j2 install
 
       - name: Configure
         run: |
