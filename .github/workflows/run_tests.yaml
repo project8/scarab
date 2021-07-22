@@ -44,13 +44,12 @@ jobs:
             libboost-all-dev \
             rapidjson-dev \
             libyaml-cpp-dev
-          cd /usr/local && \
-          git clone https://github.com/pybind/pybind11.git && \
-          cd pybind11 && \
-          git checkout v2.7.0 && \
-          mkdir build && \
-          cd build && \
-          cmake -DPYBIND11_TEST=FALSE .. && \
+          git clone https://github.com/pybind/pybind11.git
+          cd pybind11
+          git checkout v2.7.0
+          mkdir build
+          cd build
+          cmake -DPYBIND11_TEST=FALSE ..
           make -j2 install
 
       - name: Configure
