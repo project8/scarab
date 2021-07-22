@@ -11,6 +11,7 @@ if( Scarab_BUILD_PYTHON )
     set( PYBINDING_HEADERFILES
         ${dir}/scarab_binding_helpers.hh
         ${dir}/cancelable_pybind.hh
+        ${dir}/logger_pybind.hh
         ${dir}/signal_handler_pybind.hh
         ${dir}/version_pybind.hh
     )

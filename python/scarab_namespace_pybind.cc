@@ -12,6 +12,7 @@
 #endif
 
 #include "cancelable_pybind.hh"
+#include "logger_pybind.hh"
 #include "signal_handler_pybind.hh"
 #include "version_pybind.hh"
 
@@ -27,6 +28,8 @@ PYBIND11_MODULE( scarab, scarab_mod )
     std::list< std::string > all_members;
     // cancelable
     all_members.splice( all_members.end(), scarab_pybind::export_cancelable( scarab_mod ) );
+    // logger
+    all_members.splice( all_members.end(), scarab_pybind::export_logger( scarab_mod ) );
     // signal handler
     all_members.splice( all_members.end(), scarab_pybind::export_signal_handler( scarab_mod ) );
 #ifdef BUILD_CLI_PYBINDING
