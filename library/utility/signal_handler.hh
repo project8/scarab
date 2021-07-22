@@ -36,6 +36,8 @@ namespace scarab
      @brief Deals with cleanly exiting an application, and includes signal and std::terminate handler functions
 
      @details
+     # Exiting and Terminating
+
      This class differentiates between two different ways of finishing a program:
      - Cleanly "exiting" a program, allowing threads to be canceled and memory to be cleaned up, and 
      - Unclealy "terminating" a program, which exits more-or-less immediately.
@@ -64,8 +66,47 @@ namespace scarab
      Responsibility for canceling a cancelable is given to the signal_handler using add_cancelable(), and it's taken away 
      using remove_cancelable().
 
+     # Signal Handling
+
+     To perform the tasks of exiting and terminating applications, `signal_handler` allows the user to control when signals 
+     are handled, and when they aren't.  In most cases, a user will control signal handling through the existence of 
+     a `signal_handler` instance.  The user should create the instance of `signal_handler` when they want `signal_handler` 
+     to start handling those signals, and it should be destructed when handling the signals should cease.  
+     Here are several examples of how this could be done:
+
+     1. The instance is created as a global static object at static initialization time.  Signals will be handled for the entire 
+     time the application is running.
+     2. The instance is created in the `main()` function of the application and exists until the application exits.
+     3. The instance is created in some function for a specific limited time to cover a particular action.  
+     This could be for the entire scope of the function, or it could be destructed when signal handling is no longer wanted.
+
+     Note that signals are handled as long as one or more instances of `signal_handler` exist.  If two instance exist, and one 
+     goes out of scope, signals are still handled until the second instance is destructed.
+
+     In addition to this typical behavior, `signal_handler` includes an interface for more fine-grained control over when 
+     signals are handled while the `signal_handler` exists (i.e. handle_signals(), unhnadle_signals(), and is_handling()), 
+     but the recommended use case is as described above, where signal handling is controled by the existence of a `signal_handler` instance.
+
+     Note that the interface for `signal_handler` uses all static functions, so there is no need to create an extra instance of 
+     the class to use any part of that interface.  So the creation and destruction of instances can be used to control 
+     whether or not signals are handled, and the rest of the interface can be used without an instance.
+
+     # Cancelables
+
+     This class communicates the need to exit to other objects via the \ref cancelable interface.  Simply put, a \ref cancelable object 
+     can be canceled, or told to exit, asynchronously by the `signal_handler`.  Only the cancelable objects that the user wants 
+     to be directly canceled by `signal_handler` should be added with add_cancelable().  In some cases that might be all of the 
+     cancelable objects.  In other cases, where there's some hierarchy of cancelables, it would only be the top-level cancelables.
+
      While add_cancelable() takes a std::shared_ptr<cancelable> as an argument, it stores only std::weak_ptr<cancelable>, and 
      claims no ownership or responsibility for the lifetime of the cancelable object.
+
+     # Manual Cancelation/Exiting/Terminating
+
+     In addition to acting automatically via handled signals, a user can manually terminate, exit, or cancel using 
+     terminate(), exit(), or cancel_all(), respectively.  cancel_all() will only affect the canceled objects.  
+     exit() perform a clean exit using cancel_all(), in addition to setting a return code, though it assumes the 
+     application will take care of actually exiting.  And terminate() will immediately exit the application using std::_Exit().
     */
     class SCARAB_API signal_handler
     {
