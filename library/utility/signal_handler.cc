@@ -34,13 +34,14 @@ namespace {
     // function to catch unhandled exceptions
     // invoke set_terminate as part of global constant initialization
     static const bool SET_TERMINATE = std::set_terminate( scarab::signal_handler::handle_terminate );
-    static const scarab::signal_handler HANDLER;
 }
 
 
 namespace scarab
 {
     LOGGER( slog, "signal_handler" );
+
+    int signal_handler::s_ref_count = 0;
 
     bool signal_handler::s_exited = false;
     int signal_handler::s_return_code = RETURN_SUCCESS;
@@ -55,7 +56,64 @@ namespace scarab
 
     signal_handler::signal_handler()
     {
-        LOGGER( slog_constr, "signal_handler constructor" );
+        //std::cerr << "signal_handler constructor" << std::endl;
+        ++signal_handler::s_ref_count;
+
+        signal_handler::handle_signals();
+    }
+
+    signal_handler::~signal_handler()
+    {
+        //std::cerr << "signal_handler destructor" << std::endl;
+        signal_handler::unhandle_signals();
+        --signal_handler::s_ref_count;
+    }
+
+    void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
+    {
+        signal_handler::add_cancelable_s( a_cancelable );
+        return;
+    }
+
+    void signal_handler::remove_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
+    {
+        signal_handler::remove_cancelable_s( a_cancelable );
+        return;
+    }
+
+    void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
+    {
+        signal_handler::remove_cancelable_s( a_cancelable );
+        return;
+    }
+
+    void signal_handler::add_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
+    {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        s_cancelers.insert( std::make_pair(a_cancelable.get(), cancelable_wptr_t(a_cancelable) ) );
+        return;
+    }
+
+    void signal_handler::remove_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
+    {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        s_cancelers.erase( a_cancelable.get() );
+        return;
+    }
+
+    void signal_handler::remove_cancelable_s( scarab::cancelable* a_cancelable )
+    {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        s_cancelers.erase( a_cancelable );
+        return;
+    }
+
+    void signal_handler::handle_signals()
+    {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+
+        // we create a new logger here so that handle_signals() can be called from the signal_handler constructor during static initalization
+        LOGGER( slog_constr, "signal_handler handle_signals" );
 
         // setup to handle SIGABRT
         if( ! s_handling_sig_abrt && signal( SIGABRT, signal_handler::handle_exit_error ) == SIG_ERR )
@@ -107,57 +165,13 @@ namespace scarab
             throw error() << "Unable to ignore SIGPIPE\n";
         }
 #endif
-    }
-
-    signal_handler::~signal_handler()
-    {}
-
-    void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
-    {
-        signal_handler::add_cancelable_s( a_cancelable );
         return;
     }
 
-    void signal_handler::remove_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
-    {
-        signal_handler::remove_cancelable_s( a_cancelable );
-        return;
-    }
-
-    void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
-    {
-        signal_handler::remove_cancelable_s( a_cancelable );
-        return;
-    }
-
-    void signal_handler::add_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
+    void signal_handler::unhandle_signals()
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        s_cancelers.insert( std::make_pair(a_cancelable.get(), cancelable_wptr_t(a_cancelable) ) );
-        return;
-    }
 
-    void signal_handler::remove_cancelable_s( std::shared_ptr< scarab::cancelable > a_cancelable )
-    {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        s_cancelers.erase( a_cancelable.get() );
-        return;
-    }
-
-    void signal_handler::remove_cancelable_s( scarab::cancelable* a_cancelable )
-    {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        s_cancelers.erase( a_cancelable );
-        return;
-    }
-
-    void signal_handler::reset()
-    {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        LDEBUG( slog, "Resetting signal_handler" );
-        s_exited = false;
-        s_return_code = RETURN_SUCCESS;
-        s_cancelers.clear();
         if( s_handling_sig_abrt && signal( SIGABRT, SIG_DFL ) == SIG_ERR )
         {
             LWARN( slog, "Unable to switch SIGABRT to default handler" );
@@ -196,6 +210,42 @@ namespace scarab
         }
         
 #endif
+        return;
+    }
+
+    bool signal_handler::is_handling( int a_signal )
+    {
+        bool t_is_handled = false;
+        switch( a_signal )
+        {
+            case SIGABRT:
+                if( s_handling_sig_abrt) t_is_handled = true;
+                break;
+            case SIGTERM:
+                if( s_handling_sig_term) t_is_handled = true;
+                break;
+            case SIGINT:
+                if( s_handling_sig_int) t_is_handled = true;
+                break;
+#ifndef _WIN32
+            case SIGQUIT:
+                if( s_handling_sig_quit) t_is_handled = true;
+                break;
+#endif
+            default:
+                break;
+        }
+        return t_is_handled;
+    }
+
+    void signal_handler::reset()
+    {
+        LDEBUG( slog, "Resetting signal_handler" );
+        s_exited = false;
+        s_return_code = RETURN_SUCCESS;
+        s_cancelers.clear();
+
+        signal_handler::unhandle_signals();
         return;
     }
 

@@ -80,15 +80,22 @@ namespace scarab
             /// Remove a cancelable object with a plain pointer
             void remove_cancelable( cancelable* a_cancelable );
 
-            /// Remove all cancelables and signal handling
-            void reset();
-
             /// Static version: add a cancelable object
             static void add_cancelable_s( std::shared_ptr< cancelable > a_cancelable );
             /// Static version: remove a cancelable object
             static void remove_cancelable_s( std::shared_ptr< cancelable > a_cancelable );
             /// Static version: remove a cancelable object with a plain pointer
             static void remove_cancelable_s( cancelable* a_cancelable );
+
+            /// Remove all cancelables and signal handling
+            static void reset();
+
+            /// Start handling signals
+            static void handle_signals();
+            /// Stop handling signals
+            static void unhandle_signals();
+            /// Check if a signal is handled
+            static bool is_handling( int a_signal );
 
             /// Handler for std::terminate -- does not cleanup memory or threads
             [[noreturn]] static void handle_terminate() noexcept;
@@ -128,6 +135,8 @@ namespace scarab
             static std::recursive_mutex s_mutex;
 
         public:
+            mv_accessible_static_noset( int, ref_count );
+
             mv_accessible_static_noset( bool, exited );
             mv_accessible_static( int, return_code );
 
