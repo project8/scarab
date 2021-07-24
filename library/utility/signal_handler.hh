@@ -15,6 +15,9 @@
 #include <mutex>
 #include <map>
 
+#ifndef _WIN32
+#include <signal.h>  // for struct sigaction, which is in signal.h but not csignal
+#endif
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -179,6 +182,18 @@ namespace scarab
             mv_accessible_static_noset( bool, handling_sig_int );
             mv_accessible_static_noset( bool, handling_sig_quit );
 
+#ifndef _WIN32
+            mv_referrable_static( struct sigaction, old_sig_abrt_action );
+            mv_referrable_static( struct sigaction, old_sig_term_action );
+            mv_referrable_static( struct sigaction, old_sig_int_action );
+            mv_referrable_static( struct sigaction, old_sig_quit_action );
+#else // _WIN32
+            typedef void (*handler_t)(int);
+            mv_referrable_static( handler_t, old_sig_abrt_handler );
+            mv_referrable_static( handler_t, old_sig_term_handler );
+            mv_referrable_static( handler_t, old_sig_int_handler );
+            mv_referrable_static( handler_t, old_sig_quit_handler );
+#endif
     };
 
 } /* namespace scarab */

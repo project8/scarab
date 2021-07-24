@@ -14,18 +14,11 @@
 #include "logger.hh"
 
 #include <execinfo.h>
-#include <signal.h>
 #include <stdexcept>
 #include <thread>
 
-//#include <signal.h>
-//#include <string.h>
-
-//#include <cstdlib>
-//#include <mutex>
-
-
 #ifdef _WIN32
+#include <csignal>
 #include <Windows.h>
 //#include "processthreadsapi.h"
 #endif
@@ -50,6 +43,18 @@ namespace scarab
     bool signal_handler::s_handling_sig_term = false;
     bool signal_handler::s_handling_sig_int = false;
     bool signal_handler::s_handling_sig_quit = false;
+
+#ifndef _WIN32
+    struct sigaction signal_handler::s_old_sig_abrt_action;
+    struct sigaction signal_handler::s_old_sig_term_action;
+    struct sigaction signal_handler::s_old_sig_int_action;
+    struct sigaction signal_handler::s_old_sig_quit_action;
+#else // _WIN32
+    signal_handler::handler_t signal_handler::s_old_sig_abrt_handler = SIG_DFL;
+    signal_handler::handler_t signal_handler::s_old_sig_term_handler = SIG_DFL;
+    signal_handler::handler_t signal_handler::s_old_sig_int_handler = SIG_DFL;
+    signal_handler::handler_t signal_handler::s_old_sig_quit_handler = SIG_DFL;
+#endif
 
     std::recursive_mutex signal_handler::s_mutex;
     signal_handler::cancelers signal_handler::s_cancelers;
@@ -102,8 +107,20 @@ namespace scarab
 
         LDEBUG( slog_constr, "Taking over signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
 
+#ifndef _WIN32  // on a POSIX system we use sigaction
+
+        struct sigaction t_exit_error_action, t_exit_success_action;
+
+        t_exit_error_action.sa_handler = signal_handler::handle_exit_error;
+        sigemptyset(&t_exit_error_action.sa_mask);
+        t_exit_error_action.sa_flags = 0;
+
+        t_exit_success_action.sa_handler = signal_handler::handle_exit_success;
+        sigemptyset(&t_exit_success_action.sa_mask);
+        t_exit_success_action.sa_flags = 0;
+
         // setup to handle SIGABRT
-        if( ! s_handling_sig_abrt && signal( SIGABRT, signal_handler::handle_exit_error ) == SIG_ERR )
+        if( ! s_handling_sig_abrt && sigaction( SIGABRT, &t_exit_error_action, &s_old_sig_abrt_action ) != 0 )
         {
             LWARN( slog_constr, "Unable to setup handling of SIGABRT: abort() and unhandled exceptions will result in an unclean exit" );
         }
@@ -114,7 +131,7 @@ namespace scarab
         }
 
         // setup to handle SIGTERM
-        if( ! s_handling_sig_term && signal( SIGTERM, signal_handler::handle_exit_error ) == SIG_ERR )
+        if( ! s_handling_sig_term && sigaction( SIGTERM, &t_exit_error_action, &s_old_sig_term_action ) != 0 )
         {
             LWARN( slog_constr, "Unable to setup handling of SIGTERM: SIGTERM will result in an unclean exit" );
         }
@@ -125,7 +142,7 @@ namespace scarab
         }
 
         // setup to handle SIGINT
-        if( ! s_handling_sig_int && signal( SIGINT, signal_handler::handle_exit_success ) == SIG_ERR )
+        if( ! s_handling_sig_int && sigaction( SIGINT, &t_exit_success_action, &s_old_sig_int_action ) != 0 )
         {
             LWARN( slog_constr, "Unable to setup handling of SIGINT: ctrl-c cancellation will result in an unclean exit" );
         }
@@ -135,9 +152,8 @@ namespace scarab
             s_handling_sig_int = true;
         }
 
-#ifndef _WIN32
         // setup to handle SIGQUIT
-        if( ! s_handling_sig_quit && signal( SIGQUIT, signal_handler::handle_exit_success ) == SIG_ERR )
+        if( ! s_handling_sig_quit && sigaction( SIGQUIT, &t_exit_success_action, &s_old_sig_quit_action ) != 0 )
         {
             LWARN( slog_constr, "Unable to setup handling of SIGQUIT: ctrl-\\ cancellation will result in an unclean exit" );
         }
@@ -151,6 +167,58 @@ namespace scarab
         {
             throw error() << "Unable to ignore SIGPIPE\n";
         }
+
+#else // _WIN32; on a Windows system we use std::signal
+
+        // setup to handle SIGABRT
+        if( ! s_handling_sig_abrt )
+        {
+            auto t_sig_ret = signal( SIGABRT, signal_handler::handle_exit_error );
+            if( t_sig_ret == SIG_ERR )
+            {
+                LWARN( slog_constr, "Unable to setup handling of SIGABRT: abort() and unhandled exceptions will result in an unclean exit" );
+            }
+            else
+            {
+                s_handling_sig_abrt = true;
+                s_old_sig_abrt_handler = t_sig_ret;
+            }
+        }
+        if( s_handling_sig_abrt ) LTRACE( slog_constr, "Handling SIGABRT (abort() and unhandled exceptions)" );
+
+
+        // setup to handle SIGTERM
+        if( ! s_handling_sig_term )
+        {
+            auto t_sig_ret = signal( SIGTERM, signal_handler::handle_exit_error );
+            if( t_sig_ret == SIG_ERR )
+            {
+                LWARN( slog_constr, "Unable to setup handling of SIGTERM: SIGTERM will result in an unclean exit" );
+            }
+            else
+            {
+                s_handling_sig_term = true;
+                s_old_sig_abrt_handler = t_sig_ret;
+            }
+        }
+        if( s_handling_sig_term ) LTRACE( slog_constr, "Handling SIGTERM" );
+
+        // setup to handle SIGINT
+        if( ! s_handling_sig_int )
+        {
+            auto t_sig_ret = signal( SIGINT, signal_handler::handle_exit_error );
+            if( t_sig_ret == SIG_ERR )
+            {
+                LWARN( slog_constr, "Unable to setup handling of SIGINT: ctrl-c cancellation will result in an unclean exit" );
+            }
+            else
+            {
+                s_handling_sig_int = true;
+                s_old_sig_abrt_handler = t_sig_ret;
+            }
+        }
+        if( s_handling_sig_int ) LTRACE( slog_constr, "Handling SIGINT (ctrl-c))" );
+
 #endif
         return;
     }
@@ -161,49 +229,81 @@ namespace scarab
 
         LDEBUG( slog, "Returning signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
 
-        if( s_handling_sig_abrt && signal( SIGABRT, SIG_DFL ) == SIG_ERR )
+#ifndef _WIN32
+
+        if( s_handling_sig_abrt && sigaction( SIGABRT, &s_old_sig_abrt_action, nullptr ) != 0 )
         {
-            LWARN( slog, "Unable to switch SIGABRT to default handler" );
+            LWARN( slog, "Unable to switch SIGABRT to previous handler" );
         }
         else
         {
             s_handling_sig_abrt = false;
         }
         
-        if( s_handling_sig_term && signal( SIGTERM, SIG_DFL ) == SIG_ERR )
+        if( s_handling_sig_term && sigaction( SIGTERM, &s_old_sig_term_action, nullptr ) != 0 )
         {
-            LWARN( slog, "Unable to switch SIGTERM to default handler" );
+            LWARN( slog, "Unable to switch SIGTERM to previous handler" );
         }
         else
         {
             s_handling_sig_term = false;
         }
         
-        if( s_handling_sig_int && signal( SIGINT, SIG_DFL ) == SIG_ERR )
+        if( s_handling_sig_int && sigaction( SIGINT, &s_old_sig_int_action, nullptr ) != 0 )
         {
-            LWARN( slog, "Unable to switch SIGINT to default handler" );
+            LWARN( slog, "Unable to switch SIGINT to previous handler" );
         }
         else
         {
             s_handling_sig_int = false;
         }
         
-#ifndef _WIN32
-        if( s_handling_sig_quit && signal( SIGQUIT, SIG_DFL ) == SIG_ERR )
+        if( s_handling_sig_quit && sigaction( SIGQUIT, &s_old_sig_quit_action, nullptr ) != 0 )
         {
-            LWARN( slog, "Unable to switch SIGQUIT to default handler" );
+            LWARN( slog, "Unable to switch SIGQUIT to previous handler" );
         }
         else
         {
             s_handling_sig_quit = false;
         }
+
+#else // _WIN32
+
+        if( s_handling_sig_abrt && signal( SIGABRT, s_old_sig_abrt_handler ) == SIG_ERR )
+        {
+            LWARN( slog, "Unable to switch SIGABRT to previous handler" );
+        }
+        else
+        {
+            s_handling_sig_abrt = false;
+        }
         
+        if( s_handling_sig_term && signal( SIGTERM, s_old_sig_term_handler ) == SIG_ERR )
+        {
+            LWARN( slog, "Unable to switch SIGTERM to previous handler" );
+        }
+        else
+        {
+            s_handling_sig_term = false;
+        }
+        
+        if( s_handling_sig_int && signal( SIGINT, s_old_sig_int_handler ) == SIG_ERR )
+        {
+            LWARN( slog, "Unable to switch SIGINT to previous handler" );
+        }
+        else
+        {
+            s_handling_sig_int = false;
+        }
+       
 #endif
         return;
     }
 
     bool signal_handler::is_handling( int a_signal )
     {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+
         bool t_is_handled = false;
         switch( a_signal )
         {
@@ -230,6 +330,8 @@ namespace scarab
     void signal_handler::reset()
     {
         LDEBUG( slog, "Resetting signal_handler" );
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+
         s_exited = false;
         s_return_code = RETURN_SUCCESS;
         s_cancelers.clear();
@@ -246,7 +348,7 @@ namespace scarab
     void signal_handler::handle_exit_error( int a_sig )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        LERROR( slog, "Handling termination due to an error condition; signal <" << a_sig << ">" );
+        LERROR( slog, "Handling signal <" << a_sig << "> as an error condition; return code: " << RETURN_ERROR );
         exit( RETURN_ERROR );
         return;
     }
@@ -254,7 +356,7 @@ namespace scarab
     void signal_handler::handle_exit_success( int a_sig )
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        LPROG( slog, "Handling termination; signal <" << a_sig << ">" );
+        LPROG( slog, "Handling signal <" << a_sig << ">; return code: " << RETURN_SUCCESS );
         exit( RETURN_SUCCESS );
         return;
     }
