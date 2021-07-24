@@ -41,6 +41,8 @@
 
 int main(int , char ** )
 {
+    scarab::signal_handler t_handler;
+    
     raise( SIGABRT );
 
     return( EXIT_SUCCESS );
