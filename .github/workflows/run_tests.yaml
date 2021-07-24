@@ -9,17 +9,14 @@ on:
 
 jobs:
 
-  Build:
-#    if: ${{ false }} # disable for now
+  RunTests:
+
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         fail-fast: [false]
         os: [ubuntu-20.04, macos-10.15]
-
-  run_tests:
-    runs-on: ${{ matrix.os }}
 
     steps:
 
@@ -40,27 +37,26 @@ jobs:
 
       - name: Install dependencies -- Linux
         # pybind11 is manually installed because the minimum version is 2.6.2, and Ubuntu 20.04 only has v2.4.3
-        if: startsWith(matrix.os, 'linux')
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
             libboost-all-dev \
             rapidjson-dev \
             libyaml-cpp-dev
-          cd /usr/local && \
-          git clone https://github.com/pybind/pybind11.git && \
-          cd pybind11 && \
-          git checkout v2.7.0 && \
-          mkdir build && \
-          cd build && \
-          cmake -DPYBIND11_TEST=FALSE .. && \
-          make -j2 install
+          git clone https://github.com/pybind/pybind11.git
+          cd pybind11
+          git checkout v2.7.0
+          mkdir build
+          cd build
+          sudo cmake -DPYBIND11_TEST=FALSE ..
+          sudo make -j2 install
 
       - name: Configure
         run: |
           mkdir build
           cd build
-          cmake .. -DDripline_ENABLE_TESTING=TRUE -DScarab_BUILD_PYTHON=FALSE 
+          cmake .. -DScarab_ENABLE_TESTING=TRUE -DScarab_BUILD_PYTHON=TRUE
 
       - name: Build
         run: |
@@ -69,27 +65,5 @@ jobs:
 
       - name: Run tests
         run: |
-          cd build/testing
-          ./run_tests
-          
-  test_linux:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout the repo 
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Configure
-        run: |
-          export CC=gcc && export CXX=g++
-          mkdir build
           cd build
-          cmake .. -DScarab_BUILD_PYTHON=FALSE -DDripline_ENABLE_TESTING=TRUE -DCMAKE_CXX_FLAGS=-pthread
-      - name: Build
-        run: |
-          cd build
-          make -j2 install
-      - name: Run tests
-        run: |
-          cd build/testing
-          ./run_tests
+          ctest --output-on-failure
