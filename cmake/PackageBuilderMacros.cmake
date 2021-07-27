@@ -365,6 +365,7 @@ function( pbuilder_component_install_and_export )
 
         # make targets available at build time
         export( TARGETS ${FULL_LIBTARGETS}
+            APPEND
             FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
         )
 
