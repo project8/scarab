@@ -28,6 +28,8 @@
 
 int main(int , char ** )
 {
+    scarab::signal_handler t_handler;
+
     raise( SIGQUIT );
 
     return( EXIT_SUCCESS );

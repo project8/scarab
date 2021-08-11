@@ -32,7 +32,7 @@ namespace scarab
 
     cancelable::~cancelable()
     {
-        signal_handler::remove_cancelable_s( this );
+        signal_handler::remove_cancelable( this );
     }
 
     cancelable& cancelable::operator=( const cancelable& a_orig )

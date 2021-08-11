@@ -6,6 +6,7 @@
 #include "pybind11/stl.h"
 
 #include "application.hh"
+#include "scarab_binding_helpers.hh"
 
 namespace scarab_pybind
 {
@@ -16,7 +17,8 @@ namespace scarab_pybind
         all_members.push_back( "MainApp" );
         pybind11::class_< scarab::main_app >( mod, "MainApp", "Base class for creating CLI utilities" )
             .def( pybind11::init< bool >(),
-                  pybind11::arg( "use_config" ) = true )
+                  pybind11::arg( "use_config" ) = true,
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
 
             .def( "set_callback", [](scarab::main_app* an_app, std::function< void() > a_fun){ an_app->callback( a_fun );} )
 
@@ -31,10 +33,10 @@ namespace scarab_pybind
             .def_property_readonly( "app_options", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::app_options )
             .def_property_readonly( "use_config", &scarab::main_app::get_use_config )
 
-            .def( "do_config_stage_1", &scarab::main_app::do_config_stage_1 )
-            .def( "do_config_stage_2", &scarab::main_app::do_config_stage_2 )
-            .def( "do_config_stage_3", &scarab::main_app::do_config_stage_3 )
-            .def( "do_config_stage_4", &scarab::main_app::do_config_stage_4 )
+            .def( "do_config_stage_1", &scarab::main_app::do_config_stage_1, SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "do_config_stage_2", &scarab::main_app::do_config_stage_2, SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "do_config_stage_3", &scarab::main_app::do_config_stage_3, SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "do_config_stage_4", &scarab::main_app::do_config_stage_4, SCARAB_BIND_CALL_GUARD_STREAMS )
 
             //TODO: add_config_subcommand?
 
@@ -45,58 +47,66 @@ namespace scarab_pybind
                   pybind11::arg( "flag" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a CLI flag, which is toggled as a bool" )
+                  "add a CLI flag, which is toggled as a bool",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_config_counted_flag",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_flag< unsigned >(a_name, a_addr, a_description);},
                   pybind11::arg( "flag" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a CLI flag, the config will contain a count of occurrances" )
+                  "add a CLI flag, the config will contain a count of occurrances",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_config_string_option",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_option< std::string >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a single-string argument" )
+                  "add a single-string argument",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_config_int_option",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_option< int >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a single-integer argument" )
+                  "add a single-integer argument",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_config_float_option",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_option< double >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a single-float argument" )
+                  "add a single-float argument",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_config_multi_string_option",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_multi_option< std::string >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a sequence of string arguments" )
+                  "add a sequence of string arguments",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_config_multi_int_option",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_multi_option< int >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a sequence of ints arguments" )
+                  "add a sequence of ints arguments",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_config_multi_float_option",
                   [](scarab::main_app* an_app, std::string a_name, std::string a_addr, std::string a_description)
                         {an_app->add_config_multi_option< double >(a_name, a_addr, a_description);},
                   pybind11::arg( "option" ),
                   pybind11::arg( "config_address" ),
                   pybind11::arg( "description" ) = "",
-                  "add a sequence of string arguments" )
+                  "add a sequence of string arguments",
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
 
-            .def( "set_version", &scarab::main_app::set_version )
+            .def( "set_version", &scarab::main_app::set_version, SCARAB_BIND_CALL_GUARD_STREAMS )
 
             // implement execute as a lambda, it is a macro in CLI11
             .def( "execute",
@@ -115,7 +125,8 @@ namespace scarab_pybind
                     CLI11_PARSE( an_app, args.size(), argv );
                     return 0;
                   },
-                  "parse arguments and execute the application" )
+                  "parse arguments and execute the application",
+                  SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
 
             ;
 

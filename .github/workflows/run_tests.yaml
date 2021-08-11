@@ -1,0 +1,69 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ 'main', 'develop' ]
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+
+  RunTests:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        fail-fast: [false]
+        os: [ubuntu-20.04, macos-10.15]
+
+    steps:
+
+      - name: Checkout the repo 
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install dependencies -- Mac
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install \
+            boost \
+            pybind11 \
+            rabbitmq-c \
+            rapidjson \
+            yaml-cpp
+
+      - name: Install dependencies -- Linux
+        # pybind11 is manually installed because the minimum version is 2.6.2, and Ubuntu 20.04 only has v2.4.3
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            libboost-all-dev \
+            rapidjson-dev \
+            libyaml-cpp-dev
+          git clone https://github.com/pybind/pybind11.git
+          cd pybind11
+          git checkout v2.7.0
+          mkdir build
+          cd build
+          sudo cmake -DPYBIND11_TEST=FALSE ..
+          sudo make -j2 install
+
+      - name: Configure
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DScarab_ENABLE_TESTING=TRUE -DScarab_BUILD_PYTHON=TRUE
+
+      - name: Build
+        run: |
+          cd build
+          make -j2 install
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
