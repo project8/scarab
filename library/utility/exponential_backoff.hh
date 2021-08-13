@@ -8,6 +8,7 @@
 #ifndef SCARAB_EXPONENTIAL_BACKOFF_HH_
 #define SCARAB_EXPONENTIAL_BACKOFF_HH_
 
+#include "error.hh"
 #include "logger.hh"
 #include "member_variables.hh"
 #include "scarab_api.hh"
@@ -33,27 +34,30 @@ namespace scarab
     class SCARAB_API exponential_backoff
     {
         public:
-            exponential_backoff( std::function< bool (x_args...) > an_action, unsigned a_max_retries = 10, unsigned a_base_delay_ms = 100 );
+            exponential_backoff( std::function< bool (x_args...) > an_action, unsigned a_max_attempts = 10, unsigned a_base_delay_ms = 100 );
             //exponential_backoff( const exponential_backoff< x_args... >& a_orig );
             virtual ~exponential_backoff();
 
             //exponential_backoff< x_args... >& operator=( const exponential_backoff< x_args... >& a_orig );
 
+            /// returns the number of attempts made at calling the function (including the last, successful or not)
             unsigned do_action( x_args... args );
 
             mv_referrable( std::function< bool (x_args...) >, action );
 
-            mv_accessible( unsigned, max_retries );
+            mv_accessible( unsigned, max_attempts );
             mv_accessible( unsigned, base_delay_ms );
     };
 
 
     template< typename ... x_args >
-    exponential_backoff< x_args... >::exponential_backoff( std::function< bool (x_args...) > an_action, unsigned a_max_retries, unsigned a_base_delay_ms ) :
+    exponential_backoff< x_args... >::exponential_backoff( std::function< bool (x_args...) > an_action, unsigned a_max_attempts, unsigned a_base_delay_ms ) :
             f_action( an_action ),
-            f_max_retries( a_max_retries ),
+            f_max_attempts( a_max_attempts ),
             f_base_delay_ms( a_base_delay_ms )
-    {}
+    {
+        if( f_max_attempts == 0 ) throw error() << "Max attempts must be > 0";
+    }
 
     template< typename ... x_args >
     exponential_backoff< x_args... >::~exponential_backoff()
@@ -63,19 +67,19 @@ namespace scarab
     unsigned exponential_backoff< x_args... >::do_action( x_args... args )
     {
         LWARN( expbacklog_hh, "doing action" );
-        unsigned t_retries = 0;
+        unsigned t_attempts = 1;
         bool t_success = f_action( args... );
         LWARN( expbacklog_hh, "function called first time: " << t_success );
-        while( ! t_success && t_retries < f_max_retries )
+        while( ! t_success && t_attempts < f_max_attempts )
         {
-            LWARN( expbacklog_hh, "retries: " << t_retries << "   delay: " << (1<<t_retries) * f_base_delay_ms );
-            std::this_thread::sleep_for( std::chrono::milliseconds(1<<t_retries * f_base_delay_ms) );
+            LWARN( expbacklog_hh, "attempts: " << t_attempts << "   delay: " << (1<<t_attempts) * f_base_delay_ms );
+            std::this_thread::sleep_for( std::chrono::milliseconds(1<<t_attempts * f_base_delay_ms) );
             t_success = f_action( args... );
             LWARN( expbacklog_hh, "function called: " << t_success );
-            ++t_retries;
+            ++t_attempts;
         }
 
-        return t_success ? t_retries : 0;
+        return t_success ? t_attempts : 0;
     }
 
 } /* namespace scarab */
