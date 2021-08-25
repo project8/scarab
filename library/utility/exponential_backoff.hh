@@ -41,7 +41,7 @@ namespace scarab
             //exponential_backoff< x_args... >& operator=( const exponential_backoff< x_args... >& a_orig );
 
             /// returns the number of attempts made at calling the function (including the last, successful or not)
-            unsigned do_action( x_args... args );
+            unsigned go( x_args... args );
 
             mv_referrable( std::function< bool (x_args...) >, action );
 
@@ -64,7 +64,7 @@ namespace scarab
     {}
 
     template< typename ... x_args >
-    unsigned exponential_backoff< x_args... >::do_action( x_args... args )
+    unsigned exponential_backoff< x_args... >::go( x_args... args )
     {
         LWARN( expbacklog_hh, "doing action" );
         unsigned t_attempts = 1;
