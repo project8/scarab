@@ -66,16 +66,16 @@ namespace scarab
     template< typename ... x_args >
     unsigned exponential_backoff< x_args... >::go( x_args... args )
     {
-        LWARN( expbacklog_hh, "doing action" );
+        //LDEBUG( expbacklog_hh, "doing action" );
         unsigned t_attempts = 1;
         bool t_success = f_action( args... );
-        LWARN( expbacklog_hh, "function called first time: " << t_success );
+        LDEBUG( expbacklog_hh, "function called first time: " << t_success );
         while( ! t_success && t_attempts < f_max_attempts )
         {
-            LWARN( expbacklog_hh, "attempts: " << t_attempts << "   delay: " << (1<<t_attempts) * f_base_delay_ms );
-            std::this_thread::sleep_for( std::chrono::milliseconds(1<<t_attempts * f_base_delay_ms) );
+            LDEBUG( expbacklog_hh, "attempt: " << t_attempts + 1 << " after delay: " << (1<<t_attempts) * f_base_delay_ms );
+            std::this_thread::sleep_for( std::chrono::milliseconds( (1<<t_attempts) * f_base_delay_ms ) );
             t_success = f_action( args... );
-            LWARN( expbacklog_hh, "function called: " << t_success );
+            LDEBUG( expbacklog_hh, "function called: " << t_success );
             ++t_attempts;
         }
 
