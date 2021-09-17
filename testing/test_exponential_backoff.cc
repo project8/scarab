@@ -60,7 +60,8 @@ TEST_CASE( "exponential-backoff", "[utility]" )
     REQUIRE( t_value == 2 );
     REQUIRE( t_attempt == t_return );
     REQUIRE( t_return == 3 );
-    REQUIRE( t_duration.count() == Approx(200+400+t_attempts*10).margin(t_attempts*10) );
+    REQUIRE( t_duration.count() == Approx(200+400+t_attempts*15).margin(t_attempts*15) );
+    std::cerr << t_duration.count() << "  " << 200+400+t_attempts*15 << "  " << t_attempts*15 << std::endl;
 
     // test: do max attempts
     // t_value == 2
@@ -73,7 +74,8 @@ TEST_CASE( "exponential-backoff", "[utility]" )
     REQUIRE( t_value == 3 );
     REQUIRE( t_attempt == t_return );
     REQUIRE( t_return == 10 );
-    REQUIRE( t_duration.count() == Approx(200+400+800+1600+3200+6400+12800+25600+51200+t_attempts*10).margin(t_attempts*10) );
+    REQUIRE( t_duration.count() == Approx(200+400+800+1600+3200+6400+12800+25600+51200+t_attempts*15).margin(t_attempts*15) );
+    std::cerr << t_duration.count() << "  " << 200+400+t_attempts*15 << "  " << t_attempts*15 << std::endl;
 
     // test: exceed max attempts
     // t_value == 3
