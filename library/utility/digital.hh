@@ -60,16 +60,16 @@ namespace scarab
     SCARAB_API void get_calib_params2( unsigned n_bits, unsigned data_type_size, double v_offset, double v_range, double dac_gain, bool bits_r_aligned, dig_calib_params *params );
 
 
-    namespace detail {
-        enum class is_signed {};
-        enum class is_unsigned {};
-    }
+    //namespace detail {
+    //    enum class is_signed {};
+    //    enum class is_unsigned {};
+    //}
 
-    template< typename condition >
-    using enable_if_signed = typename std::enable_if< condition::value, detail::is_signed >::type;
+    template< typename type >
+    using enable_if_signed = typename std::enable_if< std::is_signed<type>::value >::type*;
 
-    template< typename condition >
-    using enable_if_unsigned = typename std::enable_if< condition::value, detail::is_unsigned >::type;
+    template< typename type >
+    using enable_if_unsigned = typename std::enable_if< std::is_unsigned<type>::value >::type*;
 
     /// Convert a signed or unsigned digital value to an analog value.
     template< typename dig_type, typename an_type >
@@ -80,7 +80,7 @@ namespace scarab
 
     /// Convert an analog value to an unsigned digital value.
     template< typename an_type, typename dig_type,
-                enable_if_unsigned< std::is_unsigned<dig_type> >... >
+                enable_if_unsigned< dig_type > = nullptr  >
     dig_type a2d( an_type analog, const struct dig_calib_params* params )
     {
         analog = ( analog - params->v_offset ) * params->inv_v_range * (an_type)(params->levels);
@@ -91,7 +91,7 @@ namespace scarab
 
     ///Convert an analog value to a signed digital value.
     template< typename an_type, typename dig_type,
-              enable_if_signed< std::is_signed<dig_type> >... >
+              enable_if_signed< dig_type > = nullptr >
     dig_type a2d( an_type analog, const struct dig_calib_params* params )
     {
         double half_levels = params->levels * 0.5;
