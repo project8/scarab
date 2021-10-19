@@ -11,9 +11,9 @@ Scarab uses the Catch2 testing framework for unit tests.  See these links for mo
 
 ### Building tests
 
-In CMake, enable the option `Dripline_ENABLE_TESTING`, and build.
+In CMake, enable the option `Scarab_ENABLE_TESTING`, and build.
 
-The testing executable, `run_tests`, will be installed in `install/prefix/testing`.
+The testing executable, `run_tests`, will be installed in `testing/`.
 
 ### Running tests
 

@@ -17,8 +17,9 @@ pbuilder_install_headers( ${testing_HEADERS} )
         stream_check.cc
         test_digital.cc
         test_exponential_backoff.cc
-        test_member_variables.cc
         test_logger.cc
+        test_member_variables.cc
+        test_path.cc
         test_signal_handler.cc
         test_time.cc
         test_verbosity.cc

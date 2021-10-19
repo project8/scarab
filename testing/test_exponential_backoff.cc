@@ -13,7 +13,8 @@
 
 using namespace std::chrono;
 
-TEST_CASE( "exponential-backoff", "[utility]" )
+// Should this be exponential-backoff and not exponential_backoff following the rest of the examples ?
+TEST_CASE( "exponential_backoff", "[utility]" )
 {
     unsigned t_value = 0; // value to increment, allowing verification that the function executed; check that this has changed from the before-test value
     unsigned t_attempts = 0; // how many attempts the increment function should wait; set this to the desired number of attempts before a test
