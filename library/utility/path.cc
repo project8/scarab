@@ -9,7 +9,7 @@
 
 #include "path.hh"
 
-#include <iostream>
+//#include <iostream>
 #include <regex>
 
 using std::string;
@@ -35,15 +35,16 @@ namespace scarab
         return absolute( t_exp_path );
     }
 
-    std::vector<std::string> glob(const std::string& a_path, const std::string& a_pattern){
-        std::vector< std::string > file_paths;
-        path a_abspath = expand_path(a_path);
-        for(fs::directory_entry& dir_entry: fs::recursive_directory_iterator(a_abspath))
+    std::vector<std::string> glob(const std::string& a_path, const std::string& a_pattern)
+    {
+        std::vector< std::string > t_file_paths;
+        path t_abspath = expand_path(a_path);
+        for(fs::directory_entry& dir_entry: fs::recursive_directory_iterator(t_abspath))
         {
-            std::string file_path=dir_entry.path().string();
-            if (!std::regex_search(file_path, std::regex(a_pattern))) continue;
-            file_paths.push_back(file_path);
+            std::string t_file_path=dir_entry.path().string();
+            if (!std::regex_search(t_file_path, std::regex(a_pattern))) continue;
+            t_file_paths.push_back(t_file_path);
         }
-        return file_paths;
+        return t_file_paths;
     }
 }
