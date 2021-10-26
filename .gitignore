@@ -11,3 +11,6 @@ build*/
 testing/package_builder/PBTest/scarab
 testing/package_builder/NestedPBTest/PBTest
 testing/package_builder/NestedPBTest/scarab
+
+# File automatically created during the CMake build phase
+../testing/test_path.cc

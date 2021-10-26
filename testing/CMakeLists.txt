@@ -9,6 +9,14 @@ set( testing_HEADERS
     test_member_variables.hh
 )
 
+# This will provide absolute path of the directory with a bunch of files for testing path glob functionality
+set(DIR_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc.in ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc @ONLY)
+set( Scarab_SOURCES
+    ${Scarab_SOURCES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc
+    PARENT_SCOPE )   
+
 pbuilder_install_headers( ${testing_HEADERS} )
 
 
@@ -84,4 +92,4 @@ add_test(NAME unit_tests COMMAND run_tests )
 # Automated CMake Integration
 #include(CTest)
 #include(Catch)
-#catch_discover_tests(foo)
+#catch_discover_tests(foo) 
