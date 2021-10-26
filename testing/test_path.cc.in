@@ -20,9 +20,7 @@ TEST_CASE( "path", "[utility]" )
     SECTION( "glob" )
     {
         std::cout << "Glob Test" << std::endl;
-        std::string dir_path;
-        dir_path="@DIR_PATH@";
-        std::cout<<dir_path<<std::endl;
+        std::string dir_path="@DIR_PATH@";
         
         // build a test vector of txt files to test against the output of glob function
         //this only works asssuming you are in a build directory
