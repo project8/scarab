@@ -10,15 +10,20 @@ set( testing_HEADERS
 )
 
 # This will provide absolute path of the directory with a bunch of files for testing path glob functionality
-set(DIR_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc.in ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc @ONLY)
-set( Scarab_SOURCES
-    ${Scarab_SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc
-    PARENT_SCOPE )   
+set( DIR_PATH ${CMAKE_CURRENT_SOURCE_DIR} )
+
+# set( Scarab_SOURCES
+#     ${Scarab_SOURCES}
+#     ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc 
+# )   
 
 pbuilder_install_headers( ${testing_HEADERS} )
 
+    configure_file( 
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc.in 
+        ${CMAKE_CURRENT_BINARY_DIR}/test_path.cc 
+        @ONLY
+    )
 
     set( testing_SOURCES
         use_catch.cc
@@ -27,10 +32,10 @@ pbuilder_install_headers( ${testing_HEADERS} )
         test_exponential_backoff.cc
         test_logger.cc
         test_member_variables.cc
-        test_path.cc
         test_signal_handler.cc
         test_time.cc
         test_verbosity.cc
+        ${CMAKE_CURRENT_BINARY_DIR}/test_path.cc 
     )
 
     if( Scarab_BUILD_PARAM )
