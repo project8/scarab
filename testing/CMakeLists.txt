@@ -9,14 +9,6 @@ set( testing_HEADERS
     test_member_variables.hh
 )
 
-# This will provide absolute path of the directory with a bunch of files for testing path glob functionality
-set( DIR_PATH ${CMAKE_CURRENT_SOURCE_DIR} )
-
-# set( Scarab_SOURCES
-#     ${Scarab_SOURCES}
-#     ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc 
-# )   
-
 pbuilder_install_headers( ${testing_HEADERS} )
 
     configure_file( 
