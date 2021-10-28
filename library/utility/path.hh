@@ -26,7 +26,8 @@ namespace scarab
     typedef fs::path path;
 
     path SCARAB_API expand_path( const std::string& a_path );
-    std::vector<path> glob( const std::string& a_path, const std::string& a_pattern );
+
+    std::vector< path> SCARAB_API glob( const std::string& a_path, const std::string& a_pattern );
 }
 
 

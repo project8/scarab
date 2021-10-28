@@ -35,7 +35,7 @@ namespace scarab
         return absolute( t_exp_path );
     }
 
-    std::vector<path> glob( const string& a_path, const string& a_pattern )
+    std::vector< path > SCARAB_API glob( const string& a_path, const string& a_pattern )
     {
         std::vector< path > t_file_paths;
         path t_abs_path = expand_path( a_path );
