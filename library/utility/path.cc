@@ -10,6 +10,7 @@
 #include "path.hh"
 
 //#include <iostream>
+#include <regex>
 
 using std::string;
 using boost::filesystem::absolute;
@@ -34,4 +35,16 @@ namespace scarab
         return absolute( t_exp_path );
     }
 
+    std::vector< path > SCARAB_API glob( const string& a_path, const string& a_pattern )
+    {
+        std::vector< path > t_file_paths;
+        path t_abs_path = expand_path( a_path );
+        for( fs::directory_entry& dir_entry: fs::recursive_directory_iterator(t_abs_path) )
+        {
+            path t_file_path=dir_entry.path();
+            if ( ! std::regex_search( t_file_path.string(), std::regex(a_pattern) ) ) continue;
+            t_file_paths.push_back( t_file_path );
+        }
+        return t_file_paths;
+    }
 }

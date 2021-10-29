@@ -13,6 +13,7 @@
 #include <boost/filesystem.hpp>
 
 #include <string>
+#include <vector>
 
 #ifndef _WIN32
 #include <wordexp.h>
@@ -26,6 +27,7 @@ namespace scarab
 
     path SCARAB_API expand_path( const std::string& a_path );
 
+    std::vector< path> SCARAB_API glob( const std::string& a_path, const std::string& a_pattern );
 }
 
 
