@@ -11,17 +11,23 @@ set( testing_HEADERS
 
 pbuilder_install_headers( ${testing_HEADERS} )
 
+    configure_file( 
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_path.cc.in 
+        ${CMAKE_CURRENT_BINARY_DIR}/test_path.cc 
+        @ONLY
+    )
 
     set( testing_SOURCES
         use_catch.cc
         stream_check.cc
         test_digital.cc
         test_exponential_backoff.cc
-        test_member_variables.cc
         test_logger.cc
+        test_member_variables.cc
         test_signal_handler.cc
         test_time.cc
         test_verbosity.cc
+        ${CMAKE_CURRENT_BINARY_DIR}/test_path.cc 
     )
 
     if( Scarab_BUILD_PARAM )
@@ -83,4 +89,4 @@ add_test(NAME unit_tests COMMAND run_tests )
 # Automated CMake Integration
 #include(CTest)
 #include(Catch)
-#catch_discover_tests(foo)
+#catch_discover_tests(foo) 
