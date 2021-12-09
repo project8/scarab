@@ -72,10 +72,15 @@ namespace scarab
             return nullptr;
         }
 
-        param_input_codec* t_codec = factory< param_input_codec >::get_instance()->create( t_encoding );
+        return read_string( a_string, t_encoding, a_options );
+    }
+
+    param_ptr_t param_translator::read_string( const std::string& a_string, const std::string& a_encoding, const param_node& a_options  )
+    {
+        param_input_codec* t_codec = factory< param_input_codec >::get_instance()->create( a_encoding );
         if( t_codec == nullptr )
         {
-            LERROR( slog, "Unable to find input codec for encoding <" << t_encoding << ">");
+            LERROR( slog, "Unable to find input codec for encoding <" << a_encoding << ">");
             return nullptr;
         }
 
@@ -110,15 +115,19 @@ namespace scarab
             return false;
         }
 
-        param_output_codec* t_codec = factory< param_output_codec >::get_instance()->create( t_encoding );
+        return write_string( a_param, a_string, t_encoding, a_options );
+    }
+
+    bool param_translator::write_string( const param& a_param, std::string& a_string, const std::string& a_encoding, const param_node& a_options  )
+    {
+        param_output_codec* t_codec = factory< param_output_codec >::get_instance()->create( a_encoding );
         if( t_codec == nullptr )
         {
-            LERROR( slog, "Unable to find output codec for encoding <" << t_encoding << ">");
+            LERROR( slog, "Unable to find output codec for encoding <" << a_encoding << ">");
             return false;
         }
 
         return t_codec->write_string( a_param, a_string, a_options );
     }
-
 
 } /* namespace scarab */

@@ -57,10 +57,12 @@ namespace scarab
         public:
             param_ptr_t read_file( const std::string& a_filename, const param_node& a_options = param_node()  );
             param_ptr_t read_string( const std::string& a_string, const param_node& a_options = param_node()  );
+            param_ptr_t read_string( const std::string& a_string, const std::string& a_encoding, const param_node& a_options = param_node() );
 
         public:
             bool write_file( const param& a_param, const std::string& a_filename, const param_node& a_options = param_node() );
             bool write_string( const param& a_param, std::string& a_string, const param_node& a_options = param_node() );
+            bool write_string( const param& a_param, std::string& a_string, const std::string& a_encoding, const param_node& a_options = param_node() );
     };
 
 
