@@ -71,6 +71,9 @@ namespace scarab
             virtual const char* what() const noexcept;
             virtual const char* where() const noexcept;
 
+            const std::string& filename() const;
+            int line() const;
+
         protected:
             mutable std::string f_what;
             mutable std::string f_where;
@@ -187,7 +190,17 @@ namespace scarab
         return *static_cast< x_derived* >(this);
     }
 
+    template< typename x_derived >
+    const std::string& typed_exception< x_derived >::filename() const
+    {
+        return f_filename;
+    }
 
+    template< typename x_derived >
+    int typed_exception< x_derived >::line() const
+    {
+        return f_line;
+    }
 }
 
 #endif /* SCARAB_BASE_EXCEPTION_HH_ */
