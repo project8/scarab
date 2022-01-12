@@ -8,6 +8,7 @@
 #ifndef SCARAB_BASE_EXCEPTION_HH_
 #define SCARAB_BASE_EXCEPTION_HH_
 
+#include "path.hh"
 #include "scarab_api.hh"
 
 #include <exception>
@@ -103,7 +104,7 @@ namespace scarab
         {
             f_filename = a_filename;
         }
-        catch( const std::exception& )
+        catch( ... )
         {
             f_filename.clear();
         }
@@ -121,7 +122,7 @@ namespace scarab
         {
             f_filename = a_orig.f_filename;
         }
-        catch( const std::exception& )
+        catch( ... )
         {
             f_filename.clear();
         }
@@ -149,9 +150,9 @@ namespace scarab
     {
         try
         {
-            f_where = f_filename + "(" + std::to_string(f_line) + ")";
+            f_where = path(f_filename).filename().string() + "(" + std::to_string(f_line) + ")";
         }
-        catch( const std::exception& )
+        catch( ... )
         {
             f_where.clear();
         }
