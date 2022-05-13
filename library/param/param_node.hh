@@ -14,6 +14,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
 
+#include <initializer_list>
 #include <map>
 
 namespace scarab
@@ -73,8 +74,11 @@ namespace scarab
             typedef param_node_iterator iterator;
             typedef param_node_const_iterator const_iterator;
             typedef contents::value_type contents_type;
+            
 
             param_node();
+            param_node( std::pair<std::string, const param&> init_item );
+            param_node( std::initializer_list< std::pair<std::string, const param&> > init_list );
             param_node( const param_node& orig );
             param_node( param_node&& orig );
             virtual ~param_node();
@@ -157,6 +161,8 @@ namespace scarab
             contents f_contents;
 
     };
+
+    using n = param_node;
 
 
     template< typename XValType >

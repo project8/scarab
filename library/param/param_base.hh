@@ -26,6 +26,12 @@ namespace scarab
     class SCARAB_API param
     {
         public:
+            using v = param_value;
+            using a = param_array;
+            using n = param_node;
+            using null = param;
+
+        public:
             param();
             param( const param& orig );
             param( param&& orig );
@@ -99,6 +105,8 @@ namespace scarab
 
             static unsigned s_indent_level;
     };
+
+    using null = param;
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param& value);
 

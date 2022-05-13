@@ -16,6 +16,9 @@
 #include <boost/iterator/indirect_iterator.hpp>
 
 #include <deque>
+//#include <initializer_list>
+//#include <tuple>
+#include <type_traits>
 
 
 namespace scarab
@@ -40,6 +43,8 @@ namespace scarab
 
         public:
             param_array();
+            param_array( const param& init_item );
+            param_array( std::initializer_list< param > init_list );
             param_array( const param_array& orig );
             param_array( param_array&& orig );
             virtual ~param_array();
@@ -97,14 +102,14 @@ namespace scarab
             void push_back( const param& a_value );
             void push_back( param&& a_value );
             void push_back( param_ptr_t a_value_ptr );
-            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
+            template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, bool > = true >
             void push_back( T a_value );
 
             void push_front( const param& a_value );
             void push_front( param&& a_value );
             void push_front( param_ptr_t a_value_ptr );
-            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
-            void push_front( T a_value );
+            template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, T > = true, typename... Ts  >
+            void push_front( T a_value, Ts... a_values );
 
             void append( const param_array& an_array );
 
@@ -129,10 +134,21 @@ namespace scarab
             virtual std::string to_string() const;
 
         protected:
+            void push_front(); // end the parameter pack recursion
+
             contents f_contents;
     };
 
+    using a = param_array;
 
+/*
+    template< typename... x_args >
+    param_array::param_array( const x_args&... init_list )
+    {
+        auto t_args = std::forward_as_tuple( init_list... );
+
+    }
+*/
     template< typename XValType >
     XValType param_array::get_value( unsigned a_index, XValType a_default ) const
     {
@@ -250,7 +266,7 @@ namespace scarab
         f_contents.push_back( std::move(a_value_ptr) );
         return;
     }
-    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
+    template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, bool > >
     inline void param_array::push_back( T a_value )
     {
         f_contents.push_back( param_ptr_t( new param_value( a_value ) ) );
@@ -272,12 +288,17 @@ namespace scarab
         f_contents.push_front( std::move(a_value_ptr) );
         return;
     }
-    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
-    inline void param_array::push_front( T a_value )
+
+    template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, T >, typename... Ts  >
+    void param_array::push_front( T a_value, Ts... a_values )
     {
         f_contents.push_front( param_ptr_t( new param_value( a_value ) ) );
+        push_front( a_values... );
         return;
     }
+
+    inline void param_array::push_front()
+    {}
 
     inline void param_array::append( const param_array& an_array )
     {

@@ -35,6 +35,7 @@ pbuilder_install_headers( ${testing_HEADERS} )
             ${testing_SOURCES}
             test_param_array.cc
             test_param_by_pointer.cc
+            test_param_initialization_lists.cc
             test_param_node.cc
             test_param_translator.cc
             test_param_value.cc

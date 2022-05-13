@@ -26,6 +26,23 @@ namespace scarab
     {
     }
 
+    param_node::param_node( std::pair< std::string, const param&> init_item ) :
+            param(),
+            f_contents()
+    {
+        add( init_item.first, init_item.second );
+    }
+
+    param_node::param_node( std::initializer_list< std::pair<std::string, const param&> > init_list ) :
+            param(),
+            f_contents()
+    {
+        for( auto i_init = init_list.begin(); i_init != init_list.end(); ++i_init )
+        {
+            add( i_init->first, i_init->second );
+        }
+    }
+
     param_node::param_node( const param_node& orig ) :
             param( orig ),
             f_contents()
