@@ -25,6 +25,9 @@ TEST_CASE( "param_init_lists", "[param]" )
 {
     param_array test_array( {param::v(1), param::v(2.2), param::v("hello")} );
     test_array.push_front( 50, 500 );
+    param::v tv(500000);
+    param_ptr_t tv2_ptr( new param::v(5000000) );
+    test_array.push_front( param::v(5000) , 50000, tv, tv2_ptr );
     std::cout << test_array << std::endl;
     REQUIRE( test_array.size() == 4 );
     REQUIRE( test_array[0]().is_int() );

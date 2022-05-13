@@ -20,6 +20,7 @@
 //#include <tuple>
 #include <type_traits>
 
+#include <iostream>
 
 namespace scarab
 {
@@ -105,11 +106,17 @@ namespace scarab
             template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, bool > = true >
             void push_back( T a_value );
 
-            void push_front( const param& a_value );
-            void push_front( param&& a_value );
-            void push_front( param_ptr_t a_value_ptr );
-            template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, T > = true, typename... Ts  >
+            //void push_front( const param& a_value );
+            //void push_front( param&& a_value );
+            //void push_front( param_ptr_t a_value_ptr );
+            /*
+            template< typename T, std::enable_if_t< std::is_base_of< param, T >::value, bool > = true, typename... Ts >
             void push_front( T a_value, Ts... a_values );
+            template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, bool > = true, typename... Ts  >
+            void push_front( T a_value, Ts... a_values );
+            */
+            template< typename T, typename... Ts >
+            void push_front( T&& a_value, Ts&&... a_values );
 
             void append( const param_array& an_array );
 
@@ -272,7 +279,7 @@ namespace scarab
         f_contents.push_back( param_ptr_t( new param_value( a_value ) ) );
         return;
     }
-
+/*
     inline void param_array::push_front( const param& a_value )
     {
         f_contents.push_front( a_value.clone() );
@@ -283,20 +290,65 @@ namespace scarab
         f_contents.push_front( a_value.move_clone() );
         return;
     }
+
     inline void param_array::push_front( param_ptr_t a_value_ptr )
     {
         f_contents.push_front( std::move(a_value_ptr) );
+        return;
+    }
+    */
+    template< typename T, typename... Ts >
+    void param_array::push_front( T&& a_value, Ts&&... a_values )
+    {
+        static_assert( std::is_same_v< T, param_ptr_t > || std::is_base_of_v< param, T > || 
+                       std::is_convertible_v< T, param_value > || 
+                       false );
+
+        if constexpr ( std::is_same_v< param_ptr_t, T > )
+        {
+            std::cerr << "pushing fron as a param_ptr_t: " << *a_value << std::endl;
+            f_contents.push_front( std::move(a_value) );
+        }
+        if constexpr ( std::is_base_of_v< param, T > )
+        {
+            if constexpr ( std::is_lvalue_reference_v< T > ) // then do a copy
+            {
+                std::cerr << "pushing front as an lvalue param: " << a_value << std::endl;
+                f_contents.push_front( a_value.clone() );
+            }
+            else // then do a move
+            {
+                std::cerr << "pushing front as an rvalue param: " << a_value << std::endl;
+                f_contents.push_front( a_value.move_clone() );
+            }
+        }
+        else if constexpr ( std::is_convertible_v< T, param_value > )
+        {
+            std::cerr << "pushing front as convertible to value: " << a_value << std::endl;
+            f_contents.push_front( param_ptr_t( new param_value( a_value ) ) );
+        }
+        push_front( std::forward<Ts>( a_values )... );
+        return;
+    }
+/*
+    template< typename T, std::enable_if_t< std::is_base_of< param, T >::value, bool >, typename... Ts >
+    void param_array::push_front( T a_value, Ts... a_values )
+    {
+        std::cerr << "pushing front as a param: " << a_value << std::endl;
+        f_contents.push_front( param_ptr_t( std::forward<T>(a_value) ) );
+        push_front( a_values... );
         return;
     }
 
     template< typename T, std::enable_if_t< std::is_convertible< T, param_value >::value, T >, typename... Ts  >
     void param_array::push_front( T a_value, Ts... a_values )
     {
+        std::cerr << "pushing front as convertible to value: " << a_value << std::endl;
         f_contents.push_front( param_ptr_t( new param_value( a_value ) ) );
         push_front( a_values... );
         return;
     }
-
+*/
     inline void param_array::push_front()
     {}
 

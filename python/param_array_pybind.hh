@@ -77,10 +77,10 @@ namespace scarab_pybind
                     (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_back,
                     pybind11::arg( "value" ),
                     "add a param object to the end of the array")
-            .def( "push_front",
-                    (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_front,
-                    pybind11::arg( "value" ),
-                    "add a param object to the end of the array")
+            //.def( "push_front",
+            //        (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_front,
+            //        pybind11::arg( "value" ),
+            //        "add a param object to the end of the array")
 
             .def( "append",
                     &scarab::param_array::append,
