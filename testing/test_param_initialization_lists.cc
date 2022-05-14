@@ -23,7 +23,7 @@ using scarab::param_ptr_t;
 
 TEST_CASE( "param_init_lists", "[param]" )
 {
-    param_array test_array( {param::v(1), param::v(2.2), param::v("hello")} );
+    param_array test_array( param::v(1), param::v(2.2), param::v("hello") );
     test_array.push_front( 50, 500 );
     param::v tv(500000);
     param_ptr_t tv2_ptr( new param::v(5000000) );

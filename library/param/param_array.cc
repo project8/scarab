@@ -26,14 +26,14 @@ namespace scarab
             f_contents()
     {
     }
-
+/*
     param_array::param_array( const param& init_item ) :
             param(),
             f_contents()
     {
         push_back( init_item );
     }
-
+*//*
     param_array::param_array( std::initializer_list< param > init_list ) :
             param(),
             f_contents()
@@ -44,7 +44,8 @@ namespace scarab
             push_back( *i_init );
         }
     }
-
+*/
+/*
     param_array::param_array( const param_array& orig ) :
             param( orig ),
             f_contents( orig.f_contents.size() )
@@ -65,7 +66,7 @@ namespace scarab
         }
         orig.clear();
     }
-
+*/
     param_array::~param_array()
     {
     }
