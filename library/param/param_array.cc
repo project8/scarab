@@ -73,6 +73,7 @@ namespace scarab
 
     param_array& param_array::operator=( const param_array& rhs )
     {
+        std::cerr << "Copying an array with operator=()" << std::endl;
         this->param::operator=( rhs );
         clear();
         resize( rhs.size()) ;
@@ -85,6 +86,7 @@ namespace scarab
 
     param_array& param_array::operator=( param_array&& rhs )
     {
+        std::cerr << "Moving an array with operator=()" << std::endl;
         this->param::operator=( std::move(rhs) );
         clear();
         resize( rhs.size()) ;
@@ -93,7 +95,34 @@ namespace scarab
             f_contents[ind] = rhs.f_contents[ ind ]->move_clone();
         }
         rhs.clear();
+        std::cerr << "after move:" << rhs << std::endl;
         return *this;
+    }
+
+    param_ptr_t param_array::clone() const
+    {
+        std::cerr << "Copy-cloning an array" << std::endl;
+        param_ptr_t array_ptr( new param_array() );
+        static_cast< param_array* >( array_ptr.get() )->operator=( *this );
+        return array_ptr;
+    }
+
+    param_ptr_t param_array::move_clone()
+    {
+        std::cerr << "Move-cloning an array" << std::endl;
+        param_ptr_t array_ptr( new param_array() );
+        static_cast< param_array* >( array_ptr.get() )->operator=( std::move(*this) );
+        return array_ptr;
+    }
+
+    bool param_array::is_null() const
+    {
+        return false;
+    }
+
+    bool param_array::is_array() const
+    {
+        return true;
     }
 
     void param_array::resize( unsigned a_size )

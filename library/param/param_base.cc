@@ -36,7 +36,45 @@ namespace scarab
     {
     }
 
-    inline void param::merge( const param& a_param )
+    param_ptr_t param::clone() const
+    {
+        std::cerr << "param::clone()" << std::endl;
+        return param_ptr_t( new param( *this ) );
+    }
+
+    param_ptr_t param::move_clone()
+    {
+        std::cerr << "param::clone()" << std::endl;
+        return param_ptr_t( new param( std::move(*this) ) );
+    }
+
+    bool param::is_null() const
+    {
+        return true;
+    }
+
+    bool param::is_value() const
+    {
+        return false;
+    }
+
+    bool param::is_array() const
+    {
+        return false;
+    }
+
+    bool param::is_node() const
+    {
+        return false;
+    }
+
+    bool param::has_subset( const param& /*a_subset*/ ) const
+    {
+        // this version of has_subset should only ever be called if a_subset is a null param (i.e. not one of the derived classes)
+        return true;
+    }
+
+    void param::merge( const param& a_param )
     {
         if( is_node() && a_param.is_node() )
         {

@@ -91,6 +91,27 @@ namespace scarab
         return *this;
     }
 
+    param_ptr_t param_node::clone() const
+    {
+        //std::cout << "param_node::clone" << std::endl;
+        return std::unique_ptr< param_node >( new param_node( *this ) );
+    }
+
+    param_ptr_t param_node::move_clone()
+    {
+        return std::unique_ptr< param_node >( new param_node( std::move(*this) ) );
+    }
+
+    bool param_node::is_null() const
+    {
+        return false;
+    }
+
+    bool param_node::is_node() const
+    {
+        return true;
+    }
+
     bool param_node::has_subset( const param& a_subset ) const
     {
         if( ! a_subset.is_node() ) return false;

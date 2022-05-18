@@ -171,27 +171,6 @@ namespace scarab
         return has( a_name ) ? operator[]( a_name ).as_value().as< XValType >() : a_default;
     }
 
-    inline param_ptr_t param_node::clone() const
-    {
-        //std::cout << "param_node::clone" << std::endl;
-        return std::unique_ptr< param_node >( new param_node( *this ) );
-    }
-
-    inline param_ptr_t param_node::move_clone()
-    {
-        return std::unique_ptr< param_node >( new param_node( std::move(*this) ) );
-    }
-
-    inline bool param_node::is_null() const
-    {
-        return false;
-    }
-
-    inline bool param_node::is_node() const
-    {
-        return true;
-    }
-
     inline unsigned param_node::size() const
     {
         return f_contents.size();

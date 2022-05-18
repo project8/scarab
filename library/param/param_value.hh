@@ -446,18 +446,6 @@ namespace scarab
         return boost::apply_visitor( get_visitor< XValType >(), f_value );
     }
 
-
-    inline param_ptr_t param_value::clone() const
-    {
-        //std::cout << "param_value::clone" << std::endl;
-        return param_ptr_t( new param_value( *this ) );
-    }
-
-    inline param_ptr_t param_value::move_clone()
-    {
-        return param_ptr_t( new param_value( std::move(*this) ) );
-    }
-
     inline bool param_value::operator==( const param_value& rhs ) const
     {
         return boost::apply_visitor( are_strict_equals(), f_value, rhs.f_value );
@@ -476,16 +464,6 @@ namespace scarab
     inline std::string param_value::type() const
     {
         return boost::apply_visitor( type_visitor(), f_value );
-    }
-
-    inline bool param_value::is_null() const
-    {
-        return false;
-    }
-
-    inline bool param_value::is_value() const
-    {
-        return true;
     }
 
     inline bool param_value::is_bool() const
