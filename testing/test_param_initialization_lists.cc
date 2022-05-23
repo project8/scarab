@@ -23,17 +23,17 @@ using scarab::param_ptr_t;
 
 TEST_CASE( "param_init_lists", "[param]" )
 {
-    param_array test_array( param::v(1), param::v(2.2), param::v("hello") );
-    test_array.push_front( 50, 500 );
-    param::v tv(500000);
-    param_ptr_t tv2_ptr( new param::v(5000000) );
-    test_array.push_front( param::v(5000) , 50000, tv, tv2_ptr );
+    param::v tv(50);
+    param_ptr_t tv2_ptr( new param::v(500) );
+    param_array test_array( 1, 2.2, "hello", tv, tv2_ptr );
     std::cout << test_array << std::endl;
-    REQUIRE( test_array.size() == 4 );
+    REQUIRE( test_array.size() == 5 );
     REQUIRE( test_array[0]().is_int() );
-    REQUIRE( test_array[0]().as_int() == 50 );
+    REQUIRE( test_array[0]().as_int() == 1 );
     REQUIRE( test_array[1]().as_double() == 2.2 );
     REQUIRE( test_array[2]().as_string() == "hello" );
+    REQUIRE( test_array[3]().as_int() == 50 );
+    REQUIRE( test_array[4]().as_int() == 500 );
 
     param_node test_node( { {"one", param::v(1)}, {"two-point-two", param::v(2.2)}, {"hello", param::v("hello")} } );
     REQUIRE( test_node.size() == 3 );
@@ -44,9 +44,13 @@ TEST_CASE( "param_init_lists", "[param]" )
     param_node test_nested( { 
         {"null", param()},
         {"one", param::v(1)},
-        {"array", param_array({
-            param::v(5), param::v(5.0), param::v("five"), param_array({param::v(5)}), param_node({"five", param::v(5)})
-        })},
+        {"array", param_array(
+            5, 
+            5.0, 
+            "five", 
+            param_array(5), 
+            param_node({"five", param::v(5)})
+        )},
         {"node", param_node({
             {"one-thousand", param::v(1000)}
         })}

@@ -26,47 +26,7 @@ namespace scarab
             f_contents()
     {
     }
-/*
-    param_array::param_array( const param& init_item ) :
-            param(),
-            f_contents()
-    {
-        push_back( init_item );
-    }
-*//*
-    param_array::param_array( std::initializer_list< param > init_list ) :
-            param(),
-            f_contents()
-    {
-        std::cerr << "n elements: " << init_list.size() << std::endl;
-        for( auto i_init = init_list.begin(); i_init != init_list.end(); ++i_init )
-        {
-            push_back( *i_init );
-        }
-    }
-*/
-/*
-    param_array::param_array( const param_array& orig ) :
-            param( orig ),
-            f_contents( orig.f_contents.size() )
-    {
-        for( unsigned ind = 0; ind < f_contents.size(); ++ind )
-        {
-            f_contents[ind] = orig.f_contents[ ind ]->clone();
-        }
-    }
 
-    param_array::param_array( param_array&& orig ) :
-            param( std::move(orig) ),
-            f_contents( orig.f_contents.size() )
-    {
-        for( unsigned ind = 0; ind < f_contents.size(); ++ind )
-        {
-            f_contents[ind] = orig.f_contents[ ind ]->move_clone();
-        }
-        orig.clear();
-    }
-*/
     param_array::~param_array()
     {
     }
