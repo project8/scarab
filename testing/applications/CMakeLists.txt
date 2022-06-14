@@ -17,7 +17,8 @@ set( testing_applications_SOURCES
 pbuilder_executables( SOURCES ${testing_applications_SOURCES}
         TARGETS_VAR programs
         PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
-        )
+)
+set( programs ${programs} PARENT_SCOPE )
 
 if( Scarab_ENABLE_TESTING )
     add_test( NAME app_with_callback COMMAND test_app_with_callback WORKING_DIRECTORY ${Scarab_BINARY_DIR} )
