@@ -281,6 +281,7 @@ function( pbuilder_executables )
 
     foreach( source ${EXES_SOURCES} )
         get_filename_component( program ${source} NAME_WE )
+        set( program "${program}_exe" )
         if( NOT TARGET ${program} )
             pbuilder_executable( EXECUTABLE ${program} 
                 SOURCES ${source} 
