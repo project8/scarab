@@ -65,7 +65,6 @@ pbuilder_install_headers( ${testing_HEADERS} )
 
 set( testing_LIB_DEPENDENCIES 
     Scarab
-    Catch
 )
 
 # Interface library was recommended for Catch:
@@ -78,6 +77,7 @@ pbuilder_executable(
     SOURCES ${testing_SOURCES}
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
 )
+target_link_libraries( run_tests PUBLIC Catch )
 set( programs "run_tests" )
 
 #add_executable( run_tests ${testing_SOURCES} )
