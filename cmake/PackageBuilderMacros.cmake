@@ -333,6 +333,19 @@ function( pbuilder_executable )
             ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
+    # Grab the include directories, which will be used for the build-interface target includes
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${EXE_EXECUTABLE} INCLUDE_DIRECTORIES )
+    message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
+    message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
+
+    # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
+    # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
+    target_include_directories( ${EXE_EXECUTABLE} 
+        INTERFACE 
+            "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
+            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
+    )
+    
 endfunction()
 
 function( pbuilder_component_install_and_export )
