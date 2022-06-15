@@ -281,15 +281,17 @@ function( pbuilder_executables )
 
     foreach( source ${EXES_SOURCES} )
         get_filename_component( program ${source} NAME_WE )
-        set( program "${program}_exe" )
-        if( NOT TARGET ${program} )
-            pbuilder_executable( EXECUTABLE ${program} 
+        set( target "${program}_exe" )
+        if( NOT TARGET ${target} )
+            pbuilder_executable( EXECUTABLE ${target} 
                 SOURCES ${source} 
                 PROJECT_LIBRARIES ${EXES_PROJECT_LIBRARIES} 
                 PUBLIC_EXTERNAL_LIBRARIES ${EXES_PUBLIC_EXTERNAL_LIBRARIES} 
                 PRIVATE_EXTERNAL_LIBRARIES ${EXES_PRIVATE_EXTERNAL_LIBRARIES} 
             )
-            list( APPEND targets ${program} )
+            # set the output name to ${program} so it doesn't have the _exe appended
+            set_target_properties( ${target} PROPERTIES OUTPUT_NAME ${program} )
+            list( APPEND targets ${target} )
         else()
             message( FATAL "Duplicate target: ${program}" )
         endif()
