@@ -517,21 +517,20 @@ function( pbuilder_do_package_config )
 
 endfunction()
 
-function( pbuilder_add_pybind11_module PROJECT_LIBRARIES )
+function( pbuilder_add_pybind11_module )
     # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
     # Installs the library in the standard lib directory unless indicated by the definition of the variable PBUILDER_PY_INSTALL_IN_SITELIB
     #
     # Parameters
     #     MODULE_NAME: name of the Python module to be built
-    #     SOURCEFILES: list of sources to be built into one module
+    #     SOURCE_FILES: list of sources to be built into one module
     #     PROJECT_LIBRARIES: libraries from the same project to be linked against
     #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
     #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
-    set( OPTIONS )
     set( ONEVALUEARGS MODULE_NAME )
-    set( MULTIVALUEARGS SOURCEFILES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_ETERNAL_LIBRARIES )
-    cmake_parse_arguments( PB11 "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+    set( MULTIVALUEARGS SOURCE_FILES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_ETERNAL_LIBRARIES )
+    cmake_parse_arguments( PB11 "" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
     message( "Doing python binding for module ${PB11_MODULE_NAME}")
 
@@ -543,7 +542,7 @@ function( pbuilder_add_pybind11_module PROJECT_LIBRARIES )
 
     # Potential point of confusion: the C++ library is "Scarab" and the python library is "scarab"
     # Other possible naming schemes seemed less desirable, and we'll hopefully avoid confusion with these comments
-    pybind11_add_module( ${PB11_MODULE_NAME} ${PB11_SOURCEFILES} )
+    pybind11_add_module( ${PB11_MODULE_NAME} ${PB11_SOURCE_FILES} )
 
     get_target_property( SOURCE_TREE_INCLUDE_DIRS ${PB11_MODULE_NAME} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_SUBDIR}" )
