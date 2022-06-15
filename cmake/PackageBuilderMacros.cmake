@@ -538,7 +538,7 @@ function( pbuilder_add_pybind11_module )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project libraries (pybind11): ${FULL_PROJECT_LIBRARIES}" )
     message( STATUS "submodule libraries (pybind11): ${${PROJECT_NAME}_SM_LIBRARIES}" )
-    message( STATUS "source files: ${PB11_SOURCEFILES}" )
+    message( STATUS "source files: ${PB11_SOURCE_FILES}" )
 
     # Potential point of confusion: the C++ library is "Scarab" and the python library is "scarab"
     # Other possible naming schemes seemed less desirable, and we'll hopefully avoid confusion with these comments
