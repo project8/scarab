@@ -40,10 +40,14 @@ if( Scarab_BUILD_PYTHON )
         )
     endif( Scarab_BUILD_PARAM )
 
-    set( PROJECT_LIBRARIES Scarab )
+    set( PYBINDING_PROJECT_LIBRARIES Scarab )
 
-    pbuilder_add_pybind11_module( scarab ${PROJECT_LIBRARIES} )
-
+    pbuilder_add_pybind11_module( 
+        MODULE_NAME scarab
+        SOURCE_FILES ${PYBINDING_SOURCEFILES}
+        PROJECT_LIBRARIES ${PYBINDING_PROJECT_LIBRARIES} 
+    )
+    
     pbuilder_install_headers( ${PYBINDING_HEADERFILES} )
 
     if( NOT DEFINED PBUILDER_PY_INSTALL_IN_SITELIB )
