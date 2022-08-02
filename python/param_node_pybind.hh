@@ -40,11 +40,11 @@ namespace scarab_pybind
 
             .def( "empty", &scarab::param_node::empty, "returns whether the map container is empty")
 
-            .def( "add",
-                    (bool (scarab::param_node::*)(const std::string&, const scarab::param&)) &scarab::param_node::add,
-                    pybind11::arg( "key" ),
-                    pybind11::arg( "value" ),
-                    "Add a param object to a node at a particular key")
+            //.def( "add",
+            //        (bool (scarab::param_node::*)(const std::string&, const scarab::param&)) &scarab::param_node::add,
+            //        pybind11::arg( "key" ),
+            //        pybind11::arg( "value" ),
+            //        "Add a param object to a node at a particular key")
 
             // Get value of the parameter, bringing along the default value
             .def( "get_value",

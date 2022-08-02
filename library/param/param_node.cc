@@ -25,7 +25,7 @@ namespace scarab
             f_contents()
     {
     }
-
+/*
     param_node::param_node( std::pair< std::string, const param&> init_item ) :
             param(),
             f_contents()
@@ -42,7 +42,7 @@ namespace scarab
             add( i_init->first, i_init->second );
         }
     }
-
+*/
     param_node::param_node( const param_node& orig ) :
             param( orig ),
             f_contents()

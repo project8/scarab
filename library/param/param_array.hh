@@ -20,8 +20,6 @@
 //#include <tuple>
 #include <type_traits>
 
-#include <iostream>
-
 namespace scarab
 {
     class param_value;

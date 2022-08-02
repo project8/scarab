@@ -20,6 +20,7 @@ using scarab::param_array;
 using scarab::param_node;
 using scarab::param_value;
 using scarab::param_ptr_t;
+using scarab::ni;
 
 TEST_CASE( "param_init_lists", "[param]" )
 {
@@ -35,26 +36,26 @@ TEST_CASE( "param_init_lists", "[param]" )
     REQUIRE( test_array[3]().as_int() == 50 );
     REQUIRE( test_array[4]().as_int() == 500 );
 
-    param_node test_node( { {"one", param::v(1)}, {"two-point-two", param::v(2.2)}, {"hello", param::v("hello")} } );
+    param_node test_node( scarab::ni("one", 1), scarab::ni("two-point-two", 2.2), scarab::ni("hello", "hello") );
     REQUIRE( test_node.size() == 3 );
     REQUIRE( test_node["one"]().as_int() == 1 );
     REQUIRE( test_node["two-point-two"]().as_double() == 2.2 );
     REQUIRE( test_node["hello"]().as_string() == "hello" );
 
-    param_node test_nested( { 
-        {"null", param()},
-        {"one", param::v(1)},
-        {"array", param_array(
+    param_node test_nested(  
+        ni("null", param()),
+        ni("one", 1),
+        ni("array", param_array(
             5, 
             5.0, 
             "five", 
             param_array(5), 
-            param_node({"five", param::v(5)})
-        )},
-        {"node", param_node({
-            {"one-thousand", param::v(1000)}
-        })}
-    } );
+            param_node(ni("five", 5))
+        )),
+        ni("node", param_node(
+            ni("one-thousand", 1000)
+        ))
+    );
     REQUIRE( test_nested.size() == 4 );
     REQUIRE( test_nested["null"].is_null() );
     REQUIRE( test_nested["one"].is_value() );
