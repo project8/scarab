@@ -50,9 +50,7 @@ endif( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
 message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
 
 # Setup the default install prefix
-# This gets set to the binary directory upon first configuring.
-# If the user changes the prefix, but leaves the flag OFF, then it will remain as the user specified.
-# If the user wants to reset the prefix to the default (i.e. the binary directory), then the flag should be set ON.
+# This gets set to the binary directory upon first configuring without overruling a user specification.
 if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
     set( CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR} CACHE PATH "Install prefix" FORCE )
 endif( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
