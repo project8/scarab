@@ -82,7 +82,7 @@ pbuilder_executable(
 set( programs "run_tests" )
 
 #add_executable( run_tests ${testing_SOURCES} )
-#target_link_libraries( run_tests PUBLIC ${testing_LIB_DEPENDENCIES} )
+target_link_libraries( run_tests PUBLIC Catch )
 
 if( Scarab_BUILD_CLI )
     add_subdirectory( applications )

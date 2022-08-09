@@ -8,6 +8,7 @@
 
 
 #include "param.hh"
+#include "param_helpers_impl.hh"
 
 #include "error.hh"
 
@@ -15,18 +16,13 @@
 
 #include <iostream>
 
-using scarab::param;
-using scarab::param_array;
-using scarab::param_node;
-using scarab::param_value;
-using scarab::param_ptr_t;
-using scarab::ni;
+using namespace scarab;
 
 TEST_CASE( "param_init_lists", "[param]" )
 {
     param::v tv(50);
     param_ptr_t tv2_ptr( new param::v(500) );
-    param_array test_array( 1, 2.2, "hello", tv, tv2_ptr );
+    param_array test_array( pa_args(1, 2.2, "hello", tv, tv2_ptr) );
     std::cout << test_array << std::endl;
     REQUIRE( test_array.size() == 5 );
     REQUIRE( test_array[0]().is_int() );
@@ -36,26 +32,35 @@ TEST_CASE( "param_init_lists", "[param]" )
     REQUIRE( test_array[3]().as_int() == 50 );
     REQUIRE( test_array[4]().as_int() == 500 );
 
-    param_node test_node( scarab::ni("one", 1), scarab::ni("two-point-two", 2.2), scarab::ni("hello", "hello") );
-    REQUIRE( test_node.size() == 3 );
-    REQUIRE( test_node["one"]().as_int() == 1 );
-    REQUIRE( test_node["two-point-two"]().as_double() == 2.2 );
-    REQUIRE( test_node["hello"]().as_string() == "hello" );
+//    param_node test_node( scarab::ni("one", 1), scarab::ni("two-point-two", 2.2), scarab::ni("hello", "hello") );
+//    std::cerr << test_node << std::endl;
+//    REQUIRE( test_node.size() == 3 );
+//    REQUIRE( test_node["one"]().as_int() == 1 );
+//    REQUIRE( test_node["two-point-two"]().as_double() == 2.2 );
+//    REQUIRE( test_node["hello"]().as_string() == "hello" );
+
+    param_node test_node_2( named_arg("one")=1, named_arg("two-point-two")=2.2, named_arg("hello")="hello" );
+    std::cout << test_node_2 << std::endl;
+    REQUIRE( test_node_2.size() == 3 );
+    REQUIRE( test_node_2["one"]().as_int() == 1 );
+    REQUIRE( test_node_2["two-point-two"]().as_double() == 2.2 );
+    REQUIRE( test_node_2["hello"]().as_string() == "hello" );
 
     param_node test_nested(  
-        ni("null", param()),
-        ni("one", 1),
-        ni("array", param_array(
+        "null"_a=param(),
+        "one"_a=1,
+        "array"_a=param_array( pa_args(
             5, 
             5.0, 
             "five", 
-            param_array(5), 
-            param_node(ni("five", 5))
+            param_array( pa_args(5) ), 
+            param_node("five"_a=5)
         )),
-        ni("node", param_node(
-            ni("one-thousand", 1000)
-        ))
+        named_arg("node")=param_node(
+            "one-thousand"_a=1000
+        )
     );
+    std::cout << test_nested << std::endl;
     REQUIRE( test_nested.size() == 4 );
     REQUIRE( test_nested["null"].is_null() );
     REQUIRE( test_nested["one"].is_value() );

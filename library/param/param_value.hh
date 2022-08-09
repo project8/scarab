@@ -21,9 +21,6 @@
 
 namespace scarab
 {
-    class param_array;
-    class param_node;
-
     class SCARAB_API param_value : public param
     {
         public:

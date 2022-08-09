@@ -14,6 +14,7 @@ using std::stringstream;
 #include "param_array.hh"
 
 #include "param_base_impl.hh"
+#include "param_helpers.hh"
 #include "param_node.hh"
 
 #include <iostream>
@@ -25,6 +26,32 @@ namespace scarab
             param(),
             f_contents()
     {
+    }
+
+    param_array::param_array( pa_args&& args ) :
+            param_array( std::move( static_cast< param_array&& >(*args.f_array_ptr)) )
+    {
+    }
+
+    param_array::param_array( const param_array& orig ) :
+            param( orig ),
+            f_contents( orig.f_contents.size() )
+    {
+        for( unsigned ind = 0; ind < f_contents.size(); ++ind )
+        {
+            f_contents[ind] = orig.f_contents[ ind ]->clone();
+        }
+    }
+
+    param_array::param_array( param_array&& orig ) :
+            param( std::move(orig) ),
+            f_contents( orig.f_contents.size() )
+    {
+        for( unsigned ind = 0; ind < f_contents.size(); ++ind )
+        {
+            f_contents[ind] = orig.f_contents[ ind ]->move_clone();
+        }
+        orig.clear();
     }
 
     param_array::~param_array()

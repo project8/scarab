@@ -42,6 +42,7 @@
  */
 
 #include "param.hh"
+#include "param_helpers.hh"
 
 #include "error.hh"
 
@@ -51,6 +52,7 @@ using scarab::param_array;
 using scarab::param_node;
 using scarab::param_value;
 using scarab::param_ptr_t;
+using scarab::pa_args;
 
 TEST_CASE( "param_array", "[param]" )
 {
@@ -107,12 +109,12 @@ TEST_CASE( "param_array", "[param]" )
     REQUIRE( array[0]().as_int() == 20 );
 
     // append and merge
-    param_array to_append( -1 );
+    param_array to_append( pa_args(-1) );
     array.append( to_append );
     REQUIRE( array.size() == 4 );
     REQUIRE( array[3]().as_int() == -1 );
 
-    param_array to_merge( -2 );
+    param_array to_merge( pa_args(-2) );
     array.merge( to_merge );
     REQUIRE( array.size() == 4 );
     REQUIRE( array[0]().as_int() == -2 );
@@ -138,7 +140,7 @@ TEST_CASE( "param_array", "[param]" )
     // multi-item creation
     param_value tv(50);
     param_ptr_t tv2_ptr( new param_value(500) );
-    param_array array_2( 1, 2.2, "hello", tv, tv2_ptr );
+    param_array array_2( pa_args(1, 2.2, "hello", tv, tv2_ptr) );
     REQUIRE( array_2.size() == 5 );
     REQUIRE( array_2[0]().is_int() );
     REQUIRE( array_2[0]().as_int() == 1 );

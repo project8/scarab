@@ -12,6 +12,7 @@
 
 #include "logger.hh"
 #include "member_variables.hh"
+#include "param.hh"
 #include "param_helpers.hh"
 #include "version_semantic.hh"
 

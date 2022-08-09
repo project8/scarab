@@ -1,86 +1,66 @@
 /*
- * param_helpers.hh
+ * param_helpers_impl.hh
  *
- *  Created on: Jan 10, 2019
+ *  Created on: Aug 8, 2022
  *      Author: N.S. Oblath
  */
 
-#ifndef SCARAB_PARAM_HELPERS_HH_
-#define SCARAB_PARAM_HELPERS_HH_
+#ifndef SCARAB_PARAM_HELPERS_IMPL_HH_
+#define SCARAB_PARAM_HELPERS_IMPL_HH_
 
-#include "param_fwd.hh"
+#include "param_helpers.hh"
 
-#include "scarab_api.hh"
+#include "param_array.hh"
+#include "param_node.hh"
+#include "param_value.hh"
 
 namespace scarab
 {
-    struct SCARAB_API simple_parser
+    template< typename T, typename... Ts >
+    pa_args::pa_args( T&& a_value, Ts&&... a_values ) :
+            f_array_ptr( new param_array() )
     {
-        public:
-            /// Converts an address into a nested param structure, and optionally attaches a value
-            static param_ptr_t parse_address( const std::string& an_addr, param_ptr_t a_value = param_ptr_t() );
-
-            /// Attempts to determine whether a value encoded as a string is an int, and unsigned int, or a floating-point number
-            static param_ptr_t parse_value( const std::string& a_value );
-
-        private:
-            static void add_next( param& a_parent, const std::string& an_addr_in_parent, const std::string& a_next_addr, param_ptr_t a_value = param_ptr_t() );
-
-            static param_ptr_t new_param_from_addr( const std::string& an_addr );
-
-        public:
-            static const char f_node_separator = '.';
-    };
-
-
-    struct SCARAB_API pa_args
-    {
-        template< typename T, typename... Ts >
-        explicit pa_args( T&& a_value, Ts&&... a_values );
-
-        param_ptr_t f_array_ptr;
-    };
-
-    struct named_arg_v;
-    struct SCARAB_API named_arg
-    {
-        /// Construct the argument with a name
-        constexpr explicit named_arg( const char* a_name ) :
-                f_name( a_name ),
-                f_derived( nullptr )
-        {}
-
-        /// Assign a value to this argument
-        template< typename T >
-        named_arg_v operator=( T&& a_value );
-
-        /// Access the name
-        const char* name() const { return f_name; }
-        /// Access the value
-        const std::shared_ptr< param >& value() const;
-
-        /// The argument name
-        const char* f_name; // use const char* here so that constructor can be constexpr
-
-        named_arg_v* f_derived;
-    };
-
-    struct SCARAB_API named_arg_v : named_arg
-    {
-        template< typename T >
-        named_arg_v( named_arg&& a_base, T&& a_value );
-
-        /// The argument value
-        std::shared_ptr< param > f_value;
-    };
-
-    inline const std::shared_ptr< param >& named_arg::value() const
-    {
-        return f_derived->f_value;
+        static_cast< param_array* >(f_array_ptr.get())->push_back( std::forward<T>(a_value), std::forward<Ts>(a_values)... );
     }
 
-    /// Syntactic sugar to enable simple-looking keyword arguments
-    constexpr named_arg operator""_a( const char *name, size_t ) { return named_arg(name); }
+    template< typename T >
+    named_arg_v named_arg::operator=( T&& a_value )
+    {
+        return { std::move(*this), std::forward<T>(a_value) };
+    }
+
+    template< typename T >
+    named_arg_v::named_arg_v( named_arg&& a_base, T&& a_value ) :
+            named_arg( std::move(a_base) ),
+            f_value()
+    {
+        f_derived = this;
+
+        using T_noref = typename std::remove_reference< T >::type;
+        static_assert( std::is_same_v< param_ptr_t, T_noref > || 
+                       std::is_base_of_v< param, T_noref > || 
+                       std::is_convertible_v< T_noref, param_value > );
+
+        if constexpr ( std::is_same_v< param_ptr_t, T_noref > )
+        {
+            f_value = std::move(a_value);
+        }
+        if constexpr ( std::is_base_of_v< param, T_noref > )
+        {
+            if constexpr ( std::is_lvalue_reference_v< T > ) // then do a copy
+            {
+                f_value = a_value.clone();
+            }
+            else // then do a move
+            {
+                f_value = a_value.move_clone();
+            }
+        }
+        else if constexpr ( std::is_convertible_v< T_noref, param_value > )
+        {
+            f_value = param_ptr_t( new param_value( a_value ) );
+        }
+    }
 
 /*
     struct node_arg_v : node_arg
@@ -191,12 +171,6 @@ arg_v arg::operator=(T &&value) const {
 }
 
 */
-
-/*
-inline namespace literals {
-constexpr arg operator"" _a(const char *name, size_t) { return arg(name); }
-} // namespace literals
-*/
 }
 
-#endif /* SCARAB_PARAM_HELPERS_HH_ */
+#endif /* SCARAB_PARAM_HELPERS_IMPL_HH_ */

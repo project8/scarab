@@ -10,6 +10,8 @@
 
 #include "param_value.hh"
 
+#include "param_helpers.hh"
+
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -21,9 +23,6 @@
 
 namespace scarab
 {
-    class param_value;
-    class param_array;
-
     // This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
     // In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
     // Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
@@ -85,8 +84,12 @@ namespace scarab
             typedef contents::value_type contents_type;
 
             param_node();
-            template< typename T, typename... Ts >
-            param_node( node_item<T> an_item, node_item<Ts>... an_items );
+            //template< typename T, typename... Ts >
+            //param_node( node_item<T> an_item, node_item<Ts>... an_items );
+            // TODO: initializer list won't work here because you can't move from one; probably need a variadic template to be able to get variable # of arguments
+            //param_node( std::initializer_list<named_arg> args );
+            template< typename... MoreArgs >
+            explicit param_node( const named_arg& arg0, const MoreArgs&... args ); // explicit so that everything isn't convertible to param_node
             param_node( const param_node& orig );
             param_node( param_node&& orig );
             virtual ~param_node();
@@ -131,6 +134,8 @@ namespace scarab
             /// Any items whose names are not present in the node are added; if a name is present, the corresponding item is not added.
             /// Returns true if none of the names were already present, and returns false if even one name is.
             /// Valid types include param_ptr_t, param objects (copy or move), and types convertible to param_value
+            template< typename... MoreArgs >
+            bool add( const named_arg& arg0, const MoreArgs&... args );
             template< typename T, typename... Ts >
             bool add( node_item<T> an_item, node_item<Ts>... an_items );
 
@@ -139,6 +144,8 @@ namespace scarab
 
             /// Adds an item or items to the node, overwriting items if the keys are already present.
             /// Valid types include param_ptr_t, param objects (copy or move), and types convertible to param_value
+            template< typename... MoreArgs >
+            void replace( const named_arg& arg0, const MoreArgs&... args );
             template< typename T, typename... Ts >
             void replace( node_item<T>&& an_item, node_item<Ts>&&... an_items );
 
@@ -168,11 +175,17 @@ namespace scarab
     };
 
     using n = param_node;
-
+/*
     template< typename T, typename... Ts >
     param_node::param_node( node_item<T> an_item, node_item<Ts>... an_items )
     {
-        this->replace( an_item, an_items... );
+        this->replace( std::forward< node_item<T> >(an_item), std::forward< node_item<Ts> >(an_items)... );
+    }
+*/
+    template< typename... MoreArgs >
+    param_node::param_node( const named_arg& arg0, const MoreArgs&... args )
+    {
+        this->replace( arg0, args... );
     }
 
     template< typename XValType >
@@ -226,6 +239,19 @@ namespace scarab
         return this->add( node_item<T>( a_name, std::forward<T>(an_element) ) );
     }
 
+    template< typename... MoreArgs >
+    bool param_node::add( const named_arg& arg0, const MoreArgs&... args )
+    {
+        bool ret = false;
+        contents::iterator it = f_contents.find( arg0.name() );
+        if( it == f_contents.end() )
+        {
+            ret = true;
+            f_contents.insert( contents_type( arg0.name(), param_ptr_t(arg0.value()->clone()) ) );
+        }
+        return ret && add( args... );
+    }
+
     template< typename T, typename... Ts >
     bool param_node::add( node_item<T> an_item, node_item<Ts>... an_items )
     {
@@ -263,7 +289,7 @@ namespace scarab
                 f_contents.insert( contents_type( an_item.first, param_ptr_t( new param_value( an_item.second ) ) ) );
             }
         }
-        return ret && add( std::forward<Ts>( an_items )... );
+        return ret && add( std::forward< node_item<Ts> >( an_items )... );
     }
 
     inline bool param_node::add()
@@ -325,6 +351,13 @@ namespace scarab
         return;
     }
 
+    template< typename... MoreArgs >
+    void param_node::replace( const named_arg& arg0, const MoreArgs&... args )
+    {
+        f_contents[ arg0.name() ] = param_ptr_t( arg0.value()->clone() );
+        replace( args... );
+    }
+
     template< typename T, typename... Ts >
     void param_node::replace( node_item<T>&& an_item, node_item<Ts>&&... an_items )
     {
@@ -356,7 +389,7 @@ namespace scarab
             std::cerr << "replacing as convertible to value: " << an_item.second << std::endl;
             f_contents[ an_item.first ] = param_ptr_t( new param_value( an_item.second ) );
         }
-        replace( std::forward<Ts>( an_items )... );
+        replace( std::forward< node_item<Ts> >( an_items )... );
         return;
     }
 

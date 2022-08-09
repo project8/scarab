@@ -24,6 +24,7 @@ namespace scarab
 {
     class param_value;
     class param_node;
+    struct pa_args;
 
     typedef std::deque< std::unique_ptr< param > > param_array_contents;
 
@@ -44,8 +45,11 @@ namespace scarab
             param_array();
             /// Creates an array with the provided parameters as elements
             /// Note that this functionality means there are no copy or move constructors; use operator=() instead for copy and move
-            template< typename T, typename... Ts >
-            explicit param_array( T&& a_value, Ts&&... a_values );
+            //template< typename T, typename... Ts >
+            //explicit param_array( T&& a_value, Ts&&... a_values );
+            param_array( pa_args&& args );
+            param_array( const param_array& orig );
+            param_array( param_array&& orig );
             virtual ~param_array();
 
             param_array& operator=( const param_array& rhs );
@@ -133,7 +137,7 @@ namespace scarab
     };
 
     using a = param_array;
-
+/*
     template< typename T, typename... Ts >
     param_array::param_array( T&& a_value, Ts&&... a_values ) :
             param(),
@@ -141,7 +145,7 @@ namespace scarab
     {
         this->push_back( std::forward<T>(a_value), std::forward<Ts>(a_values)... );
     }
-
+*/
     template< typename XValType >
     XValType param_array::get_value( unsigned a_index, XValType a_default ) const
     {

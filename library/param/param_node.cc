@@ -15,6 +15,7 @@ using std::stringstream;
 
 #include "param_array.hh"
 #include "param_base_impl.hh"
+#include "param_helpers.hh"
 
 
 namespace scarab
@@ -40,6 +41,16 @@ namespace scarab
         for( auto i_init = init_list.begin(); i_init != init_list.end(); ++i_init )
         {
             add( i_init->first, i_init->second );
+        }
+    }
+*//*
+    param_node::param_node( std::initializer_list<named_arg> args ) :
+            param(),
+            f_contents()
+    {
+        for( auto i_arg = args.begin(); i_arg != args.end(); ++i_arg )
+        {
+            add( i_arg->f_name, std::move(i_arg->f_value) );
         }
     }
 */

@@ -7,7 +7,7 @@
 
 #define SCARAB_API_EXPORTS
 
-#include "param_helpers.hh"
+#include "param_helpers_impl.hh"
 
 #include "logger.hh"
 

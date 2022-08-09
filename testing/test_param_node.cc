@@ -26,13 +26,13 @@ TEST_CASE( "param_node", "[param]" )
 
     param_array subarray1;
     subarray1.push_back( 500 );
-    node.add( "subarray1", subarray1 );
+    node.add( scarab::ni("subarray1", subarray1) );
     REQUIRE( node.size() == 2 );
     REQUIRE_FALSE( subarray1.empty() );
 
     param_array subarray2;
     subarray2.push_back( "5000" );
-    node.add( "subarray2", std::move(subarray2) );
+    node.add( scarab::ni("subarray2", std::move(subarray2)) );
     REQUIRE( node.size() == 3 );
     REQUIRE( subarray2.empty() );
 
