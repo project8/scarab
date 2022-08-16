@@ -397,8 +397,6 @@ namespace scarab
 
     };
 
-    using v = param_value;
-
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
 
     template<>

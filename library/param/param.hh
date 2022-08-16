@@ -14,5 +14,6 @@
 #include "param_value.hh"
 
 #include "param_base_impl.hh"
+#include "param_helpers_impl.hh"
 
 #endif /* SCARAB_PARAM_HH_ */

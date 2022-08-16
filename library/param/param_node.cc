@@ -15,8 +15,11 @@ using std::stringstream;
 
 #include "param_array.hh"
 #include "param_base_impl.hh"
-#include "param_helpers.hh"
+#include "param_helpers_impl.hh"
 
+#include "logger.hh"
+
+LOGGER( dlog, "param_node" );
 
 namespace scarab
 {
@@ -24,36 +27,8 @@ namespace scarab
     param_node::param_node() :
             param(),
             f_contents()
-    {
-    }
-/*
-    param_node::param_node( std::pair< std::string, const param&> init_item ) :
-            param(),
-            f_contents()
-    {
-        add( init_item.first, init_item.second );
-    }
+    {}
 
-    param_node::param_node( std::initializer_list< std::pair<std::string, const param&> > init_list ) :
-            param(),
-            f_contents()
-    {
-        for( auto i_init = init_list.begin(); i_init != init_list.end(); ++i_init )
-        {
-            add( i_init->first, i_init->second );
-        }
-    }
-*//*
-    param_node::param_node( std::initializer_list<named_arg> args ) :
-            param(),
-            f_contents()
-    {
-        for( auto i_arg = args.begin(); i_arg != args.end(); ++i_arg )
-        {
-            add( i_arg->f_name, std::move(i_arg->f_value) );
-        }
-    }
-*/
     param_node::param_node( const param_node& orig ) :
             param( orig ),
             f_contents()
@@ -76,8 +51,7 @@ namespace scarab
     }
 
     param_node::~param_node()
-    {
-    }
+    {}
 
     param_node& param_node::operator=( const param_node& rhs )
     {
@@ -143,21 +117,21 @@ namespace scarab
         {
             if( ! has( it->first ) )
             {
-                //LDEBUG( dlog, "do not have object <" << it->first << "> = <" << *it->second << ">" );
-                add( it->first, *it->second );
+                //LDEBUG( dlog, "do not have object <" << it->first << "> = <" << *it->second << "> (" << it->second->type() << ")" );
+                add( it->first, it->second->clone() );
                 continue;
             }
 
             param& t_param = (*this)[ it->first ];
             if( t_param.is_value() && it->second->is_value() )
             {
-                //LDEBUG( dlog, "replacing the value of \"" << it->first << "\" <" << get_value( it->first ) << "> with <" << *it->second << ">" );
+                //LDEBUG( dlog, "replacing the value of \"" << it->first << "\" <" << (*this)[it->first]() << "> with <" << *it->second << ">" );
                 t_param.as_value() = it->second->as_value();
                 continue;
             }
             if( t_param.is_node() && it->second->is_node() )
             {
-                //LDEBUG( dlog, "merging nodes")
+                //LDEBUG( dlog, "merging nodes");
                 t_param.as_node().merge( it->second->as_node() );
                 continue;
             }
@@ -168,8 +142,8 @@ namespace scarab
                 continue;
             }
 
-            //LDEBUG( dlog, "generic replace" );
-            this->replace( it->first, *it->second );
+            LDEBUG( dlog, "generic replace" );
+            this->replace( it->first, it->second->clone() );
         }
     }
 

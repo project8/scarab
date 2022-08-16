@@ -20,9 +20,6 @@ namespace scarab
     class SCARAB_API param
     {
         public:
-            using v = param_value;
-            using a = param_array;
-            using n = param_node;
             using null = param;
 
         public:
@@ -41,6 +38,7 @@ namespace scarab
             virtual bool is_value() const;
             virtual bool is_array() const;
             virtual bool is_node() const;
+            std::string type() const;
 
             virtual bool has_subset( const param& a_subset ) const;
 
@@ -99,8 +97,6 @@ namespace scarab
 
             static unsigned s_indent_level;
     };
-
-    using null = param;
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param& value);
 

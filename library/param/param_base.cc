@@ -21,30 +21,26 @@ namespace scarab
     SCARAB_API unsigned param::s_indent_level = 0;
 
     param::param()
-    {
-    }
+    {}
 
     param::param( const param& )
-    {
-    }
+    {}
 
     param::param( param&& )
-    {
-    }
+    {}
 
     param::~param()
-    {
-    }
+    {}
 
     param_ptr_t param::clone() const
     {
-        std::cerr << "param::clone()" << std::endl;
+        //std::cerr << "param::clone()" << std::endl;
         return param_ptr_t( new param( *this ) );
     }
 
     param_ptr_t param::move_clone()
     {
-        std::cerr << "param::clone()" << std::endl;
+        //std::cerr << "param::move_clone()" << std::endl;
         return param_ptr_t( new param( std::move(*this) ) );
     }
 
@@ -66,6 +62,15 @@ namespace scarab
     bool param::is_node() const
     {
         return false;
+    }
+
+    std::string param::type() const
+    {
+        if( this->is_value() ) return "value";
+        else if( this->is_node() ) return "node";
+        else if( this->is_array() ) return "array";
+        else if( this->is_null() ) return "null";
+        else throw error() << "Unknown param type encountered";
     }
 
     bool param::has_subset( const param& /*a_subset*/ ) const

@@ -19,13 +19,11 @@ namespace scarab
 
     inline param& param::operator=( const param& )
     {
-        std::cerr << "param::operator=()" << std::endl;
         return *this;
     }
 
     inline param& param::operator=( param&& )
     {
-        std::cerr << "param::operator=()" << std::endl;
         return *this;
     }
 
