@@ -72,15 +72,14 @@ namespace scarab_pybind
                     pybind11::arg( "index" ),
                     pybind11::arg( "default" ),
                     "Get string parameter array value at index, or return provided value if out of index range" )
-
-            //.def( "push_back",
-            //        (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_back,
-            //        pybind11::arg( "value" ),
-            //        "add a param object to the end of the array")
-            //.def( "push_front",
-            //        (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_front,
-            //        pybind11::arg( "value" ),
-            //        "add a param object to the end of the array")
+            .def( "push_back",
+                    (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_back,
+                    pybind11::arg( "value" ),
+                    "add a param object to the end of the array")
+            .def( "push_front",
+                    (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_front,
+                    pybind11::arg( "value" ),
+                    "add a param object to the end of the array")
 
             .def( "append",
                     &scarab::param_array::append,
