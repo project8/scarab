@@ -29,6 +29,13 @@ namespace scarab_pybind
                 pybind11::arg( "hyphenate_keys" ) = false,
                 "Convert native python types to a param structure." );
 
+        all_members.push_back( "to_python" );
+        mod.def( "to_python",
+                &to_python,
+                pybind11::arg( "object" ),
+                pybind11::arg( "hyphenate_keys" ) = false,
+                "Convert param structures to native python types" );
+
         // param
         all_members.push_back( "Param" );
         pybind11::class_< scarab::param >( mod, "Param", "param data structure base class and null object" )
