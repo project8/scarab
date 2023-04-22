@@ -90,7 +90,7 @@ if( Scarab_BUILD_CODEC_YAML )
 
     add_definitions( -DUSE_CODEC_YAML )
 else( Scarab_BUILD_CODEC_YAML )
-    removed_definitions( -DUSE_CODEC_YAML )
+    remove_definitions( -DUSE_CODEC_YAML )
 endif( Scarab_BUILD_CODEC_YAML )
 
 # Create a cache variable for boost components that can be set from dependent projects
