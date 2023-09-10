@@ -67,3 +67,9 @@ jobs:
         run: |
           cd build
           ctest --output-on-failure
+
+# For debugging
+      - name: Setup tmate session
+        if: ${{ ! success() }}
+        uses: mxschmitt/action-tmate@v3
+
