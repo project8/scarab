@@ -21,11 +21,21 @@ include( CMakeParseArguments ) # required until cmake v3.5, when this was added 
 set( PBUILDER_STANDALONE FALSE CACHE INTERNAL "Flag for whether or not this is a stand-alone build" )
 set( PBUILDER_CHILD_NAME_EXTENSION "${PROJECT_NAME}" CACHE INTERNAL "Submodule library name modifier" )
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
+    message( STATUS "PBuilder has determined that this is a standalone project (project build dir: ${PROJECT_BINARY_DIR})" )
     set( PBUILDER_STANDALONE TRUE )
     
     if( CMAKE_GENERATOR MATCHES ".*(Make|Ninja).*" AND NOT CMAKE_BUILD_TYPE )
   		set( CMAKE_BUILD_TYPE "DEBUG" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel" FORCE )
   		message( STATUS "CMAKE_BUILD_TYPE not specified. Using ${CMAKE_BUILD_TYPE} build" )
+    endif()
+
+    # Setup the default install prefix
+    # This gets set to the binary directory upon first configuring without overruling a user specification.
+    if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+        set( CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR} CACHE PATH "Install prefix" FORCE )
+        message( STATUS "Setting the install prefix to ${CMAKE_INSTALL_PREFIX}" )
+    else()
+        message( STATUS "Install prefix is set to ${CMAKE_INSTALL_PREFIX}" )
     endif()
 
     # option to force linking when using g++
@@ -48,12 +58,6 @@ else( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
 endif( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
 
 message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
-
-# Setup the default install prefix
-# This gets set to the binary directory upon first configuring without overruling a user specification.
-if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
-    set( CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR} CACHE PATH "Install prefix" FORCE )
-endif( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
 
 # install subdirectories
 set( INCLUDE_INSTALL_SUBDIR "include/${PROJECT_NAME}" CACHE PATH "Install subdirectory for headers" )
