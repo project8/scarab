@@ -86,8 +86,13 @@ endif( Scarab_BUILD_CODEC_JSON )
 if( Scarab_BUILD_CODEC_YAML )
     find_package( yaml-cpp CONFIG REQUIRED )
 
-    list( APPEND PUBLIC_EXT_LIBS yaml-cpp )
-
+    # sometimes the target is yaml-cpp and somtimes it's yaml-cpp::yaml-cpp
+    if( TARGET yaml-cpp::yaml-cpp )
+        list( APPEND PUBLIC_EXT_LIBS yaml-cpp::yaml-cpp )
+    else()
+        list( APPEND PUBLIC_EXT_LIBS yaml-cpp )
+    endif()
+    
     add_definitions( -DUSE_CODEC_YAML )
 else( Scarab_BUILD_CODEC_YAML )
     remove_definitions( -DUSE_CODEC_YAML )

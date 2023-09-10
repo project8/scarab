@@ -78,14 +78,16 @@ pbuilder_executable(
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
 )
 target_link_libraries( run_tests PUBLIC Catch )
-set( programs "run_tests" )
 
 #add_executable( run_tests ${testing_SOURCES} )
 #target_link_libraries( run_tests PUBLIC ${testing_LIB_DEPENDENCIES} )
 
 if( Scarab_BUILD_CLI )
+    # this sets the programs list
     add_subdirectory( applications )
 endif( Scarab_BUILD_CLI )
+
+list( APPEND programs "run_tests" )
 
 message(STATUS "##### programs: ${programs}")
 pbuilder_component_install_and_export( 
@@ -98,7 +100,7 @@ pbuilder_component_install_and_export(
 
 # Normal CMake Integration
 #enable_testing()
-add_test(NAME unit_tests COMMAND run_tests )
+add_test( NAME unit_tests COMMAND run_tests WORKING_DIRECTORY ${Scarab_BINARY_DIR} )
 
 # Automated CMake Integration
 #include(CTest)
