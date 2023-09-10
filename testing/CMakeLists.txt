@@ -100,7 +100,7 @@ pbuilder_component_install_and_export(
 
 # Normal CMake Integration
 #enable_testing()
-add_test( NAME unit_tests COMMAND run_tests WORKING_DIRECTORY ${Scarab_BINARY_DIR} )
+add_test( NAME unit_tests COMMAND run_tests WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
 
 # Automated CMake Integration
 #include(CTest)
