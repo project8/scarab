@@ -76,9 +76,9 @@ option( ${PROJECT_NAME}_ENABLE_TESTING "Turn on or off the building of test prog
 option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of executables (other than test programs)" ON )
 
 # flag for using C++11
-option( USE_CPP11 "Flag for building with C++11" ON )
+option( USE_CPP11 "Flag for building with C++11" OFF )
 option( USE_CPP14 "Flag for building with C++14" OFF )
-option( USE_CPP17 "Flag for building with C++17" OFF )
+option( USE_CPP17 "Flag for building with C++17" ON )
 if( USE_CPP17 )
     add_definitions( -DUSE_CPP17 )
     add_definitions( -DUSE_CPP14 )
