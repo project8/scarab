@@ -101,6 +101,15 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
     endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 endmacro()
 
+macro( pbuilder_get_link_options VAR )
+    # Fill a variable with link options that should be used for libraries and executables
+    if( OVERRIDE_LIB_PATH )
+        set( ${VAR} "LINKER:--disable-new-dtags" )
+    else( OVERRIDE_LIB_PATH )
+        set( ${VAR} "LINKER:--enable-new-dtags" )
+    endif( OVERRIDE_LIB_PATH )
+endmacro()
+
 macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
     # Output is in the form of the variable FULL_LIB_NAME
     set( FULL_LIB_NAME "${LIB_NAME}${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
@@ -231,11 +240,13 @@ function( pbuilder_link_library )
 
     pbuilder_expand_lib_name( ${LIB_TARGET} )
     set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
+    pbuilder_get_link_options( LINK_OPTIONS )
 
     pbuilder_expand_lib_names( ${LIB_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project library dependencies (lib): ${FULL_PROJECT_LIBRARIES}" )
 
+    target_link_options( ${FULL_LIB_TARGET} PUBLIC ${LINK_OPTIONS} )
     target_link_libraries( ${FULL_LIB_TARGET} 
         PUBLIC
             ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${LIB_PUBLIC_EXTERNAL_LIBRARIES}
@@ -325,7 +336,9 @@ function( pbuilder_executable )
     pbuilder_expand_lib_names( ${EXE_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project library dependencies (exe): ${FULL_PROJECT_LIBRARIES}" )
+    pbuilder_get_link_options( LINK_OPTIONS )
 
+    target_link_options( ${EXE_EXECUTABLE} PUBLIC ${LINK_OPTIONS} )
     target_link_libraries( ${EXE_EXECUTABLE} 
         PUBLIC
             ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${EXE_PUBLIC_EXTERNAL_LIBRARIES}
