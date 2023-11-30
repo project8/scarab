@@ -103,11 +103,14 @@ endmacro()
 
 macro( pbuilder_get_link_options VAR )
     # Fill a variable with link options that should be used for libraries and executables
-    if( OVERRIDE_LIB_PATH )
-        set( ${VAR} "LINKER:--disable-new-dtags" )
-    else( OVERRIDE_LIB_PATH )
-        set( ${VAR} "LINKER:--enable-new-dtags" )
-    endif( OVERRIDE_LIB_PATH )
+
+    if( LINUX )
+        if( OVERRIDE_LIB_PATH )
+            set( ${VAR} "LINKER:--disable-new-dtags" )
+        else( OVERRIDE_LIB_PATH )
+            set( ${VAR} "LINKER:--enable-new-dtags" )
+        endif( OVERRIDE_LIB_PATH )
+    endif()
 endmacro()
 
 macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
