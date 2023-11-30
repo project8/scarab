@@ -103,7 +103,7 @@ option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of execu
 
 # default version of C++
 # acceptable values are any used by the CXX_STANDARD property of your CMake
-set( CMAKE_CXX_STANDARD 11 )
+set( CMAKE_CXX_STANDARD 17 )
 
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
