@@ -108,6 +108,11 @@ set( CMAKE_CXX_STANDARD 17 )
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
 
+# flag for whether or not to use RPATH for the runtime library search path instead of RUNPATH, 
+# the former of which is searched before LD_LIBRARY_PATH and RUNPATH
+# Default chosen to be ON because typical use patterns have not included replacing shared libraries
+option( OVERRIDE_LIB_PATH "Turn on to set runtime library path using RPATH, which is searched before LD_LIBRARY_PATH and RUNPATH" ON )
+
 # turn on RPATH for Mac OSX
 set( CMAKE_MACOSX_RPATH ON )
 
