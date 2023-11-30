@@ -7,7 +7,7 @@
 namespace scarab
 {
 
-    class SCARAB_API error : public base_exception< error >
+    class SCARAB_API error : public typed_exception< error >
     {
         public:
             error() = default;
