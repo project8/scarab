@@ -20,7 +20,13 @@ namespace scarab
 
     SCARAB_API std::string demangle( const char* a_name );
 
-    template <class x_type>
+    template< class x_type >
+    SCARAB_API std::string type()
+    {
+        return demangle( typeid(x_type).name() );
+    }
+
+    template< class x_type >
     SCARAB_API std::string type( const x_type& a_param )
     {
         return demangle( typeid(a_param).name() );

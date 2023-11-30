@@ -65,7 +65,6 @@ pbuilder_install_headers( ${testing_HEADERS} )
 
 set( testing_LIB_DEPENDENCIES 
     Scarab
-    Catch
 )
 
 # Interface library was recommended for Catch:
@@ -73,19 +72,35 @@ set( testing_LIB_DEPENDENCIES
 add_library( Catch INTERFACE )
 target_include_directories( Catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/catch )
 
-add_executable( run_tests ${testing_SOURCES} )
-target_link_libraries( run_tests PUBLIC ${testing_LIB_DEPENDENCIES} )
+pbuilder_executable( 
+    EXECUTABLE run_tests
+    SOURCES ${testing_SOURCES}
+    PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
+)
+target_link_libraries( run_tests PUBLIC Catch )
+
+#add_executable( run_tests ${testing_SOURCES} )
+#target_link_libraries( run_tests PUBLIC ${testing_LIB_DEPENDENCIES} )
 
 if( Scarab_BUILD_CLI )
+    # this sets the programs list
     add_subdirectory( applications )
 endif( Scarab_BUILD_CLI )
+
+list( APPEND programs "run_tests" )
+
+message(STATUS "##### programs: ${programs}")
+pbuilder_component_install_and_export( 
+    COMPONENT Executables
+    EXETARGETS ${programs}
+)
 
 # So far it seems sufficient to use Catch2's ability to run tests, and not CTest.
 # Here are two ways it could potentially be integrated with CTest, if we change our minds.
 
 # Normal CMake Integration
 #enable_testing()
-add_test(NAME unit_tests COMMAND run_tests )
+add_test( NAME unit_tests COMMAND run_tests WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
 
 # Automated CMake Integration
 #include(CTest)

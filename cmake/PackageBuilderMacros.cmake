@@ -103,11 +103,14 @@ endmacro()
 
 macro( pbuilder_get_link_options VAR )
     # Fill a variable with link options that should be used for libraries and executables
-    if( OVERRIDE_LIB_PATH )
-        set( ${VAR} "LINKER:--disable-new-dtags" )
-    else( OVERRIDE_LIB_PATH )
-        set( ${VAR} "LINKER:--enable-new-dtags" )
-    endif( OVERRIDE_LIB_PATH )
+
+    if( LINUX )
+        if( OVERRIDE_LIB_PATH )
+            set( ${VAR} "LINKER:--disable-new-dtags" )
+        else( OVERRIDE_LIB_PATH )
+            set( ${VAR} "LINKER:--enable-new-dtags" )
+        endif( OVERRIDE_LIB_PATH )
+    endif()
 endmacro()
 
 macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
@@ -292,14 +295,17 @@ function( pbuilder_executables )
 
     foreach( source ${EXES_SOURCES} )
         get_filename_component( program ${source} NAME_WE )
-        if( NOT TARGET ${program} )
-            pbuilder_executable( EXECUTABLE ${program} 
+        set( target "${program}_exe" )
+        if( NOT TARGET ${target} )
+            pbuilder_executable( EXECUTABLE ${target} 
                 SOURCES ${source} 
                 PROJECT_LIBRARIES ${EXES_PROJECT_LIBRARIES} 
                 PUBLIC_EXTERNAL_LIBRARIES ${EXES_PUBLIC_EXTERNAL_LIBRARIES} 
                 PRIVATE_EXTERNAL_LIBRARIES ${EXES_PRIVATE_EXTERNAL_LIBRARIES} 
             )
-            list( APPEND targets ${program} )
+            # set the output name to ${program} so it doesn't have the _exe appended
+            set_target_properties( ${target} PROPERTIES OUTPUT_NAME ${program} )
+            list( APPEND targets ${target} )
         else()
             message( FATAL "Duplicate target: ${program}" )
         endif()
@@ -346,6 +352,19 @@ function( pbuilder_executable )
             ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
+    # Grab the include directories, which will be used for the build-interface target includes
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${EXE_EXECUTABLE} INCLUDE_DIRECTORIES )
+    message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
+    message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
+
+    # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
+    # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
+    target_include_directories( ${EXE_EXECUTABLE} 
+        INTERFACE 
+            "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
+            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
+    )
+    
 endfunction()
 
 function( pbuilder_component_install_and_export )
@@ -516,31 +535,49 @@ function( pbuilder_do_package_config )
 
 endfunction()
 
-function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
+function( pbuilder_add_pybind11_module )
     # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
     # Installs the library in the standard lib directory unless indicated by the definition of the variable PBUILDER_PY_INSTALL_IN_SITELIB
+    #
+    # Parameters
+    #     MODULE_NAME: name of the Python module to be built
+    #     SOURCE_FILES: list of sources to be built into one module
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
-    pbuilder_expand_lib_names( ${PROJECT_LIBRARIES} )
+    set( ONEVALUEARGS MODULE_NAME )
+    set( MULTIVALUEARGS SOURCE_FILES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_ETERNAL_LIBRARIES )
+    cmake_parse_arguments( PB11 "" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    message( "Doing python binding for module ${PB11_MODULE_NAME}")
+
+    pbuilder_expand_lib_names( ${PB11_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project libraries (pybind11): ${FULL_PROJECT_LIBRARIES}" )
-
     message( STATUS "submodule libraries (pybind11): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "source files: ${PB11_SOURCE_FILES}" )
 
     # Potential point of confusion: the C++ library is "Scarab" and the python library is "scarab"
     # Other possible naming schemes seemed less desirable, and we'll hopefully avoid confusion with these comments
-    pybind11_add_module( ${PY_MODULE_NAME} ${PYBINDING_SOURCEFILES} )
+    pybind11_add_module( ${PB11_MODULE_NAME} ${PB11_SOURCE_FILES} )
 
-    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${PY_MODULE_NAME} INCLUDE_DIRECTORIES )
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${PB11_MODULE_NAME} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
 
-    target_include_directories( ${PY_MODULE_NAME}
+    target_include_directories( ${PB11_MODULE_NAME}
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
     )
 
-    target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
+    target_link_libraries( ${PB11_MODULE_NAME} 
+        PUBLIC
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${EXE_PUBLIC_EXTERNAL_LIBRARIES}
+        PRIVATE
+            ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
+    )
 
     set( PY_MODULE_INSTALL_DIR ${LIB_INSTALL_DIR} )
     # Override that install location if specified by the user
@@ -549,6 +586,6 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     endif( DEFINED PBUILDER_PY_INSTALL_IN_SITELIB AND DEFINED Python3_SITELIB )
     message( STATUS "Installing module ${PY_MODULE_NAME} in ${PY_MODULE_INSTALL_DIR}" )
 
-    install( TARGETS ${PY_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
+    install( TARGETS ${PB11_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
     
 endfunction()

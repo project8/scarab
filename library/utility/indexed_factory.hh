@@ -84,6 +84,8 @@ namespace scarab
             bool has_class( const XIndexType& a_index ) const;
             void remove_class( const XIndexType& a_index );
 
+            const base_registrar< XBaseType, XArgs... >* get_registrar( const XIndexType& a_index ) const;
+
             FactoryCIt begin() const;
             FactoryCIt end() const;
 
@@ -145,6 +147,8 @@ namespace scarab
             void register_class( const XIndexType& a_index, const base_registrar< XBaseType >* base_registrar );
             bool has_class( const XIndexType& a_index ) const;
             void remove_class( const XIndexType& a_index );
+
+            const base_registrar< XBaseType >* get_registrar( const XIndexType& a_index ) const;
 
             FactoryCIt begin() const;
             FactoryCIt end() const;
@@ -221,6 +225,12 @@ namespace scarab
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;
+    }
+
+    template< class XIndexType, class XBaseType, typename ... XArgs >
+    const base_registrar< XBaseType, XArgs... >* indexed_factory< XIndexType, XBaseType, XArgs... >::get_registrar( const XIndexType& a_index ) const
+    {
+        return fMap->at( a_index );
     }
 
     template< class XIndexType, class XBaseType, typename ... XArgs >
@@ -341,6 +351,12 @@ namespace scarab
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;
+    }
+
+    template< class XIndexType, class XBaseType >
+    const base_registrar< XBaseType >* indexed_factory< XIndexType, XBaseType, void >::get_registrar( const XIndexType& a_index ) const
+    {
+        return fMap->at( a_index );
     }
 
     template< class XIndexType, class XBaseType >
