@@ -218,7 +218,7 @@ function( pbuilder_add_library )
     target_include_directories( ${FULL_LIB_TARGET} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
-            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
+            "$<INSTALL_INTERFACE:${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
     )
 
 
@@ -362,7 +362,7 @@ function( pbuilder_executable )
     target_include_directories( ${EXE_EXECUTABLE} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
-            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
+            "$<INSTALL_INTERFACE:${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
     )
     
 endfunction()
@@ -569,14 +569,14 @@ function( pbuilder_add_pybind11_module )
     target_include_directories( ${PB11_MODULE_NAME}
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
-            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
+            "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_SUBDIR}>"
     )
 
     target_link_libraries( ${PB11_MODULE_NAME} 
         PUBLIC
-            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${EXE_PUBLIC_EXTERNAL_LIBRARIES}
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${PB11_PUBLIC_EXTERNAL_LIBRARIES}
         PRIVATE
-            ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
+            ${PB11_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
     set( PY_MODULE_INSTALL_DIR ${LIB_INSTALL_DIR} )
