@@ -373,11 +373,12 @@ function( pbuilder_component_install_and_export )
     # Parameters:
     #     COMPONENT: build component being installed; required if this function is used multiple times in a project
     #                if a build does not actually have multiple components, a name still needs to be given (e.g. "library")
+    #     NAMESPACE: optional namespace specification to add to the library on export, with colons included
     #     LIBTARGETS: all library targets to be installed
     #     EXETARGETS: all executable targets to be installed
 
     set( OPTIONS )
-    set( ONEVALUEARGS COMPONENT )
+    set( ONEVALUEARGS COMPONENT NAMESPACE )
     set( MULTIVALUEARGS LIBTARGETS EXETARGETS )
     cmake_parse_arguments( CIE "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
@@ -395,11 +396,20 @@ function( pbuilder_component_install_and_export )
         set( FULL_LIBTARGETS ${FULL_LIB_NAMES} )
         message( STATUS "Expanded lib names: ${FULL_LIBTARGETS}" )
 
-        # make targets available at build time
-        export( TARGETS ${FULL_LIBTARGETS}
-            APPEND
-            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
-        )
+
+        # export to make targets available at build time
+        if( CIE_NAMESPACE )
+            export( TARGETS ${FULL_LIBTARGETS}
+                NAMESPACE ${CIE_NAMESPACE}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        else()
+            export( TARGETS ${FULL_LIBTARGETS}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        endif()
 
         # install libraries and add to export for installation
         install( TARGETS ${FULL_LIBTARGETS} 
@@ -407,20 +417,29 @@ function( pbuilder_component_install_and_export )
             COMPONENT ${CIE_COMPONENT}
             LIBRARY DESTINATION ${LIB_INSTALL_DIR}
         )
-    endif()
+endif()
 
     # Executables
     if( CIE_EXETARGETS )
         message( "Installing and exporting executables for component <${CIE_COMPONENT}>" )
         message( STATUS "Targets are: ${CIE_EXETARGETS}" )
 
+        
         # make targets available at build time
         #message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
-        export( TARGETS ${CIE_EXETARGETS}
-            APPEND
-            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
-        )
-        
+        if( CIE_NAMESPACE )
+            export( TARGETS ${CIE_EXETARGETS}
+                NAMESPACE ${CIE_NAMESPACE}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        else()
+            export( TARGETS ${CIE_EXETARGETS}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        endif()
+
         # install executables and add to export for installation
         #message( STATUS "******* installed exe targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets")
         install( TARGETS ${CIE_EXETARGETS}
@@ -428,6 +447,7 @@ function( pbuilder_component_install_and_export )
             COMPONENT ${CIE_COMPONENT}
             RUNTIME DESTINATION ${BIN_INSTALL_DIR}
         )
+
     endif()
 
     # Export installation
@@ -481,54 +501,51 @@ function( pbuilder_do_package_config )
     # It creates and installs the "version-config" and "targets" files.
     # Arguments: 
     #   
-    #   CONFIG_LOCATION -- Directory in which to find the already-created config file.
-    #                      If not specified, the default is ${PROJECT_BINARY_DIR}.
-    #   FILE_PREFIX -- Portion of the filename that preceeds `Config.cmake`, `Targets.cmake`, and `ConfigVersion.cmake` for the 
-    #                  config, targets, and config-version files, respectively.  If not specified, the default is ${PROJECT_NAME}.
-    #   CONFIG_FILENAME -- Optional specification of the full config filename.  If specified, overrules the default described above.
+    #   INPUT_FILE -- Path of the input config file (typically ends in .cmake.in).  Absolute path or relative to the current source directory.
+    #   OUTPUT_FILE -- Filename for the output config file (no file path)
     #   VERSION_FILENAME -- Optional specification of the full version-config filename.  If specified, overrules the default described above.
 
     # Parse macro arguments
-    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME VERSION_FILENAME )
+    set( oneValueArgs INPUT_FILE OUTPUT_FILE VERSION_FILENAME )
     cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
 
     # Handle arguments and apply defaults
 
-    if( NOT PKG_CONF_CONFIG_LOCATION )
-        set( PKG_CONF_CONFIG_LOCATION ${PROJECT_BINARY_DIR} )
+    if( NOT PKG_CONF_INPUT_FILE )
+        set( PKG_CONF_INPUT_FILE ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in )
     endif()
+    message( STATUS "Config input file: ${PKG_CONF_INPUT_FILE}")
 
-    if( NOT PKG_CONF_FILE_PREFIX )
-        set( PKG_CONF_FILE_PREFIX ${PROJECT_NAME} )
+    if( NOT PKG_CONF_OUTPUT_FILE )
+        set( PKG_CONF_OUTPUT_FILE ${PROJECT_NAME}Config.cmake )
     endif()
-
-    if( NOT PKG_CONF_CONFIG_FILENAME )
-        set( PKG_CONF_CONFIG_FILENAME ${PKG_CONF_FILE_PREFIX}Config.cmake )
-    endif()
-    set( CONFIG_PATH ${PKG_CONF_CONFIG_LOCATION}/${PKG_CONF_CONFIG_FILENAME} )
-    message( STATUS "Config file path: ${CONFIG_PATH}" )
+    message( STATUS "Config output file: ${PKG_CONF_OUTPUT_FILE}")
 
     if( NOT PKG_CONF_VERSION_FILENAME )
-        set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
+        set( PKG_CONF_VERSION_FILENAME ${PROJECT_NAME}ConfigVersion.cmake )
     endif()
     set( CONFIG_VERSION_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME} )
-    message( STATUS "Config version file path: ${CONFIG_VERSION_PATH}" )
+    message( STATUS "Config version file path: ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}" )
 
     # Config file must exist already
-    if( NOT EXISTS ${CONFIG_PATH} )
-        message( FATAL_ERROR "Package config file does not exist: ${CONFIG_PATH}" )
+    if( NOT EXISTS ${PKG_CONF_INPUT_FILE} )
+        message( FATAL_ERROR "Package config file does not exist: ${PKG_CONF_INPUT_FILE}" )
     endif()
 
     include( CMakePackageConfigHelpers )
+    configure_package_config_file( ${PKG_CONF_INPUT_FILE} ${PKG_CONF_OUTPUT_FILE} 
+        INSTALL_DESTINATION ${PACKAGE_CONFIG_PREFIX}
+    )
+
     write_basic_package_version_file(
-        ${CONFIG_VERSION_PATH}
+        ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
         COMPATIBILITY SameMajorVersion
     )
 
     install( 
         FILES 
-            ${CONFIG_VERSION_PATH}
-            ${CONFIG_PATH}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_OUTPUT_FILE}
         DESTINATION 
             ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}
     )
