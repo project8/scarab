@@ -148,10 +148,12 @@ The remainder should go wherever the library is being defined::
     )
 
     # If the build does not actually use components, but this function is being used multiple times in the project (we'll use it below), 
-    # then specifying a component is required.  Here, since we're building the library, we'll call it ``Library``.
+    # then specifying a component is required.  Here, since we're building the library, we'll call it ``Library``.  
+    # The namespace is optional and must include the double colon.
     pbuilder_component_install_and_export( 
         COMPONENT Library
         LIBTARGETS Insecta
+        NAMESPACE Insecta::
     )
 
     # Headers are passed as a list, so we pass the value of the HEADERS variable
@@ -194,10 +196,12 @@ For the Insecta project, the executable section of the build (again, in its own 
         )
 
     # If the build does not actually use components, but this function is being used multiple times in the project (we used it above), 
-    # then specifying a component is required.  Here, since we're building the executables, we'll call it ``Library``.
+    # then specifying a component is required.  Here, since we're building the executables, we'll call it ``Library``.  
+    # The namespace is optional and must include the double colon.
     pbuilder_component_install_and_export( 
         COMPONENT Executables
         LIBTARGETS ${programs}
+        NAMESPACE Insecta::
     )
 
     endif( Insecta_ENABLE_EXECUTABLES )
@@ -295,15 +299,17 @@ rather than by using ``FindPackage`` scripts.  PB supports the creation of CMake
 PB uses one of the standard configuration-file locations for installing the package-config files:  ``<prefix>/${LIB_INSTALL_SUBDIR}/cmake/${PROJECT_NAME}``.
 
 The package author is responsible for creating a configurable package-config file (apologies for the confusing wording).  
-The file is "configurable" in that CMake will customize the file using the ``configure_file()`` command during the CMake configure stage.  
-The user should include this in their main CMakeList file::
+The file is "configurable" in that CMake will customize the file using the ``configure_package_config_file()`` 
+command during the CMake configure stage.  That configuration and the writing of a version config file are done in 
+``pbuilder_do_package_config()``::
 
-    configure_file( ${PROJECT_SOURCE_DIR}/[project name]Config.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/[project name]Config.cmake @ONLY )
+    pbuilder_do_package_config(
+        INPUT_FILE ${PROJECT_SOURCE_DIR}/[project name]Config.cmake.in
+        OUTPUT_FILE [project name]Config.cmake
+    )
 
-Then the user calls a PB macro that will install the above configuration file, and create configuration files that 
-describe the version and targets of the package::
-
-    pbuilder_do_package_config()
+The input file should be the path (relative to the current direcotory or absolute) to the configurable package-config file.  
+The output file should be the filename for the output, usually ``[project name]Config.cmake``.
 
 Here is an example of a simple package-config template file, taken from the PBTest package that comes with Scarab (in the ``testing`` directory)::
 
