@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.5)
 
 cmake_policy( SET CMP0048 NEW ) # version in project()
 project( PBTest VERSION 1.0.0 )
@@ -106,6 +106,8 @@ endif()
 # Config
 ########
 
-configure_file( ${PROJECT_SOURCE_DIR}/PBTestConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/PBTestConfig.cmake @ONLY )
+pbuilder_do_package_config(
+    INPUT_FILE ${PROJECT_SOURCE_DIR}/PBTestConfig.cmake.in
+    OUTPUT_FILE PBTestConfig.cmake
 
-pbuilder_do_package_config()
+)

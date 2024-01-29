@@ -67,6 +67,7 @@ pbuilder_library(
 pbuilder_component_install_and_export( 
     COMPONENT Library
     LIBTARGETS Scarab
+    NAMESPACE Scarab::
 )
 
 pbuilder_install_headers( ${Scarab_HEADERS} )

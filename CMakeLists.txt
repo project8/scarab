@@ -181,7 +181,8 @@ endif()
 # Package Config #
 ##################
 
-configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake @ONLY )
-
-pbuilder_do_package_config()
+pbuilder_do_package_config(
+    INPUT_FILE ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in
+    OUTPUT_FILE ScarabConfig.cmake
+)
 
