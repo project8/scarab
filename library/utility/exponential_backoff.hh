@@ -29,7 +29,58 @@ namespace scarab
      @brief Class that performs an action using exponential backoff
 
      @details
-     
+     This is a utility class that allows you to perform an action using exponential backoff: 
+     if the action fails, it can be repeated with gradually lengthening delays in between attempts.
+
+     The main design use case is signing into a service or making a network connection, where there might 
+     be intermittent reasons for failure, and one would want to retry the action after some delay.
+
+     The action is provided in the constructor as a std::function with signature void([args]).
+
+     The other relevant parameters are the maximum number of attempts to make, and the 
+     "base delay," which is the initial delay that then gets multiplied by an exponentially-growing integer.
+
+     Time parameters and values are all in milliseconds.
+
+     The calculation of the delay for attempt #N (after attempt N-1) is (base delay) * 2^N.
+
+     With the default parameters, 10 attempts and a base delay of 100 ms, the sequence of delays is:
+
+         100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600, and 51200 ms
+
+     The exponential_backoff class inherits from cancelable, so an instance can be added to scarab::signal_handler 
+     wherever it's in use.  The delay times are chunked (by default into 1-s chunks) to make cancelation 
+     respond quickly even when the delays times get longer.
+
+     Here's an example of how exponential_backoff can be used:
+
+        t_conn_ptr = networking.connection();
+        auto t_open_conn_fcn = [&]()->bool
+        {
+            try
+            {
+                t_conn_ptr = networking.make_connection();
+                return true;
+            }
+            catch( non_fatal_exception& e )
+            {
+                std::err << "Warning: connection was not made: "" << e.what();
+                return false;
+            }
+        }
+
+        scarab::exponential_backoff<> t_open_conn_backoff( t_open_conn_fcn );
+        auto t_exp_cancel_wrap = wrap_cancelable( t_open_conn_backoff );
+        scarab::signal_handler::add_cancelable( t_exp_cancel_wrap );
+
+        try
+        {
+            t_open_conn_backoff.go();
+        }
+        catch( fatal_exception& e )
+        {
+            std::err << "Error: a fatal error occurred: " << e.what() );
+        }
     */
     template< typename ... x_args >
     class SCARAB_API exponential_backoff : public cancelable
