@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         fail-fast: [false]
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
 
