@@ -278,6 +278,8 @@ namespace scarab
             virtual void do_config_stage_3();
             /// Load the application-specific options
             virtual void do_config_stage_4();
+            /// Load the modifiers
+            virtual void do_config_stage_5();
 
             void set_version( scarab::version_semantic_ptr_t a_ver );
 

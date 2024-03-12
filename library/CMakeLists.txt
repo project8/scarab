@@ -18,6 +18,7 @@ include_directories( BEFORE
     ${CMAKE_CURRENT_SOURCE_DIR}/utility
     ${CMAKE_CURRENT_SOURCE_DIR}/logger
     ${CMAKE_CURRENT_SOURCE_DIR}/version
+    ${CMAKE_CURRENT_SOURCE_DIR}/modifier
 )
 
 include_directories( BEFORE
@@ -27,6 +28,7 @@ include_directories( BEFORE
 add_subdirectory( utility )
 add_subdirectory( version )
 add_subdirectory( logger )
+add_subdirectory( modifier )
 
 if( Scarab_BUILD_PARAM )
     include_directories( BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/param )

@@ -13,6 +13,11 @@
 #include "param_codec.hh"
 #include "version_wrapper.hh"
 
+#include "env_substitute.hh"
+#include "null_modifier.hh"
+
+#include <list>
+
 using std::string;
 
 LOGGER(applog, "application");
@@ -130,6 +135,8 @@ namespace scarab
             do_config_stage_3();
 
             do_config_stage_4();
+
+            do_config_stage_5();
 
             LPROG( applog, "Final configuration:\n" << f_primary_config );
             LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
@@ -254,6 +261,19 @@ namespace scarab
         }
         // set the global verbosity in the logger
         applog.SetGlobalLevel( f_global_verbosity->second );
+        return;
+    }
+
+    void main_app::do_config_stage_5()
+    {
+        // fifth configuration stage: additional modification of param_node  (variable substitution, etc.)
+        std::list<std::shared_ptr< modifier >> modifiers;
+        //add items to chain
+        modifiers.push_back( std::make_shared< null_modifier >() );
+        modifiers.push_back( std::make_shared< env_substitute >() );
+
+        std::for_each(modifiers.begin(), modifiers.end(),
+                [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_master_config);} );
         return;
     }
 
