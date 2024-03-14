@@ -9,7 +9,7 @@
 
 #include "env_substitute.hh"
 #include "logger.hh"
-#include "param_array.hh"
+#include "param.hh"
 
 #include <iostream>
 #include <cstdlib>
@@ -21,12 +21,48 @@ namespace scarab
 
     void env_substitute::modify(param_node &a_config)
     {
-        for( auto it = a_config.begin(); it != a_config.end(); ++it )
+        LINFO( mm2log, "in modify");
+        this->recurse( &a_config );
+        return;
+//        for( auto it = a_config.begin(); it != a_config.end(); ++it )
+//        {
+//            recurse_param(it);
+//        }
+//        return;
+    }
+
+    void env_substitute::recurse( param_node* a_node )
+    {
+        LINFO( mm2log, "substitute recurse param node: " << *a_node );
+        for( auto it = a_node->begin(); it != a_node->end(); ++it )
         {
-            recurse_param(it);
+            this->recurse( &(*it) );
         }
         return;
     }
+
+    void env_substitute::recurse( param_array* an_array )
+    {
+        LINFO( mm2log, "substitute recurse param array: " << *an_array );
+        for( auto it = an_array->begin(); it != an_array->end(); ++it )
+        {
+            this->recurse( &(*it) );
+        }
+        return;
+    }
+
+    void env_substitute::recurse( param_value* a_value )
+    {
+        LINFO( mm2log, "substitute recurse param value: " << *a_value );
+        return;
+    }
+/*
+    void env_substitute::recurse( param* a_param )
+    {
+        LINFO( mm2log, "substitute recurse param: " << *a_param );
+        return;
+    }
+*/
 
     //takes in param_(array/node)_iterator, recursively goes through until value is found
     template <class param_iterator>

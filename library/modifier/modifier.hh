@@ -8,19 +8,20 @@
 #ifndef SCARAB_MODIFIER_HH_
 #define SCARAB_MODIFIER_HH_
 
-#include "param_node.hh"
+#include "scarab_api.hh"
 
 namespace scarab
 {
+    class param_node;
 
     class SCARAB_API modifier
     {
         public:
             modifier();
-            ~modifier();
+            virtual ~modifier();
 
         public:
-            virtual void modify(param_node &a_config) = 0;
+            virtual void modify( param_node &a_config ) = 0;
 
     };
 

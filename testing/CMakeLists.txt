@@ -38,6 +38,7 @@ pbuilder_install_headers( ${testing_HEADERS} )
             test_param_node.cc
             test_param_translator.cc
             test_param_value.cc
+            test_env_substitute.cc
         )
     endif( Scarab_BUILD_PARAM )
 

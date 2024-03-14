@@ -273,7 +273,7 @@ namespace scarab
         modifiers.push_back( std::make_shared< env_substitute >() );
 
         std::for_each(modifiers.begin(), modifiers.end(),
-                [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_master_config);} );
+                [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_primary_config);} );
         return;
     }
 
