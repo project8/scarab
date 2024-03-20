@@ -9,7 +9,6 @@
 #define SCARAB_PARAM_VISITOR_HH_
 
 #include <functional>
-//#include <variant>
 
 #include "member_variables.hh"
 #include "scarab_api.hh"

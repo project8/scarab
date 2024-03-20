@@ -75,10 +75,6 @@ TEST_CASE( "param_visitor", "[param]" )
         )
     );
 
-    //scarab::params& noderef = test_nested;
-
-    //std::visit( param_visitor_callback(), noderef );
-
     param_visitor_callback_tester t_visitor;
 
     test_nested.accept( t_visitor );
