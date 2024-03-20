@@ -14,8 +14,10 @@ using std::stringstream;
 #include "param_array.hh"
 
 #include "param_base_impl.hh"
+#include "param_helpers.hh"
 #include "param_node.hh"
 
+#include <iostream>
 
 namespace scarab
 {
@@ -23,6 +25,11 @@ namespace scarab
     param_array::param_array() :
             param(),
             f_contents()
+    {
+    }
+
+    param_array::param_array( args&& args ) :
+            param_array( std::move( static_cast< param_array&& >(*args.f_array_ptr)) )
     {
     }
 
@@ -53,6 +60,7 @@ namespace scarab
 
     param_array& param_array::operator=( const param_array& rhs )
     {
+        //std::cerr << "Copying an array with operator=()" << std::endl;
         this->param::operator=( rhs );
         clear();
         resize( rhs.size()) ;
@@ -65,6 +73,7 @@ namespace scarab
 
     param_array& param_array::operator=( param_array&& rhs )
     {
+        //std::cerr << "Moving an array with operator=()" << std::endl;
         this->param::operator=( std::move(rhs) );
         clear();
         resize( rhs.size()) ;
@@ -73,7 +82,34 @@ namespace scarab
             f_contents[ind] = rhs.f_contents[ ind ]->move_clone();
         }
         rhs.clear();
+        //std::cerr << "after move:" << rhs << std::endl;
         return *this;
+    }
+
+    param_ptr_t param_array::clone() const
+    {
+        //std::cerr << "Copy-cloning an array" << std::endl;
+        param_ptr_t array_ptr( new param_array() );
+        static_cast< param_array* >( array_ptr.get() )->operator=( *this );
+        return array_ptr;
+    }
+
+    param_ptr_t param_array::move_clone()
+    {
+        //std::cerr << "Move-cloning an array" << std::endl;
+        param_ptr_t array_ptr( new param_array() );
+        static_cast< param_array* >( array_ptr.get() )->operator=( std::move(*this) );
+        return array_ptr;
+    }
+
+    bool param_array::is_null() const
+    {
+        return false;
+    }
+
+    bool param_array::is_array() const
+    {
+        return true;
     }
 
     void param_array::resize( unsigned a_size )
@@ -113,7 +149,7 @@ namespace scarab
             if( f_contents.at( index )->is_null() )
             {
                 //LDEBUG( dlog, "have a null object at <" << index << ">; adding <" << a_object[index] << ">" );
-                assign( index, a_object[index] );
+                assign( index, a_object[index].clone() );
                 continue;
             }
 
@@ -140,7 +176,7 @@ namespace scarab
 
             // overwrite via direct assignment if destination location does not match incoming type
             //LDEBUG( dlog, "generic replace" );
-            assign( index, a_object[index] );
+            assign( index, a_object[index].clone() );
         }
         return;
      }

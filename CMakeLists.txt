@@ -50,7 +50,7 @@ if( Scarab_ENABLE_TESTING )
 endif()
 
 # Scarab needs C++11
-set( CMAKE_CXX_STANDARD 11 )
+set( CMAKE_CXX_STANDARD 17 )
 
 
 #######################
