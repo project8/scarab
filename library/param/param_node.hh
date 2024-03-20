@@ -9,6 +9,7 @@
 #define SCARAB_PARAM_NODE_HH_
 
 #include "param_helpers.hh"
+#include "param_modifier.hh"
 #include "param_value.hh"
 #include "param_visitor.hh"
 
@@ -88,6 +89,7 @@ namespace scarab
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
 
+            virtual void accept( param_modifier& a_modifier );
             virtual void accept( param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
@@ -182,6 +184,12 @@ namespace scarab
     inline bool param_node::empty() const
     {
         return f_contents.empty();
+    }
+
+    inline void param_node::accept( param_modifier& a_modifier )
+    {
+        a_modifier( *this );
+        return;
     }
 
     inline void param_node::accept( param_visitor& a_visitor ) const

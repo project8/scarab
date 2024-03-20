@@ -19,6 +19,7 @@ namespace scarab
 
     typedef std::unique_ptr< param > param_ptr_t;
 
+    class param_modifier;
     class param_visitor;
 }
 

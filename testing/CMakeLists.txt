@@ -31,10 +31,15 @@ set( testing_SOURCES
 )
 
 if( Scarab_BUILD_PARAM )
+    set( testing_HEADERS
+        ${testing_HEADERS}
+        test_param_modifiers_visitors.hh
+    )
     set( testing_SOURCES
         ${testing_SOURCES}
         test_param_array.cc
         test_param_by_pointer.cc
+        test_param_modifier.cc
         test_param_nested.cc
         test_param_node.cc
         test_param_translator.cc

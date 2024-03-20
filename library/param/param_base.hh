@@ -17,6 +17,7 @@
 
 namespace scarab
 {
+    
     class SCARAB_API param
     {
         public:
@@ -34,6 +35,7 @@ namespace scarab
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
 
+            virtual void accept( param_modifier& a_modifier );
             virtual void accept( param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;

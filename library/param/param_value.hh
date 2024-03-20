@@ -10,6 +10,7 @@
 
 #include "param_base.hh"
 
+#include "param_modifier.hh"
 #include "param_visitor.hh"
 #include "path.hh"
 
@@ -58,6 +59,7 @@ namespace scarab
 
             bool empty() const;
 
+            virtual void accept( param_modifier& a_modifier );
             virtual void accept( param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
@@ -401,6 +403,12 @@ namespace scarab
     };
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
+
+    inline void param_value::accept( param_modifier& a_modifier )
+    {
+        a_modifier( *this );
+        return;
+    }
 
     inline void param_value::accept( param_visitor& a_visitor ) const
     {
