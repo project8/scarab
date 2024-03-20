@@ -8,19 +8,20 @@
 #ifndef SCARAB_PARAM_NODE_HH_
 #define SCARAB_PARAM_NODE_HH_
 
+#include "param_helpers.hh"
 #include "param_value.hh"
 
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
 
+#include <initializer_list>
 #include <map>
+
+#include <iostream>
 
 namespace scarab
 {
-    class param_value;
-    class param_array;
-
     // This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
     // In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
     // Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
@@ -65,7 +66,6 @@ namespace scarab
     typedef map_deref_iterator< std::string, param, param_node_contents::iterator > param_node_iterator;
     typedef map_deref_iterator< std::string, const param, param_node_contents::const_iterator > param_node_const_iterator;
 
-
     class SCARAB_API param_node : public param
     {
         public:
@@ -75,6 +75,8 @@ namespace scarab
             typedef contents::value_type contents_type;
 
             param_node();
+            template< typename... MoreArgs >
+            explicit param_node( const kwarg& arg0, const MoreArgs&... args ); // explicit so that everything isn't convertible to param_node
             param_node( const param_node& orig );
             param_node( param_node&& orig );
             virtual ~param_node();
@@ -112,29 +114,25 @@ namespace scarab
             /// Throws an std::out_of_range if a_name is not present.
             param& operator[]( const std::string& a_name );
 
-            /// Adds a copy of a_value
-            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
-            bool add( const std::string& a_name, const param& a_value );
-            /// Adds a_value with move semantics
-            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
-            bool add( const std::string& a_name, param&& a_value );
-            /// Adds a_value_ptr by directly adding the pointer
-            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
-            bool add( const std::string& a_name, param_ptr_t a_value_ptr );
-            /// Adds a_value as a param_value for any type that param_value accepts
-            /// Only adds and returns true if `a_name` is not already present, and returns false if it is.
-            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
-            bool add( const std::string& a_name, T a_value );
+            /// Adds an item or items to the node if items with the given names aren't already present.
+            /// Any items whose names are not present in the node are added; if a name is present, the corresponding item is not added.
+            /// Returns true if none of the names were already present, and returns false if even one name is.
+            /// Valid types include param_ptr_t, param objects (copy or move), and types convertible to param_value
+            template< typename... MoreArgs >
+            bool add( const kwarg& arg0, const MoreArgs&... args );
+            template< typename T >
+            bool add( const char* a_name, T an_element );
+            template< typename T >
+            bool add( const std::string& a_name, T an_element );
 
-            /// Creates a copy of a_value; overwrites if the key exits
-            void replace( const std::string& a_name, const param& a_value );
-            /// Adds a_value with move semantics; overwrites if the key exists
-            void replace( const std::string& a_name, param&& a_value );
-            /// Adds a_value_ptr by directly adding the pointer; overwrites if the key exists
-            void replace( const std::string& a_name, param_ptr_t a_value_ptr );
-            /// Adds a_value as a param_valuefor any type that param_value accepts
-            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
-            void replace( const std::string& a_name, T a_value );
+            /// Adds an item or items to the node, overwriting items if the keys are already present.
+            /// Valid types include param_ptr_t, param objects (copy or move), and types convertible to param_value
+            template< typename... MoreArgs >
+            void replace( const kwarg& arg0, const MoreArgs&... args );
+            template< typename T >
+            void replace( const char* a_name, T an_element );
+            template< typename T >
+            void replace( const std::string& a_name, T an_element );
 
             /// Merges the contents of a_object into this object.
             /// If names in the contents of a_object exist in this object,
@@ -154,36 +152,24 @@ namespace scarab
             virtual std::string to_string() const;
 
         protected:
+            bool add(); // end the parameter pack recursion
+            void replace(); // end the parameter pack recursion
+
             contents f_contents;
 
     };
 
 
+    template< typename... MoreArgs >
+    param_node::param_node( const kwarg& arg0, const MoreArgs&... args )
+    {
+        this->replace( arg0, args... );
+    }
+
     template< typename XValType >
     inline XValType param_node::get_value( const std::string& a_name, XValType a_default ) const
     {
         return has( a_name ) ? operator[]( a_name ).as_value().as< XValType >() : a_default;
-    }
-
-    inline param_ptr_t param_node::clone() const
-    {
-        //std::cout << "param_node::clone" << std::endl;
-        return std::unique_ptr< param_node >( new param_node( *this ) );
-    }
-
-    inline param_ptr_t param_node::move_clone()
-    {
-        return std::unique_ptr< param_node >( new param_node( std::move(*this) ) );
-    }
-
-    inline bool param_node::is_null() const
-    {
-        return false;
-    }
-
-    inline bool param_node::is_node() const
-    {
-        return true;
     }
 
     inline unsigned param_node::size() const
@@ -225,77 +211,59 @@ namespace scarab
         return *f_contents.at( a_name );
     }
 
-    inline bool param_node::add( const std::string& a_name, const param& a_value )
+    template< typename T >
+    bool param_node::add( const char* a_name, T an_element )
     {
-        contents::iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            f_contents.insert( contents_type( a_name, a_value.clone() ) );
-            return true;
-        }
-        return false;
+        return this->add( kwarg(a_name)=std::forward<T>(an_element) );
     }
 
-    inline bool param_node::add( const std::string& a_name, param&& a_value )
+    template< typename T >
+    bool param_node::add( const std::string& a_name, T an_element )
     {
-        contents::iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            f_contents.insert( contents_type( a_name, a_value.move_clone() ) );
-            return true;
-        }
-        return false;
+        return this->add( kwarg(a_name.c_str())=std::forward<T>(an_element) );
     }
 
-    inline bool param_node::add( const std::string& a_name, param_ptr_t a_value_ptr )
+    template< typename... MoreArgs >
+    bool param_node::add( const kwarg& arg0, const MoreArgs&... args )
     {
-        contents::iterator it = f_contents.find( a_name );
+        bool ret = false;
+        contents::iterator it = f_contents.find( arg0.name() );
         if( it == f_contents.end() )
         {
-            f_contents.insert( contents_type( a_name, std::move(a_value_ptr) ) );
-            return true;
+            ret = true;
+            f_contents.insert( contents_type( arg0.name(), param_ptr_t(arg0.value()->clone()) ) );
         }
-        return false;
+        return ret && add( args... );
     }
 
-    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
-    inline bool param_node::add( const std::string& a_name, T a_value )
+    inline bool param_node::add()
     {
-        //static_assert(std::is_convertible< T, param_value >::value, "Cannot convert type to param_value" );
-        contents::iterator it = f_contents.find( a_name );
-        if( it == f_contents.end() )
-        {
-            f_contents.insert( contents_type( a_name, param_ptr_t( new param_value( a_value ) ) ) );
-            return true;
-        }
-        return false;
+        return true;
     }
 
-    inline void param_node::replace( const std::string& a_name, const param& a_value )
+    template< typename T >
+    void param_node::replace( const char* a_name, T an_element )
     {
-        f_contents[ a_name ] = a_value.clone();
+        this->replace( kwarg(a_name)=std::forward<T>(an_element) );
         return;
     }
 
-    inline void param_node::replace( const std::string& a_name, param&& a_value )
+    template< typename T >
+    void param_node::replace( const std::string& a_name, T an_element )
     {
-        f_contents[ a_name ] = a_value.move_clone();
+        this->replace( kwarg(a_name.c_str())=std::forward<T>(an_element) );
         return;
     }
 
-    inline void param_node::replace( const std::string& a_name, param_ptr_t a_value_ptr )
+    template< typename... MoreArgs >
+    void param_node::replace( const kwarg& arg0, const MoreArgs&... args )
     {
-        f_contents[ a_name ] = std::move(a_value_ptr);
-        return;
+        f_contents[ arg0.name() ] = param_ptr_t( arg0.value()->clone() );
+        replace( args... );
     }
 
-    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
-    inline void param_node::replace( const std::string& a_name, T a_value )
-    {
-        f_contents[ a_name ] = param_ptr_t( new param_value( a_value ) );
-        return;
-    }
-
+    inline void param_node::replace()
+    {}
 
     inline void param_node::erase( const std::string& a_name )
     {

@@ -27,44 +27,6 @@ namespace scarab
         return *this;
     }
 
-    inline param_ptr_t param::clone() const
-    {
-        //std::cout << "param::clone()" << std::endl;
-        return param_ptr_t( new param( *this ) );
-    }
-
-    inline param_ptr_t param::move_clone()
-    {
-        //std::cout << "param::clone()" << std::endl;
-        return param_ptr_t( new param( std::move(*this) ) );
-    }
-
-    inline bool param::is_null() const
-    {
-        return true;
-    }
-
-    inline bool param::is_value() const
-    {
-        return false;
-    }
-
-    inline bool param::is_array() const
-    {
-        return false;
-    }
-
-    inline bool param::is_node() const
-    {
-        return false;
-    }
-
-    inline bool param::has_subset( const param& /*a_subset*/ ) const
-    {
-        // this version of has_subset should only ever be called if a_subset is a null param (i.e. not one of the derived classes)
-        return true;
-    }
-
     inline param_value& param::as_value()
     {
         if( this->is_value() ) return *static_cast< param_value* >( this );

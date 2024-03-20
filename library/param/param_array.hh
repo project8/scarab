@@ -16,12 +16,13 @@
 #include <boost/iterator/indirect_iterator.hpp>
 
 #include <deque>
-
+#include <type_traits>
 
 namespace scarab
 {
     class param_value;
     class param_node;
+    class args;
 
     typedef std::deque< std::unique_ptr< param > > param_array_contents;
 
@@ -40,6 +41,7 @@ namespace scarab
 
         public:
             param_array();
+            param_array( args&& args );
             param_array( const param_array& orig );
             param_array( param_array&& orig );
             virtual ~param_array();
@@ -84,27 +86,20 @@ namespace scarab
             const param& back() const;
             param& back();
 
-            // assign a copy of a_value to the array at a_index
-            void assign( unsigned a_index, const param& a_value );
-            // directly assign a_value to the array at a_index
-            void assign( unsigned a_index, param&& a_value );
-            // directly assign a_value_ptr to the array at a_index
-            void assign( unsigned a_index, param_ptr_t a_value_ptr );
-            // directly assign a_value to the array at a_index for any type that param_value accepts
-            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
-            void assign( unsigned a_index, T a_value );
+            /// Assigns the value to the array at a_index
+            /// Valid types include param_ptr_t, param objects (copy or move), and types convertible to param_value
+            template< typename T >
+            void assign( unsigned a_index, T&& a_value );
 
-            void push_back( const param& a_value );
-            void push_back( param&& a_value );
-            void push_back( param_ptr_t a_value_ptr );
-            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
-            void push_back( T a_value );
+            /// Adds an item or items to the back of the array (last item pushed will end up at the back of the array)
+            /// Valid types include param_ptr_t, param objects (copy or move), and types convertible to param_value
+            template< typename T, typename... Ts >
+            void push_back( T&& a_value, Ts&&... a_values );
 
-            void push_front( const param& a_value );
-            void push_front( param&& a_value );
-            void push_front( param_ptr_t a_value_ptr );
-            template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* = nullptr >
-            void push_front( T a_value );
+            /// Adds an item or items to the front of the array (last item pushed will end up at the front of the array)
+            /// Valid types include param_ptr_t, param objects (copy or move), and types convertible to param_value
+            template< typename T, typename... Ts >
+            void push_front( T&& a_value, Ts&&... a_values );
 
             void append( const param_array& an_array );
 
@@ -129,34 +124,16 @@ namespace scarab
             virtual std::string to_string() const;
 
         protected:
+            void push_back(); // end the parameter pack recursion
+            void push_front(); // end the parameter pack recursion
+
             contents f_contents;
     };
-
 
     template< typename XValType >
     XValType param_array::get_value( unsigned a_index, XValType a_default ) const
     {
         return a_index < size() ? operator[]( a_index ).as_value().as< XValType >() : a_default;
-    }
-
-    inline param_ptr_t param_array::clone() const
-    {
-        return std::unique_ptr< param_array >( new param_array( *this ) );
-    }
-
-    inline param_ptr_t param_array::move_clone()
-    {
-        return std::unique_ptr< param_array >( new param_array( std::move( *this ) ) );
-    }
-
-    inline bool param_array::is_null() const
-    {
-        return false;
-    }
-
-    inline bool param_array::is_array() const
-    {
-        return true;
     }
 
     inline unsigned param_array::size() const
@@ -205,79 +182,104 @@ namespace scarab
         return *f_contents.back();
     }
 
-    // assign a copy of a_value to the array at a_index
-    inline void param_array::assign( unsigned a_index, const param& a_value )
+    template< typename T >
+    void param_array::assign( unsigned a_index, T&& a_value )
     {
+        using T_noref = typename std::remove_reference< T >::type;
+        static_assert( std::is_same_v< param_ptr_t, T_noref > || 
+                       std::is_base_of_v< param, T_noref > || 
+                       std::is_convertible_v< T_noref, param_value > );
+
         erase( a_index );
-        f_contents.at( a_index ) = a_value.clone();
-        return;
-    }
-    // directly move a_value to the array at a_index
-    inline void param_array::assign( unsigned a_index, param&& a_value )
-    {
-        erase( a_index );
-        f_contents.at( a_index ) = a_value.move_clone();
-        return;
-    }
-    // directly assign a_value_ptr to the array at a_index
-    inline void param_array::assign( unsigned a_index, param_ptr_t a_value_ptr )
-    {
-        erase( a_index );
-        f_contents.at( a_index ) = std::move(a_value_ptr);
-        return;
-    }
-    // directly move a_value to the array at a_index
-    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
-    inline void param_array::assign( unsigned a_index, T a_value )
-    {
-        erase( a_index );
-        f_contents.at( a_index ) = param_ptr_t( new param_value( a_value ) );
+        if constexpr ( std::is_same_v< param_ptr_t, T_noref > )
+        {
+            f_contents.at( a_index ) = std::move(a_value);
+        }
+        if constexpr ( std::is_base_of_v< param, T_noref > )
+        {
+            if constexpr ( std::is_lvalue_reference_v< T > ) // then do a copy
+            {
+                f_contents.at( a_index ) = a_value.clone();
+            }
+            else // then do a move
+            {
+                f_contents.at( a_index ) = a_value.move_clone();
+            }
+        }
+        else if constexpr ( std::is_convertible_v< T_noref, param_value > )
+        {
+            f_contents.at( a_index ) = param_ptr_t( new param_value( a_value ) );
+        }
         return;
     }
 
-    inline void param_array::push_back( const param& a_value )
+    template< typename T, typename... Ts >
+    void param_array::push_back( T&& a_value, Ts&&... a_values )
     {
-        f_contents.push_back( a_value.clone() );
-        return;
-    }
-    inline void param_array::push_back( param&& a_value )
-    {
-        f_contents.push_back( a_value.move_clone() );
-        return;
-    }
-    inline void param_array::push_back( param_ptr_t a_value_ptr )
-    {
-        f_contents.push_back( std::move(a_value_ptr) );
-        return;
-    }
-    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
-    inline void param_array::push_back( T a_value )
-    {
-        f_contents.push_back( param_ptr_t( new param_value( a_value ) ) );
+        using T_noref = typename std::remove_reference< T >::type;
+        static_assert( std::is_same_v< param_ptr_t, T_noref > || 
+                       std::is_base_of_v< param, T_noref > || 
+                       std::is_convertible_v< T_noref, param_value > );
+
+        if constexpr ( std::is_same_v< param_ptr_t, T_noref > )
+        {
+            f_contents.push_back( std::move(a_value) );
+        }
+        if constexpr ( std::is_base_of_v< param, T_noref > )
+        {
+            if constexpr ( std::is_lvalue_reference_v< T > ) // then do a copy
+            {
+                f_contents.push_back( a_value.clone() );
+            }
+            else // then do a move
+            {
+                f_contents.push_back( a_value.move_clone() );
+            }
+        }
+        else if constexpr ( std::is_convertible_v< T_noref, param_value > )
+        {
+            f_contents.push_back( param_ptr_t( new param_value( a_value ) ) );
+        }
+        push_back( std::forward<Ts>( a_values )... );
         return;
     }
 
-    inline void param_array::push_front( const param& a_value )
+    inline void param_array::push_back()
+    {}
+
+    template< typename T, typename... Ts >
+    void param_array::push_front( T&& a_value, Ts&&... a_values )
     {
-        f_contents.push_front( a_value.clone() );
+        using T_noref = typename std::remove_reference< T >::type;
+        static_assert( std::is_same_v< param_ptr_t, T_noref > || 
+                       std::is_base_of_v< param, T_noref > || 
+                       std::is_convertible_v< T_noref, param_value > );
+
+        if constexpr ( std::is_same_v< param_ptr_t, T_noref > )
+        {
+            f_contents.push_front( std::move(a_value) );
+        }
+        if constexpr ( std::is_base_of_v< param, T_noref > )
+        {
+            if constexpr ( std::is_lvalue_reference_v< T > ) // then do a copy
+            {
+                f_contents.push_front( a_value.clone() );
+            }
+            else // then do a move
+            {
+                f_contents.push_front( a_value.move_clone() );
+            }
+        }
+        else if constexpr ( std::is_convertible_v< T_noref, param_value > )
+        {
+            f_contents.push_front( param_ptr_t( new param_value( a_value ) ) );
+        }
+        push_front( std::forward<Ts>( a_values )... );
         return;
     }
-    inline void param_array::push_front( param&& a_value )
-    {
-        f_contents.push_front( a_value.move_clone() );
-        return;
-    }
-    inline void param_array::push_front( param_ptr_t a_value_ptr )
-    {
-        f_contents.push_front( std::move(a_value_ptr) );
-        return;
-    }
-    template< typename T, typename std::enable_if< std::is_convertible< T, param_value >::value, T >::type* >
-    inline void param_array::push_front( T a_value )
-    {
-        f_contents.push_front( param_ptr_t( new param_value( a_value ) ) );
-        return;
-    }
+
+    inline void param_array::push_front()
+    {}
 
     inline void param_array::append( const param_array& an_array )
     {

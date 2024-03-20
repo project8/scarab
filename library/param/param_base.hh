@@ -9,6 +9,7 @@
 #define SCARAB_PARAM_BASE_HH_
 
 #include "error.hh"
+#include "param_fwd.hh"
 
 #include <memory>
 #include <sstream>
@@ -16,15 +17,11 @@
 
 namespace scarab
 {
-    class param_value;
-    class param_array;
-    class param_node;
-
-    class param;
-    typedef std::unique_ptr< param > param_ptr_t;
-
     class SCARAB_API param
     {
+        public:
+            using null = param;
+
         public:
             param();
             param( const param& orig );
@@ -41,6 +38,7 @@ namespace scarab
             virtual bool is_value() const;
             virtual bool is_array() const;
             virtual bool is_node() const;
+            std::string type() const;
 
             virtual bool has_subset( const param& a_subset ) const;
 

@@ -42,6 +42,7 @@
  */
 
 #include "param.hh"
+#include "param_helpers.hh"
 
 #include "error.hh"
 
@@ -51,6 +52,7 @@ using scarab::param_array;
 using scarab::param_node;
 using scarab::param_value;
 using scarab::param_ptr_t;
+using scarab::args;
 
 TEST_CASE( "param_array", "[param]" )
 {
@@ -61,17 +63,22 @@ TEST_CASE( "param_array", "[param]" )
     array.push_back( 5 );
     REQUIRE_FALSE( array.empty() );
     REQUIRE( array.size() == 1 );
+    REQUIRE( array[0].is_value() );
+    REQUIRE( array[0]().is_int() );
+    REQUIRE( array[0]().as_int() == 5 );
 
     param_node subnode;
     subnode.add( "five-hundred", 500 );
     array.push_back( subnode );
     REQUIRE( array.size() == 2 );
+    REQUIRE( array[1].is_node() );
     REQUIRE_FALSE( subnode.empty() );
 
     param_array subarray;
     subarray.push_back( "5000" );
     array.push_back( std::move(subarray) );
     REQUIRE( array.size() == 3 );
+    REQUIRE( array[2].is_array() );
     REQUIRE( subarray.empty() );
 
     // access
@@ -94,7 +101,7 @@ TEST_CASE( "param_array", "[param]" )
     REQUIRE( to_assign.as_int() == 10 );
 
     to_assign = 15;
-    array.assign( 0, std::move(to_assign ) );
+    array.assign( 0, std::move(to_assign) );
     REQUIRE( array[0]().as_int() == 15 );
     REQUIRE_FALSE( to_assign.as_int() == 0 );
 
@@ -102,14 +109,12 @@ TEST_CASE( "param_array", "[param]" )
     REQUIRE( array[0]().as_int() == 20 );
 
     // append and merge
-    param_array to_append;
-    to_append.push_back( -1 );
+    param_array to_append( args(-1) );
     array.append( to_append );
     REQUIRE( array.size() == 4 );
     REQUIRE( array[3]().as_int() == -1 );
 
-    param_array to_merge;
-    to_merge.push_back( -2 );
+    param_array to_merge( args(-2) );
     array.merge( to_merge );
     REQUIRE( array.size() == 4 );
     REQUIRE( array[0]().as_int() == -2 );
@@ -132,6 +137,34 @@ TEST_CASE( "param_array", "[param]" )
     array.clear();
     REQUIRE( array.size() == 0 );
 
+    // multi-item creation
+    param_value tv(50);
+    param_ptr_t tv2_ptr( new param_value(500) );
+    param_array array_2( args(1, 2.2, "hello", tv, tv2_ptr) );
+    REQUIRE( array_2.size() == 5 );
+    REQUIRE( array_2[0]().is_int() );
+    REQUIRE( array_2[0]().as_int() == 1 );
+    REQUIRE( array_2[1]().as_double() == 2.2 );
+    REQUIRE( array_2[2]().as_string() == "hello" );
+    REQUIRE( array_2[3]().as_int() == 50 );
+    REQUIRE( array_2[4]().as_int() == 500 );
+
+    // copy operator
+    array = array_2;
+    REQUIRE( array.size() == 5 );
+    REQUIRE( array_2.size() == 5 );
+    REQUIRE( array[0]().is_int() );
+    REQUIRE( array[0]().as_int() == 1 );
+    
+    // move operator
+    array_2[0]().set( 100 );
+    REQUIRE( array_2.size() == 5 );
+    REQUIRE( array_2[0]().as_int() == 100 );
+    array = std::move(array_2);
+    REQUIRE( array.size() == 5 );
+    REQUIRE( array_2.size() == 0 );
+    REQUIRE( array[0]().is_int() );
+    REQUIRE( array[0]().as_int() == 100 );
 }
 
 

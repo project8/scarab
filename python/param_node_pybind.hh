@@ -45,6 +45,11 @@ namespace scarab_pybind
                     pybind11::arg( "key" ),
                     pybind11::arg( "value" ),
                     "Add a param object to a node at a particular key")
+            .def( "replace",
+                    (void (scarab::param_node::*)(const std::string&, const scarab::param&)) &scarab::param_node::replace,
+                    pybind11::arg( "key" ),
+                    pybind11::arg( "value" ),
+                    "Replace (or add) the param object to a node at a particular key")
 
             // Get value of the parameter, bringing along the default value
             .def( "get_value",
