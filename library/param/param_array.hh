@@ -9,6 +9,7 @@
 #define SCARAB_PARAM_ARRAY_HH_
 
 #include "param_value.hh"
+#include "param_visitor.hh"
 
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/type_traits/is_convertible.hpp>
@@ -51,6 +52,8 @@ namespace scarab
 
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
+
+            virtual void accept( param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_array() const;
@@ -143,6 +146,12 @@ namespace scarab
     inline bool param_array::empty() const
     {
         return f_contents.empty();
+    }
+
+    inline void param_array::accept( param_visitor& a_visitor ) const
+    {
+        a_visitor( *this );
+        return;
     }
 
     inline std::string param_array::get_value( unsigned a_index, const std::string& a_default ) const

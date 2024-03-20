@@ -10,6 +10,7 @@
 
 #include "param_helpers.hh"
 #include "param_value.hh"
+#include "param_visitor.hh"
 
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/type_traits/is_convertible.hpp>
@@ -86,6 +87,8 @@ namespace scarab
 
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
+
+            virtual void accept( param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_node() const;
@@ -179,6 +182,12 @@ namespace scarab
     inline bool param_node::empty() const
     {
         return f_contents.empty();
+    }
+
+    inline void param_node::accept( param_visitor& a_visitor ) const
+    {
+        a_visitor( *this );
+        return;
     }
 
     inline bool param_node::has( const std::string& a_name ) const

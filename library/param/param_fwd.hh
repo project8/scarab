@@ -18,6 +18,8 @@ namespace scarab
     class param_node;
 
     typedef std::unique_ptr< param > param_ptr_t;
+
+    class param_visitor;
 }
 
 #endif /* SCARAB_PARAM_FWD_HH_ */

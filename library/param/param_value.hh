@@ -10,6 +10,7 @@
 
 #include "param_base.hh"
 
+#include "param_visitor.hh"
 #include "path.hh"
 
 #include <boost/variant.hpp>
@@ -56,6 +57,8 @@ namespace scarab
             bool loose_is_equal_to( const param_value& rhs ) const;
 
             bool empty() const;
+
+            virtual void accept( param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_value() const;
@@ -398,6 +401,12 @@ namespace scarab
     };
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
+
+    inline void param_value::accept( param_visitor& a_visitor ) const
+    {
+        a_visitor( *this );
+        return;
+    }
 
     template<>
     inline bool param_value::as< bool >() const

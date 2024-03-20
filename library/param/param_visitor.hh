@@ -9,6 +9,7 @@
 #define SCARAB_PARAM_VISITOR_HH_
 
 #include <functional>
+//#include <variant>
 
 #include "member_variables.hh"
 #include "scarab_api.hh"
@@ -19,6 +20,8 @@ namespace scarab
     class param_array;
     class param_node;
     class param_value;
+
+    //using params = std::variant< param, param_array, param_node, param_value >;
 
     class SCARAB_API param_visitor
     {

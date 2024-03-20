@@ -26,11 +26,19 @@ namespace scarab
                 f_param_callback( [](const param&) {
                     LDEBUG( plog, "param callback" );
                 }),
-                f_param_array_callback( [](const param_array& an_array) {
-                    LDEBUG( plog, "Param callback: " << an_array );
+                f_param_array_callback( [this](const param_array& an_array) {
+                    LDEBUG( plog, "param_array callback: " << an_array );
+                    for( const auto& it: an_array )
+                    {
+                        it.accept( *this );
+                    }
                 }),
-                f_param_node_callback( [](const param_node& a_node) {
+                f_param_node_callback( [this](const param_node& a_node) {
                     LDEBUG( plog, "param_node callback: " << a_node );
+                    for( const auto& it: a_node )
+                    {
+                        it.accept( *this );
+                    }
                 }),
                 f_param_value_callback( [](const param_value& a_value) {
                     LDEBUG( plog, "param_value callback: " << a_value );
