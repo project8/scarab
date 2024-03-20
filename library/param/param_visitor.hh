@@ -50,10 +50,10 @@ namespace scarab
             virtual void operator()( const param_value& );
 
         protected:
-            memvar_ref( param_callback_t, param_callback );
-            memvar_ref( param_array_callback_t, param_array_callback );
-            memvar_ref( param_node_callback_t, param_node_callback );
-            memvar_ref( param_value_callback_t, param_value_callback );
+            mv_referrable( param_callback_t, param_callback );
+            mv_referrable( param_array_callback_t, param_array_callback );
+            mv_referrable( param_node_callback_t, param_node_callback );
+            mv_referrable( param_value_callback_t, param_value_callback );
     };
 
 } /* namespace scarab */

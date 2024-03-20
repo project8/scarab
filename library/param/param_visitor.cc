@@ -9,6 +9,8 @@
 
 #include "param_visitor.hh"
 
+#include "param.hh"
+
 #include "logger.hh"
 
 LOGGER( plog, "param_visitor" );
@@ -56,7 +58,7 @@ namespace scarab
             return;
         };
 
-        void param_visitor_callback::operator()( const param_value& a_avalue )
+        void param_visitor_callback::operator()( const param_value& a_value )
         {
             f_param_value_callback( a_value );
             return;

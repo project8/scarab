@@ -13,7 +13,7 @@
 #include "param_codec.hh"
 #include "version_wrapper.hh"
 
-#include "env_substitute.hh"
+//#include "env_substitute.hh"
 #include "null_modifier.hh"
 
 #include <list>
@@ -265,7 +265,7 @@ namespace scarab
     }
 
     void main_app::do_config_stage_5()
-    {
+    {/*
         // fifth configuration stage: additional modification of param_node  (variable substitution, etc.)
         std::list<std::shared_ptr< modifier >> modifiers;
         //add items to chain
@@ -273,7 +273,7 @@ namespace scarab
         modifiers.push_back( std::make_shared< env_substitute >() );
 
         std::for_each(modifiers.begin(), modifiers.end(),
-                [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_primary_config);} );
+                [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_primary_config);} ); */
         return;
     }
 
