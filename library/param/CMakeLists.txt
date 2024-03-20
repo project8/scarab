@@ -13,6 +13,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/param_helpers.hh
     ${dir}/param_node.hh
     ${dir}/param_value.hh
+    ${dir}/param_visitor.hh
     PARENT_SCOPE )
 
 set( Scarab_SOURCES ${Scarab_SOURCES}
@@ -22,4 +23,5 @@ set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/param_helpers.cc
     ${dir}/param_node.cc
     ${dir}/param_value.cc
+    ${dir}/param_visitor.cc
     PARENT_SCOPE )
