@@ -4,24 +4,29 @@
 
 ##########
 
-set( lib_dependencies 
-    Scarab
-)
+# Currently all of the executables use the CLI, so we require the CLI
+if( Scarab_BUILD_CLI )
 
-set( sources
-    scarab-parse.cc
-)
+    set( lib_dependencies 
+        Scarab
+    )
 
-set( programs )
-pbuilder_executables( 
-    SOURCES ${sources}
-    TARGETS_VAR programs
-    PROJECT_LIBRARIES ${lib_dependencies}
-    PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
-    PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
-)
+    set( sources
+        scarab-parse.cc
+    )
 
-pbuilder_component_install_and_export( 
-    COMPONENT Executables
-    EXETARGETS ${programs}
-)
+    set( programs )
+    pbuilder_executables( 
+        SOURCES ${sources}
+        TARGETS_VAR programs
+        PROJECT_LIBRARIES ${lib_dependencies}
+        PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+        PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+    )
+
+    pbuilder_component_install_and_export( 
+        COMPONENT Executables
+        EXETARGETS ${programs}
+    )
+
+endif( Scarab_BUILD_CLI )

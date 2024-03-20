@@ -86,11 +86,16 @@ endif( Scarab_BUILD_CODEC_JSON )
 if( Scarab_BUILD_CODEC_YAML )
     find_package( yaml-cpp CONFIG REQUIRED )
 
-    list( APPEND PUBLIC_EXT_LIBS yaml-cpp )
-
+    # sometimes the target is yaml-cpp and somtimes it's yaml-cpp::yaml-cpp
+    if( TARGET yaml-cpp::yaml-cpp )
+        list( APPEND PUBLIC_EXT_LIBS yaml-cpp::yaml-cpp )
+    else()
+        list( APPEND PUBLIC_EXT_LIBS yaml-cpp )
+    endif()
+    
     add_definitions( -DUSE_CODEC_YAML )
 else( Scarab_BUILD_CODEC_YAML )
-    removed_definitions( -DUSE_CODEC_YAML )
+    remove_definitions( -DUSE_CODEC_YAML )
 endif( Scarab_BUILD_CODEC_YAML )
 
 # Create a cache variable for boost components that can be set from dependent projects
@@ -176,7 +181,8 @@ endif()
 # Package Config #
 ##################
 
-configure_file( ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ScarabConfig.cmake @ONLY )
-
-pbuilder_do_package_config()
+pbuilder_do_package_config(
+    INPUT_FILE ${PROJECT_SOURCE_DIR}/ScarabConfig.cmake.in
+    OUTPUT_FILE ScarabConfig.cmake
+)
 

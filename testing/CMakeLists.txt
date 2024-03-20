@@ -66,7 +66,6 @@ endif( Scarab_BUILD_CLI )
 
 set( testing_LIB_DEPENDENCIES 
     Scarab
-    Catch
 )
 
 # Interface library was recommended for Catch:
@@ -78,13 +77,12 @@ pbuilder_executable(
     EXECUTABLE run_tests
     SOURCES ${testing_SOURCES}
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
+    PUBLIC_EXTERNAL_LIBRARIES Catch
 )
 set( programs "run_tests" )
 
-#add_executable( run_tests ${testing_SOURCES} )
-target_link_libraries( run_tests PUBLIC Catch )
-
 if( Scarab_BUILD_CLI )
+    # this sets the programs list
     add_subdirectory( applications )
 endif( Scarab_BUILD_CLI )
 
@@ -99,7 +97,7 @@ pbuilder_component_install_and_export(
 
 # Normal CMake Integration
 #enable_testing()
-add_test(NAME unit_tests COMMAND run_tests )
+add_test( NAME unit_tests COMMAND run_tests WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
 
 # Automated CMake Integration
 #include(CTest)

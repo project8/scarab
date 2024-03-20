@@ -223,7 +223,7 @@ namespace scarab
     {
         if( logger::Private::count() == 0 )
         {
-            sprintf( logger::Private::dateTimeFormat(),  "%%Y-%%m-%%d %%T" );
+            snprintf( logger::Private::dateTimeFormat(), 16, "%%Y-%%m-%%d %%T" );
         }
 
         logger::Private::count()++;
@@ -248,7 +248,7 @@ namespace scarab
     {
         if( logger::Private::count() == 0 )
         {
-            sprintf( logger::Private::dateTimeFormat(),  "%%Y-%%m-%%d %%T" );
+            snprintf( logger::Private::dateTimeFormat(), 16,  "%%Y-%%m-%%d %%T" );
         }
 
         logger::Private::count()++;

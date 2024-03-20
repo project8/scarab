@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         fail-fast: [false]
-        os: [ubuntu-20.04, macos-10.15]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
 
@@ -67,3 +67,9 @@ jobs:
         run: |
           cd build
           ctest --output-on-failure
+
+# For debugging
+      - name: Setup tmate session
+        if: ${{ ! success() }}
+        uses: mxschmitt/action-tmate@v3
+

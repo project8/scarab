@@ -101,6 +101,18 @@ macro( pbuilder_add_submodule SM_NAME SM_LOCATION )
     endif( NOT ${SM_NAME}_FOUND OR "${${SM_NAME}_LOCATION}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}/${SM_LOCATION}" )
 endmacro()
 
+macro( pbuilder_get_link_options VAR )
+    # Fill a variable with link options that should be used for libraries and executables
+
+    if( LINUX )
+        if( OVERRIDE_LIB_PATH )
+            set( ${VAR} "LINKER:--disable-new-dtags" )
+        else( OVERRIDE_LIB_PATH )
+            set( ${VAR} "LINKER:--enable-new-dtags" )
+        endif( OVERRIDE_LIB_PATH )
+    endif()
+endmacro()
+
 macro( pbuilder_expand_lib_name_2 LIB_NAME SM_NAME )
     # Output is in the form of the variable FULL_LIB_NAME
     set( FULL_LIB_NAME "${LIB_NAME}${${SM_NAME}_PARENT_LIB_NAME_SUFFIX}" )
@@ -206,7 +218,7 @@ function( pbuilder_add_library )
     target_include_directories( ${FULL_LIB_TARGET} 
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
-            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
+            "$<INSTALL_INTERFACE:${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
     )
 
 
@@ -231,11 +243,13 @@ function( pbuilder_link_library )
 
     pbuilder_expand_lib_name( ${LIB_TARGET} )
     set( FULL_LIB_TARGET ${FULL_LIB_NAME} )
+    pbuilder_get_link_options( LINK_OPTIONS )
 
     pbuilder_expand_lib_names( ${LIB_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project library dependencies (lib): ${FULL_PROJECT_LIBRARIES}" )
 
+    target_link_options( ${FULL_LIB_TARGET} PUBLIC ${LINK_OPTIONS} )
     target_link_libraries( ${FULL_LIB_TARGET} 
         PUBLIC
             ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${LIB_PUBLIC_EXTERNAL_LIBRARIES}
@@ -281,14 +295,17 @@ function( pbuilder_executables )
 
     foreach( source ${EXES_SOURCES} )
         get_filename_component( program ${source} NAME_WE )
-        if( NOT TARGET ${program} )
-            pbuilder_executable( EXECUTABLE ${program} 
+        set( target "${program}_exe" )
+        if( NOT TARGET ${target} )
+            pbuilder_executable( EXECUTABLE ${target} 
                 SOURCES ${source} 
                 PROJECT_LIBRARIES ${EXES_PROJECT_LIBRARIES} 
                 PUBLIC_EXTERNAL_LIBRARIES ${EXES_PUBLIC_EXTERNAL_LIBRARIES} 
                 PRIVATE_EXTERNAL_LIBRARIES ${EXES_PRIVATE_EXTERNAL_LIBRARIES} 
             )
-            list( APPEND targets ${program} )
+            # set the output name to ${program} so it doesn't have the _exe appended
+            set_target_properties( ${target} PROPERTIES OUTPUT_NAME ${program} )
+            list( APPEND targets ${target} )
         else()
             message( FATAL "Duplicate target: ${program}" )
         endif()
@@ -325,7 +342,9 @@ function( pbuilder_executable )
     pbuilder_expand_lib_names( ${EXE_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project library dependencies (exe): ${FULL_PROJECT_LIBRARIES}" )
+    pbuilder_get_link_options( LINK_OPTIONS )
 
+    target_link_options( ${EXE_EXECUTABLE} PUBLIC ${LINK_OPTIONS} )
     target_link_libraries( ${EXE_EXECUTABLE} 
         PUBLIC
             ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${EXE_PUBLIC_EXTERNAL_LIBRARIES}
@@ -333,6 +352,19 @@ function( pbuilder_executable )
             ${EXE_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
+    # Grab the include directories, which will be used for the build-interface target includes
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${EXE_EXECUTABLE} INCLUDE_DIRECTORIES )
+    message( STATUS "Adding install interface include dir: ${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}" )
+    message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
+
+    # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
+    # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
+    target_include_directories( ${EXE_EXECUTABLE} 
+        INTERFACE 
+            "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
+            "$<INSTALL_INTERFACE:${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
+    )
+    
 endfunction()
 
 function( pbuilder_component_install_and_export )
@@ -341,11 +373,12 @@ function( pbuilder_component_install_and_export )
     # Parameters:
     #     COMPONENT: build component being installed; required if this function is used multiple times in a project
     #                if a build does not actually have multiple components, a name still needs to be given (e.g. "library")
+    #     NAMESPACE: optional namespace specification to add to the library on export, with colons included
     #     LIBTARGETS: all library targets to be installed
     #     EXETARGETS: all executable targets to be installed
 
     set( OPTIONS )
-    set( ONEVALUEARGS COMPONENT )
+    set( ONEVALUEARGS COMPONENT NAMESPACE )
     set( MULTIVALUEARGS LIBTARGETS EXETARGETS )
     cmake_parse_arguments( CIE "${OPTIONS}" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
 
@@ -363,11 +396,20 @@ function( pbuilder_component_install_and_export )
         set( FULL_LIBTARGETS ${FULL_LIB_NAMES} )
         message( STATUS "Expanded lib names: ${FULL_LIBTARGETS}" )
 
-        # make targets available at build time
-        export( TARGETS ${FULL_LIBTARGETS}
-            APPEND
-            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
-        )
+
+        # export to make targets available at build time
+        if( CIE_NAMESPACE )
+            export( TARGETS ${FULL_LIBTARGETS}
+                NAMESPACE ${CIE_NAMESPACE}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        else()
+            export( TARGETS ${FULL_LIBTARGETS}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        endif()
 
         # install libraries and add to export for installation
         install( TARGETS ${FULL_LIBTARGETS} 
@@ -375,20 +417,29 @@ function( pbuilder_component_install_and_export )
             COMPONENT ${CIE_COMPONENT}
             LIBRARY DESTINATION ${LIB_INSTALL_DIR}
         )
-    endif()
+endif()
 
     # Executables
     if( CIE_EXETARGETS )
         message( "Installing and exporting executables for component <${CIE_COMPONENT}>" )
         message( STATUS "Targets are: ${CIE_EXETARGETS}" )
 
+        
         # make targets available at build time
         #message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
-        export( TARGETS ${CIE_EXETARGETS}
-            APPEND
-            FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
-        )
-        
+        if( CIE_NAMESPACE )
+            export( TARGETS ${CIE_EXETARGETS}
+                NAMESPACE ${CIE_NAMESPACE}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        else()
+            export( TARGETS ${CIE_EXETARGETS}
+                APPEND
+                FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake
+            )
+        endif()
+
         # install executables and add to export for installation
         #message( STATUS "******* installed exe targets export: ${PROJECT_NAME}${INSERT_COMPONENT}_Targets")
         install( TARGETS ${CIE_EXETARGETS}
@@ -396,6 +447,7 @@ function( pbuilder_component_install_and_export )
             COMPONENT ${CIE_COMPONENT}
             RUNTIME DESTINATION ${BIN_INSTALL_DIR}
         )
+
     endif()
 
     # Export installation
@@ -449,85 +501,100 @@ function( pbuilder_do_package_config )
     # It creates and installs the "version-config" and "targets" files.
     # Arguments: 
     #   
-    #   CONFIG_LOCATION -- Directory in which to find the already-created config file.
-    #                      If not specified, the default is ${PROJECT_BINARY_DIR}.
-    #   FILE_PREFIX -- Portion of the filename that preceeds `Config.cmake`, `Targets.cmake`, and `ConfigVersion.cmake` for the 
-    #                  config, targets, and config-version files, respectively.  If not specified, the default is ${PROJECT_NAME}.
-    #   CONFIG_FILENAME -- Optional specification of the full config filename.  If specified, overrules the default described above.
+    #   INPUT_FILE -- Path of the input config file (typically ends in .cmake.in).  Absolute path or relative to the current source directory.
+    #   OUTPUT_FILE -- Filename for the output config file (no file path)
     #   VERSION_FILENAME -- Optional specification of the full version-config filename.  If specified, overrules the default described above.
 
     # Parse macro arguments
-    set( oneValueArgs CONFIG_LOCATION FILE_PREFIX CONFIG_FILENAME VERSION_FILENAME )
+    set( oneValueArgs INPUT_FILE OUTPUT_FILE VERSION_FILENAME )
     cmake_parse_arguments( PKG_CONF "" "${oneValueArgs}" "" ${ARGN} )
 
     # Handle arguments and apply defaults
 
-    if( NOT PKG_CONF_CONFIG_LOCATION )
-        set( PKG_CONF_CONFIG_LOCATION ${PROJECT_BINARY_DIR} )
+    if( NOT PKG_CONF_INPUT_FILE )
+        set( PKG_CONF_INPUT_FILE ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in )
     endif()
+    message( STATUS "Config input file: ${PKG_CONF_INPUT_FILE}")
 
-    if( NOT PKG_CONF_FILE_PREFIX )
-        set( PKG_CONF_FILE_PREFIX ${PROJECT_NAME} )
+    if( NOT PKG_CONF_OUTPUT_FILE )
+        set( PKG_CONF_OUTPUT_FILE ${PROJECT_NAME}Config.cmake )
     endif()
-
-    if( NOT PKG_CONF_CONFIG_FILENAME )
-        set( PKG_CONF_CONFIG_FILENAME ${PKG_CONF_FILE_PREFIX}Config.cmake )
-    endif()
-    set( CONFIG_PATH ${PKG_CONF_CONFIG_LOCATION}/${PKG_CONF_CONFIG_FILENAME} )
-    message( STATUS "Config file path: ${CONFIG_PATH}" )
+    message( STATUS "Config output file: ${PKG_CONF_OUTPUT_FILE}")
 
     if( NOT PKG_CONF_VERSION_FILENAME )
-        set( PKG_CONF_VERSION_FILENAME ${PKG_CONF_FILE_PREFIX}ConfigVersion.cmake )
+        set( PKG_CONF_VERSION_FILENAME ${PROJECT_NAME}ConfigVersion.cmake )
     endif()
     set( CONFIG_VERSION_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME} )
-    message( STATUS "Config version file path: ${CONFIG_VERSION_PATH}" )
+    message( STATUS "Config version file path: ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}" )
 
     # Config file must exist already
-    if( NOT EXISTS ${CONFIG_PATH} )
-        message( FATAL_ERROR "Package config file does not exist: ${CONFIG_PATH}" )
+    if( NOT EXISTS ${PKG_CONF_INPUT_FILE} )
+        message( FATAL_ERROR "Package config file does not exist: ${PKG_CONF_INPUT_FILE}" )
     endif()
 
     include( CMakePackageConfigHelpers )
+    configure_package_config_file( ${PKG_CONF_INPUT_FILE} ${PKG_CONF_OUTPUT_FILE} 
+        INSTALL_DESTINATION ${PACKAGE_CONFIG_PREFIX}
+    )
+
     write_basic_package_version_file(
-        ${CONFIG_VERSION_PATH}
+        ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
         COMPATIBILITY SameMajorVersion
     )
 
     install( 
         FILES 
-            ${CONFIG_VERSION_PATH}
-            ${CONFIG_PATH}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_VERSION_FILENAME}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PKG_CONF_OUTPUT_FILE}
         DESTINATION 
             ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}
     )
 
 endfunction()
 
-function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
+function( pbuilder_add_pybind11_module )
     # Adds a pybind11 module that is linked to the specified project libraries, PUBLIC_EXT_LIBS, and PRIVATE_EXT_LIBS
     # Installs the library in the standard lib directory unless indicated by the definition of the variable PBUILDER_PY_INSTALL_IN_SITELIB
+    #
+    # Parameters
+    #     MODULE_NAME: name of the Python module to be built
+    #     SOURCE_FILES: list of sources to be built into one module
+    #     PROJECT_LIBRARIES: libraries from the same project to be linked against
+    #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
+    #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
 
-    pbuilder_expand_lib_names( ${PROJECT_LIBRARIES} )
+    set( ONEVALUEARGS MODULE_NAME )
+    set( MULTIVALUEARGS SOURCE_FILES PROJECT_LIBRARIES PUBLIC_EXTERNAL_LIBRARIES PRIVATE_ETERNAL_LIBRARIES )
+    cmake_parse_arguments( PB11 "" "${ONEVALUEARGS}" "${MULTIVALUEARGS}" ${ARGN} )
+
+    message( "Doing python binding for module ${PB11_MODULE_NAME}")
+
+    pbuilder_expand_lib_names( ${PB11_PROJECT_LIBRARIES} )
     set( FULL_PROJECT_LIBRARIES ${FULL_LIB_NAMES} )
     message( STATUS "full project libraries (pybind11): ${FULL_PROJECT_LIBRARIES}" )
-
     message( STATUS "submodule libraries (pybind11): ${${PROJECT_NAME}_SM_LIBRARIES}" )
+    message( STATUS "source files: ${PB11_SOURCE_FILES}" )
 
     # Potential point of confusion: the C++ library is "Scarab" and the python library is "scarab"
     # Other possible naming schemes seemed less desirable, and we'll hopefully avoid confusion with these comments
-    pybind11_add_module( ${PY_MODULE_NAME} ${PYBINDING_SOURCEFILES} )
+    pybind11_add_module( ${PB11_MODULE_NAME} ${PB11_SOURCE_FILES} )
 
-    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${PY_MODULE_NAME} INCLUDE_DIRECTORIES )
+    get_target_property( SOURCE_TREE_INCLUDE_DIRS ${PB11_MODULE_NAME} INCLUDE_DIRECTORIES )
     message( STATUS "Adding install interface include dir: ${INCLUDE_INSTALL_SUBDIR}" )
     message( STATUS "Adding build interface include dirs: ${SOURCE_TREE_INCLUDE_DIRS}" )
 
-    target_include_directories( ${PY_MODULE_NAME}
+    target_include_directories( ${PB11_MODULE_NAME}
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
-            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INCLUDE_INSTALL_SUBDIR}>"
+            "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_SUBDIR}>"
     )
 
-    target_link_libraries( ${PY_MODULE_NAME} PRIVATE ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${PUBLIC_EXT_LIBS} ${PRIVATE_EXT_LIBS} )
+    target_link_libraries( ${PB11_MODULE_NAME} 
+        PUBLIC
+            ${FULL_PROJECT_LIBRARIES} ${${PROJECT_NAME}_SM_LIBRARIES} ${PB11_PUBLIC_EXTERNAL_LIBRARIES}
+        PRIVATE
+            ${PB11_PRIVATE_EXTERNAL_LIBRARIES} 
+    )
 
     set( PY_MODULE_INSTALL_DIR ${LIB_INSTALL_DIR} )
     # Override that install location if specified by the user
@@ -536,6 +603,6 @@ function( pbuilder_add_pybind11_module PY_MODULE_NAME PROJECT_LIBRARIES )
     endif( DEFINED PBUILDER_PY_INSTALL_IN_SITELIB AND DEFINED Python3_SITELIB )
     message( STATUS "Installing module ${PY_MODULE_NAME} in ${PY_MODULE_INSTALL_DIR}" )
 
-    install( TARGETS ${PY_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
+    install( TARGETS ${PB11_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
     
 endfunction()

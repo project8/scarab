@@ -1,5 +1,7 @@
 # ScarabConfig.cmake
 
+@PACKAGE_INIT@
+
 get_filename_component( Scarab_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
 
 # Find the dependencies
@@ -27,3 +29,5 @@ if( NOT TARGET Scarab::@Scarab_FULL_TARGET_NAME@ )
         include( "${Scarab_CMAKE_DIR}/Scarab_Library_Targets.cmake" )
     endif()
 endif()
+
+check_required_components( Scarab )

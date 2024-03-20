@@ -25,5 +25,5 @@ cmake ..
 
 ```
 > cd /top/level/of/Scarab/testing/package_builder/NestedPBTest
-> rm -rf scarab PBTest
+> rm -rf scarab PBTest build
 ```

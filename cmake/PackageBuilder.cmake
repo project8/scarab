@@ -21,11 +21,21 @@ include( CMakeParseArguments ) # required until cmake v3.5, when this was added 
 set( PBUILDER_STANDALONE FALSE CACHE INTERNAL "Flag for whether or not this is a stand-alone build" )
 set( PBUILDER_CHILD_NAME_EXTENSION "${PROJECT_NAME}" CACHE INTERNAL "Submodule library name modifier" )
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
+    message( STATUS "PBuilder has determined that this is a standalone project (project build dir: ${PROJECT_BINARY_DIR})" )
     set( PBUILDER_STANDALONE TRUE )
     
     if( CMAKE_GENERATOR MATCHES ".*(Make|Ninja).*" AND NOT CMAKE_BUILD_TYPE )
   		set( CMAKE_BUILD_TYPE "DEBUG" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel" FORCE )
   		message( STATUS "CMAKE_BUILD_TYPE not specified. Using ${CMAKE_BUILD_TYPE} build" )
+    endif()
+
+    # Setup the default install prefix
+    # This gets set to the binary directory upon first configuring without overruling a user specification.
+    if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+        set( CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR} CACHE PATH "Install prefix" FORCE )
+        message( STATUS "Setting the install prefix to ${CMAKE_INSTALL_PREFIX}" )
+    else()
+        message( STATUS "Install prefix is set to ${CMAKE_INSTALL_PREFIX}" )
     endif()
 
     # option to force linking when using g++
@@ -48,18 +58,6 @@ else( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
 endif( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
 
 message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
-
-# Setup the default install prefix
-# This gets set to the binary directory upon first configuring.
-# If the user changes the prefix, but leaves the flag OFF, then it will remain as the user specified.
-# If the user wants to reset the prefix to the default (i.e. the binary directory), then the flag should be set ON.
-if( NOT DEFINED SET_INSTALL_PREFIX_TO_DEFAULT )
-    set( SET_INSTALL_PREFIX_TO_DEFAULT ON )
-endif( NOT DEFINED SET_INSTALL_PREFIX_TO_DEFAULT )
-if( SET_INSTALL_PREFIX_TO_DEFAULT )
-    set( CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR} CACHE PATH "Install prefix" FORCE )
-    set( SET_INSTALL_PREFIX_TO_DEFAULT OFF CACHE BOOL "Reset default install path when when configuring" FORCE )
-endif( SET_INSTALL_PREFIX_TO_DEFAULT )
 
 # install subdirectories
 set( INCLUDE_INSTALL_SUBDIR "include/${PROJECT_NAME}" CACHE PATH "Install subdirectory for headers" )
@@ -103,10 +101,15 @@ option( ${PROJECT_NAME}_ENABLE_EXECUTABLES "Turn on or off the building of execu
 
 # default version of C++
 # acceptable values are any used by the CXX_STANDARD property of your CMake
-set( CMAKE_CXX_STANDARD 11 )
+set( CMAKE_CXX_STANDARD 17 )
 
 # build shared libraries
 set( BUILD_SHARED_LIBS ON )
+
+# flag for whether or not to use RPATH for the runtime library search path instead of RUNPATH, 
+# the former of which is searched before LD_LIBRARY_PATH and RUNPATH
+# Default chosen to be ON because typical use patterns have not included replacing shared libraries
+option( OVERRIDE_LIB_PATH "Turn on to set runtime library path using RPATH, which is searched before LD_LIBRARY_PATH and RUNPATH" ON )
 
 # turn on RPATH for Mac OSX
 set( CMAKE_MACOSX_RPATH ON )
