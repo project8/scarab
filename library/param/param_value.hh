@@ -23,6 +23,14 @@
 
 namespace scarab
 {
+    /*!
+     @class param_value
+     @author N. S. Oblath
+
+     @brief Param class holding values (i.e. bools, ints, floats, and strings)
+
+     @details
+    */
     class SCARAB_API param_value : public param
     {
         public:

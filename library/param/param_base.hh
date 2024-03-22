@@ -18,6 +18,14 @@
 namespace scarab
 {
     
+    /*!
+     @class param
+     @author N. S. Oblath
+
+     @brief Base param type and null param object
+
+     @details
+    */
     class SCARAB_API param
     {
         public:

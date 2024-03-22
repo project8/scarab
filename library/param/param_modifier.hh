@@ -20,8 +20,15 @@ namespace scarab
     class param_node;
     class param_value;
 
-    //using params = std::variant< param, param_array, param_node, param_value >;
 
+    /*!
+     @class param_modifier
+     @author N. S. Oblath
+
+     @brief Base class for param modifiers
+
+     @details
+    */
     class SCARAB_API param_modifier
     {
         public:
@@ -35,6 +42,14 @@ namespace scarab
     };
 
 
+    /*!
+     @class param_modifier_callback
+     @author N. S. Oblath
+
+     @brief Param modifier allowing runtime modification of modifier behavior via callback functions
+
+     @details
+    */
     class SCARAB_API param_modifier_callback : public param_modifier
     {
         public:

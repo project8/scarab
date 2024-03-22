@@ -24,9 +24,17 @@
 
 namespace scarab
 {
-    // This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
-    // In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
-    // Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
+    /*!
+     @class map_deref_iterator
+     @author N. S. Oblath
+
+     @brief Iterator class that provides convenient access to the param object
+
+     @details
+     This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
+     In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
+     Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
+    */
     template< class x_key, class x_value, class x_iiterator >
     class map_deref_iterator : public boost::iterator_adaptor< map_deref_iterator< x_key, x_value, x_iiterator >, x_iiterator, x_value, boost::bidirectional_traversal_tag >
     {
@@ -68,6 +76,14 @@ namespace scarab
     typedef map_deref_iterator< std::string, param, param_node_contents::iterator > param_node_iterator;
     typedef map_deref_iterator< std::string, const param, param_node_contents::const_iterator > param_node_const_iterator;
 
+    /*!
+     @class param_node
+     @author N. S. Oblath
+
+     @brief Dictionary/map-like param structure
+
+     @details
+    */
     class SCARAB_API param_node : public param
     {
         public:

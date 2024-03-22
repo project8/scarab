@@ -22,6 +22,14 @@ namespace scarab
 
     //using params = std::variant< param, param_array, param_node, param_value >;
 
+    /*!
+     @class param_visitor
+     @author N. S. Oblath
+
+     @brief Base class for param visitors
+
+     @details
+    */
     class SCARAB_API param_visitor
     {
         public:
@@ -35,6 +43,14 @@ namespace scarab
     };
 
 
+    /*!
+     @class param_visitor_callback
+     @author N. S. Oblath
+
+     @brief Visitor class allowing runtime updating of visitor behavior via callback functions
+
+     @details
+    */
     class SCARAB_API param_visitor_callback : public param_visitor
     {
         public:

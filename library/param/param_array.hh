@@ -31,6 +31,14 @@ namespace scarab
     typedef boost::indirect_iterator< param_array_contents::iterator, param > param_array_iterator;
     typedef boost::indirect_iterator< param_array_contents::const_iterator, const param > param_array_const_iterator;
 
+    /*!
+     @class param_array
+     @author N. S. Oblath
+
+     @brief Array/list-like param structure
+
+     @details
+    */
     class SCARAB_API param_array : public param
     {
         public:
