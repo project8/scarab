@@ -65,6 +65,14 @@ namespace scarab_testing
                     a_value.set( 42 );
                 };
             }
+            void reset_counts()
+            {
+                f_param_count = 0;
+                f_param_array_count = 0;
+                f_param_node_count = 0;
+                f_param_value_count = 0;
+                return;
+            }
             mv_accessible( int, param_count );
             mv_accessible( int, param_array_count );
             mv_accessible( int, param_node_count );
@@ -113,6 +121,14 @@ namespace scarab_testing
             mv_accessible( int, param_array_count );
             mv_accessible( int, param_node_count );
             mv_accessible( int, param_value_count );
+            void reset_counts()
+            {
+                f_param_count = 0;
+                f_param_array_count = 0;
+                f_param_node_count = 0;
+                f_param_value_count = 0;
+                return;
+            }
 
             mv_accessible( bool, check_magic_value );
             mv_accessible( int, magic_value );

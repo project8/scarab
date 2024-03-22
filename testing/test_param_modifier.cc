@@ -40,10 +40,19 @@ TEST_CASE( "param_modifier", "[param]" )
     test_nested.accept( t_modifier );
     test_nested.accept( t_visitor );
 
+    // verify we visited all of the elements
     REQUIRE( t_modifier.get_param_count() == 1 );
     REQUIRE( t_modifier.get_param_array_count() == 2 );
     REQUIRE( t_modifier.get_param_node_count() == 3 );
     REQUIRE( t_modifier.get_param_value_count() == 7 );
 
+    // verify that the values were set to 42
+    REQUIRE( test_nested["one"]().as_int() == 42 );
+    REQUIRE( test_nested["array"][0]().as_int() == 42 );
+    REQUIRE( test_nested["array"][1]().as_int() == 42 );
+    REQUIRE( test_nested["array"][2]().as_int() == 42 );
+    REQUIRE( test_nested["array"][3][0]().as_int() == 42 );
+    REQUIRE( test_nested["array"][4]["five"]().as_int() == 42 );
+    REQUIRE( test_nested["node"]["one-thousand"]().as_int() == 42 );
 }
 

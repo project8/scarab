@@ -86,12 +86,13 @@ pbuilder_executable(
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
     PUBLIC_EXTERNAL_LIBRARIES Catch
 )
-set( programs "run_tests" )
 
 if( Scarab_BUILD_CLI )
     # this sets the programs list
     add_subdirectory( applications )
 endif( Scarab_BUILD_CLI )
+
+list( APPEND programs "run_tests" )
 
 message(STATUS "##### programs: ${programs}")
 pbuilder_component_install_and_export( 
