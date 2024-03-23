@@ -25,9 +25,12 @@ namespace scarab
      @class param_modifier
      @author N. S. Oblath
 
-     @brief Base class for param modifiers
+     @brief Base class for param modifiers -- visits all elements of the structure but does not modify them
 
      @details
+     Modifier functions are marked as const --- the most intuitive behavior is that the modifier functions 
+     don't change the state of the modifier.  If such change is required (e.g. an internal counter needs 
+     to change at each visit), that should be marked as a mutable member of the modifier.
     */
     class SCARAB_API param_modifier
     {
@@ -35,10 +38,10 @@ namespace scarab
             param_modifier();
             virtual ~param_modifier();
 
-            virtual void operator()( param& ) = 0;
-            virtual void operator()( param_array& ) = 0;
-            virtual void operator()( param_node& ) = 0;
-            virtual void operator()( param_value& ) = 0;
+            virtual void operator()( param& ) const;
+            virtual void operator()( param_array& ) const;
+            virtual void operator()( param_node& ) const;
+            virtual void operator()( param_value& ) const;
     };
 
 
@@ -61,10 +64,10 @@ namespace scarab
             param_modifier_callback();
             virtual ~param_modifier_callback();
 
-            virtual void operator()( param& );
-            virtual void operator()( param_array& );
-            virtual void operator()( param_node& );
-            virtual void operator()( param_value& );
+            virtual void operator()( param& ) const;
+            virtual void operator()( param_array& ) const;
+            virtual void operator()( param_node& ) const;
+            virtual void operator()( param_value& ) const;
 
         protected:
             mv_referrable( param_callback_t, param_callback );

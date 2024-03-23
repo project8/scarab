@@ -73,10 +73,10 @@ namespace scarab_testing
                 f_param_value_count = 0;
                 return;
             }
-            mv_accessible( int, param_count );
-            mv_accessible( int, param_array_count );
-            mv_accessible( int, param_node_count );
-            mv_accessible( int, param_value_count );
+            mv_accessible_mutable( int, param_count );
+            mv_accessible_mutable( int, param_array_count );
+            mv_accessible_mutable( int, param_node_count );
+            mv_accessible_mutable( int, param_value_count );
     };
 
 
@@ -117,10 +117,10 @@ namespace scarab_testing
                     this->set_param_value_count( this->get_param_value_count() + 1 );
                 };
             }
-            mv_accessible( int, param_count );
-            mv_accessible( int, param_array_count );
-            mv_accessible( int, param_node_count );
-            mv_accessible( int, param_value_count );
+            mv_accessible_mutable( int, param_count );
+            mv_accessible_mutable( int, param_array_count );
+            mv_accessible_mutable( int, param_node_count );
+            mv_accessible_mutable( int, param_value_count );
             void reset_counts()
             {
                 f_param_count = 0;

@@ -30,13 +30,13 @@ namespace scarab
         return *this;
     }
 
-    inline void param::accept( param_modifier& a_modifier )
+    inline void param::accept( const param_modifier& a_modifier )
     {
         a_modifier( *this );
         return;
     }
 
-    inline void param::accept( param_visitor& a_visitor ) const
+    inline void param::accept( const param_visitor& a_visitor ) const
     {
         a_visitor( *this );
         return;

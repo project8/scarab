@@ -105,8 +105,8 @@ namespace scarab
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
 
-            virtual void accept( param_modifier& a_modifier );
-            virtual void accept( param_visitor& a_visitor ) const;
+            virtual void accept( const param_modifier& a_modifier );
+            virtual void accept( const param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_node() const;
@@ -202,13 +202,13 @@ namespace scarab
         return f_contents.empty();
     }
 
-    inline void param_node::accept( param_modifier& a_modifier )
+    inline void param_node::accept( const param_modifier& a_modifier )
     {
         a_modifier( *this );
         return;
     }
 
-    inline void param_node::accept( param_visitor& a_visitor ) const
+    inline void param_node::accept( const param_visitor& a_visitor ) const
     {
         a_visitor( *this );
         return;

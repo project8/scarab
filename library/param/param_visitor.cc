@@ -17,8 +17,38 @@ LOGGER( plog, "param_visitor" );
 
 namespace scarab
 {
-        param_visitor::param_visitor() {}
-        param_visitor::~param_visitor() {}
+        param_visitor::param_visitor() 
+        {}
+
+        param_visitor::~param_visitor() 
+        {}
+
+        void param_visitor::operator()( const param& ) const
+        {
+            return;
+        }
+
+        void param_visitor::operator()( const param_array& an_array ) const
+        {
+            for( const auto& it: an_array )
+            {
+                it.accept( *this );
+            }
+            return;
+        }
+
+        void param_visitor::operator()( const param_node& a_node ) const
+        {
+            for( const auto& it: a_node )
+            {
+                it.accept( *this );
+            }
+        }
+
+        void param_visitor::operator()( const param_value& ) const
+        {
+            return;
+        }
 
 
         param_visitor_callback::param_visitor_callback() :
@@ -48,25 +78,25 @@ namespace scarab
         param_visitor_callback::~param_visitor_callback() 
         {}
 
-        void param_visitor_callback::operator()( const param& a_null )
+        void param_visitor_callback::operator()( const param& a_null ) const
         {
             f_param_callback( a_null );
             return;
         };
 
-        void param_visitor_callback::operator()( const param_array& an_array )
+        void param_visitor_callback::operator()( const param_array& an_array ) const
         {
             f_param_array_callback( an_array );
             return;
         };
 
-        void param_visitor_callback::operator()( const param_node& a_node )
+        void param_visitor_callback::operator()( const param_node& a_node ) const
         {
             f_param_node_callback( a_node );
             return;
         };
 
-        void param_visitor_callback::operator()( const param_value& a_value )
+        void param_visitor_callback::operator()( const param_value& a_value ) const
         {
             f_param_value_callback( a_value );
             return;

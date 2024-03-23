@@ -67,8 +67,8 @@ namespace scarab
 
             bool empty() const;
 
-            virtual void accept( param_modifier& a_modifier );
-            virtual void accept( param_visitor& a_visitor ) const;
+            virtual void accept( const param_modifier& a_modifier );
+            virtual void accept( const param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_value() const;
@@ -412,13 +412,13 @@ namespace scarab
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
 
-    inline void param_value::accept( param_modifier& a_modifier )
+    inline void param_value::accept( const param_modifier& a_modifier )
     {
         a_modifier( *this );
         return;
     }
 
-    inline void param_value::accept( param_visitor& a_visitor ) const
+    inline void param_value::accept( const param_visitor& a_visitor ) const
     {
         a_visitor( *this );
         return;

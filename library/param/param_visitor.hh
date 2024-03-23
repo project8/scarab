@@ -20,15 +20,16 @@ namespace scarab
     class param_node;
     class param_value;
 
-    //using params = std::variant< param, param_array, param_node, param_value >;
-
     /*!
      @class param_visitor
      @author N. S. Oblath
 
-     @brief Base class for param visitors
+     @brief Base class for param visitors -- visits all elements of the param structure
 
      @details
+     Visitor functions are marked as const --- the most intuitive behavior is that the visitor functions 
+     don't modifiy the state of the visitor.  If such modification is required (e.g. an internal counter needs 
+     to change at each visit), that should be marked as a mutable member of the visitor.
     */
     class SCARAB_API param_visitor
     {
@@ -36,10 +37,10 @@ namespace scarab
             param_visitor();
             virtual ~param_visitor();
 
-            virtual void operator()( const param& ) = 0;
-            virtual void operator()( const param_array& ) = 0;
-            virtual void operator()( const param_node& ) = 0;
-            virtual void operator()( const param_value& ) = 0;
+            virtual void operator()( const param& ) const;
+            virtual void operator()( const param_array& ) const;
+            virtual void operator()( const param_node& ) const;
+            virtual void operator()( const param_value& ) const;
     };
 
 
@@ -62,10 +63,10 @@ namespace scarab
             param_visitor_callback();
             virtual ~param_visitor_callback();
 
-            virtual void operator()( const param& );
-            virtual void operator()( const param_array& );
-            virtual void operator()( const param_node& );
-            virtual void operator()( const param_value& );
+            virtual void operator()( const param& ) const;
+            virtual void operator()( const param_array& ) const;
+            virtual void operator()( const param_node& ) const;
+            virtual void operator()( const param_value& ) const;
 
         protected:
             mv_referrable( param_callback_t, param_callback );

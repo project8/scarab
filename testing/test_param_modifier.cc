@@ -36,9 +36,7 @@ TEST_CASE( "param_modifier", "[param]" )
     param_visitor_callback_tester t_visitor;
     param_modifier_callback_tester t_modifier;
 
-    test_nested.accept( t_visitor );
     test_nested.accept( t_modifier );
-    test_nested.accept( t_visitor );
 
     // verify we visited all of the elements
     REQUIRE( t_modifier.get_param_count() == 1 );
@@ -54,5 +52,23 @@ TEST_CASE( "param_modifier", "[param]" )
     REQUIRE( test_nested["array"][3][0]().as_int() == 42 );
     REQUIRE( test_nested["array"][4]["five"]().as_int() == 42 );
     REQUIRE( test_nested["node"]["one-thousand"]().as_int() == 42 );
+
+    // modify the modifier
+    t_modifier.param_value_callback() = [t_modifier](param_value& a_value) {
+        LDEBUG( tlog_pmh, "modified param_value callback: " << a_value );
+        t_modifier.set_param_value_count( t_modifier.get_param_value_count() + 1 );
+        a_value.set( 43 );
+    };
+    test_nested.accept( t_modifier );
+
+        // verify that the values were set to 43
+    REQUIRE( test_nested["one"]().as_int() == 43 );
+    REQUIRE( test_nested["array"][0]().as_int() == 43 );
+    REQUIRE( test_nested["array"][1]().as_int() == 43 );
+    REQUIRE( test_nested["array"][2]().as_int() == 43 );
+    REQUIRE( test_nested["array"][3][0]().as_int() == 43 );
+    REQUIRE( test_nested["array"][4]["five"]().as_int() == 43 );
+    REQUIRE( test_nested["node"]["one-thousand"]().as_int() == 43 );
+
 }
 
