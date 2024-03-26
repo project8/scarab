@@ -24,6 +24,18 @@
 namespace scarab
 {
     /*!
+     @class param_value_visitor
+     @author N. S. Oblath
+
+     @brief 
+
+     @details
+    */
+   //template< typename XReturnType >
+   //class SCARAB_API param_value_visitor
+
+
+    /*!
      @class param_value
      @author N. S. Oblath
 
@@ -101,6 +113,9 @@ namespace scarab
             virtual std::string to_string() const;
 
             void clear();
+
+            template< typename XRetType, typename XVisitorType >
+            XRetType accept_value_visitor( const XVisitorType& a_visitor );
 
         private:
             boost::variant< bool, uint64_t, int64_t, double, std::string > f_value;
@@ -560,6 +575,15 @@ namespace scarab
         boost::apply_visitor( clear_visitor(), f_value );
         return;
     }
+
+    template< typename XRetType, typename XVisitorType >
+    XRetType param_value::accept_value_visitor( const XVisitorType& a_visitor )
+    {
+        return boost::apply_visitor( a_visitor, f_value );
+    }
+
+    //template< typename XRetType >
+    //XRetType param_value::accept_value_visitor( const boost::static_visitor< XRetType >& a_visitor )
 
 } /* namespace scarab */
 
