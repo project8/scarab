@@ -39,6 +39,7 @@ if( Scarab_BUILD_PARAM )
         ${testing_SOURCES}
         test_param_array.cc
         test_param_by_pointer.cc
+        test_param_env_modifier.cc
         test_param_modifier.cc
         test_param_nested.cc
         test_param_node.cc
