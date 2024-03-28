@@ -31,7 +31,6 @@ add_subdirectory( logger )
 if( Scarab_BUILD_PARAM )
     include_directories( BEFORE 
         ${CMAKE_CURRENT_SOURCE_DIR}/param
-        ${CMAKE_CURRENT_SOURCE_DIR}/modifier
     )
     add_subdirectory( param )
     #add_subdirectory( modifier )

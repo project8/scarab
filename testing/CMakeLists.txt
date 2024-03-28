@@ -46,7 +46,6 @@ if( Scarab_BUILD_PARAM )
         test_param_translator.cc
         test_param_value.cc
         test_param_visitor.cc
-#        test_env_substitute.cc
 )
 endif( Scarab_BUILD_PARAM )
 
