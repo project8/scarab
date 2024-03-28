@@ -14,6 +14,14 @@
 
 namespace scarab
 {
+    /*!
+     @struct simple_parser
+     @author N. S. Oblath
+
+     @brief Parses a string that references a location in a param structure
+
+     @details
+    */
     struct SCARAB_API simple_parser
     {
         public:

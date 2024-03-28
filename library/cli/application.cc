@@ -11,6 +11,7 @@
 
 #include "nonoption_parser.hh"
 #include "param_codec.hh"
+#include "param_env_modifier.hh"
 #include "version_wrapper.hh"
 
 using std::string;
@@ -130,6 +131,8 @@ namespace scarab
             do_config_stage_3();
 
             do_config_stage_4();
+
+            do_config_stage_5();
 
             LPROG( applog, "Final configuration:\n" << f_primary_config );
             LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
@@ -254,6 +257,15 @@ namespace scarab
         }
         // set the global verbosity in the logger
         applog.SetGlobalLevel( f_global_verbosity->second );
+        return;
+    }
+
+    void main_app::do_config_stage_5()
+    {
+        // fifth configuration stage: additional modification of param_node:
+        // * environment variable substitution for ENV{[var]} tokens
+        param_env_modifier t_modifier;
+        t_modifier( f_primary_config );
         return;
     }
 

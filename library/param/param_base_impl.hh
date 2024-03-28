@@ -14,6 +14,9 @@
 #include "param_node.hh"
 #include "param_value.hh"
 
+#include "param_modifier.hh"
+#include "param_visitor.hh"
+
 namespace scarab
 {
 
@@ -25,6 +28,18 @@ namespace scarab
     inline param& param::operator=( param&& )
     {
         return *this;
+    }
+
+    inline void param::accept( const param_modifier& a_modifier )
+    {
+        a_modifier( *this );
+        return;
+    }
+
+    inline void param::accept( const param_visitor& a_visitor ) const
+    {
+        a_visitor( *this );
+        return;
     }
 
     inline param_value& param::as_value()

@@ -12,6 +12,23 @@
 
 using scarab::param_value;
 
+class modify_value : public boost::static_visitor< void >
+{
+    public:
+        //typedef void result_type;
+        void operator()( std::string& a_value ) const
+        {
+            a_value = "modified";
+            return;
+        }
+        template< typename T >
+        void operator()( T ) const
+        {
+            return;
+        }
+};
+
+
 TEST_CASE( "param_value", "[param]" )
 {
     SECTION( "initialization" )
@@ -178,6 +195,13 @@ TEST_CASE( "param_value", "[param]" )
         double_val_2 = 2.;
         REQUIRE_FALSE( double_val.loose_is_equal_to(double_val_2) );
         REQUIRE_FALSE( double_val.loose_is_equal_to(int_val) );
+    }
+
+    SECTION( "visitation" )
+    {
+        param_value str_val( "hello" );
+        str_val.accept_value_visitor< void >( modify_value() );
+        REQUIRE( str_val.strict_is_equal_to( "modified" ) );
     }
 }
 

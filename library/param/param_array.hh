@@ -8,7 +8,9 @@
 #ifndef SCARAB_PARAM_ARRAY_HH_
 #define SCARAB_PARAM_ARRAY_HH_
 
+#include "param_modifier.hh"
 #include "param_value.hh"
+#include "param_visitor.hh"
 
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/type_traits/is_convertible.hpp>
@@ -29,6 +31,14 @@ namespace scarab
     typedef boost::indirect_iterator< param_array_contents::iterator, param > param_array_iterator;
     typedef boost::indirect_iterator< param_array_contents::const_iterator, const param > param_array_const_iterator;
 
+    /*!
+     @class param_array
+     @author N. S. Oblath
+
+     @brief Array/list-like param structure
+
+     @details
+    */
     class SCARAB_API param_array : public param
     {
         public:
@@ -51,6 +61,9 @@ namespace scarab
 
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
+
+            virtual void accept( const param_modifier& a_modifier );
+            virtual void accept( const param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_array() const;
@@ -143,6 +156,18 @@ namespace scarab
     inline bool param_array::empty() const
     {
         return f_contents.empty();
+    }
+
+    inline void param_array::accept( const param_modifier& a_modifier )
+    {
+        a_modifier( *this );
+        return;
+    }
+
+    inline void param_array::accept( const param_visitor& a_visitor ) const
+    {
+        a_visitor( *this );
+        return;
     }
 
     inline std::string param_array::get_value( unsigned a_index, const std::string& a_default ) const

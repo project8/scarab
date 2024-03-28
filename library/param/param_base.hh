@@ -17,6 +17,15 @@
 
 namespace scarab
 {
+    
+    /*!
+     @class param
+     @author N. S. Oblath
+
+     @brief Base param type and null param object
+
+     @details
+    */
     class SCARAB_API param
     {
         public:
@@ -33,6 +42,9 @@ namespace scarab
 
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
+
+            virtual void accept( const param_modifier& a_modifier );
+            virtual void accept( const param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_value() const;

@@ -31,15 +31,22 @@ set( testing_SOURCES
 )
 
 if( Scarab_BUILD_PARAM )
+    set( testing_HEADERS
+        ${testing_HEADERS}
+        test_param_modifiers_visitors.hh
+    )
     set( testing_SOURCES
         ${testing_SOURCES}
         test_param_array.cc
         test_param_by_pointer.cc
+        test_param_env_modifier.cc
+        test_param_modifier.cc
         test_param_nested.cc
         test_param_node.cc
         test_param_translator.cc
         test_param_value.cc
-    )
+        test_param_visitor.cc
+)
 endif( Scarab_BUILD_PARAM )
 
 if( Scarab_BUILD_CODEC_JSON )
@@ -79,12 +86,13 @@ pbuilder_executable(
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
     PUBLIC_EXTERNAL_LIBRARIES Catch
 )
-set( programs "run_tests" )
 
 if( Scarab_BUILD_CLI )
     # this sets the programs list
     add_subdirectory( applications )
 endif( Scarab_BUILD_CLI )
+
+list( APPEND programs "run_tests" )
 
 message(STATUS "##### programs: ${programs}")
 pbuilder_component_install_and_export( 
