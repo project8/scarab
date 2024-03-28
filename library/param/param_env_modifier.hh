@@ -21,7 +21,8 @@ namespace scarab
      @brief Param modifier that substitutes values from environment variables
 
      @details
-     
+     This class uses a param_value visitor to modify string values in particular.  
+     The value visitor will replace all environment variable substitutions requested in a string.
     */
     class SCARAB_API param_env_modifier : public param_modifier
     {
@@ -31,6 +32,12 @@ namespace scarab
 
             virtual void operator()( param_value& ) const;
 
+            /*!
+            @class param_env_modifier::modify_string
+            @author N. S. Oblath
+
+            @brief Value visitor that does environment variable substitutions on strings
+            */
             class modify_string : public boost::static_visitor< void >
             {
                 public:
@@ -51,7 +58,12 @@ namespace scarab
                         return;
                     }
 
+                    /// returns true if a substitution was made; false if the string had not ENV{} token
+                    /// throws std::regex on regex error
+                    /// throws scarab::error on environment variable present but not found or regex returned unexpected results
                     bool substitute_env( std::string& a_string ) const;
+                    /// throws std::regex on regex error
+                    /// throws scarab::error on environment variable not found
                     std::string get_env( const std::string& a_var ) const;
 
                 protected:

@@ -45,7 +45,7 @@ namespace scarab
                 if( t_matches.size() != 2 )
                 {
                     // something unexpected happened in the match that gave us the wrong size matches array; raise exception
-                    throw( std::runtime_error( "Something unexpected happened in the regex match to find environment variables" ) );
+                    throw error() << "Something unexpected happened in the regex match to find environment variables";
                 }
 
                 try
@@ -64,11 +64,8 @@ namespace scarab
                     return true;
 
                 }
-                catch( const scarab::error& e )
-                {
-                    LERROR( plog, e.what() );
-                    throw scarab::error() << e.what();
-                }
+                // only catch regex_error here
+                // if scarab::error was thrown, then that indicates the environment variable was not found, and we want that to propagate upwards
                 catch( const std::regex_error& e )
                 {
                     LERROR( plog, "Regex error: " << e.what() );
@@ -87,6 +84,7 @@ namespace scarab
             {
                 return std::string( t_env_value );
             }
+            LERROR( plog, "Environment variable not found: " << a_var );
             // TODO: change this to throw something customized
             throw error() << "Did not find environment variable <" << a_var << ">";
         }
