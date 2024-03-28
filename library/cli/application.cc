@@ -11,10 +11,8 @@
 
 #include "nonoption_parser.hh"
 #include "param_codec.hh"
+#include "param_env_modifier.hh"
 #include "version_wrapper.hh"
-
-//#include "env_substitute.hh"
-#include "null_modifier.hh"
 
 #include <list>
 
@@ -265,15 +263,11 @@ namespace scarab
     }
 
     void main_app::do_config_stage_5()
-    {/*
-        // fifth configuration stage: additional modification of param_node  (variable substitution, etc.)
-        std::list<std::shared_ptr< modifier >> modifiers;
-        //add items to chain
-        modifiers.push_back( std::make_shared< null_modifier >() );
-        modifiers.push_back( std::make_shared< env_substitute >() );
-
-        std::for_each(modifiers.begin(), modifiers.end(),
-                [this](std::shared_ptr< modifier> a_ptr){ a_ptr->modify(f_primary_config);} ); */
+    {
+        // fifth configuration stage: additional modification of param_node:
+        // * environment variable substitution for ENV{[var]} tokens
+        param_env_modifier t_modifier;
+        t_modifier( f_primary_config );
         return;
     }
 
