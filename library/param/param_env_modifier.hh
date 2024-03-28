@@ -30,7 +30,8 @@ namespace scarab
             param_env_modifier();
             virtual ~param_env_modifier();
 
-            virtual void operator()( param_value& ) const;
+            using param_modifier::operator(); // bring all of param_modifier's operator() into scope
+            virtual void operator()( param_value& ) const override;
 
             /*!
             @class param_env_modifier::modify_string

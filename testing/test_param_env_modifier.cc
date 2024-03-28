@@ -17,14 +17,6 @@
 using scarab::param_env_modifier;
 using scarab::param_value;
 
-// to test
-//  - regex error caught [direct]
-//  - no vars in string (string unchanged) [direct & modifier]
-//  - var in string but not in env (throws scarab::error) [direct & modifier]
-//  - var in string and in env (changed as predicted) [direct & modifier]
-//  - var in string twice (changed as predicted) [direct & modifier]
-//  - two vars in string (changed as predicted) [modifier]
-
 TEST_CASE( "param_env_modifier::modify_string", "[param]" )
 {
     param_env_modifier t_modifier;

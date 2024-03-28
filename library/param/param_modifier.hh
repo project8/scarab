@@ -64,10 +64,10 @@ namespace scarab
             param_modifier_callback();
             virtual ~param_modifier_callback();
 
-            virtual void operator()( param& ) const;
-            virtual void operator()( param_array& ) const;
-            virtual void operator()( param_node& ) const;
-            virtual void operator()( param_value& ) const;
+            virtual void operator()( param& ) const override;
+            virtual void operator()( param_array& ) const override;
+            virtual void operator()( param_node& ) const override;
+            virtual void operator()( param_value& ) const override;
 
         protected:
             mv_referrable( param_callback_t, param_callback );
