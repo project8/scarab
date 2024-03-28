@@ -24,18 +24,6 @@
 namespace scarab
 {
     /*!
-     @class param_value_visitor
-     @author N. S. Oblath
-
-     @brief 
-
-     @details
-    */
-   //template< typename XReturnType >
-   //class SCARAB_API param_value_visitor
-
-
-    /*!
      @class param_value
      @author N. S. Oblath
 

@@ -14,8 +14,6 @@
 #include "param_env_modifier.hh"
 #include "version_wrapper.hh"
 
-#include <list>
-
 using std::string;
 
 LOGGER(applog, "application");

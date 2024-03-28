@@ -33,7 +33,6 @@ if( Scarab_BUILD_PARAM )
         ${CMAKE_CURRENT_SOURCE_DIR}/param
     )
     add_subdirectory( param )
-    #add_subdirectory( modifier )
 endif( Scarab_BUILD_PARAM )
 
 if( Scarab_BUILD_CODEC_JSON )
