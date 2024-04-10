@@ -9,7 +9,9 @@
 #define SCARAB_PARAM_NODE_HH_
 
 #include "param_helpers.hh"
+#include "param_modifier.hh"
 #include "param_value.hh"
+#include "param_visitor.hh"
 
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/type_traits/is_convertible.hpp>
@@ -22,9 +24,17 @@
 
 namespace scarab
 {
-    // This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
-    // In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
-    // Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
+    /*!
+     @class map_deref_iterator
+     @author N. S. Oblath
+
+     @brief Iterator class that provides convenient access to the param object
+
+     @details
+     This special iterator class is used to allow the param_node iterator to point to a `param` object instead of a `std::unique_ptr<param>` object.
+     In param_array we just used boost::indirect_iterator, but that doesn't work quite as simply for map-like objects.
+     Note that unlike a normal map iterator, *iterator gives the `param` object, and iterator.name() gives the key.
+    */
     template< class x_key, class x_value, class x_iiterator >
     class map_deref_iterator : public boost::iterator_adaptor< map_deref_iterator< x_key, x_value, x_iiterator >, x_iiterator, x_value, boost::bidirectional_traversal_tag >
     {
@@ -66,6 +76,14 @@ namespace scarab
     typedef map_deref_iterator< std::string, param, param_node_contents::iterator > param_node_iterator;
     typedef map_deref_iterator< std::string, const param, param_node_contents::const_iterator > param_node_const_iterator;
 
+    /*!
+     @class param_node
+     @author N. S. Oblath
+
+     @brief Dictionary/map-like param structure
+
+     @details
+    */
     class SCARAB_API param_node : public param
     {
         public:
@@ -86,6 +104,9 @@ namespace scarab
 
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
+
+            virtual void accept( const param_modifier& a_modifier );
+            virtual void accept( const param_visitor& a_visitor ) const;
 
             virtual bool is_null() const;
             virtual bool is_node() const;
@@ -179,6 +200,18 @@ namespace scarab
     inline bool param_node::empty() const
     {
         return f_contents.empty();
+    }
+
+    inline void param_node::accept( const param_modifier& a_modifier )
+    {
+        a_modifier( *this );
+        return;
+    }
+
+    inline void param_node::accept( const param_visitor& a_visitor ) const
+    {
+        a_visitor( *this );
+        return;
     }
 
     inline bool param_node::has( const std::string& a_name ) const

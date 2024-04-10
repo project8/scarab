@@ -10,6 +10,8 @@
 
 #include "param_base.hh"
 
+#include "param_modifier.hh"
+#include "param_visitor.hh"
 #include "path.hh"
 
 #include <boost/variant.hpp>
@@ -21,6 +23,14 @@
 
 namespace scarab
 {
+    /*!
+     @class param_value
+     @author N. S. Oblath
+
+     @brief Param class holding values (i.e. bools, ints, floats, and strings)
+
+     @details
+    */
     class SCARAB_API param_value : public param
     {
         public:
@@ -57,6 +67,9 @@ namespace scarab
 
             bool empty() const;
 
+            virtual void accept( const param_modifier& a_modifier );
+            virtual void accept( const param_visitor& a_visitor ) const;
+
             virtual bool is_null() const;
             virtual bool is_value() const;
 
@@ -88,6 +101,9 @@ namespace scarab
             virtual std::string to_string() const;
 
             void clear();
+
+            template< typename XRetType, typename XVisitorType >
+            XRetType accept_value_visitor( const XVisitorType& a_visitor );
 
         private:
             boost::variant< bool, uint64_t, int64_t, double, std::string > f_value;
@@ -399,6 +415,18 @@ namespace scarab
 
     SCARAB_API std::ostream& operator<<(std::ostream& out, const param_value& value);
 
+    inline void param_value::accept( const param_modifier& a_modifier )
+    {
+        a_modifier( *this );
+        return;
+    }
+
+    inline void param_value::accept( const param_visitor& a_visitor ) const
+    {
+        a_visitor( *this );
+        return;
+    }
+
     template<>
     inline bool param_value::as< bool >() const
     {
@@ -535,6 +563,15 @@ namespace scarab
         boost::apply_visitor( clear_visitor(), f_value );
         return;
     }
+
+    template< typename XRetType, typename XVisitorType >
+    XRetType param_value::accept_value_visitor( const XVisitorType& a_visitor )
+    {
+        return boost::apply_visitor( a_visitor, f_value );
+    }
+
+    //template< typename XRetType >
+    //XRetType param_value::accept_value_visitor( const boost::static_visitor< XRetType >& a_visitor )
 
 } /* namespace scarab */
 

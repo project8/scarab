@@ -23,6 +23,14 @@ namespace scarab
 #define REGISTER_PARAM_INPUT_CODEC(codec_class, encoding) \
         static registrar< param_input_codec, codec_class > s_param_input_codec##codec_class##_registrar( encoding );
 
+    /*!
+     @class param_input_codec
+     @author N. S. Oblath
+
+     @brief 
+
+     @details
+    */
     class SCARAB_API param_input_codec
     {
         public:
@@ -34,6 +42,14 @@ namespace scarab
     };
 
 
+    /*!
+     @class param_output_codec
+     @author N. S. Oblath
+
+     @brief 
+
+     @details
+    */
     class SCARAB_API param_output_codec
     {
         public:
@@ -48,6 +64,14 @@ namespace scarab
         static registrar< param_output_codec, codec_class > s_param_output_codec##codec_class##_registrar( encoding );
 
 
+    /*!
+     @class param_translator
+     @author N. S. Oblath
+
+     @brief Translates between files/strings of data and param structures
+
+     @details
+    */
     class SCARAB_API param_translator
     {
         public:
