@@ -135,7 +135,9 @@ namespace scarab
     template< typename x_derived >
     typed_exception< x_derived >& typed_exception< x_derived >::operator=( const typed_exception< x_derived >& a_orig )
     {
-        f_what = a_orig.f_error;
+        f_what = a_orig.f_what;
+        f_filename = a_orig.f_filename;
+        f_line = a_orig.f_line;
         return *this;
     }
 
