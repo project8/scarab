@@ -14,7 +14,27 @@
 
 namespace scarab
 {
+    class SCARAB_API authentication
+    {
+        public:
+            authentication();
+            virtual ~authentication();
 
+        public:
+            void process_design();
+            
+            mv_referrable( param_node, design );
+
+        public:
+            /// Retrieve a particular item from the authentication data
+            /// Will throw std::out_of_range if the group or item does not exist
+            std::string get(const std::string& a_group, const std::string& an_item) const;
+
+            mv_referrable( param_node, data );
+
+    };
+
+/*
     class SCARAB_API authentication : public param_node
     {
         public:
@@ -29,7 +49,7 @@ namespace scarab
             mv_accessible_noset( bool, is_loaded );
 
     };
-
+*/
 } /* namespace scarab */
 
 #endif /* SCARAB_AUTHENTICATION_HH_ */

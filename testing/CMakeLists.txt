@@ -70,6 +70,12 @@ if( Scarab_BUILD_CLI )
     )
 endif( Scarab_BUILD_CLI )
 
+if( Scarab_BUILD_AUTHENTICATION )
+    set( testing_SOURCES
+        ${testing_SOURCES}
+        test_authentication.cc
+    )
+endif( Scarab_BUILD_AUTHENTICATION )
 
 set( testing_LIB_DEPENDENCIES 
     Scarab
