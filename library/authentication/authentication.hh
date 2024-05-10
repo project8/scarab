@@ -14,6 +14,14 @@
 
 namespace scarab
 {
+    /*!
+     @class authentication
+     @author N. S. Oblath
+
+     @brief Loads authentication information from a file or environment variables
+
+     @details
+    */
     class SCARAB_API authentication
     {
         public:
@@ -21,16 +29,24 @@ namespace scarab
             virtual ~authentication();
 
         public:
-            void process_design();
-            
-            mv_referrable( param_node, design );
+            //void add_group( const std::string& a_group );
+            //void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env );
 
+            void set_auth_file( const std::string& a_filename, const scarab::param_node& a_read_opts = scarab::param_node() );
+
+            void process_design();
+
+            mv_referrable( scarab::param_node, design );
+
+        protected:
+            void load_from_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts );
+            
         public:
             /// Retrieve a particular item from the authentication data
             /// Will throw std::out_of_range if the group or item does not exist
             std::string get(const std::string& a_group, const std::string& an_item) const;
 
-            mv_referrable( param_node, data );
+            mv_referrable( scarab::param_node, data );
 
     };
 
