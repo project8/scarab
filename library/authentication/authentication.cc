@@ -72,66 +72,80 @@ namespace scarab
     {
         try
         {
-            f_data.clear();
-
             LDEBUG( mtlog, "Processing authentication design" );
-            LWARN( mtlog, f_design );
+            //LWARN( mtlog, f_design );
 
+            param_ptr_t t_file_data_ptr;
             if( f_design.has( "file" ) )
             {
                 LDEBUG( mtlog, "Loading authentication information from a file" );
-                load_from_file( f_design["file"]().as_string(), f_design["file-read-opts"].as_node() );
+                t_file_data_ptr = load_from_file( f_design["file"]().as_string(), f_design["file-read-opts"].as_node() );
             }
 
-            // pull out the "groups" node; throws if not present or not a node
-            const param_node& t_groups = f_design["groups"].as_node();
-            for( auto it = t_groups.begin(); it != t_groups.end(); ++it )
+            param_node t_default_data, t_env_data;
+
+            if( f_design.has("groups" ) )
             {
-                LDEBUG( mtlog, "Found group <" << it.name() << ">" );
-                // throws if not a node
-                const param_node& t_a_group = it->as_node();
-                if( t_a_group.empty() )
+                // pull out the "groups" node; throws if not a node
+                const param_node& t_groups = f_design["groups"].as_node();
+                for( auto it = t_groups.begin(); it != t_groups.end(); ++it )
                 {
-                    LWARN( mtlog, "Group <" << it.name() << "> is empty; skipping" );
-                    continue;
-                }
-
-                param_node t_new_group;
-                for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
-                {
-                    LDEBUG( mtlog, "Processing item <" << gr_it.name() << ">" );
+                    LDEBUG( mtlog, "Found group <" << it.name() << ">" );
                     // throws if not a node
-                    const param_node& t_an_item = gr_it->as_node();
-
-                    // default value; required; throws if not present or not string
-                    std::string t_value( t_an_item["default"]().as_string() );
-                    // environment variable; not required; throws if present and not a string
-                    if( t_an_item.has("env") )
+                    const param_node& t_a_group = it->as_node();
+                    if( t_a_group.empty() )
                     {
-                        std::string t_env_var( t_an_item["env"]().as_string() );
-                        LDEBUG( mtlog, "Checking for environment variable < " << t_env_var << ">" );
-                        if( const char* t_env_value = std::getenv( t_env_var.c_str() ) )
-                        {
-                            LDEBUG( mtlog, "Found environment variable <" << t_env_var << ">" );
-                            t_value = t_env_value;
-                        }
+                        LWARN( mtlog, "Group <" << it.name() << "> is empty; skipping" );
+                        continue;
                     }
 
-                    t_new_group.add( gr_it.name(), param_value(t_value) );
-                    //LDEBUG( mtlog, "Value is <" << t_value << ">" );
+                    param_node t_new_default_group, t_new_env_group;
+                    for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
+                    {
+                        LDEBUG( mtlog, "Processing item <" << gr_it.name() << ">" );
+                        // throws if not a node
+                        const param_node& t_an_item = gr_it->as_node();
+
+                        // default value; required; throws if not present or not string
+                        t_new_default_group.add( gr_it.name(), t_an_item["default"]().as_string() );
+
+                        // environment variable; not required; throws if present and not a string
+                        if( t_an_item.has("env") )
+                        {
+                            std::string t_env_var( t_an_item["env"]().as_string() );
+                            LDEBUG( mtlog, "Checking for environment variable < " << t_env_var << ">" );
+                            if( const char* t_env_value = std::getenv( t_env_var.c_str() ) )
+                            {
+                                LDEBUG( mtlog, "Found environment variable <" << t_env_var << ">" );
+                                t_new_env_group.add( gr_it.name(), t_env_value );
+                            }
+                        }
+
+                    }
+                    t_default_data.add( it.name(), t_new_default_group );
+                    if( ! t_new_env_group.empty() ) t_env_data.add( it.name(), t_new_env_group );
                 }
-                f_data.add( it.name(), t_new_group );
-            }
+            } // end loop over groups
+
+            //LWARN( mtlog, "Default data:\n" << t_default_data );
+            //LWARN( mtlog, "Env data:\n" << t_env_data );
             
+            // order of precedence: default --> file --> env
+            f_data.clear();
+            f_data.merge( t_default_data );
+            if( t_file_data_ptr ) f_data.merge( t_file_data_ptr->as_node() );
+            f_data.merge( t_env_data );
+            //LWARN( mtlog, "Final data:\n" << f_data );
         }
         catch( const std::exception& e )
         {
             std::cerr << e.what() << '\n';
         }
         
+        return;
     }
 
-    void authentication::load_from_file( const std::string& a_auth_file, const param_node& a_read_opts )
+    param_ptr_t authentication::load_from_file( const std::string& a_auth_file, const param_node& a_read_opts )
     {
         // expand path with standard assumptions
         path t_auth_file_path = expand_path( a_auth_file );
@@ -166,9 +180,11 @@ namespace scarab
             throw error( __FILE__, __LINE__ ) << "Authentication file must translate to a node";
         }
 
-        f_data.merge( t_read_file->as_node() );
-        LDEBUG( mtlog, "File loaded; auth is now:\n" << f_data );
-        return;
+        param_ptr_t t_file_data_ptr = std::make_unique< param_node >();
+
+        t_file_data_ptr->as_node().merge( t_read_file->as_node() );
+        //LWARN( mtlog, "File loaded:\n" << t_file_data_ptr->as_node() );
+        return t_file_data_ptr;
     }
 
     std::string authentication::get(const std::string& a_group, const std::string& an_item ) const

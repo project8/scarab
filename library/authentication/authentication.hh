@@ -39,7 +39,7 @@ namespace scarab
             mv_referrable( scarab::param_node, design );
 
         protected:
-            void load_from_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts );
+            param_ptr_t load_from_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts );
             
         public:
             /// Retrieve a particular item from the authentication data
