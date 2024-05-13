@@ -29,8 +29,8 @@ namespace scarab
             virtual ~authentication();
 
         public:
-            //void add_group( const std::string& a_group );
-            //void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env );
+            void add_group( const std::string& a_group );
+            void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env = "" );
 
             void set_auth_file( const std::string& a_filename, const scarab::param_node& a_read_opts = scarab::param_node() );
 

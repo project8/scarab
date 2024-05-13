@@ -16,6 +16,7 @@
 #include "catch.hpp"
 
 #include <cstdio>
+#include <stdlib.h>
 
 using_param_args_and_kwargs; // bring _a into namespace
 
@@ -62,6 +63,9 @@ TEST_CASE( "authentication", "[authentication]" )
 
     scarab::authentication t_auth;
 
+    REQUIRE( t_auth.design().empty() );
+    REQUIRE( t_auth.data().empty() );
+
     SECTION( "Loading from a file" )
     {
         LWARN( talog, "in loading file section" );
@@ -76,8 +80,6 @@ TEST_CASE( "authentication", "[authentication]" )
         t_auth.set_auth_file( t_filename, t_read_opts );
         REQUIRE( t_auth.design().has("file") );
 
-        LWARN( talog, "added filename:\n" << t_auth.design() );
-
         t_auth.process_design();
 
         LWARN( talog, t_auth.data() );
@@ -87,6 +89,51 @@ TEST_CASE( "authentication", "[authentication]" )
         REQUIRE_THAT( t_auth.get("scarab", "user"), Equals("file_user") );
 
         close( fd );
+    }
+
+    SECTION( "Set design" )
+    {
+        // group1 will be empty
+        // It will not get added to the data
+        t_auth.add_group( "group1" );
+        LWARN( talog, t_auth.design());
+        REQUIRE( t_auth.design()["groups"].as_node().has("group1") );
+
+        // group2 will have an item, but the environment variable will not be set
+        // The value should be the default
+        t_auth.add_group( "group2" );
+        LWARN( talog, t_auth.design());
+        t_auth.add_item( "group2", "name2", "default2", "SCARAB_AUTH_TEST_ENV2" );
+        REQUIRE( t_auth.design()["groups"].as_node().has("group2") ); // group should be there
+        REQUIRE( t_auth.design()["groups"]["group2"].as_node().has("name2") ); // item should be there
+        REQUIRE_THAT( t_auth.design()["groups"]["group2"]["name2"]["default"]().as_string(), Equals("default2") );
+        REQUIRE_THAT( t_auth.design()["groups"]["group2"]["name2"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV2") );
+        
+        // group3 will have an item, and the environment variable will be set
+        // The group is not separately added; it should still be there
+        // The value should be the environment variable's value
+        t_auth.add_item( "group3", "name3", "default3", "SCARAB_AUTH_TEST_ENV3" );
+        LWARN( talog, t_auth.design());
+        setenv( "SCARAB_AUTH_TEST_ENV3", "env_value_3", true );
+        REQUIRE( t_auth.design()["groups"].as_node().has("group3") ); // group should be there
+        REQUIRE( t_auth.design()["groups"]["group3"].as_node().has("name3") ); // item should be there
+        REQUIRE_THAT( t_auth.design()["groups"]["group3"]["name3"]["default"]().as_string(), Equals("default3") );
+        REQUIRE_THAT( t_auth.design()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
+
+        t_auth.process_design();
+
+        REQUIRE_FALSE( t_auth.data().has("group1") ); // group should not be there (was empty in the design)
+
+        REQUIRE( t_auth.data().has("group2") ); // group should be there
+        REQUIRE( t_auth.data()["group2"].as_node().has("name2") ); // item should be there
+        REQUIRE_THAT( t_auth.get("group2", "name2"), Equals(t_auth.data()["group2"]["name2"]().as_string()) );
+        REQUIRE_THAT( t_auth.get("group2", "name2"), Equals("default2") );
+
+        REQUIRE( t_auth.data().has("group3") ); // group should be there
+        REQUIRE( t_auth.data()["group3"].as_node().has("name3") ); // item should be there
+        REQUIRE_THAT( t_auth.get("group3", "name3"), Equals(t_auth.data()["group3"]["name3"]().as_string()) );
+        REQUIRE_THAT( t_auth.get("group3", "name3"), Equals("env_value_3") );
+
     }
 
     //t_auth.process_design();

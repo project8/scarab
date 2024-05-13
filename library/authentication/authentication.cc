@@ -42,10 +42,29 @@ namespace scarab
     authentication::~authentication()
     {}
 
+    void authentication::add_group( const std::string& a_group )
+    {
+        f_design.add( "groups", param_node() );
+        f_design["groups"].as_node().add( a_group, param_node() );
+        LDEBUG( mtlog, "Added group <" << a_group << "> (or it was already there)" );
+        return;
+    }
+
+    void authentication::add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env )
+    {
+        add_group( a_group );
+        param_node t_item( "default"_a=a_default );
+        if( ! an_env.empty() ) t_item.add( "env", an_env );
+        f_design["groups"][a_group].as_node().replace( a_name, t_item );
+        LDEBUG( mtlog, "Added item <" << a_group << ":" << a_name << ">" );
+        return;
+    }
+
     void authentication::set_auth_file( const std::string& a_filename, const param_node& a_read_opts )
     {
         f_design.replace( "file", a_filename );
         f_design.replace( "file-read-opts", a_read_opts );
+        LDEBUG( mtlog, "Added filename: " << f_design["file"] );
         return;
     }
 
@@ -56,6 +75,7 @@ namespace scarab
             f_data.clear();
 
             LDEBUG( mtlog, "Processing authentication design" );
+            LWARN( mtlog, f_design );
 
             if( f_design.has( "file" ) )
             {
@@ -70,6 +90,11 @@ namespace scarab
                 LDEBUG( mtlog, "Found group <" << it.name() << ">" );
                 // throws if not a node
                 const param_node& t_a_group = it->as_node();
+                if( t_a_group.empty() )
+                {
+                    LWARN( mtlog, "Group <" << it.name() << "> is empty; skipping" );
+                    continue;
+                }
 
                 param_node t_new_group;
                 for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
@@ -84,15 +109,16 @@ namespace scarab
                     if( t_an_item.has("env") )
                     {
                         std::string t_env_var( t_an_item["env"]().as_string() );
-                        LDEBUG( mtlog, "Found environment variable <" << t_env_var << "> with value <" << std::getenv( t_env_var.c_str() ) << ">" );
+                        LDEBUG( mtlog, "Checking for environment variable < " << t_env_var << ">" );
                         if( const char* t_env_value = std::getenv( t_env_var.c_str() ) )
                         {
+                            LDEBUG( mtlog, "Found environment variable <" << t_env_var << ">" );
                             t_value = t_env_value;
                         }
                     }
 
                     t_new_group.add( gr_it.name(), param_value(t_value) );
-                    LDEBUG( mtlog, "Value is <" << t_value << ">" );
+                    //LDEBUG( mtlog, "Value is <" << t_value << ">" );
                 }
                 f_data.add( it.name(), t_new_group );
             }
