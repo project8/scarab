@@ -43,7 +43,7 @@ os.environ['PROJECT_LOGO'] = 'scarab_logo_small.png'
 # directories in which doxygen should look for source files; if you have a `doxfiles` directory in your documentation, that should go here; string with space-separated directories
 os.environ['DOXYGEN_INPUT'] = 'doxfiles ../../library'
 # directories within DOXYGEN_INPUT that you want to exclude from doxygen (e.g. if there's  a submodule included that you don't want to index); string with space-separated directories
-os.environ['DOXYGEN_EXCLUDE'] = '../../library/param/codec/json/rapidjson ../../library/param/codec/msgpack/msgpack-c ../../library/param/codec/yaml/yaml-cpp'
+os.environ['DOXYGEN_EXCLUDE'] = ''
 # directories outside of DOXYGEN_INPUT that you want the C preprocessor to look in for macro definitions (e.g. if there's a submodule not included that has relevant macros); string with space-separated directories
 os.environ['PREPROC_INCLUDE_PATH'] = ''
 
@@ -87,7 +87,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Scarab'
-copyright = u'2018, Scarab Authors'
+copyright = u'2024, Scarab Authors'
 author = u'Project 8 Collaboration'
 
 # The version info for the project you're documenting, acts as replacement for
