@@ -18,9 +18,24 @@ namespace scarab
      @class authentication
      @author N. S. Oblath
 
-     @brief Loads authentication information from a file or environment variables
+     @brief Loads authentication information from configuration information, an authentication file or environment variables
 
      @details
+     The interface to this class is split into two parts, the first addressing the authentication design, and 
+     the second addressing the authentication data.
+
+     ### Design interface
+     Groups and items are added with add_group() and add_item(), respectively.  add_item() requires specification 
+     of the enclosing group, which will add that group if it's not already there.  For each item, the name and 
+     default value are required, while the environment variable is optional.
+
+     The authentication file is set with set_auth_file().
+
+     When the design is complete, process_design() is used to convert the design to data.
+
+     ### Data interface
+
+     Once the data has been created, individual items can be accessed with the get() function.
     */
     class SCARAB_API authentication
     {
