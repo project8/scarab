@@ -8,21 +8,21 @@ such as login details.
 Structure
 =========
 
-Authentication information is handled in two parts: design and data.  
-The design specifies what authentication information is expected and where it's coming from, 
+Authentication information is handled in two parts: specification and data.  
+The specification determines what authentication information is expected and where it's coming from, 
 while the data contains the authentication information itself.
 
 Authentication information is divided into groups, and each group contains items.  
 A group can be thought of as the login information for a given service, 
 and each piece of information is an item.  
 
-Design
-======
+Specification
+=============
 
 As an example application of the authentication class, consider the login information needed for a database.  
 The group might be called `database` and the two items used would be `username` and `password`.
 
-The design for the above example might look like (in YAML format)::
+The specification for the above example might look like (in YAML format)::
 
     groups:
       database:
@@ -45,7 +45,7 @@ In order of precedence from low to high, they are:
 2. Authentication file
 3. Environment variables
 
-Default values are given in the design.  As shown above, each item has a default, which is required.
+Default values are given in the specification.  As shown above, each item has a default, which is required.
 
 Authentication files are data files (typically JSON or YAML) that specify one or more groups of 
 authentication information.  If the above `database` example were provided in a YAML authentication file, 
@@ -56,7 +56,7 @@ it would look like this (note that in the case the user did not include the `url
       password: file_pword
 
 Individual items can be specified in environment variables.  The specific variable that should be checked 
-for a particular item is specified in the design (see the above example.  If a user wanted to override the 
+for a particular item is specified in the specification (see the above example.  If a user wanted to override the 
 password from the above example, they could use an environment variable at runtime, e.g.::
 
     > DB_PASSWORD=my_real_pword run_my_app

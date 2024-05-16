@@ -10,6 +10,7 @@
 
 #include "CLI11.hpp"
 
+#include "authentication.hh"
 #include "logger.hh"
 #include "member_variables.hh"
 #include "param.hh"
@@ -254,6 +255,7 @@ namespace scarab
 
      There are several test examples that can be used as useful references on different ways that
      applications can be setup.  You'll find them in the scarab/testing/applications directory.
+     - test_app_with_authentication.cc -- an example that includes an authentication specification
      - test_app_with_callback.cc -- an example that runs a program using a callback function
      - test_app_with_options.cc -- an example using basic CLI11 options (i.e. options that don't modify the configuration)
      - test_app_with_subcommands.cc -- an example with two subcommands.  e.g. my_app do_action_A --an_option=6
@@ -281,6 +283,8 @@ namespace scarab
             virtual void do_config_stage_4();
             /// Load the modifiers
             virtual void do_config_stage_5();
+            /// Load authentication with specification and then process the spec
+            virtual void do_authentication();
 
             void set_version( scarab::version_semantic_ptr_t a_ver );
 
@@ -293,7 +297,9 @@ namespace scarab
 
             // configuration stage 2
             /// Configuration file name
-            mv_referrable_const( std::string, config_filename );
+            mv_referrable( std::string, config_filename );
+            /// In case the encoding is not made clear by the file extension
+            mv_referrable( std::string, config_encoding );
 
             // configuration stage 3
             /// Keyword configuration values coming from the command line, in the form: config.address=value
@@ -309,6 +315,12 @@ namespace scarab
             mv_referrable( std::vector< std::shared_ptr< app_option_holder > >, app_option_holders );
 
             mv_accessible_noset( bool, use_config );
+
+            /// Key used for the authentication specification and auth file in the config
+            mv_referrable( std::string, auth_spec_key );
+            mv_referrable( std::string, auth_file_key );
+            /// Authentication object
+            mv_referrable( authentication, auth );
 
             //*************************
             // Verbosity

@@ -26,7 +26,8 @@ namespace scarab_pybind
             .def_property_readonly( "primary_config", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::primary_config )
             .def_property( "default_config", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::default_config,
                            [](scarab::main_app& an_obj, scarab::param_node& a_config){ an_obj.default_config() = a_config; } )
-            .def_property_readonly( "config_filename", (const std::string& (scarab::main_app::*)()) &scarab::main_app::config_filename )
+            .def_property( "config_filename", (std::string& (scarab::main_app::*)()) &scarab::main_app::config_filename,
+                           [](scarab::main_app& an_obj, std::string& a_filename){ an_obj.config_filename() = a_filename; } )
             .def_property_readonly( "global_verbosity", &scarab::main_app::get_global_verbosity )
             .def_property_readonly( "nonoption_kw_args", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::nonoption_kw_args )
             .def_property_readonly( "nonoption_ord_args", (scarab::param_array& (scarab::main_app::*)()) &scarab::main_app::nonoption_ord_args )
