@@ -21,17 +21,17 @@ namespace scarab
      @brief Loads authentication information from configuration information, an authentication file or environment variables
 
      @details
-     The interface to this class is split into two parts, the first addressing the authentication design, and 
+     The interface to this class is split into two parts, the first addressing the authentication specification, and 
      the second addressing the authentication data.
 
-     ### Design interface
+     ### Specification interface
      Groups and items are added with add_group() and add_item(), respectively.  add_item() requires specification 
      of the enclosing group, which will add that group if it's not already there.  For each item, the name and 
      default value are required, while the environment variable is optional.
 
      The authentication file is set with set_auth_file().
 
-     When the design is complete, process_design() is used to convert the design to data.
+     When the specification is complete, process_specification() is used to convert the specification to data.
 
      ### Data interface
 
@@ -46,12 +46,13 @@ namespace scarab
         public:
             void add_group( const std::string& a_group );
             void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env = "" );
+            void add_groups( const scarab::param_node& a_groups_node );
 
             void set_auth_file( const std::string& a_filename, const scarab::param_node& a_read_opts = scarab::param_node() );
 
-            void process_design();
+            void process_spec();
 
-            mv_referrable( scarab::param_node, design );
+            mv_referrable( scarab::param_node, spec );
 
         protected:
             param_ptr_t load_from_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts );

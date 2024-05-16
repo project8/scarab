@@ -15,25 +15,13 @@
 #include "path.hh"
 
 #include <cstdlib> // for getenv()
-#include <stdlib.h> // for setenv(); remove after debugging
 
 namespace scarab
 {
     LOGGER( mtlog, "authentication" );
 
     authentication::authentication() :
-//            f_design(
-//                "groups"_a=param_node(
-//                    "scarab"_a=param_node(
-//                        "user"_a=param_node(
-//                            "default"_a="scarab_user",
-//                            "env"_a="SCARAB_USER"
-//                        )
-//                    )
-//                ),
-//                "file"_a="my_auth.yaml"
-//            ),
-            f_design(),
+            f_spec(),
             f_data()
     {
         setenv("SCARAB_USER", "some_user", true);
@@ -44,8 +32,8 @@ namespace scarab
 
     void authentication::add_group( const std::string& a_group )
     {
-        f_design.add( "groups", param_node() );
-        f_design["groups"].as_node().add( a_group, param_node() );
+        f_spec.add( "groups", param_node() );
+        f_spec["groups"].as_node().add( a_group, param_node() );
         LDEBUG( mtlog, "Added group <" << a_group << "> (or it was already there)" );
         return;
     }
@@ -55,39 +43,65 @@ namespace scarab
         add_group( a_group );
         param_node t_item( "default"_a=a_default );
         if( ! an_env.empty() ) t_item.add( "env", an_env );
-        f_design["groups"][a_group].as_node().replace( a_name, t_item );
+        f_spec["groups"][a_group].as_node().replace( a_name, t_item );
         LDEBUG( mtlog, "Added item <" << a_group << ":" << a_name << ">" );
+        return;
+    }
+
+    void authentication::add_groups( const param_node& a_groups_node )
+    {
+        for( auto it = a_groups_node.begin(); it != a_groups_node.end(); ++it )
+        {
+            LDEBUG( mtlog, "Found group <" << it.name() << ">" );
+            // throws if not a node
+            const param_node& t_a_group = it->as_node();
+            if( t_a_group.empty() )
+            {
+                LWARN( mtlog, "Group <" << it.name() << "> is empty; skipping" );
+                continue;
+            }
+
+            param_node t_new_default_group, t_new_env_group;
+            for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
+            {
+                LDEBUG( mtlog, "Processing item <" << gr_it.name() << ">" );
+                // throws if not a node
+                const param_node& t_an_item = gr_it->as_node();
+
+                // default value; required; throws if not present or not string
+                add_item( it.name(), gr_it.name(), t_an_item["default"]().as_string(), t_an_item.get_value("env", "") );
+            }
         return;
     }
 
     void authentication::set_auth_file( const std::string& a_filename, const param_node& a_read_opts )
     {
-        f_design.replace( "file", a_filename );
-        f_design.replace( "file-read-opts", a_read_opts );
-        LDEBUG( mtlog, "Added filename: " << f_design["file"] );
+        f_spec.replace( "file", a_filename );
+        f_spec.replace( "file-read-opts", a_read_opts );
+        LDEBUG( mtlog, "Added filename: " << f_spec["file"] );
         return;
     }
 
-    void authentication::process_design()
+    void authentication::process_spec()
     {
         try
         {
-            LDEBUG( mtlog, "Processing authentication design" );
-            //LWARN( mtlog, f_design );
+            LDEBUG( mtlog, "Processing authentication specification" );
+            //LWARN( mtlog, f_spec );
 
             param_ptr_t t_file_data_ptr;
-            if( f_design.has( "file" ) )
+            if( f_spec.has( "file" ) )
             {
                 LDEBUG( mtlog, "Loading authentication information from a file" );
-                t_file_data_ptr = load_from_file( f_design["file"]().as_string(), f_design["file-read-opts"].as_node() );
+                t_file_data_ptr = load_from_file( f_spec["file"]().as_string(), f_spec["file-read-opts"].as_node() );
             }
 
             param_node t_default_data, t_env_data;
 
-            if( f_design.has("groups" ) )
+            if( f_spec.has("groups" ) )
             {
                 // pull out the "groups" node; throws if not a node
-                const param_node& t_groups = f_design["groups"].as_node();
+                const param_node& t_groups = f_spec["groups"].as_node();
                 for( auto it = t_groups.begin(); it != t_groups.end(); ++it )
                 {
                     LDEBUG( mtlog, "Found group <" << it.name() << ">" );

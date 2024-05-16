@@ -59,7 +59,7 @@ TEST_CASE( "authentication", "[authentication]" )
 
     scarab::authentication t_auth;
 
-    REQUIRE( t_auth.design().empty() );
+    REQUIRE( t_auth.spec().empty() );
     REQUIRE( t_auth.data().empty() );
 
     SECTION( "Loading from a file" )
@@ -69,9 +69,9 @@ TEST_CASE( "authentication", "[authentication]" )
         int fd = create_temp_auth_file( t_filename, t_read_opts );
 
         t_auth.set_auth_file( t_filename, t_read_opts );
-        REQUIRE( t_auth.design().has("file") );
+        REQUIRE( t_auth.spec().has("file") );
 
-        t_auth.process_design();
+        t_auth.process_spec();
 
         REQUIRE( t_auth.data().has("scarab") );
         REQUIRE_THAT( t_auth.get("scarab", "user"), Equals("file_user") );
@@ -79,36 +79,36 @@ TEST_CASE( "authentication", "[authentication]" )
         close( fd );
     }
 
-    SECTION( "Set design" )
+    SECTION( "Set spec" )
     {
         // group1 will be empty
         // It will not get added to the data
         t_auth.add_group( "group1" );
-        REQUIRE( t_auth.design()["groups"].as_node().has("group1") );
+        REQUIRE( t_auth.spec()["groups"].as_node().has("group1") );
 
         // group2 will have an item, but the environment variable will not be set
         // The value should be the default
         t_auth.add_group( "group2" );
         t_auth.add_item( "group2", "name2", "default2", "SCARAB_AUTH_TEST_ENV2" );
-        REQUIRE( t_auth.design()["groups"].as_node().has("group2") ); // group should be there
-        REQUIRE( t_auth.design()["groups"]["group2"].as_node().has("name2") ); // item should be there
-        REQUIRE_THAT( t_auth.design()["groups"]["group2"]["name2"]["default"]().as_string(), Equals("default2") );
-        REQUIRE_THAT( t_auth.design()["groups"]["group2"]["name2"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV2") );
+        REQUIRE( t_auth.spec()["groups"].as_node().has("group2") ); // group should be there
+        REQUIRE( t_auth.spec()["groups"]["group2"].as_node().has("name2") ); // item should be there
+        REQUIRE_THAT( t_auth.spec()["groups"]["group2"]["name2"]["default"]().as_string(), Equals("default2") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group2"]["name2"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV2") );
         
         // group3 will have an item, and the environment variable will be set
         // The group is not separately added; it should still be there
         // The value should be the environment variable's value
         t_auth.add_item( "group3", "name3", "default3", "SCARAB_AUTH_TEST_ENV3" );
         setenv( "SCARAB_AUTH_TEST_ENV3", "env_value_3", true );
-        REQUIRE( t_auth.design()["groups"].as_node().has("group3") ); // group should be there
-        REQUIRE( t_auth.design()["groups"]["group3"].as_node().has("name3") ); // item should be there
-        REQUIRE_THAT( t_auth.design()["groups"]["group3"]["name3"]["default"]().as_string(), Equals("default3") );
-        REQUIRE_THAT( t_auth.design()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
+        REQUIRE( t_auth.spec()["groups"].as_node().has("group3") ); // group should be there
+        REQUIRE( t_auth.spec()["groups"]["group3"].as_node().has("name3") ); // item should be there
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["default"]().as_string(), Equals("default3") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
 
-        t_auth.process_design();
+        t_auth.process_spec();
         unsetenv( "SCARAB_AUTH_TEST_ENV3" );
 
-        REQUIRE_FALSE( t_auth.data().has("group1") ); // group should not be there (was empty in the design)
+        REQUIRE_FALSE( t_auth.data().has("group1") ); // group should not be there (was empty in the specification)
 
         REQUIRE( t_auth.data().has("group2") ); // group should be there
         REQUIRE( t_auth.data()["group2"].as_node().has("name2") ); // item should be there
@@ -131,14 +131,14 @@ TEST_CASE( "authentication", "[authentication]" )
         int fd = create_temp_auth_file( t_filename, t_read_opts );
 
         t_auth.set_auth_file( t_filename, t_read_opts );
-        REQUIRE( t_auth.design().has("file") );
+        REQUIRE( t_auth.spec().has("file") );
 
         t_auth.add_item( "scarab", "user", "a_user", "SCARAB_AUTH_TEST_USER" );
         t_auth.add_item( "scarab", "password", "a_user", "SCARAB_AUTH_TEST_PASSWORD" );
 
         setenv( "SCARAB_AUTH_TEST_PASSWORD", "123456", true );
 
-        t_auth.process_design();
+        t_auth.process_spec();
         unsetenv( "SCARAB_AUTH_TEST_PASSWORD" );
 
         REQUIRE( t_auth.data().has( "scarab" ) );
