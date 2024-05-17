@@ -45,6 +45,9 @@ namespace scarab
             authentication( authentication&& ) = default;
             virtual ~authentication();
 
+            authentication& operator=( const authentication& );
+            authentication& operator=( authentication&& );
+
         public:
             void add_group( const std::string& a_group );
             void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env = "" );

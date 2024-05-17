@@ -30,6 +30,20 @@ namespace scarab
     authentication::~authentication()
     {}
 
+    authentication& authentication::operator=( const authentication& an_orig )
+    {
+        f_spec = an_orig.f_spec;
+        f_data = an_orig.f_data;
+        return *this;
+    }
+
+    authentication& authentication::operator=( authentication&& an_orig )
+    {
+        f_spec = std::move( an_orig.f_spec );
+        f_data = std::move( an_orig.f_data );
+        return *this;
+    }
+
     void authentication::add_group( const std::string& a_group )
     {
         f_spec.add( "groups", param_node() );

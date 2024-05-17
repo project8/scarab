@@ -33,11 +33,19 @@ namespace scarab_pybind
             .def_property_readonly( "nonoption_ord_args", (scarab::param_array& (scarab::main_app::*)()) &scarab::main_app::nonoption_ord_args )
             .def_property_readonly( "app_options", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::app_options )
             .def_property_readonly( "use_config", &scarab::main_app::get_use_config )
+            .def_property( "auth_spec_key", (std::string& (scarab::main_app::*)()) &scarab::main_app::auth_spec_key,
+                           [](scarab::main_app& an_obj, std::string& a_key){ an_obj.auth_spec_key() = a_key; } )
+            .def_property( "auth_file_key", (std::string& (scarab::main_app::*)()) &scarab::main_app::auth_file_key,
+                           [](scarab::main_app& an_obj, std::string& a_key){ an_obj.auth_file_key() = a_key; } )
+            .def_property( "auth", (scarab::authentication& (scarab::main_app::*)()) &scarab::main_app::auth,
+                           [](scarab::main_app& an_obj, scarab::authentication& an_auth){ an_obj.auth() = an_auth; } )
 
             .def( "do_config_stage_1", &scarab::main_app::do_config_stage_1, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "do_config_stage_2", &scarab::main_app::do_config_stage_2, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "do_config_stage_3", &scarab::main_app::do_config_stage_3, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "do_config_stage_4", &scarab::main_app::do_config_stage_4, SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "do_config_stage_5", &scarab::main_app::do_config_stage_5, SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "do_authentication", &scarab::main_app::do_authentication, SCARAB_BIND_CALL_GUARD_STREAMS )
 
             //TODO: add_config_subcommand?
 
