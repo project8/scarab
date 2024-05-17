@@ -236,12 +236,12 @@ namespace scarab
         }
         if( f_primary_config.has( f_auth_file_key ) )
         {
-            f_auth.set_auth_filename( f_primary_config[f_auth_file_key]().as_string() );
+            f_auth.set_auth_file( f_primary_config[f_auth_file_key]().as_string() );
         }
 
         f_auth.process_spec();
+        return;
     }
-
 
     main_app::verbosity_t main_app::get_global_verbosity() const
     {

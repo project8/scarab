@@ -57,7 +57,7 @@ namespace scarab
             const param_node& t_a_group = it->as_node();
             if( t_a_group.empty() )
             {
-                LWARN( mtlog, "Group <" << it.name() << "> is empty; skipping" );
+                add_group( it.name() );
                 continue;
             }
 
@@ -71,6 +71,7 @@ namespace scarab
                 // default value; required; throws if not present or not string
                 add_item( it.name(), gr_it.name(), t_an_item["default"]().as_string(), t_an_item.get_value("env", "") );
             }
+        }
         return;
     }
 

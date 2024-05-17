@@ -85,6 +85,7 @@ TEST_CASE( "authentication", "[authentication]" )
         // It will not get added to the data
         t_auth.add_group( "group1" );
         REQUIRE( t_auth.spec()["groups"].as_node().has("group1") );
+        REQUIRE( t_auth.spec()["groups"]["group1"].as_node().empty() );
 
         // group2 will have an item, but the environment variable will not be set
         // The value should be the default
@@ -119,6 +120,39 @@ TEST_CASE( "authentication", "[authentication]" )
         REQUIRE( t_auth.data()["group3"].as_node().has("name3") ); // item should be there
         REQUIRE_THAT( t_auth.get("group3", "name3"), Equals(t_auth.data()["group3"]["name3"]().as_string()) );
         REQUIRE_THAT( t_auth.get("group3", "name3"), Equals("env_value_3") );
+    }
+
+    SECTION( "Add spec via add_groups" )
+    {
+        scarab::param_node t_groups(
+            "group1"_a=scarab::param_node(),
+            "group2"_a=scarab::param_node(
+                "name2"_a=scarab::param_node(
+                    "default"_a="default2",
+                    "env"_a="SCARAB_AUTH_TEST_ENV2"
+                )
+            ),
+            "group3"_a=scarab::param_node(
+                "name3"_a=scarab::param_node(
+                    "default"_a="default3",
+                    "env"_a="SCARAB_AUTH_TEST_ENV3"
+                )
+            )
+        );
+        t_auth.add_groups( t_groups );
+
+        REQUIRE( t_auth.spec()["groups"].as_node().has("group1") );
+        REQUIRE( t_auth.spec()["groups"]["group1"].as_node().empty() );
+
+        REQUIRE( t_auth.spec()["groups"].as_node().has("group2") ); // group should be there
+        REQUIRE( t_auth.spec()["groups"]["group2"].as_node().has("name2") ); // item should be there
+        REQUIRE_THAT( t_auth.spec()["groups"]["group2"]["name2"]["default"]().as_string(), Equals("default2") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group2"]["name2"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV2") );
+
+        REQUIRE( t_auth.spec()["groups"].as_node().has("group3") ); // group should be there
+        REQUIRE( t_auth.spec()["groups"]["group3"].as_node().has("name3") ); // item should be there
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["default"]().as_string(), Equals("default3") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
     }
 
     SECTION( "Precedence: default --> file --> env var" )

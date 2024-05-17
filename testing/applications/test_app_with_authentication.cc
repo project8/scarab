@@ -50,17 +50,25 @@ class test_app : public main_app
                 "backend"_a=scarab::param_node(
                     "user"_a=scarab::param_node(
                         "default"_a="a_backend_user",
-                        "env"_a="BACKEND_USER"
+                        "env"_a="SCARAB_AUTH_TEST_BACKEND_USER"
                     ),
                     "password"_a=scarab::param_node(
                         "default"_a="security_hole",
-                        "env"_a="BACKEND_PASSWORD"
+                        "env"_a="SCARAB_AUTH_TEST_BACKEND_PASSWORD"
                     )
                 )
             ) );
         }
         virtual ~test_app() {}
 
+        void execute()
+        {
+            // Print the authentication information, both specification and data
+            LPROG( testlog, "Authentication specification: " << f_auth.spec() );
+            LPROG( testlog, "Authentication data: " << f_auth.data() );
+
+            return;
+        }
 };
 
 /// Creates a temporary file and loads it with authentication specification
@@ -71,11 +79,11 @@ int create_temp_config_file( std::string& a_filename, scarab::param_node& a_file
             "database"_a=scarab::param_node(
                 "user"_a=scarab::param_node(
                     "default"_a="a_db_user",
-                    "env"_a="DB_USER"
+                    "env"_a="SCARAB_AUTH_TEST_DB_USER"
                 ),
                 "password"_a=scarab::param_node(
                     "default"_a="",
-                    "env"_a="DB_PASSWORD"
+                    "env"_a="SCARAB_AUTH_TEST_DB_PASSWORD"
                 )
             )
         )
@@ -106,13 +114,21 @@ int main( int argc, char **argv )
     int fd = create_temp_config_file( t_filename, t_read_opts );
 
     test_app the_main( true ); // boolean option is for skipping use of a config file
+    auto t_executor = [&](){
+        the_main.execute();
+    };
+    the_main.callback( t_executor );
 
     // provide a filename directly 
     // In real life would be provided on CL w/ -c or --config
     the_main.config_filename() = t_filename; 
     the_main.config_encoding() = t_read_opts["encoding"]().as_string();
 
+    setenv( "SCARAB_AUTH_TEST_DB_PASSWORD", "5up3r 53cr3t", true );
+
     CLI11_PARSE( the_main, argc, argv );
+
+    unsetenv( "SCARAB_AUTH_TEST_DB_PASSWORD" );
 
     close( fd );
 
