@@ -20,7 +20,7 @@ Specification
 =============
 
 As an example application of the authentication class, consider the login information needed for a database.  
-The group might be called `database` and the two items used would be `username` and `password`.
+The group might be called ``database`` and the two items used would be ``username`` and ``password``.
 
 The specification for the above example might look like (in YAML format)::
 
@@ -48,8 +48,8 @@ In order of precedence from low to high, they are:
 Default values are given in the specification.  As shown above, each item has a default, which is required.
 
 Authentication files are data files (typically JSON or YAML) that specify one or more groups of 
-authentication information.  If the above `database` example were provided in a YAML authentication file, 
-it would look like this (note that in the case the user did not include the `url` item)::
+authentication information.  If the above ``database`` example were provided in a YAML authentication file, 
+it would look like this (note that in the case the user did not include the ``url`` item)::
 
     database:
       username: file_user
@@ -66,10 +66,20 @@ Data
 
 The data is determined by combining the three sources of information in order: the authentication file 
 overrides default values, and the enviroment variables override information in the authentication file or defaults. 
-Combining the above defaults, authentication file, and environment variable for the `database` example, 
+Combining the above defaults, authentication file, and environment variable for the ``database``` example, 
 the final data would be::
 
     database:
       username: file_user
       password: my_real_pword
       url: my.database
+
+Integration with applications
+=============================
+
+The ``main_app`` class integrates authentication information that can be configured and processed at runtime. 
+The authentication object is then accessible from the ``main_app`` object for any elements of an applciation that 
+need the authentication information.
+
+For more information, please see :doc:`application_building`.
+
