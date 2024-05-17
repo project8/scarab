@@ -41,6 +41,8 @@ namespace scarab
     {
         public:
             authentication();
+            authentication( const authentication& ) = default;
+            authentication( authentication&& ) = default;
             virtual ~authentication();
 
         public:

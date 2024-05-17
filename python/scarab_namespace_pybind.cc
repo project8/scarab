@@ -22,6 +22,10 @@
 #include "param_node_pybind.hh"
 #endif
 
+#ifdef BUILD_AUTH_PYBINDING
+#include "authentication_pybind.hh"
+#endif
+
 PYBIND11_MODULE( scarab, scarab_mod )
 {
     std::list< std::string > all_members;
@@ -41,6 +45,10 @@ PYBIND11_MODULE( scarab, scarab_mod )
     all_members.splice( all_members.end(), scarab_pybind::export_param_value( scarab_mod ) );
     all_members.splice( all_members.end(), scarab_pybind::export_param_array( scarab_mod ) );
     all_members.splice( all_members.end(), scarab_pybind::export_param_node( scarab_mod ) );
+#endif
+#ifdef BUILD_AUTH_PYBINDING
+    // authentication
+    all_members.splice( all_members.end(), scarab_pybind::export_authentication( scarab_mod ) );
 #endif
     scarab_mod.attr( "__all__" ) = all_members;
 }
