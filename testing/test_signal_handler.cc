@@ -16,7 +16,7 @@
 #include "logger.hh"
 #include "stream_check.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include <signal.h>
 

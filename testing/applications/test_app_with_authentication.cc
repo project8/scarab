@@ -30,7 +30,6 @@
 #include "param_codec.hh"
 #include "param_helpers_impl.hh"
 
-
 #include <cstdio>
 #include <stdlib.h>
 
@@ -66,10 +65,10 @@ class test_app : public main_app
             // Print the authentication information, both specification and data
             LPROG( testlog, "Authentication specification: " << f_auth.spec() );
             LPROG( testlog, "Authentication data: " << f_auth.data() );
-
             return;
         }
 };
+
 
 /// Creates a temporary file and loads it with authentication specification
 int create_temp_config_file( std::string& a_filename, scarab::param_node& a_file_opts )
