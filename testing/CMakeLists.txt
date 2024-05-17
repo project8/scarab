@@ -137,7 +137,6 @@ pbuilder_component_install_and_export(
 # CTest integration
 
 # Normal CMake Integration
-enable_testing()
 add_test( NAME unit_tests COMMAND run_tests WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
 
 # Another option would be to do automated CMake Integration

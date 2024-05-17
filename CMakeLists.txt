@@ -37,12 +37,16 @@ option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interf
 
 option( Scarab_BUILD_PYTHON "Build python bindings" TRUE )
 
-if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_MSGPACK OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
+if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
     message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs, Authentication, and CLI requires Param.  If you want these elements, turn on Param.  If you want Param off, turn these elements off." )
 endif()
 
-if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON )
-    message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the JSON Codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
+if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON AND NOT Scarab_BUILD_CODEC_YAML )
+    message( FATAL_ERROR "Invalid combination of build options.  Building Authentication requires the either the JSON codec or the YAML codec.  If you want Authentication, turn on the JSON Codec.  If you want the JSON Codec off, turn Authentication off.")
+endif()
+
+if( Scarab_BUILD_CLI AND NOT Scarab_BUILD_AUTHENTICATION )
+    message( FATAL_ERROR "Invalid combination of build options.  Building the CLI requires Authentication.  If you want Authentication off, turn off the CLI" );
 endif()
 
 if( Scarab_ENABLE_TESTING )
