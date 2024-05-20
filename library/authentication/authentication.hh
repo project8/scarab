@@ -63,9 +63,17 @@ namespace scarab
             param_ptr_t load_from_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts );
             
         public:
+            /// Check whether a group exists in the data
+            bool has( const std::string& a_group ) const;
+            /// Check whether a group/item combination exists in the data
+            bool has( const std::string& a_group, const std::string& an_item ) const;
+
             /// Retrieve a particular item from the authentication data
             /// Will throw std::out_of_range if the group or item does not exist
-            std::string get(const std::string& a_group, const std::string& an_item) const;
+            std::string get( const std::string& a_group, const std::string& an_item ) const;
+            /// Retrieve a particular item from the authentication data
+            /// Returns the default if the group or item does not exist
+            std::string get( const std::string& a_group, const std::string& an_item, const std::string& a_default ) const
 
             mv_referrable( scarab::param_node, data );
 

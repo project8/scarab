@@ -216,9 +216,41 @@ namespace scarab
         return t_file_data_ptr;
     }
 
-    std::string authentication::get(const std::string& a_group, const std::string& an_item ) const
+    bool authentication::has( const std::string& a_group ) const
+    {
+        return f_data.has( a_group );
+    }
+
+    bool authentication::has( const std::string& a_group, const std::string& an_item ) const
+    {
+        try
+        {
+            // throws std::out_of_range if a_group is not present
+            // throws scarab::error if f_data[a_group] is not a node
+            return f_data[a_group].as_node().has( an_item );
+        }
+        catch( const std::exception& )
+        {
+            return false;
+        }
+    }
+
+    std::string authentication::get( const std::string& a_group, const std::string& an_item ) const
     {
         return f_data[a_group][an_item]().as_string();
+    }
+
+    std::string authentication::get( const std::string& a_group, const std::string& an_item, const std::string& a_default ) const
+    {
+        try
+        {
+            return f_data[a_group][an_item]().as_string();
+        }
+        catch( const std::exception& )
+        {
+            return a_default;
+        }
+        
     }
 
 /*
