@@ -46,7 +46,7 @@ if( Scarab_BUILD_AUTHENTICATION AND NOT Scarab_BUILD_CODEC_JSON AND NOT Scarab_B
 endif()
 
 if( Scarab_BUILD_CLI AND NOT Scarab_BUILD_AUTHENTICATION )
-    message( FATAL_ERROR "Invalid combination of build options.  Building the CLI requires Authentication.  If you want Authentication off, turn off the CLI" );
+    message( FATAL_ERROR "Invalid combination of build options.  Building the CLI requires Authentication.  If you want Authentication off, turn off the CLI" )
 endif()
 
 if( Scarab_ENABLE_TESTING )
