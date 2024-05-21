@@ -286,6 +286,13 @@ namespace scarab
             /// Load authentication with specification and then process the spec
             virtual void do_authentication();
 
+            /// Set the authentication specification in the primary config (replaces what was there)
+            void set_auth_spec( const scarab::param_node& a_spec );
+            /// Merges the given specification (for a single group) into the authentication specificaiton in the primary config
+            void merge_auth_spec_group( const scarab::param_node& a_group_spec );
+            /// Sets the authentication file name in the primary config
+            void set_auth_file( const std::string& a_filename );
+
             void set_version( scarab::version_semantic_ptr_t a_ver );
 
             /// Master configuration tree for the application

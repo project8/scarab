@@ -243,6 +243,24 @@ namespace scarab
         return;
     }
 
+    void main_app::set_auth_spec( const scarab::param_node& a_spec )
+    {
+        f_primary_config.replace(f_auth_spec_key, a_spec);
+        return;
+    }
+
+    void main_app::merge_auth_spec_group( const scarab::param_node& a_spec_group )
+    {
+        f_primary_config[f_auth_spec_key]["groups"].as_node().merge( a_spec_group );
+        return;
+    }
+
+    void main_app::set_auth_file( const std::string& a_filename )
+    {
+        f_primary_config[f_auth_file_key]().set( a_filename );
+        return;
+    }
+
     main_app::verbosity_t main_app::get_global_verbosity() const
     {
         return f_global_verbosity->first;
