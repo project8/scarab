@@ -325,7 +325,6 @@ namespace scarab
 
             /// Key used for the authentication specification and auth file in the config
             mv_referrable( std::string, auth_spec_key );
-            mv_referrable( std::string, auth_file_key );
             /// Authentication object
             mv_referrable( authentication, auth );
 
