@@ -73,28 +73,12 @@ namespace scarab
             std::string get( const std::string& a_group, const std::string& an_item ) const;
             /// Retrieve a particular item from the authentication data
             /// Returns the default if the group or item does not exist
-            std::string get( const std::string& a_group, const std::string& an_item, const std::string& a_default ) const
+            std::string get( const std::string& a_group, const std::string& an_item, const std::string& a_default ) const;
 
             mv_referrable( scarab::param_node, data );
 
     };
 
-/*
-    class SCARAB_API authentication : public param_node
-    {
-        public:
-            authentication( const std::string& a_auth_file );
-            ~authentication();
-
-        public:
-            bool load( const std::string& a_auth_file );
-
-        public:
-            mv_referrable( std::string, auth_filename );
-            mv_accessible_noset( bool, is_loaded );
-
-    };
-*/
 } /* namespace scarab */
 
 #endif /* SCARAB_AUTHENTICATION_HH_ */
