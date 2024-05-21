@@ -49,8 +49,11 @@ namespace scarab
             authentication& operator=( authentication&& );
 
         public:
+            /// Adds a group to the specification; replaces the group in the spec if it already exists
             void add_group( const std::string& a_group );
+            /// Adds an item to a group; adds the group if it doesn't exist; replaces the item in the spec if it already exists
             void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env = "" );
+            /// Adds a set of groups; for each group provided, replaces the group in the spec if it already exists
             void add_groups( const scarab::param_node& a_groups_node );
 
             void set_auth_file( const std::string& a_filename, const scarab::param_node& a_read_opts = scarab::param_node() );

@@ -24,7 +24,7 @@ namespace scarab
             f_spec(),
             f_data()
     {
-        setenv("SCARAB_USER", "some_user", true);
+        f_spec.add( "groups", param_node() );
     }
 
     authentication::~authentication()
@@ -46,9 +46,8 @@ namespace scarab
 
     void authentication::add_group( const std::string& a_group )
     {
-        f_spec.add( "groups", param_node() );
-        f_spec["groups"].as_node().add( a_group, param_node() );
-        LDEBUG( mtlog, "Added group <" << a_group << "> (or it was already there)" );
+        f_spec["groups"].as_node().replace( a_group, param_node() );
+        LDEBUG( mtlog, "Added group <" << a_group << ">" );
         return;
     }
 
