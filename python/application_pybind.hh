@@ -39,7 +39,7 @@ namespace scarab_pybind
                            [](scarab::main_app& an_obj, scarab::authentication& an_auth){ an_obj.auth() = an_auth; } )
 
             .def( "set_default_auth_spec", &scarab::main_app::set_default_auth_spec )
-            .def( "set_default_auth_spec_group", &scarab::main_app::set_default_auth_spec_group )
+            .def( "add_default_auth_spec_group", &scarab::main_app::add_default_auth_spec_group )
             .def( "set_default_auth_file", &scarab::main_app::set_default_auth_file )
 
             .def( "do_config_stage_1", &scarab::main_app::do_config_stage_1, SCARAB_BIND_CALL_GUARD_STREAMS )
