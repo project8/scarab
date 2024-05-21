@@ -60,7 +60,7 @@ TEST_CASE( "authentication", "[authentication]" )
 
     scarab::authentication t_auth;
 
-    REQUIRE( t_auth.spec().empty() );
+    REQUIRE( t_auth.spec().has("groups") );
     REQUIRE( t_auth.data().empty() );
 
     SECTION( "Loading from a file" )
