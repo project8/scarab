@@ -32,13 +32,15 @@ namespace scarab_pybind
             .def_property_readonly( "nonoption_kw_args", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::nonoption_kw_args )
             .def_property_readonly( "nonoption_ord_args", (scarab::param_array& (scarab::main_app::*)()) &scarab::main_app::nonoption_ord_args )
             .def_property_readonly( "app_options", (scarab::param_node& (scarab::main_app::*)()) &scarab::main_app::app_options )
-            .def_property_readonly( "use_config", &scarab::main_app::get_use_config )
-            .def_property( "auth_spec_key", (std::string& (scarab::main_app::*)()) &scarab::main_app::auth_spec_key,
-                           [](scarab::main_app& an_obj, std::string& a_key){ an_obj.auth_spec_key() = a_key; } )
+            .def_property( "use_config", &scarab::main_app::get_use_config, &scarab::main_app::set_use_config )
+            .def_property( "auth_groups_key", (std::string& (scarab::main_app::*)()) &scarab::main_app::auth_groups_key,
+                           [](scarab::main_app& an_obj, std::string& a_key){ an_obj.auth_groups_key() = a_key; } )
+            .def_property( "auth_file_key", (std::string& (scarab::main_app::*)()) &scarab::main_app::auth_file_key,
+                           [](scarab::main_app& an_obj, std::string& a_key){ an_obj.auth_file_key() = a_key; } )
             .def_property( "auth", (scarab::authentication& (scarab::main_app::*)()) &scarab::main_app::auth,
                            [](scarab::main_app& an_obj, scarab::authentication& an_auth){ an_obj.auth() = an_auth; } )
 
-            .def( "set_default_auth_spec", &scarab::main_app::set_default_auth_spec )
+            .def( "set_default_auth_spec_groups", &scarab::main_app::set_default_auth_spec_groups )
             .def( "add_default_auth_spec_group", &scarab::main_app::add_default_auth_spec_group )
             .def( "set_default_auth_file", &scarab::main_app::set_default_auth_file )
 

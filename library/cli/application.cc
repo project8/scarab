@@ -70,7 +70,8 @@ namespace scarab
             f_app_options(),
             f_app_option_holders(),
             f_use_config( a_use_config ),
-            f_auth_spec_key( "auth-spec" ),
+            f_auth_groups_key( "auth-groups" ),
+            f_auth_file_key( "auth-file" ),
             f_auth()
     {
         set_global_verbosity( logger::ELevel::eProg );
@@ -220,6 +221,9 @@ namespace scarab
     {
         // fifth configuration stage: additional modification of param_node:
         // * environment variable substitution for ENV{[var]} tokens
+
+        if( ! f_use_config ) return;
+
         param_env_modifier t_modifier;
         t_modifier( f_primary_config );
         return;
@@ -229,43 +233,35 @@ namespace scarab
     {
         // Load the authentication specification into the authentication object
         // Will throw scarab::error if the spec is not properly formatted
-        if( f_primary_config.has( f_auth_spec_key ) )
+        if( f_primary_config.has( f_auth_groups_key ) )
         {
-            if( f_primary_config[f_auth_spec_key].as_node().has("groups") )
-            {
-                f_auth.add_groups( f_primary_config[f_auth_spec_key]["groups"].as_node() );
-            }
-            if( f_primary_config[f_auth_spec_key].as_node().has("file"))
-            {
-                f_auth.set_auth_file( f_primary_config[f_auth_spec_key]["file"]().as_string() );
-            }
+            f_auth.add_groups( f_primary_config[f_auth_groups_key].as_node() );
+        }
+        if( f_primary_config.has( f_auth_file_key ) )
+        {
+            f_auth.set_auth_file( f_primary_config[f_auth_file_key]().as_string() );
         }
 
         f_auth.process_spec();
         return;
     }
 
-    void main_app::set_default_auth_spec( const scarab::param_node& a_spec )
+    void main_app::set_default_auth_spec_groups( const scarab::param_node& a_groups )
     {
-        f_default_config.replace(f_auth_spec_key, a_spec);
+        f_default_config.replace( f_auth_groups_key, a_groups );
         return;
     }
 
     void main_app::add_default_auth_spec_group( const std::string& a_group_name, const scarab::param_node& a_spec_group )
     {
-        if( ! f_default_config.has(f_auth_spec_key) ) f_default_config.add( f_auth_spec_key, scarab::param_node() );
-        if( ! f_default_config[f_auth_spec_key].as_node().has("groups") ) 
-        {
-            f_default_config[f_auth_spec_key].as_node().add( "groups", scarab::param_node() );
-        }
-        f_default_config[f_auth_spec_key]["groups"].as_node().replace( a_group_name, a_spec_group );
+        if( ! f_default_config.has(f_auth_groups_key) ) f_default_config.add( f_auth_groups_key, scarab::param_node() );
+        f_default_config[f_auth_groups_key].as_node().replace( a_group_name, a_spec_group );
         return;
     }
 
     void main_app::set_default_auth_file( const std::string& a_filename )
     {
-        if( ! f_default_config.has(f_auth_spec_key) ) f_default_config.add( f_auth_spec_key, scarab::param_node() );
-        f_default_config[f_auth_spec_key].as_node().replace( "file", a_filename );
+        f_default_config.replace( f_auth_file_key, a_filename );
         return;
     }
 

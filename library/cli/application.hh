@@ -286,9 +286,9 @@ namespace scarab
             /// Load authentication with specification and then process the spec
             virtual void do_authentication();
 
-            /// Set the authentication specification in the primary config (replaces what was there)
-            void set_default_auth_spec( const scarab::param_node& a_spec );
-            /// Adds the given specification (for a single group) into the authentication specificaiton in the primary config
+            /// Set the authentication specification groups in the default config (replaces what was there)
+            void set_default_auth_spec_groups( const scarab::param_node& a_groups );
+            /// Adds the given specification (for a single group) into the authentication specificaiton in the default config
             void add_default_auth_spec_group( const std::string& a_group_name, const scarab::param_node& a_group_spec );
             /// Sets the authentication file name in the primary config
             void set_default_auth_file( const std::string& a_filename );
@@ -321,10 +321,12 @@ namespace scarab
             /// Store the app option holder structs from this app and any subcommands
             mv_referrable( std::vector< std::shared_ptr< app_option_holder > >, app_option_holders );
 
-            mv_accessible_noset( bool, use_config );
+            mv_accessible( bool, use_config );
 
-            /// Key used for the authentication specification and auth file in the config
-            mv_referrable( std::string, auth_spec_key );
+            /// Key used for the authentication groups in the config
+            mv_referrable( std::string, auth_groups_key );
+            /// Key used for the authentication file in the config
+            mv_referrable( std::string, auth_file_key);
             /// Authentication object
             mv_referrable( authentication, auth );
 
