@@ -45,7 +45,7 @@ class test_app : public main_app
             main_app(a_use_config)
         {
 
-            f_default_config.add( "auth-spec", scarab::param_node(
+            f_default_config.add( "auth-groups", scarab::param_node(
                 "backend"_a=scarab::param_node(
                     "user"_a=scarab::param_node(
                         "default"_a="a_backend_user",
@@ -74,7 +74,7 @@ class test_app : public main_app
 int create_temp_config_file( std::string& a_filename, scarab::param_node& a_file_opts )
 {
     scarab::param_node t_auth(
-        "auth-spec"_a=scarab::param_node(
+        "auth-groups"_a=scarab::param_node(
             "database"_a=scarab::param_node(
                 "user"_a=scarab::param_node(
                     "default"_a="a_db_user",

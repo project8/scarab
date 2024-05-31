@@ -46,18 +46,36 @@ namespace scarab
 
     void authentication::add_group( const std::string& a_group )
     {
-        f_spec["groups"].as_node().replace( a_group, param_node() );
-        LDEBUG( mtlog, "Added group <" << a_group << ">" );
+        if( f_spec["groups"].as_node().add( a_group, param_node() ) )
+        {
+            LDEBUG( mtlog, "Added group <" << a_group << ">" );
+        }
+        else
+        {
+            LDEBUG( mtlog, "Group <" << a_group << "> already exists" );
+        }
         return;
     }
 
     void authentication::add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env )
     {
         add_group( a_group );
+        if( f_spec["groups"][a_group].as_node().has(a_name) )
+        {
+            LDEBUG( mtlog, "Item <" << a_group << ":" << a_name << "> already exists; it will be overwritten" );
+        }
+        else
+        {
+            f_spec["groups"][a_group].as_node().add( a_name, param_node() );
+        }
+
         param_node t_item( "default"_a=a_default );
         if( ! an_env.empty() ) t_item.add( "env", an_env );
-        f_spec["groups"][a_group].as_node().replace( a_name, t_item );
+        LWARN( mtlog, "new item:\n" << t_item );
+        f_spec["groups"][a_group][ a_name ].as_node().merge(t_item);
         LDEBUG( mtlog, "Added item <" << a_group << ":" << a_name << ">" );
+        LWARN( mtlog, f_spec["groups"][a_group] );
+        
         return;
     }
 
@@ -101,7 +119,7 @@ namespace scarab
         try
         {
             LDEBUG( mtlog, "Processing authentication specification" );
-            //LWARN( mtlog, f_spec );
+            LWARN( mtlog, f_spec );
 
             param_ptr_t t_file_data_ptr;
             if( f_spec.has( "file" ) )
@@ -128,6 +146,7 @@ namespace scarab
                     }
 
                     param_node t_new_default_group, t_new_env_group;
+                    LWARN( mtlog, "getting items from group:\n" << t_a_group );
                     for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
                     {
                         LDEBUG( mtlog, "Processing item <" << gr_it.name() << ">" );
