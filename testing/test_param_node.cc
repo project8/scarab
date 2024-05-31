@@ -46,8 +46,18 @@ TEST_CASE( "param_node", "[param]" )
     REQUIRE( node.count("five") == 1 );
     REQUIRE( node.count("ten") == 0 );
 
+    // const access
+    const param_node& const_node = node;
+    REQUIRE( const_node["five"]().as_int() == 5 );
+    REQUIRE_THROWS_AS( const_node["twenty"], scarab::error );
+    REQUIRE( const_node.at("five")().as_int() == 5 );
+    REQUIRE_THROWS_AS( const_node.at("twenty"), scarab::error );
+
     // access
     REQUIRE( node["five"]().as_int() == 5 );
+    REQUIRE_THROWS_AS( node["twenty"], scarab::error );
+    REQUIRE( node.at("five")().as_int() == 5 );
+    REQUIRE_THROWS_AS( node.at("twenty"), scarab::error );
     REQUIRE( node.get_value("five", 99999) == 5 );
     REQUIRE( node.get_value("ten", 99999) == 99999 );
     REQUIRE_THROWS_AS( node["subarray1"](), scarab::error );
