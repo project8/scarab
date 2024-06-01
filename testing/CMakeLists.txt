@@ -82,6 +82,7 @@ endif( Scarab_BUILD_CODEC_YAML )
 if( Scarab_BUILD_CLI )
     set( testing_SOURCES
         ${testing_SOURCES}
+        test_main_app.cc
         test_nonoption_parser.cc
     )
 endif( Scarab_BUILD_CLI )
