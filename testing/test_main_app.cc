@@ -130,11 +130,11 @@ TEST_CASE( "configuration", "[main_app]" )
         REQUIRE_FALSE( t_app.app_options().has("value") );
         REQUIRE_FALSE( t_app.primary_config().has("value") );
 
-        REQUIRE_THAT( t_app.primary_config()["fromenv"]().as_string(), Equals("ENV{MAIN_APP_TEST_VAR}") );
+        REQUIRE_THAT( t_app.nonoption_kw_args()["fromenv"]().as_string(), Equals("ENV{MAIN_APP_TEST_VAR}") );
         setenv( "MAIN_APP_TEST_VAR", "500", true );
         t_app.do_config_stage_5();
         unsetenv( "MAIN_APP_TEST_VAR" );
-        REQUIRE_FALSE( t_app.primary_config().has("fromenv") );
+        REQUIRE_FALSE( t_app.nonoption_kw_args().has("fromenv") );
 
     }
 
