@@ -134,7 +134,7 @@ TEST_CASE( "configuration", "[main_app]" )
         setenv( "MAIN_APP_TEST_VAR", "500", true );
         t_app.do_config_stage_5();
         unsetenv( "MAIN_APP_TEST_VAR" );
-        REQUIRE_FALSE( t_app.nonoption_kw_args().has("fromenv") );
+        REQUIRE_FALSE( t_app.primary_config().has("fromenv") );
 
     }
 
@@ -210,7 +210,7 @@ TEST_CASE( "app-authentication", "[main_app]" )
 
     SECTION( "by groups" )
     {
-        t_app.primary_config().add( "auth-spec", scarab::param_node(
+        t_app.primary_config().add( "auth-groups", scarab::param_node(
             "backend"_a=scarab::param_node(
                 "user"_a=scarab::param_node(
                     "default"_a="a_backend_user",
@@ -224,7 +224,28 @@ TEST_CASE( "app-authentication", "[main_app]" )
         ) );
 
         t_app.do_authentication();
+
+        // testing the authentication spec
+        LWARN( talog, "app's auth spec:\n" << t_app.auth().spec() );
+        REQUIRE( t_app.auth().spec().has("groups") );
+        REQUIRE( t_app.auth().spec()["groups"].as_node().has("backend") );
+        REQUIRE( t_app.auth().spec()["groups"]["backend"].as_node().has("user") );
+        REQUIRE( t_app.auth().spec()["groups"]["backend"].as_node().has("password") );
+
+        // testing the authentication data
+        LWARN( talog, "app's auth data:\n" << t_app.auth().data() );
+        REQUIRE( t_app.auth().has("backend") );
+        REQUIRE( t_app.auth().has("backend", "user") );
+        REQUIRE( t_app.auth().has("backend", "password") );
+        REQUIRE_THAT( t_app.auth().get("backend", "user"), Equals("a_backend_user") );
+        REQUIRE_THAT( t_app.auth().get("backend", "password"), Equals("security_hole") );
     }
+/*
+    SECTION( "by auth file" )
+    {
+        //TODO
+    }
+    */
 }
 
 /*
