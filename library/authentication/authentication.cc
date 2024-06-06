@@ -174,15 +174,15 @@ namespace scarab
                 }
             } // end loop over groups
 
-            //LWARN( mtlog, "Default data:\n" << t_default_data );
-            //LWARN( mtlog, "Env data:\n" << t_env_data );
+            LWARN( mtlog, "Default data:\n" << t_default_data );
+            LWARN( mtlog, "Env data:\n" << t_env_data );
             
             // order of precedence: default --> file --> env
             f_data.clear();
             f_data.merge( t_default_data );
             if( t_file_data_ptr ) f_data.merge( t_file_data_ptr->as_node() );
             f_data.merge( t_env_data );
-            //LWARN( mtlog, "Final data:\n" << f_data );
+            LWARN( mtlog, "Final data:\n" << f_data );
         }
         catch( const std::exception& e )
         {
@@ -216,6 +216,7 @@ namespace scarab
         }
 
         // if so, load it
+        LDEBUG( mtlog, "Opening and reading file <" << t_auth_file_path << ">" );
         param_translator t_translator;
         std::unique_ptr< param > t_read_file( t_translator.read_file( t_auth_file_path.string(), a_read_opts ) );
         if( t_read_file == NULL )
@@ -230,7 +231,7 @@ namespace scarab
         param_ptr_t t_file_data_ptr = std::make_unique< param_node >();
 
         t_file_data_ptr->as_node().merge( t_read_file->as_node() );
-        //LWARN( mtlog, "File loaded:\n" << t_file_data_ptr->as_node() );
+        LWARN( mtlog, "File loaded:\n" << t_file_data_ptr->as_node() );
         return t_file_data_ptr;
     }
 

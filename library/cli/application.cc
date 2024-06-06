@@ -216,6 +216,7 @@ namespace scarab
 
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
+        LWARN( applog, "App options, before stage-4 merge:\n" << f_app_options );
         f_primary_config.merge( f_app_options );
         LWARN( applog, "Primary config, after stage 4:\n" << f_primary_config )
         return;
