@@ -116,6 +116,14 @@ namespace scarab
 
     void authentication::process_spec()
     {
+        // This function takes the authentication specification and turns it into authentication data.
+        // It handles the various sources of information in the following order of precedence (higher numbers override lower numbers):
+        // 1. Defaults
+        // 2. Authentication file
+        // 3. Environment variables
+        // 4. Override (file)
+        // 5. Override (value)
+
         try
         {
             LDEBUG( mtlog, "Processing authentication specification" );
@@ -128,7 +136,7 @@ namespace scarab
                 t_file_data_ptr = load_from_file( f_spec["file"]().as_string(), f_spec["file-read-opts"].as_node() );
             }
 
-            param_node t_default_data, t_env_data;
+            param_node t_default_data, t_env_data, t_override_data;
 
             if( f_spec.has("groups" ) )
             {
@@ -145,7 +153,7 @@ namespace scarab
                         continue;
                     }
 
-                    param_node t_new_default_group, t_new_env_group;
+                    param_node t_new_default_group, t_new_env_group, t_new_override_group;
                     LWARN( mtlog, "getting items from group:\n" << t_a_group );
                     for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
                     {
@@ -168,20 +176,37 @@ namespace scarab
                             }
                         }
 
+                        if( t_an_item.has("override-file") )
+                        {
+                            std::string t_override_filename( t_an_item["override-file"]().as_string() );
+                            LDEBUG( mtlog, "Found an override file: " << t_override_filename );
+                            // TODO: extract file contents into a string -- limit size to 50 kB?
+                            std::string t_override_file_value("this would be file contents");
+                            t_new_override_group.add( gr_it.name(), t_an_item["override"]().as_string() );
+                        }
+
+                        if( t_an_item.has("override") )
+                        {
+                            LDEBUG( mtlog, "Found an override value" );
+                            t_new_override_group.replace( gr_it.name(), t_an_item["override"]().as_string() );
+                        }
                     }
                     t_default_data.add( it.name(), t_new_default_group );
                     if( ! t_new_env_group.empty() ) t_env_data.add( it.name(), t_new_env_group );
+                    if( ! t_new_override_group.empty() ) t_override_data.add( it.name(), t_new_override_group );
                 }
             } // end loop over groups
 
             LWARN( mtlog, "Default data:\n" << t_default_data );
             LWARN( mtlog, "Env data:\n" << t_env_data );
+            LWARN( mtlog, "Override data:\n" << t_override_data );
             
-            // order of precedence: default --> file --> env
+            // order of precedence: default --> auth file --> env --> overrides
             f_data.clear();
             f_data.merge( t_default_data );
             if( t_file_data_ptr ) f_data.merge( t_file_data_ptr->as_node() );
             f_data.merge( t_env_data );
+            f_data.merge( t_override_data );
             LWARN( mtlog, "Final data:\n" << f_data );
         }
         catch( const std::exception& e )

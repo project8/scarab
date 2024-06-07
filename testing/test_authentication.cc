@@ -156,7 +156,7 @@ TEST_CASE( "authentication", "[authentication]" )
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
     }
 
-    SECTION( "Precedence: default --> file --> env var" )
+    SECTION( "Precedence: default --> file --> env var --> overrides" )
     {
         // scarab.user is determined by the file
         // scarab.password gets is determined by the environment variable
