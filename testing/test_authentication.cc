@@ -215,7 +215,9 @@ TEST_CASE( "authentication", "[authentication]" )
             "group3"_a=scarab::param_node(
                 "name3"_a=scarab::param_node(
                     "default"_a="default3",
-                    "env"_a="SCARAB_AUTH_TEST_ENV3"
+                    "env"_a="SCARAB_AUTH_TEST_ENV3",
+                    "override"_a="override3",
+                    "override-file"_a="override-file3"
                 )
             )
         );
@@ -233,6 +235,8 @@ TEST_CASE( "authentication", "[authentication]" )
         REQUIRE( t_auth.spec()["groups"]["group3"].as_node().has("name3") ); // item should be there
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["default"]().as_string(), Equals("default3") );
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["override"]().as_string(), Equals("override3") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["override-file"]().as_string(), Equals("override-file3") );
     }
 
     SECTION( "Precedence: default --> file --> env var --> override file --> override value" )

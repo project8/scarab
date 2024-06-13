@@ -102,6 +102,8 @@ namespace scarab
 
                 // default value; required; throws if not present or not string
                 add_item( it.name(), gr_it.name(), t_an_item["default"]().as_string(), t_an_item.get_value("env", "") );
+                if( t_an_item.has("override") ) set_override_value( it.name(), gr_it.name(), t_an_item["override"]().as_string() );
+                if( t_an_item.has("override-file") ) set_override_file( it.name(), gr_it.name(), t_an_item["override-file"]().as_string() );
             }
         }
         return;
