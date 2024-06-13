@@ -55,7 +55,12 @@ namespace scarab
             void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env = "" );
             /// Adds a set of groups; for each group provided, replaces the group in the spec if it already exists
             void add_groups( const scarab::param_node& a_groups_node );
+            /// Sets an override file for an existing item; if the item does not already exist, throws scarab::error
+            void set_override_file( const std::string& a_group, const std::string& a_name, const std::string& a_filename );
+            /// Sets an override value for an existing item; if the item does not already exist, throws scarab::error
+            void set_override_value( const std::string& a_group, const std::string& a_name, const std::string& a_value );
 
+            /// Sets the filename for an authentication file; note that auth files are not the preferred way of setting up authentication
             void set_auth_file( const std::string& a_filename, const scarab::param_node& a_read_opts = scarab::param_node() );
 
             void process_spec();
@@ -63,8 +68,9 @@ namespace scarab
             mv_referrable( scarab::param_node, spec );
 
         protected:
-            param_ptr_t load_from_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts );
-            
+            param_ptr_t load_from_auth_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts ) const;
+            std::string read_from_file( const std::string& a_filename ) const;
+
         public:
             /// Check whether a group exists in the data
             bool has( const std::string& a_group ) const;
@@ -79,6 +85,10 @@ namespace scarab
             std::string get( const std::string& a_group, const std::string& an_item, const std::string& a_default ) const;
 
             mv_referrable( scarab::param_node, data );
+
+        public:
+            /// Check that a file exists and return its path; throws scarab::error if the file does not exist
+            path check_path( const std::string& a_filename ) const;
 
     };
 

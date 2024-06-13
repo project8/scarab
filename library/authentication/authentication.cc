@@ -15,6 +15,7 @@
 #include "path.hh"
 
 #include <cstdlib> // for getenv()
+#include <fstream>
 
 namespace scarab
 {
@@ -106,6 +107,18 @@ namespace scarab
         return;
     }
 
+    void authentication::set_override_file( const std::string& a_group, const std::string& a_name, const std::string& a_filename )
+    {
+        f_spec["groups"][a_group][a_name].as_node().replace("override-file", a_filename);
+        return;
+    }
+
+    void authentication::set_override_value( const std::string& a_group, const std::string& a_name, const std::string& a_value )
+    {
+        f_spec["groups"][a_group][a_name].as_node().replace("override", a_value);
+        return;
+    }
+
     void authentication::set_auth_file( const std::string& a_filename, const param_node& a_read_opts )
     {
         f_spec.replace( "file", a_filename );
@@ -133,7 +146,7 @@ namespace scarab
             if( f_spec.has( "file" ) )
             {
                 LDEBUG( mtlog, "Loading authentication information from a file" );
-                t_file_data_ptr = load_from_file( f_spec["file"]().as_string(), f_spec["file-read-opts"].as_node() );
+                t_file_data_ptr = load_from_auth_file( f_spec["file"]().as_string(), f_spec["file-read-opts"].as_node() );
             }
 
             param_node t_default_data, t_env_data, t_override_data;
@@ -178,11 +191,8 @@ namespace scarab
 
                         if( t_an_item.has("override-file") )
                         {
-                            std::string t_override_filename( t_an_item["override-file"]().as_string() );
-                            LDEBUG( mtlog, "Found an override file: " << t_override_filename );
-                            // TODO: extract file contents into a string -- limit size to 50 kB?
-                            std::string t_override_file_value("this would be file contents");
-                            t_new_override_group.add( gr_it.name(), t_an_item["override"]().as_string() );
+                            LDEBUG( mtlog, "Reading from override file <" << t_an_item["override-file"]() << ">" );   
+                            t_new_override_group.add( gr_it.name(), read_from_file( t_an_item["override-file"]().as_string() ) );
                         }
 
                         if( t_an_item.has("override") )
@@ -190,12 +200,13 @@ namespace scarab
                             LDEBUG( mtlog, "Found an override value" );
                             t_new_override_group.replace( gr_it.name(), t_an_item["override"]().as_string() );
                         }
-                    }
+                    } // end loop over items in the group
+
                     t_default_data.add( it.name(), t_new_default_group );
                     if( ! t_new_env_group.empty() ) t_env_data.add( it.name(), t_new_env_group );
                     if( ! t_new_override_group.empty() ) t_override_data.add( it.name(), t_new_override_group );
-                }
-            } // end loop over groups
+                } // end loop over groups
+            } // end if-have-groups
 
             LWARN( mtlog, "Default data:\n" << t_default_data );
             LWARN( mtlog, "Env data:\n" << t_env_data );
@@ -217,28 +228,10 @@ namespace scarab
         return;
     }
 
-    param_ptr_t authentication::load_from_file( const std::string& a_auth_file, const param_node& a_read_opts )
+    param_ptr_t authentication::load_from_auth_file( const std::string& a_auth_file, const param_node& a_read_opts ) const
     {
-        // expand path with standard assumptions
-        path t_auth_file_path = expand_path( a_auth_file );
+        path t_auth_file_path = check_path( a_auth_file );
         LINFO( mtlog, "Loading authentication file <" << t_auth_file_path << ">" );
-
-        // is the file there?
-        if( ! t_auth_file_path.empty() )
-        {
-            LDEBUG( mtlog, "Looking for authentication file: <" << t_auth_file_path << ">" );
-            try
-            {
-                if( ! (exists( t_auth_file_path ) && is_regular_file( t_auth_file_path )) )
-                {
-                    throw error( __FILE__, __LINE__ ) << "File either doesn't exist (" << exists( t_auth_file_path ) << ") or isn't a regular file (" << is_regular_file( t_auth_file_path ) << ")";
-                }
-            }
-            catch( boost::filesystem::filesystem_error& e )
-            {
-                throw error( __FILE__, __LINE__ ) << "Unable to determine if the authentication file is a regular file: " << e.what();
-            }
-        }
 
         // if so, load it
         LDEBUG( mtlog, "Opening and reading file <" << t_auth_file_path << ">" );
@@ -259,6 +252,61 @@ namespace scarab
         LWARN( mtlog, "File loaded:\n" << t_file_data_ptr->as_node() );
         return t_file_data_ptr;
     }
+
+    std::string authentication::read_from_file( const std::string& a_filename ) const
+    {
+        // expand path with standard assumptions
+        path t_path = expand_path( a_filename );
+        LDEBUG( mtlog, "Found a file: " << t_path );
+
+        std::ifstream t_op_ifstream( t_path.native(), std::ifstream::binary );
+        if( ! t_op_ifstream.is_open() )
+        {
+            throw error( __FILE__, __LINE__ ) << "Couldn't open file <" << t_path << ">";
+        }
+
+        constexpr std::streamsize t_max_buffers = 50;
+        std::array<char, 1024> t_buffer;
+        std::string t_value;
+        while( t_op_ifstream.good() )
+        {
+            t_op_ifstream.read( t_buffer.data(), t_buffer.size() );
+            std::streamsize t_size_read = t_op_ifstream.gcount();
+            t_value += std::string( t_buffer.data(), t_size_read );
+        }
+        if( t_op_ifstream.bad() )
+        {
+            throw error( __FILE__, __LINE__ ) << "Error while reading file <" << t_path << ">";
+        }
+
+        return t_value;
+    }
+
+    path authentication::check_path( const std::string& a_filename ) const
+    {
+        // expand path with standard assumptions
+        path t_file_path = expand_path( a_filename );
+        LDEBUG( mtlog, "Expanded path: " << t_file_path );
+
+        // is the file there?
+        if( ! t_file_path.empty() )
+        {
+            LDEBUG( mtlog, "Looking for authentication file: <" << t_file_path << ">" );
+            try
+            {
+                if( ! (exists( t_file_path ) && is_regular_file( t_file_path )) )
+                {
+                    throw error( __FILE__, __LINE__ ) << "File either doesn't exist (" << exists( t_file_path ) << ") or isn't a regular file (" << is_regular_file( t_file_path ) << ")";
+                }
+            }
+            catch( boost::filesystem::filesystem_error& e )
+            {
+                throw error( __FILE__, __LINE__ ) << "Unable to determine if the authentication file is a regular file: " << e.what();
+            }
+        }
+        return t_file_path;
+    }
+
 
     bool authentication::has( const std::string& a_group ) const
     {
