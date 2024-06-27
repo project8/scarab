@@ -89,7 +89,7 @@ for a particular item is provided by the application in the specification.  Use 
 for any item is optional (at the discretion of the application).  If a user wanted to override the 
 password from the above example, they could use an environment variable at runtime, e.g.::
 
-    > DB_PASSWORD=my_real_pword run_my_app
+    > DB_PASSWORD=env_pword run_my_app
 
 Override file
 -------------
@@ -125,19 +125,57 @@ an app might provide a command-line option to set the username with `-u`, which 
 Data
 ====
 
-The data is determined by combining the five sources of information in order: the authentication file 
-overrides default values, and the enviroment variables override information in the authentication file or defaults. 
-Override files override enviroment variables, authentication files, and defaults, 
-and override values override everything else.
+The data are determined by combining the five sources of information as laid out in the specification.  
+This is done in five steps:
 
-Combining the above defaults, authentication file, and environment variables, and override files and values 
-for the ``database`` example, the final data would be::
+1. Set defaults
+2. Read in the authentication file
+3. Get values from environment variables
+4. Read override files
+5. Apply override values
 
-    database:
-      username: INewton
-      password: [contents of in_login.txt]
+The ``data`` data structure can be checked for the presence of an item with the ``has()`` function, and 
+the value can be requested with the ``get()`` function.
 
-The sequence of events in processing the specification into data for the two items in the example would be:
+Example: deriving data from the specification & user input
+----------------------------------------------------------
+
+In this example we'll show how the final data is determined from the inputs discussed above.
+
+The application, ``run_my_app``, uses the database and requires database authentication information.  
+The application will provide the initial specification, including the single group and the user and 
+password items::
+
+    groups:
+      database:
+        username:
+          default: a_user
+          env: DB_USER
+        password:
+          default: 123456
+          env: DB_PASSWORD
+
+This application takes advantage of all of ``authentication``'s user-input options: authentication file, 
+override files, and override values.  The user runs the following command::
+
+    > DB_PASSWORD=env_pword run_my_app --auth-file db_auth.yaml -u INewton --pword-file in_login.txt
+
+In the real world, we expect a user would not use *all* of these options at the same time, since 
+both the username and password end up being specified multiple times, but it serves to document 
+how all of the different options interact.
+
+The contents of db_auth.yaml are::
+
+  database:
+    username: file_user
+    password: file_pword
+
+And the contents of in_login.txt are::
+
+  dk3j8t8jn&*fllsi32ld
+
+The act of processing the specification into data would go through the five steps described above.  
+This table shows the content of the username and password values at each step:
 
 +----------------------------------------+--------------------------------+--------------------------------+
 | Event                                  | Value of ``database.username`` | Value of ``database.password`` |
@@ -146,12 +184,18 @@ The sequence of events in processing the specification into data for the two ite
 +----------------------------------------+--------------------------------+--------------------------------+
 | 2. Auth file is read                   | ``file_user``                  | ``file_pword``                 |
 +----------------------------------------+--------------------------------+--------------------------------+
-| 3. Environment variables are checked   | ``file_user``                  | ``my_real_pword``              |
+| 3. Environment variables are checked   | ``file_user``                  | ``env_pword``                  |
 +----------------------------------------+--------------------------------+--------------------------------+
 | 4. Override files are checked          | ``file_user``                  | ``dk3j8t8jn&*fllsi32ld``       |
 +----------------------------------------+--------------------------------+--------------------------------+
 | 5. Override values are used            | ``INewton``                    | ``dk3j8t8jn&*fllsi32ld``       |
 +----------------------------------------+--------------------------------+--------------------------------+
+
+In the end, the final data would be::
+
+    database:
+      username: INewton
+      password: dk3j8t8jn&*fllsi32ld
 
 API
 ===
