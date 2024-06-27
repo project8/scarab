@@ -29,6 +29,10 @@ namespace scarab
      of the enclosing group, which will add that group if it's not already there.  For each item, the name and 
      default value are required, while the environment variable is optional.
 
+     Override files and override values can be added to an existing item with set_override_file() and 
+     set_override_value(), respectively.  The item they're being added to must already exist; otherwise a 
+     scarab::error will be thrown.
+
      The authentication file is set with set_auth_file().
 
      When the specification is complete, process_specification() is used to convert the specification to data.
