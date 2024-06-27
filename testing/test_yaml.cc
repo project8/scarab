@@ -9,7 +9,7 @@
 #include "param.hh"
 #include "param_yaml.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include <iostream>
 

@@ -88,9 +88,18 @@ namespace scarab
 
             /// Returns a reference to the param at a_index.
             /// Throws a std::out_of_range if a_index is out-of-range.
+            const param& at( unsigned a_index ) const;
+            /// Returns a reference to the param at a_index.
+            /// Throws a std::out_of_range if a_index is out-of-range.
+            param& at( unsigned a_index );
+
+            /// Returns a reference to the param at a_index.
+            /// Throws a std::out_of_range if a_index is out-of-range.
+            /// Note that this behavior differs from the C++ STL sequence-like container behavior
             const param& operator[]( unsigned a_index ) const;
             /// Returns a reference to the param at a_index.
             /// Throws a std::out_of_range if a_index is out-of-range.
+            /// Note that this behavior differs from the C++ STL sequence-like container behavior
             param& operator[]( unsigned a_index );
 
             const param& front() const;
@@ -178,6 +187,15 @@ namespace scarab
     inline std::string param_array::get_value( unsigned a_index, const char* a_default ) const
     {
         return get_value( a_index, std::string( a_default ) );
+    }
+
+    inline const param& param_array::at( unsigned a_index ) const
+    {
+        return *f_contents.at( a_index );
+    }
+    inline param& param_array::at( unsigned a_index )
+    {
+        return *f_contents.at( a_index );
     }
 
     inline const param& param_array::operator[]( unsigned a_index ) const

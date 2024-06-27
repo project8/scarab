@@ -30,13 +30,16 @@
 
 #include "digital.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
 
 #include <iostream>
 
 
 TEST_CASE( "digital", "[utility]" )
 {
+    using Catch::Matchers::WithinAbs;
+
     SECTION( "adc_unsigned" )
     {
         std::cout << "ADC Unsigned Test" << std::endl;
@@ -95,7 +98,7 @@ TEST_CASE( "digital", "[utility]" )
 
         for( unsigned i = 0; i < t_digital.size(); ++i )
         {
-            REQUIRE_THAT( (scarab::d2a< unsigned, double >( t_digital[i], &t_params )), Catch::WithinAbs( t_analog[i], t_tolerance ) );
+            REQUIRE_THAT( (scarab::d2a< unsigned, double >( t_digital[i], &t_params )), WithinAbs( t_analog[i], t_tolerance ) );
         }
     }
 
@@ -117,7 +120,7 @@ TEST_CASE( "digital", "[utility]" )
 
         for( unsigned i = 0; i < t_digital.size(); ++i )
         {
-            REQUIRE_THAT( (scarab::d2a< int, double >( t_digital[i], &t_params )), Catch::WithinAbs( t_analog[i], t_tolerance ) );
+            REQUIRE_THAT( (scarab::d2a< int, double >( t_digital[i], &t_params )), WithinAbs( t_analog[i], t_tolerance ) );
         }
     }
 }

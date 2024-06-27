@@ -46,7 +46,7 @@
 
 #include "error.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 using scarab::param_array;
 using scarab::param_node;

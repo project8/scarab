@@ -119,6 +119,11 @@ namespace scarab
     /// Syntactic sugar to enable simple-looking keyword arguments
     constexpr kwarg operator""_a( const char *name, size_t ) { return kwarg(name); }
 
+    /// Convenience macro to bring args, kwargs, and _a into the current namespace
+    #define using_param_args_and_kwargs \
+        using scarab::args; \
+        using scarab::kwarg; \
+        using scarab::operator""_a;
 }
 
 #endif /* SCARAB_PARAM_HELPERS_HH_ */

@@ -108,6 +108,26 @@ namespace scarab
         return as_node()[ a_name ];
     }
 
+    inline const param& param::at( unsigned a_index ) const
+    {
+        return as_array().at( a_index );
+    }
+
+    inline param& param::at( unsigned a_index )
+    {
+        return as_array().at( a_index );
+    }
+
+    inline const param& param::at( const std::string& a_name ) const
+    {
+        return as_node().at( a_name );
+    }
+
+    inline param& param::at( const std::string& a_name )
+    {
+        return as_node().at( a_name );
+    }
+
     inline std::string param::get_value( const std::string& a_name, const std::string& a_default ) const
     {
         return as_node().get_value( a_name, a_default );

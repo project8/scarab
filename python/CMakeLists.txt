@@ -40,6 +40,15 @@ if( Scarab_BUILD_PYTHON )
         )
     endif( Scarab_BUILD_PARAM )
 
+    if( Scarab_BUILD_AUTHENTICATION )
+        add_definitions( -DBUILD_AUTH_PYBINDING )
+        set( PYBINDING_HEADERFILES
+            ${PYBINDING_HEADERFILES}
+            ${dir}/authentication_pybind.hh
+        )
+    endif( Scarab_BUILD_AUTHENTICATION )
+
+
     set( PYBINDING_PROJECT_LIBRARIES Scarab )
 
     pbuilder_add_pybind11_module( 

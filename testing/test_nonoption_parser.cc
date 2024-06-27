@@ -53,10 +53,13 @@ Cannot parse an option with the nonoption_parser: -five
 
 #include "nonoption_parser.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
 
 TEST_CASE( "nonoption_parser", "[param]" )
 {
+    using Catch::Matchers::WithinRel;
+
     SECTION( "args" )
     {
         std::vector< std::string > t_args;
@@ -82,9 +85,9 @@ TEST_CASE( "nonoption_parser", "[param]" )
 
         REQUIRE( t_parser.kw_args()["And"]().as_uint() == 1 );
         REQUIRE( t_parser.kw_args()["we"]().as_uint() == 2 );
-        REQUIRE_THAT( t_parser.kw_args()["are"][6]().as_double(), Catch::WithinRel( 3.0 ) );
+        REQUIRE_THAT( t_parser.kw_args()["are"][6]().as_double(), WithinRel( 3.0 ) );
         REQUIRE( t_parser.kw_args()["key"]["word"]().as_int() == -4 );
-        REQUIRE_THAT( t_parser.kw_args()["args"]().as_double(), Catch::WithinRel( 5.e8 ) );
+        REQUIRE_THAT( t_parser.kw_args()["args"]().as_double(), WithinRel( 5.e8 ) );
     }
 
     SECTION( "negative" )

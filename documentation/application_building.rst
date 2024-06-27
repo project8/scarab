@@ -70,6 +70,30 @@ Non-Option Arguments
 
     * Ordered arguments have a value (NULL, boolean, string, or numeric) but no key.  They are not merged with the global configuration, and are made available in an array-like structure: ``main_app::nonoption_ord_args()``.
 
+Authentication
+--------------
+
+The ``main_app`` class incorporates an ``authentication`` object to collect and give access to authentication 
+information.  The authentication specification is configurable under the configuration key ``auth-spec``, e.g.::
+    auth-spec:
+      a_group:
+        username:
+          default: some_user
+          env: GROUP_USER
+        password:
+          default: ""
+          env: GROUP_PWORD
+
+Alternatively, or in addition to the above example, the authentication specification can be loaded from 
+an authentication file.  The filename is configured with the key ``auth-key``.
+
+See :doc:`authentication` for more information about authentication specifications.
+
+The authentication specification will be processed after all configuration steps are complete.
+
+Note that authentication _data_ is intentionally not included in the ``main_app`` configuration.  
+We recommend that authentication values, especially passwords, be supplied as an environment variable or authentication file.
+
 Creating an Application
 -----------------------
 
@@ -165,7 +189,10 @@ In this case we use the default value, which enables the use of a config file.
 Example with subcommands
 ########################
 
-This example uses a class with two functions that are implemented as subcommands called by callback.  Note that ``app.fallthrough()`` is used in the main function to allow non-option arguments to be collected by the main app.
+This example uses a class with two functions that are implemented as subcommands called by callback.  
+This can be run from the command line as ``test_app_with_subcommands get`` and ``test_app_with_subcommands set``.
+
+Note that ``app.fallthrough()`` is used in the main function to allow non-option arguments to be collected by the main app.
 
 ::
 
@@ -221,3 +248,65 @@ This example uses a class with two functions that are implemented as subcommands
         CLI11_PARSE( the_main, argc, argv );
         return 0;
     }
+
+Example with authentication
+###########################
+
+This application example defines some default authentication specification that it uses for some purpose called ``backend``.  
+The user could modify the information therein at runtime either via environment variables or an authentication file.  
+It also uses a callback function for execution of the application.
+
+::
+    #include "application.hh"
+
+    #include "logger.hh"
+    #include "param_helpers_impl.hh"
+
+    using namespace scarab;
+
+    LOGGER( testlog, "test_app_with_authentication" );
+
+    class test_app : public main_app
+    {
+        public:
+            test_app(bool a_use_config = true) :
+                main_app(a_use_config)
+            {
+
+                f_default_config.add( "auth-spec", scarab::param_node(
+                    "backend"_a=scarab::param_node(
+                        "user"_a=scarab::param_node(
+                            "default"_a="a_backend_user",
+                            "env"_a="SCARAB_AUTH_TEST_BACKEND_USER"
+                        ),
+                        "password"_a=scarab::param_node(
+                            "default"_a="security_hole",
+                            "env"_a="SCARAB_AUTH_TEST_BACKEND_PASSWORD"
+                        )
+                    )
+                ) );
+            }
+            virtual ~test_app() {}
+
+            void execute()
+            {
+                // Print the authentication information, both specification and data
+                LPROG( testlog, "Authentication specification: " << f_auth.spec() );
+                LPROG( testlog, "Authentication data: " << f_auth.data() );
+                return;
+            }
+    };
+
+    int main( int argc, char **argv )
+    {
+        test_app the_main( true );
+        auto t_executor = [&](){
+            the_main.execute();
+        };
+        the_main.callback( t_executor );
+
+        CLI11_PARSE( the_main, argc, argv );
+
+        return 0;
+    }
+
