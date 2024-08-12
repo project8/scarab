@@ -21,22 +21,40 @@ namespace scarab_pybind
         pybind11::class_< scarab::authentication >( mod, "Authentication", "class for defining and processing authentication information" )
             .def( pybind11::init<>() )
             .def( pybind11::init< const scarab::authentication& >() )
-
+            // convenience init for setting auth file at construction
+            .def( pybind11::init( []( const std::string& a_filename ){
+                                        auto t_auth = new scarab::authentication();
+                                        t_auth->set_auth_file( a_filename );
+                                        return t_auth;
+                                  } 
+                  ),
+                  SCARAB_BIND_CALL_GUARD_STREAMS,
+                  pybind11::arg("auth_file")
+            )
+            // spec functions
             .def( "add_group", &scarab::authentication::add_group, SCARAB_BIND_CALL_GUARD_STREAMS )
-            .def( "add_item", &scarab::authentication::add_item, pybind11::arg("group"), pybind11::arg("name"), pybind11::arg("default"), pybind11::arg("env")="", SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "add_item", &scarab::authentication::add_item, 
+                  pybind11::arg("group"), 
+                  pybind11::arg("name"), 
+                  pybind11::arg("default"), 
+                  pybind11::arg("env")="", 
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_groups", &scarab::authentication::add_groups, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "set_override_file", &scarab::authentication::set_override_file, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "set_override_value", &scarab::authentication::set_override_value, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "set_auth_file", &scarab::authentication::set_auth_file, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "process_spec", &scarab::authentication::process_spec, SCARAB_BIND_CALL_GUARD_STREAMS )
-            .def_property( "spec", (scarab::param_node& (scarab::authentication::*)()) &scarab::authentication::spec,
+            .def_property( "spec", 
+                           (scarab::param_node& (scarab::authentication::*)()) &scarab::authentication::spec,
                            [](scarab::authentication& an_obj, const scarab::param_node& a_spec ) {an_obj.spec() = a_spec; } )
+            // data functions
             .def( "has", static_cast<has_sig1>(&scarab::authentication::has) )
             .def( "has", static_cast<has_sig2>(&scarab::authentication::has) )
             .def( "get", static_cast<get_sig1>(&scarab::authentication::get) )
             .def( "get", static_cast<get_sig2>(&scarab::authentication::get) )
             .def_property( "data", (scarab::param_node& (scarab::authentication::*)()) &scarab::authentication::data,
-                           [](scarab::authentication& an_obj, const scarab::param_node& a_data ) {an_obj.data() = a_data; } )
+                           [](scarab::authentication& an_obj, 
+                           const scarab::param_node& a_data ) {an_obj.data() = a_data; } )
 
         ;
 
