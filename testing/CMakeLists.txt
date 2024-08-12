@@ -109,6 +109,14 @@ pbuilder_executable(
 
 # Other tests
 
+if( Scarab_BUILD_PYTHON )
+    add_custom_target(
+        python_testing ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/python" "${CMAKE_CURRENT_BINARY_DIR}/python"
+        COMMENT "Copying testing/python to the build directory"
+    )
+endif( Scarab_BUILD_PYTHON )
+
 if( Scarab_BUILD_CLI )
     # this sets the programs list
     add_subdirectory( applications )
