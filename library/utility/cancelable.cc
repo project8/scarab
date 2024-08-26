@@ -17,17 +17,21 @@ namespace scarab
     LOGGER( slog, "cancelable" );
 
     cancelable::cancelable() :
-            f_canceled( false )
+            f_canceled( false ),
+            f_has_moved( false )
     {}
 
     cancelable::cancelable( const cancelable& a_orig ) :
-            f_canceled( a_orig.f_canceled.load() )
+            f_canceled( a_orig.f_canceled.load() ),
+            f_has_moved( false )
     {}
 
     cancelable::cancelable( cancelable&& a_orig ) :
-            f_canceled( a_orig.f_canceled.load() )
+            f_canceled( a_orig.f_canceled.load() ),
+            f_has_moved( false )
     {
         a_orig.f_canceled.store( false );
+        a_orig.f_has_moved = true;
     }
 
     cancelable::~cancelable()
@@ -38,13 +42,18 @@ namespace scarab
     cancelable& cancelable::operator=( const cancelable& a_orig )
     {
         f_canceled.store( a_orig.f_canceled.load() );
+        f_has_moved = false;
         return *this;
     }
 
     cancelable& cancelable::operator=( cancelable&& a_orig )
     {
+        // if a_orig already has been moved from, we don't duplicate that action
+        if( a_orig.f_has_moved ) return *this;
         f_canceled.store( a_orig.f_canceled.load() );
+        f_has_moved = false;
         a_orig.f_canceled.store( false );
+        a_orig.f_has_moved = true;
         return *this;
     }
 

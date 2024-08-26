@@ -47,6 +47,10 @@ namespace scarab
 
      Genreally it's assumed that a top-level-parent cancelable object will be created on the heap using std::shared_ptr
      (hence why signal_handler adds cancelables using std::shared_ptr<cancelable>).
+
+     Since this class can be used as a virtual base class, potentially multiply inherited by a final derived class, 
+     we use the flag f_has_moved to avoid duplicating calls to the move assignment operator and 
+     potentially ending up with incorrect information after the derived-class move operation is complete.
     */
     class SCARAB_API cancelable
     {
@@ -71,6 +75,9 @@ namespace scarab
         private:
             virtual void do_cancellation( int a_code );
             virtual void do_reset_cancellation();
+
+            // private flag to indicate whether the move assignment operator or constructor have been used on this base object already
+            bool f_has_moved;
 
         protected:
             std::atomic< bool > f_canceled;
