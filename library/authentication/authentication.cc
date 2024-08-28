@@ -85,22 +85,22 @@ namespace scarab
 
                 // default value; required; throws if not present or not string
                 add_item( it.name(), gr_it.name(), t_an_item["default"]().as_string(), t_an_item.get_value("env", "") );
-                if( t_an_item.has("override") ) set_override_value( it.name(), gr_it.name(), t_an_item["override"]().as_string() );
-                if( t_an_item.has("override-file") ) set_override_file( it.name(), gr_it.name(), t_an_item["override-file"]().as_string() );
+                if( t_an_item.has("value") ) set_value( it.name(), gr_it.name(), t_an_item["value"]().as_string() );
+                if( t_an_item.has("file") ) set_file( it.name(), gr_it.name(), t_an_item["file"]().as_string() );
             }
         }
         return;
     }
 
-    void authentication::set_override_file( const std::string& a_group, const std::string& a_name, const std::string& a_filename )
+    void authentication::set_file( const std::string& a_group, const std::string& a_name, const std::string& a_filename )
     {
-        f_spec["groups"][a_group][a_name].as_node().replace("override-file", a_filename);
+        f_spec["groups"][a_group][a_name].as_node().replace("file", a_filename);
         return;
     }
 
-    void authentication::set_override_value( const std::string& a_group, const std::string& a_name, const std::string& a_value )
+    void authentication::set_value( const std::string& a_group, const std::string& a_name, const std::string& a_value )
     {
-        f_spec["groups"][a_group][a_name].as_node().replace("override", a_value);
+        f_spec["groups"][a_group][a_name].as_node().replace("value", a_value);
         return;
     }
 
@@ -174,16 +174,16 @@ namespace scarab
                             }
                         }
 
-                        if( t_an_item.has("override-file") )
+                        if( t_an_item.has("file") )
                         {
-                            LDEBUG( mtlog, "Reading from override file <" << t_an_item["override-file"]() << ">" );   
-                            t_new_override_group.add( gr_it.name(), read_from_file( t_an_item["override-file"]().as_string() ) );
+                            LDEBUG( mtlog, "Reading from file <" << t_an_item["file"]() << ">" );   
+                            t_new_override_group.add( gr_it.name(), read_from_file( t_an_item["file"]().as_string() ) );
                         }
 
-                        if( t_an_item.has("override") )
+                        if( t_an_item.has("value") )
                         {
-                            LDEBUG( mtlog, "Found an override value" );
-                            t_new_override_group.replace( gr_it.name(), t_an_item["override"]().as_string() );
+                            LDEBUG( mtlog, "Found a value" );
+                            t_new_override_group.replace( gr_it.name(), t_an_item["value"]().as_string() );
                         }
                     } // end loop over items in the group
 

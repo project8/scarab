@@ -29,8 +29,9 @@ namespace scarab
      of the enclosing group, which will add that group if it's not already there.  For each item, the name and 
      default value are required, while the environment variable is optional.
 
-     Override files and override values can be added to an existing item with set_override_file() and 
-     set_override_value(), respectively.  The item they're being added to must already exist; otherwise a 
+     An item can be specified from a file with `set_file()`.  
+     An item can also be specified directly with `set_value()`.  
+     In both cases, the item they're being added to must already exist; otherwise a 
      scarab::error will be thrown.
 
      The authentication file is set with set_auth_file().
@@ -59,10 +60,10 @@ namespace scarab
             void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env = "" );
             /// Adds a set of groups; for each group provided, replaces the group in the spec if it already exists
             void add_groups( const scarab::param_node& a_groups_node );
-            /// Sets an override file for an existing item; if the item does not already exist, throws scarab::error
-            void set_override_file( const std::string& a_group, const std::string& a_name, const std::string& a_filename );
-            /// Sets an override value for an existing item; if the item does not already exist, throws scarab::error
-            void set_override_value( const std::string& a_group, const std::string& a_name, const std::string& a_value );
+            /// Sets a file for an existing item; if the item does not already exist, throws scarab::error
+            void set_file( const std::string& a_group, const std::string& a_name, const std::string& a_filename );
+            /// Sets a value for an existing item; if the item does not already exist, throws scarab::error
+            void set_value( const std::string& a_group, const std::string& a_name, const std::string& a_value );
 
             /// Sets the filename for an authentication file; note that auth files are not the preferred way of setting up authentication
             void set_auth_file( const std::string& a_filename, const scarab::param_node& a_read_opts = scarab::param_node() );

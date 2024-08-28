@@ -40,8 +40,8 @@ namespace scarab_pybind
                   pybind11::arg("env")="", 
                   SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "add_groups", &scarab::authentication::add_groups, SCARAB_BIND_CALL_GUARD_STREAMS )
-            .def( "set_override_file", &scarab::authentication::set_override_file, SCARAB_BIND_CALL_GUARD_STREAMS )
-            .def( "set_override_value", &scarab::authentication::set_override_value, SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "set_file", &scarab::authentication::set_file, SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( "set_value", &scarab::authentication::set_value, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "set_auth_file", &scarab::authentication::set_auth_file, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def( "process_spec", &scarab::authentication::process_spec, SCARAB_BIND_CALL_GUARD_STREAMS )
             .def_property( "spec", 

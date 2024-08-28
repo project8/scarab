@@ -29,19 +29,19 @@ The specification for the above example might look like (in YAML format)::
         username:
           default: a_user
           env: DB_USER
-          override: INewton
+          value: INewton
         password:
           default: 123456
           env: DB_PASSWORD
-          override-file: in_login.txt
+          file: in_login.txt
 
 Both the username and password have a default value, which will typically be provided by the application that's 
 using the authentication system.  The application will also specify the environment variables that the user can 
 employ to set the respective values.  In this case, the application has provided the user the opportunity to 
-directly override the username (e.g. from the command line) and to override the password with the contents of 
-the named file.
+directly override the username (e.g. from the command line) with `value` and to override the password with the contents of 
+the named file with `file`.
 
-The ``default``, ``env``, ``override``, and ``override-file`` parameters are available for all specification items.  
+The ``default``, ``env``, ``value``, and ``file`` parameters are available for all specification items.  
 Only the ``default`` is required, and the others can be provided at the application's discretion.
 
 Sources of information
@@ -53,8 +53,8 @@ In order of precedence from low to high, they are:
 1. Default values
 2. Authentication file
 3. Environment variables
-4. Override file
-5. Override value
+4. File override
+5. Value override
 
 When the specification is evaluated and turned into authentication data, items with higher precedence will 
 override those with lower precedence.
@@ -91,7 +91,7 @@ password from the above example, they could use an environment variable at runti
 
     > DB_PASSWORD=env_pword run_my_app
 
-Override file
+File override
 -------------
 
 Items can be set via the contents of a particular text file.  The use of the override file is optional, 
@@ -107,12 +107,12 @@ an app might provide a command-line option to specify a file that will be read i
 
     > run_my_app --pword-file=in_login.txt
 
-Override value
+Value override
 --------------
 
-Items can be set directly using the override value, which will override all other sources of data.  
-The use of the override value is optional, at the discretion of the application.  
-An application could, for instance, give the user the opportunity to specify an override value on 
+Items can be set directly using the value override, which will override all other sources of data.  
+The use of the value override is optional, at the discretion of the application.  
+An application could, for instance, give the user the opportunity to specify a value on 
 the command line or in a configuration file at runtime.  Use this feature carefully 
 for "secrets" information, as it can result in leaking information into a CL history, for instance, or other 
 collections of plain-text information.
@@ -131,8 +131,8 @@ This is done in five steps:
 1. Set defaults
 2. Read in the authentication file
 3. Get values from environment variables
-4. Read override files
-5. Apply override values
+4. Read file overrides
+5. Apply value overrides
 
 The ``data`` data structure can be checked for the presence of an item with the ``has()`` function, and 
 the value can be requested with the ``get()`` function.
@@ -156,7 +156,7 @@ password items::
           env: DB_PASSWORD
 
 This application takes advantage of all of ``authentication``'s user-input options: authentication file, 
-override files, and override values.  The user runs the following command::
+file overrides, and value overrides.  The user runs the following command::
 
     > DB_PASSWORD=env_pword run_my_app --auth-file db_auth.yaml -u INewton --pword-file in_login.txt
 
@@ -186,9 +186,9 @@ This table shows the content of the username and password values at each step:
 +----------------------------------------+--------------------------------+--------------------------------+
 | 3. Environment variables are checked   | ``file_user``                  | ``env_pword``                  |
 +----------------------------------------+--------------------------------+--------------------------------+
-| 4. Override files are checked          | ``file_user``                  | ``dk3j8t8jn&*fllsi32ld``       |
+| 4. File overrides are checked          | ``file_user``                  | ``dk3j8t8jn&*fllsi32ld``       |
 +----------------------------------------+--------------------------------+--------------------------------+
-| 5. Override values are used            | ``INewton``                    | ``dk3j8t8jn&*fllsi32ld``       |
+| 5. Value overrides are used            | ``INewton``                    | ``dk3j8t8jn&*fllsi32ld``       |
 +----------------------------------------+--------------------------------+--------------------------------+
 
 In the end, the final data would be::
@@ -214,8 +214,8 @@ it will be added) or through ``authentication::add_groups()``.
 If an authentication file is to be used, the filename is provided with ``authentication::set_auth_file()``.  
 This function will also add groups and items if they're not already present.
 
-Override files and override values are added to the specification with ``authentication::set_override_file()`` and 
-``authentication::set_override_value()``, respectively.  The item to which the override(s) are being added must already 
+File overrides and value overrides are added to the specification with ``authentication::set_file()`` and 
+``authentication::set_value()``, respectively.  The item to which the override(s) are being added must already 
 be present, or an exception will be thrown (``scarab::error``).
 
 Data
