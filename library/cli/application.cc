@@ -28,10 +28,6 @@ namespace scarab
     {
     }
 
-    config_decorator::~config_decorator()
-    {
-    }
-
     config_decorator* config_decorator::add_config_subcommand( std::string a_subcommand_name, std::string a_description )
     {
         app* t_subcommand = f_this->add_subcommand( a_subcommand_name, a_description );
@@ -102,10 +98,6 @@ namespace scarab
                 throw CLI::Success();
             };
         add_flag_function( "-V,--version", t_version_callback, "Print the version message and exit" );
-    }
-
-    main_app::~main_app()
-    {
     }
 
     void main_app::set_version( scarab::version_semantic_ptr_t a_ver )

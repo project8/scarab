@@ -18,6 +18,7 @@ namespace scarab_pybind
         pybind11::class_< scarab::main_app >( mod, "MainApp", "Base class for creating CLI utilities" )
             .def( pybind11::init< bool >(),
                   pybind11::arg( "use_config" ) = true,
+                  pybind11::return_value_policy::take_ownership,
                   SCARAB_BIND_CALL_GUARD_STREAMS )
 
             .def( "set_callback", [](scarab::main_app* an_app, std::function< void() > a_fun){ an_app->callback( a_fun );} )

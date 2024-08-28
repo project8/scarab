@@ -47,10 +47,10 @@ namespace scarab
             authentication();
             authentication( const authentication& ) = default;
             authentication( authentication&& ) = default;
-            virtual ~authentication();
+            virtual ~authentication() = default;
 
-            authentication& operator=( const authentication& );
-            authentication& operator=( authentication&& );
+            authentication& operator=( const authentication& ) = default;
+            authentication& operator=( authentication&& ) = default;
 
         public:
             /// Adds a group to the specification; replaces the group in the spec if it already exists

@@ -14,7 +14,9 @@ namespace scarab_pybind
 
         all_members.push_back( "SignalHandler" );
         pybind11::class_< scarab::signal_handler >( mod, "SignalHandler", "handle system signals and pass cancel status to associated objects" )
-            .def( pybind11::init< >(), SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def( pybind11::init< >(), 
+                  pybind11::return_value_policy::take_ownership,
+                  SCARAB_BIND_CALL_GUARD_STREAMS )
 
             .def_static( "add_cancelable", &scarab::signal_handler::add_cancelable, "add a cancelable object to the list to be canceled in the event of a SIGINT" )
             .def_static( "remove_cancelable", static_cast<void (*)(std::shared_ptr<scarab::cancelable>)>( &scarab::signal_handler::remove_cancelable ), "remove a cancelable object from the list to be canceled in the event of a SIGINT" )

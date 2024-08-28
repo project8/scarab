@@ -60,7 +60,7 @@ namespace scarab
             config_decorator( main_app* a_main, app* a_this_app );
             config_decorator( const config_decorator& ) = delete;
             config_decorator( config_decorator&& ) = delete;
-            virtual ~config_decorator();
+            virtual ~config_decorator() = default;
 
             config_decorator& operator=( const config_decorator& ) = delete;
             config_decorator& operator=( config_decorator&& ) = delete;
@@ -265,7 +265,12 @@ namespace scarab
     {
         public:
             main_app( bool a_use_config = true );
-            virtual ~main_app();
+            main_app( const main_app& ) = delete;
+            main_app( main_app&& ) = default;
+            virtual ~main_app() = default;
+
+            main_app& operator=( const main_app& ) = delete;
+            main_app& operator=( main_app&& ) = default;
 
         public:
             /// parses positional arguments into the global config

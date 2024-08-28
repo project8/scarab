@@ -28,23 +28,6 @@ namespace scarab
         f_spec.add( "groups", param_node() );
     }
 
-    authentication::~authentication()
-    {}
-
-    authentication& authentication::operator=( const authentication& an_orig )
-    {
-        f_spec = an_orig.f_spec;
-        f_data = an_orig.f_data;
-        return *this;
-    }
-
-    authentication& authentication::operator=( authentication&& an_orig )
-    {
-        f_spec = std::move( an_orig.f_spec );
-        f_data = std::move( an_orig.f_data );
-        return *this;
-    }
-
     void authentication::add_group( const std::string& a_group )
     {
         if( f_spec["groups"].as_node().add( a_group, param_node() ) )
