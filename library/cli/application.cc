@@ -109,9 +109,9 @@ namespace scarab
     {
         if( f_use_config )
         {
-            do_config_stage_1();
+            do_config_stage_1(); // defaults
 
-            do_config_stage_2();
+            do_config_stage_2(); // config file
 
             try
             {
@@ -125,16 +125,18 @@ namespace scarab
                 throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
             }
 
-            do_config_stage_3();
+            do_config_stage_3(); // keyword arguments
 
-            do_config_stage_4();
+            do_config_stage_4(); // application options
 
-            do_config_stage_5();
+            do_config_stage_5(); // additional modifiers (e.g. environment variables)
+
+            do_authentication();
+            // remove auth spec from the configuation
+            f_primary_config.erase( f_auth_groups_key );
 
             LPROG( applog, "Final configuration:\n" << f_primary_config );
             LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
-
-            do_authentication();
         }
         return;
     }
