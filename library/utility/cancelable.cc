@@ -9,8 +9,12 @@
 
 #include "cancelable.hh"
 
+#include "error.hh"
 #include "logger.hh"
 #include "signal_handler.hh"
+
+#include <chrono>
+#include <thread>
 
 namespace scarab
 {
@@ -71,6 +75,30 @@ namespace scarab
     void cancelable::do_reset_cancellation()
     {
         // override in derived class
+        return;
+    }
+
+    void cancelable::wait( unsigned a_wait_ms, unsigned a_check_ms ) const
+    {
+        if( a_check_ms > a_wait_ms )
+        {
+            throw error( __FILE__, __LINE__ ) << "Check time (" << a_check_ms << ") should be less than the wait time (" << a_wait_ms << ")";
+        }
+
+        std::chrono::milliseconds t_check_duration( a_check_ms );
+        std::chrono::steady_clock::time_point const t_wait_until = std::chrono::steady_clock::now() + std::chrono::milliseconds(a_wait_ms);
+        while( ! is_canceled() && std::chrono::steady_clock::now() < t_wait_until )
+        {
+            std::this_thread::sleep_for( t_check_duration );
+        }
+        if( is_canceled() )
+        {
+            LDEBUG( slog, "Cancelable wait was canceled" );
+        }
+        else
+        {
+            LDEBUG( slog, "Cancelable wait completed wait time" );
+        }
         return;
     }
 
