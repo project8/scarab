@@ -30,14 +30,14 @@ if( NOT TARGET Scarab::@Scarab_FULL_TARGET_NAME@ )
     endif()
 endif()
 
-if( @Scarab_BUILD_PYTHON@ ) # Scarab_BUILD_PYTHON
-    if( NOT TARGET Scarab::scarab )
-        if( TARGET scarab )
-            add_library( Scarab::scarab ALIAS scarab )
-        else()
-            include( "${Scarab_CMAKE_DIR}/Scarab_PyBind_Targets.cmake" )
-        endif()
-    endif()
-endif()
+#if( @Scarab_BUILD_PYTHON@ ) # Scarab_BUILD_PYTHON
+#    if( NOT TARGET Scarab::scarab )
+#        if( TARGET scarab )
+#            add_library( Scarab::scarab ALIAS scarab )
+#        else()
+#            include( "${Scarab_CMAKE_DIR}/Scarab_PyBind_Targets.cmake" )
+#        endif()
+#    endif()
+#endif()
 
 check_required_components( Scarab )
