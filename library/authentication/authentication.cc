@@ -55,10 +55,10 @@ namespace scarab
 
         param_node t_item( "default"_a=a_default );
         if( ! an_env.empty() ) t_item.add( "env", an_env );
-        LWARN( mtlog, "new item:\n" << t_item );
+        //LWARN( mtlog, "new item:\n" << t_item );
         f_spec["groups"][a_group][ a_name ].as_node().merge(t_item);
         LDEBUG( mtlog, "Added item <" << a_group << ":" << a_name << ">" );
-        LWARN( mtlog, f_spec["groups"][a_group] );
+        //LWARN( mtlog, f_spec["groups"][a_group] );
         
         return;
     }
@@ -108,7 +108,7 @@ namespace scarab
     {
         f_spec.replace( "file", a_filename );
         f_spec.replace( "file-read-opts", a_read_opts );
-        LDEBUG( mtlog, "Added filename: " << f_spec["file"] );
+        LDEBUG( mtlog, "Added auth filename: " << f_spec["file"] );
         return;
     }
 
@@ -125,7 +125,7 @@ namespace scarab
         try
         {
             LDEBUG( mtlog, "Processing authentication specification" );
-            LWARN( mtlog, f_spec );
+            //LWARN( mtlog, f_spec );
 
             param_ptr_t t_file_data_ptr;
             if( f_spec.has( "file" ) )
@@ -152,7 +152,7 @@ namespace scarab
                     }
 
                     param_node t_new_default_group, t_new_env_group, t_new_override_group;
-                    LWARN( mtlog, "getting items from group:\n" << t_a_group );
+                    //LWARN( mtlog, "getting items from group:\n" << t_a_group );
                     for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
                     {
                         LDEBUG( mtlog, "Processing item <" << gr_it.name() << ">" );
@@ -193,9 +193,9 @@ namespace scarab
                 } // end loop over groups
             } // end if-have-groups
 
-            LWARN( mtlog, "Default data:\n" << t_default_data );
-            LWARN( mtlog, "Env data:\n" << t_env_data );
-            LWARN( mtlog, "Override data:\n" << t_override_data );
+            //LWARN( mtlog, "Default data:\n" << t_default_data );
+            //LWARN( mtlog, "Env data:\n" << t_env_data );
+            //LWARN( mtlog, "Override data:\n" << t_override_data );
             
             // order of precedence: default --> auth file --> env --> overrides
             f_data.clear();
@@ -203,7 +203,8 @@ namespace scarab
             if( t_file_data_ptr ) f_data.merge( t_file_data_ptr->as_node() );
             f_data.merge( t_env_data );
             f_data.merge( t_override_data );
-            LWARN( mtlog, "Final data:\n" << f_data );
+            LDEBUG( mtlog, "Authentication data processed" );
+            //LWARN( mtlog, "Final data:\n" << f_data );
         }
         catch( const std::exception& e )
         {
@@ -234,7 +235,7 @@ namespace scarab
         param_ptr_t t_file_data_ptr = std::make_unique< param_node >();
 
         t_file_data_ptr->as_node().merge( t_read_file->as_node() );
-        LWARN( mtlog, "File loaded:\n" << t_file_data_ptr->as_node() );
+        //LWARN( mtlog, "File loaded:\n" << t_file_data_ptr->as_node() );
         return t_file_data_ptr;
     }
 
