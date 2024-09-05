@@ -156,27 +156,27 @@ TEST_CASE( "authentication", "[authentication]" )
         std::string t_filename_3_2;
         int fd_3_2 = create_temp_file( t_text, t_filename_3_2 );
 
-        // adding an override file or value should throw before a group exists
-        REQUIRE_THROWS_AS( t_auth.set_override_file( "group3", "name3_2", t_filename_3_2 ), scarab::error );
-        REQUIRE_THROWS_AS( t_auth.set_override_value( "group3", "name3_3", "value3_3" ), scarab::error );
+        // adding an overriding file or value should throw before a group exists
+        REQUIRE_THROWS_AS( t_auth.set_file( "group3", "name3_2", t_filename_3_2 ), scarab::error );
+        REQUIRE_THROWS_AS( t_auth.set_value( "group3", "name3_3", "value3_3" ), scarab::error );
         t_auth.add_item( "group3", "name3_1", "default3_1", "SCARAB_AUTH_TEST_ENV3_1" );
-        // adding an override file or value should throw if the group exists, but the relevant item does not
-        REQUIRE_THROWS_AS( t_auth.set_override_file( "group3", "name3_2", t_filename_3_2 ), scarab::error );
-        REQUIRE_THROWS_AS( t_auth.set_override_value( "group3", "name3_3", "value3_3" ), scarab::error );
+        // adding an overriding file or value should throw if the group exists, but the relevant item does not
+        REQUIRE_THROWS_AS( t_auth.set_file( "group3", "name3_2", t_filename_3_2 ), scarab::error );
+        REQUIRE_THROWS_AS( t_auth.set_value( "group3", "name3_3", "value3_3" ), scarab::error );
         t_auth.add_item( "group3", "name3_2", "default3_2" );
-        REQUIRE_NOTHROW( t_auth.set_override_file( "group3", "name3_2", t_filename_3_2 ) );
+        REQUIRE_NOTHROW( t_auth.set_file( "group3", "name3_2", t_filename_3_2 ) );
         t_auth.add_item( "group3", "name3_3", "default3_3" );
-        REQUIRE_NOTHROW( t_auth.set_override_value( "group3", "name3_3", "value3_3" ) );
+        REQUIRE_NOTHROW( t_auth.set_value( "group3", "name3_3", "value3_3" ) );
         REQUIRE( t_auth.spec()["groups"].as_node().has("group3") ); // group should be there
         REQUIRE( t_auth.spec()["groups"]["group3"].as_node().has("name3_1") ); // item should be there
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_1"]["default"]().as_string(), Equals("default3_1") );
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_1"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3_1") );
         REQUIRE( t_auth.spec()["groups"]["group3"].as_node().has("name3_2") ); // item should be there
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_2"]["default"]().as_string(), Equals("default3_2") );
-        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_2"]["override-file"]().as_string(), Equals(t_filename_3_2) );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_2"]["file"]().as_string(), Equals(t_filename_3_2) );
         REQUIRE( t_auth.spec()["groups"]["group3"].as_node().has("name3_3") ); // item should be there
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_3"]["default"]().as_string(), Equals("default3_3") );
-        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_3"]["override"]().as_string(), Equals("value3_3") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3_3"]["value"]().as_string(), Equals("value3_3") );
 
         t_auth.process_spec();
 
@@ -216,8 +216,8 @@ TEST_CASE( "authentication", "[authentication]" )
                 "name3"_a=scarab::param_node(
                     "default"_a="default3",
                     "env"_a="SCARAB_AUTH_TEST_ENV3",
-                    "override"_a="override3",
-                    "override-file"_a="override-file3"
+                    "value"_a="value3",
+                    "file"_a="file3"
                 )
             )
         );
@@ -235,11 +235,11 @@ TEST_CASE( "authentication", "[authentication]" )
         REQUIRE( t_auth.spec()["groups"]["group3"].as_node().has("name3") ); // item should be there
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["default"]().as_string(), Equals("default3") );
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
-        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["override"]().as_string(), Equals("override3") );
-        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["override-file"]().as_string(), Equals("override-file3") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["value"]().as_string(), Equals("value3") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["file"]().as_string(), Equals("file3") );
     }
 
-    SECTION( "Precedence: default --> file --> env var --> override file --> override value" )
+    SECTION( "Precedence: default --> file --> env var --> file --> value" )
     {
         // scarab.favorite-color is determined by the default
         // scarab.user is determined by the file
@@ -261,10 +261,10 @@ TEST_CASE( "authentication", "[authentication]" )
         t_auth.add_item( "scarab", "user", "default_user", "SCARAB_AUTH_TEST_USER" );
         t_auth.add_item( "scarab", "password", "default_password", "SCARAB_AUTH_TEST_PASSWORD" );
         t_auth.add_item( "scarab", "lorem", "Lorem ipsum", "SCARAB_AUTH_TEST_LOREM_IPSUM" );
-        t_auth.set_override_file( "scarab", "lorem", t_lorem_filename );
+        t_auth.set_file( "scarab", "lorem", t_lorem_filename );
         t_auth.add_item( "scarab", "licks-to-get-to-center-of-tootsie-pop", "one", "SCARAB_AUTH_TEST_LICKS_FOR_TOOTSIE_POP" );
-        t_auth.set_override_file( "scarab", "licks-to-get-to-center-of-tootsie-pop", t_lorem_filename );
-        t_auth.set_override_value( "scarab", "licks-to-get-to-center-of-tootsie-pop", "three" );
+        t_auth.set_file( "scarab", "licks-to-get-to-center-of-tootsie-pop", t_lorem_filename );
+        t_auth.set_value( "scarab", "licks-to-get-to-center-of-tootsie-pop", "three" );
 
         unsetenv( "SCARAB_FAVORITE_COLOR" );
         unsetenv( "SCARAB_AUTH_TEST_USER" );
