@@ -602,12 +602,6 @@ function( pbuilder_add_pybind11_module )
             ${PB11_PRIVATE_EXTERNAL_LIBRARIES} 
     )
 
-    #export( TARGETS ${PB11_MODULE_NAME}
-    #    NAMESPACE ${PROJECT_NAME}::
-    #    APPEND
-    #    FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_PyBind_Targets.cmake
-    #)
-
     set( PY_MODULE_INSTALL_DIR ${LIB_INSTALL_DIR} )
     # Override that install location if specified by the user
     if( DEFINED PBUILDER_PY_INSTALL_IN_SITELIB AND DEFINED Python3_SITELIB )
@@ -616,19 +610,5 @@ function( pbuilder_add_pybind11_module )
     message( STATUS "Installing module ${PY_MODULE_NAME} in ${PY_MODULE_INSTALL_DIR}" )
 
     install( TARGETS ${PB11_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
-#    install( TARGETS ${PB11_MODULE_NAME} 
-#        EXPORT ${PROJECT_NAME}_PyBind_Targets
-#        COMPONENT PyBind
-#        LIBRARY DESTINATION ${PY_MODULE_INSTALL_DIR}
-#    )
-#
-#    message( "Installing export ${PROJECT_NAME}_PyBind_Targets" )
-#    message( STATUS "Output file will be ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}/${PROJECT_NAME}_PyBind_Targets.cmake" )
-#    install( EXPORT ${PROJECT_NAME}_PyBind_Targets
-#        NAMESPACE
-#            ${PROJECT_NAME}::
-#        DESTINATION
-#            ${${PROJECT_NAME}_CMAKE_CONFIG_DIR}
-#    )
 
 endfunction()
