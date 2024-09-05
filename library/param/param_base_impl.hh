@@ -14,6 +14,9 @@
 #include "param_node.hh"
 #include "param_value.hh"
 
+#include "param_modifier.hh"
+#include "param_visitor.hh"
+
 namespace scarab
 {
 
@@ -27,42 +30,16 @@ namespace scarab
         return *this;
     }
 
-    inline param_ptr_t param::clone() const
+    inline void param::accept( const param_modifier& a_modifier )
     {
-        //std::cout << "param::clone()" << std::endl;
-        return param_ptr_t( new param( *this ) );
+        a_modifier( *this );
+        return;
     }
 
-    inline param_ptr_t param::move_clone()
+    inline void param::accept( const param_visitor& a_visitor ) const
     {
-        //std::cout << "param::clone()" << std::endl;
-        return param_ptr_t( new param( std::move(*this) ) );
-    }
-
-    inline bool param::is_null() const
-    {
-        return true;
-    }
-
-    inline bool param::is_value() const
-    {
-        return false;
-    }
-
-    inline bool param::is_array() const
-    {
-        return false;
-    }
-
-    inline bool param::is_node() const
-    {
-        return false;
-    }
-
-    inline bool param::has_subset( const param& /*a_subset*/ ) const
-    {
-        // this version of has_subset should only ever be called if a_subset is a null param (i.e. not one of the derived classes)
-        return true;
+        a_visitor( *this );
+        return;
     }
 
     inline param_value& param::as_value()
@@ -129,6 +106,26 @@ namespace scarab
     inline param& param::operator[]( const std::string& a_name )
     {
         return as_node()[ a_name ];
+    }
+
+    inline const param& param::at( unsigned a_index ) const
+    {
+        return as_array().at( a_index );
+    }
+
+    inline param& param::at( unsigned a_index )
+    {
+        return as_array().at( a_index );
+    }
+
+    inline const param& param::at( const std::string& a_name ) const
+    {
+        return as_node().at( a_name );
+    }
+
+    inline param& param::at( const std::string& a_name )
+    {
+        return as_node().at( a_name );
     }
 
     inline std::string param::get_value( const std::string& a_name, const std::string& a_default ) const

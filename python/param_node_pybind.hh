@@ -45,6 +45,11 @@ namespace scarab_pybind
                     pybind11::arg( "key" ),
                     pybind11::arg( "value" ),
                     "Add a param object to a node at a particular key")
+            .def( "replace",
+                    (void (scarab::param_node::*)(const std::string&, const scarab::param&)) &scarab::param_node::replace,
+                    pybind11::arg( "key" ),
+                    pybind11::arg( "value" ),
+                    "Replace (or add) the param object to a node at a particular key")
 
             // Get value of the parameter, bringing along the default value
             .def( "get_value",
@@ -73,7 +78,18 @@ namespace scarab_pybind
                     pybind11::arg( "default" ),
                     "Get parameter node value at [key] or return [default] (as a string)" )
 
-            //TODO: merge(), erase(), remove(), clear()
+            .def( "merge", &scarab::param_node::merge,
+                    pybind11::arg( "object" ),
+                    "Merge the contents of object into this node" )
+
+            .def( "erase", &scarab::param_node::erase,
+                    pybind11::arg( "erase" ),
+                    "Erase an item from this node" )
+            .def( "remove", &scarab::param_node::remove,
+                    pybind11::arg( "name" ),
+                    "Remove an item from the node and return it" )
+            .def( "clear", &scarab::param_node::clear,
+                    "Erase all contents of this node" )
 
 
             ;

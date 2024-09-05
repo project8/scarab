@@ -7,7 +7,7 @@
 
 #include "test_member_variables.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 
 TEST_CASE( "member_variables", "[utility]" )

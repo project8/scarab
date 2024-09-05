@@ -72,7 +72,6 @@ namespace scarab_pybind
                     pybind11::arg( "index" ),
                     pybind11::arg( "default" ),
                     "Get string parameter array value at index, or return provided value if out of index range" )
-
             .def( "push_back",
                     (void (scarab::param_array::*)(const scarab::param&)) &scarab::param_array::push_back,
                     pybind11::arg( "value" ),

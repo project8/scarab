@@ -51,11 +51,12 @@ endif( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
 set( PBUILDER_DIR ${CMAKE_CURRENT_LIST_DIR} )
 
 # preprocessor defintion for debug build
-if( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
+string( TOLOWER ${CMAKE_BUILD_TYPE} build_type_lower )
+if( "${build_type_lower}" STREQUAL "debug" )
     add_definitions(-D${PROJECT_NAME}_DEBUG )
-else( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
+else( "${build_type_lower}" STREQUAL "debug" )
     remove_definitions(-D${PROJECT_NAME}_DEBUG )    
-endif( "${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG" )
+endif( "${build_type_lower}" STREQUAL "debug" )
 
 message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
 

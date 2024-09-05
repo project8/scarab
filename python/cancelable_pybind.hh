@@ -20,6 +20,12 @@ namespace scarab_pybind
             .def( "reset_cancel", &scarab::cancelable::reset_cancel, SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
             .def( "is_canceled", &scarab::cancelable::is_canceled )
 
+            .def( "wait", &scarab::cancelable::wait, 
+                  SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL,
+                  pybind11::arg("wait_ms"),
+                  pybind11::arg("check_ms") = 500
+                )
+
             ;
 
         return all_members;

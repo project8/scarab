@@ -6,19 +6,23 @@
  */
 
 #include "param.hh"
+#include "param_helpers_impl.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 using scarab::param_array;
 using scarab::param_node;
 using scarab::param_value;
 using scarab::param_ptr_t;
+using scarab::operator""_a;
 
 TEST_CASE( "param_node", "[param]" )
 {
     param_node node;
     REQUIRE( node.empty() );
     REQUIRE( node.size() == 0 );
+    REQUIRE( node.is_node() );
+    REQUIRE( node.type() == "node" );
 
     node.add( "five", 5 );
     REQUIRE_FALSE( node.empty() );
@@ -26,13 +30,13 @@ TEST_CASE( "param_node", "[param]" )
 
     param_array subarray1;
     subarray1.push_back( 500 );
-    node.add( "subarray1", subarray1 );
+    node.add( "subarray1"_a=subarray1 );
     REQUIRE( node.size() == 2 );
     REQUIRE_FALSE( subarray1.empty() );
 
     param_array subarray2;
     subarray2.push_back( "5000" );
-    node.add( "subarray2", std::move(subarray2) );
+    node.add( "subarray2"_a=std::move(subarray2) );
     REQUIRE( node.size() == 3 );
     REQUIRE( subarray2.empty() );
 
@@ -42,8 +46,18 @@ TEST_CASE( "param_node", "[param]" )
     REQUIRE( node.count("five") == 1 );
     REQUIRE( node.count("ten") == 0 );
 
+    // const access
+    const param_node& const_node = node;
+    REQUIRE( const_node["five"]().as_int() == 5 );
+    REQUIRE_THROWS_AS( const_node["twenty"], scarab::error );
+    REQUIRE( const_node.at("five")().as_int() == 5 );
+    REQUIRE_THROWS_AS( const_node.at("twenty"), scarab::error );
+
     // access
     REQUIRE( node["five"]().as_int() == 5 );
+    REQUIRE_THROWS_AS( node["twenty"], scarab::error );
+    REQUIRE( node.at("five")().as_int() == 5 );
+    REQUIRE_THROWS_AS( node.at("twenty"), scarab::error );
     REQUIRE( node.get_value("five", 99999) == 5 );
     REQUIRE( node.get_value("ten", 99999) == 99999 );
     REQUIRE_THROWS_AS( node["subarray1"](), scarab::error );

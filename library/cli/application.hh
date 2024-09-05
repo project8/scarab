@@ -10,8 +10,10 @@
 
 #include "CLI11.hpp"
 
+#include "authentication.hh"
 #include "logger.hh"
 #include "member_variables.hh"
+#include "param.hh"
 #include "param_helpers.hh"
 #include "version_semantic.hh"
 
@@ -57,11 +59,11 @@ namespace scarab
         public:
             config_decorator( main_app* a_main, app* a_this_app );
             config_decorator( const config_decorator& ) = delete;
-            config_decorator( config_decorator&& ) = delete;
-            virtual ~config_decorator();
+            config_decorator( config_decorator&& ) = default;
+            virtual ~config_decorator() = default;
 
             config_decorator& operator=( const config_decorator& ) = delete;
-            config_decorator& operator=( config_decorator&& ) = delete;
+            config_decorator& operator=( config_decorator&& ) = default;
 
             main_app* main() const;
             app* this_app() const;
@@ -253,6 +255,7 @@ namespace scarab
 
      There are several test examples that can be used as useful references on different ways that
      applications can be setup.  You'll find them in the scarab/testing/applications directory.
+     - test_app_with_authentication.cc -- an example that includes an authentication specification
      - test_app_with_callback.cc -- an example that runs a program using a callback function
      - test_app_with_options.cc -- an example using basic CLI11 options (i.e. options that don't modify the configuration)
      - test_app_with_subcommands.cc -- an example with two subcommands.  e.g. my_app do_action_A --an_option=6
@@ -262,7 +265,12 @@ namespace scarab
     {
         public:
             main_app( bool a_use_config = true );
-            virtual ~main_app();
+            main_app( const main_app& ) = delete;
+            main_app( main_app&& ) = default;
+            virtual ~main_app() = default;
+
+            main_app& operator=( const main_app& ) = delete;
+            main_app& operator=( main_app&& ) = default;
 
         public:
             /// parses positional arguments into the global config
@@ -278,6 +286,17 @@ namespace scarab
             virtual void do_config_stage_3();
             /// Load the application-specific options
             virtual void do_config_stage_4();
+            /// Load the modifiers
+            virtual void do_config_stage_5();
+            /// Load authentication with specification and then process the spec
+            virtual void do_authentication();
+
+            /// Set the authentication specification groups in the default config (replaces what was there)
+            void set_default_auth_spec_groups( const scarab::param_node& a_groups );
+            /// Adds the given specification (for a single group) into the authentication specificaiton in the default config
+            void add_default_auth_spec_group( const std::string& a_group_name, const scarab::param_node& a_group_spec );
+            /// Sets the authentication file name in the primary config
+            void set_default_auth_file( const std::string& a_filename );
 
             void set_version( scarab::version_semantic_ptr_t a_ver );
 
@@ -290,7 +309,9 @@ namespace scarab
 
             // configuration stage 2
             /// Configuration file name
-            mv_referrable_const( std::string, config_filename );
+            mv_referrable( std::string, config_filename );
+            /// In case the encoding is not made clear by the file extension
+            mv_referrable( std::string, config_encoding );
 
             // configuration stage 3
             /// Keyword configuration values coming from the command line, in the form: config.address=value
@@ -305,7 +326,14 @@ namespace scarab
             /// Store the app option holder structs from this app and any subcommands
             mv_referrable( std::vector< std::shared_ptr< app_option_holder > >, app_option_holders );
 
-            mv_accessible_noset( bool, use_config );
+            mv_accessible( bool, use_config );
+
+            /// Key used for the authentication groups in the config
+            mv_referrable( std::string, auth_groups_key );
+            /// Key used for the authentication file in the config
+            mv_referrable( std::string, auth_file_key);
+            /// Authentication object
+            mv_referrable( authentication, auth );
 
             //*************************
             // Verbosity

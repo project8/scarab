@@ -173,6 +173,27 @@ namespace scarab
         return *this;
     }
 
+    param_ptr_t param_value::clone() const
+    {
+        //std::cout << "param_value::clone" << std::endl;
+        return param_ptr_t( new param_value( *this ) );
+    }
+
+    param_ptr_t param_value::move_clone()
+    {
+        return param_ptr_t( new param_value( std::move(*this) ) );
+    }
+
+    bool param_value::is_null() const
+    {
+        return false;
+    }
+
+    bool param_value::is_value() const
+    {
+        return true;
+    }
+
     bool param_value::has_subset( const param& a_subset ) const
     {
         if( ! a_subset.is_value() ) return false;

@@ -115,7 +115,12 @@ namespace scarab
     {
         public:
             signal_handler();
+            signal_handler( const signal_handler& ) = delete;
+            signal_handler( signal_handler&& ) = delete;
             virtual ~signal_handler();
+
+            signal_handler& operator=( const signal_handler& ) = delete;
+            signal_handler& operator=( signal_handler&& ) = delete;
 
             /// Static version: add a cancelable object
             static void add_cancelable( std::shared_ptr< cancelable > a_cancelable );

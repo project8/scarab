@@ -49,8 +49,16 @@ namespace scarab
         std::string t_encoding = a_options.get_value( "encoding", "" );
         if( t_encoding.empty() )
         {
-            path t_path = expand_path( a_filename );
-            t_encoding = t_path.extension().string().substr( 1 ); // remove the '.' at the beginning
+            try
+            {
+                path t_path = expand_path( a_filename );
+                t_encoding = t_path.extension().string().substr( 1 ); // remove the '.' at the beginning
+            }
+            catch( const std::exception& e )
+            {
+                LERROR( slog, "Unable to parse the file extension to determine the input codec for file <" << a_filename << ">" );
+                return nullptr;
+            }
         }
 
         param_input_codec* t_codec = factory< param_input_codec >::get_instance()->create( t_encoding );
@@ -92,14 +100,22 @@ namespace scarab
         std::string t_encoding = a_options.get_value( "encoding", "" );
         if( t_encoding.empty() )
         {
-            path t_path = expand_path( a_filename );
-            t_encoding = t_path.extension().string().substr( 1 ); // remove the '.' at the beginning
+            try
+            {
+                path t_path = expand_path( a_filename );
+                t_encoding = t_path.extension().string().substr( 1 ); // remove the '.' at the beginning
+            }
+            catch( const std::exception& e )
+            {
+                LERROR( slog, "Unable to parse the file extension to determine the output codec for file <" << a_filename << ">" );
+                return false;
+            }            
         }
 
         param_output_codec* t_codec = factory< param_output_codec >::get_instance()->create( t_encoding );
         if( t_codec == nullptr )
         {
-            LERROR( slog, "Unable to find output codec for encoding <" << t_encoding << ">");
+            LERROR( slog, "Unable to find output codec for encoding <" << t_encoding << ">" );
             return false;
         }
 

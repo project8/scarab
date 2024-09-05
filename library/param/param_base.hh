@@ -9,6 +9,7 @@
 #define SCARAB_PARAM_BASE_HH_
 
 #include "error.hh"
+#include "param_fwd.hh"
 
 #include <memory>
 #include <sstream>
@@ -16,15 +17,20 @@
 
 namespace scarab
 {
-    class param_value;
-    class param_array;
-    class param_node;
+    
+    /*!
+     @class param
+     @author N. S. Oblath
 
-    class param;
-    typedef std::unique_ptr< param > param_ptr_t;
+     @brief Base param type and null param object
 
+     @details
+    */
     class SCARAB_API param
     {
+        public:
+            using null = param;
+
         public:
             param();
             param( const param& orig );
@@ -37,10 +43,14 @@ namespace scarab
             virtual param_ptr_t clone() const;
             virtual param_ptr_t move_clone();
 
+            virtual void accept( const param_modifier& a_modifier );
+            virtual void accept( const param_visitor& a_visitor ) const;
+
             virtual bool is_null() const;
             virtual bool is_value() const;
             virtual bool is_array() const;
             virtual bool is_node() const;
+            std::string type() const;
 
             virtual bool has_subset( const param& a_subset ) const;
 
@@ -59,17 +69,35 @@ namespace scarab
 
             /// Assumes that the parameter is an array, and returns a reference to the param at a_index.
             /// Behavior is undefined if a_index is out-of-range.
+            /// Note that this behavior differs from the C++ STL sequence-like container behavior
             const param& operator[]( unsigned a_index ) const;
             /// Assumes that the parameter is an array, and returns a reference to the param at a_index.
             /// Behavior is undefined if a_index is out-of-range.
+            /// Note that this behavior differs from the C++ STL sequence-like container behavior
             param& operator[]( unsigned a_index );
 
             /// Assumes that the parameter is a node, and returns a reference to the param corresponding to a_name.
             /// Throws a scarab::error if a_name is not present.
+            /// Note that this behavior differs from the C++ STL map-like container behavior
             const param& operator[]( const std::string& a_name ) const;
             /// Assumes that the parameter is a node, and returns a reference to the param corresponding to a_name.
-            /// Throws a scarab::error if a_name is not present.
+            /// Throws an scarab::error if a_name is not present.
+            /// Note that this behavior differs from the C++ STL map-like container behavior
             param& operator[]( const std::string& a_name );
+
+            /// Assumes that the parameter is an array, and returns a reference to the param at a_index.
+            /// Behavior is undefined if a_index is out-of-range.
+            const param& at( unsigned a_index ) const;
+            /// Assumes that the parameter is an array, and returns a reference to the param at a_index.
+            /// Behavior is undefined if a_index is out-of-range.
+            param& at( unsigned a_index );
+
+            /// Assumes that the parameter is a node, and returns a reference to the param corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            const param& at( const std::string& a_name ) const;
+            /// Assumes that the parameter is a node, and returns a reference to the param corresponding to a_name.
+            /// Throws a scarab::error if a_name is not present.
+            param& at( const std::string& a_name );
 
             /// If the derived param type is param_node, forwards the reqeust to param_node; otherwise throws an error.
             /// Returns the result of param_value::get if a_name is present and is of type param_value

@@ -7,7 +7,7 @@
 
 #include "application.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 
 TEST_CASE( "verbosity", "[cli][logger]" )
