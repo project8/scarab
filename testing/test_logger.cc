@@ -9,7 +9,7 @@
 
 #include "stream_check.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 using scarab::testing::compare_and_clear;
 

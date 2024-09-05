@@ -8,7 +8,8 @@
 
 #include "param.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
 
 using scarab::param_ptr_t;
 using scarab::param_array;
@@ -17,6 +18,8 @@ using scarab::param_node;
 
 TEST_CASE( "param_by_pointer", "[param]" )
 {
+    using Catch::Matchers::WithinULP;
+
     param_ptr_t param_0( new param_node() );
     REQUIRE( param_0 );
     REQUIRE( param_0->is_node() );
@@ -25,7 +28,7 @@ TEST_CASE( "param_by_pointer", "[param]" )
     REQUIRE( param_1->is_value() );
     param_0->as_node().add( "eight", std::move(param_1) );
     REQUIRE_FALSE( param_1 );
-    REQUIRE_THAT( param_0->as_node()["eight"]().as_double(), Catch::WithinULP(8., 10) );
+    REQUIRE_THAT( param_0->as_node()["eight"]().as_double(), WithinULP(8., 10) );
 
     param_ptr_t param_2( new param_array() );
     REQUIRE( param_2->is_array() );

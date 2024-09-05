@@ -11,8 +11,9 @@ namespace scarab
     {
         public:
             error() = default;
+            error(const std::string& a_filename, int a_line );
             error( const error& ) = default;
-            ~error() noexcept = default;
+            virtual ~error() noexcept = default;
     };
 
 }

@@ -28,10 +28,6 @@ namespace scarab
     {
     }
 
-    config_decorator::~config_decorator()
-    {
-    }
-
     config_decorator* config_decorator::add_config_subcommand( std::string a_subcommand_name, std::string a_description )
     {
         app* t_subcommand = f_this->add_subcommand( a_subcommand_name, a_description );
@@ -64,11 +60,15 @@ namespace scarab
             f_primary_config(),
             f_default_config(),
             f_config_filename(),
+            f_config_encoding(),
             f_nonoption_kw_args(),
             f_nonoption_ord_args(),
             f_app_options(),
             f_app_option_holders(),
-            f_use_config( a_use_config )
+            f_use_config( a_use_config ),
+            f_auth_groups_key( "auth-groups" ),
+            f_auth_file_key( "auth-file" ),
+            f_auth()
     {
         set_global_verbosity( logger::ELevel::eProg );
 
@@ -77,6 +77,7 @@ namespace scarab
         if( f_use_config )
         {
             add_option( "-c,--config", f_config_filename, "Config file filename" )->check(CLI::ExistingFile);
+            add_option( "--config-encoding", f_config_encoding, "Config file encoding" );
         }
 
         auto t_verbose_callback = [this]( unsigned a_count )
@@ -99,10 +100,6 @@ namespace scarab
         add_flag_function( "-V,--version", t_version_callback, "Print the version message and exit" );
     }
 
-    main_app::~main_app()
-    {
-    }
-
     void main_app::set_version( scarab::version_semantic_ptr_t a_ver )
     {
         version_wrapper::get_instance()->set_imp( a_ver );
@@ -112,9 +109,9 @@ namespace scarab
     {
         if( f_use_config )
         {
-            do_config_stage_1();
+            do_config_stage_1(); // defaults
 
-            do_config_stage_2();
+            do_config_stage_2(); // config file
 
             try
             {
@@ -128,11 +125,15 @@ namespace scarab
                 throw CLI::ParseError( std::string("Unable to parse remaining arguments due to parse error or unknown option: ") + e.what(), CLI::ExitCodes::ArgumentMismatch );
             }
 
-            do_config_stage_3();
+            do_config_stage_3(); // keyword arguments
 
-            do_config_stage_4();
+            do_config_stage_4(); // application options
 
-            do_config_stage_5();
+            do_config_stage_5(); // additional modifiers (e.g. environment variables)
+
+            do_authentication();
+            // remove auth spec from the configuation
+            f_primary_config.erase( f_auth_groups_key );
 
             LPROG( applog, "Final configuration:\n" << f_primary_config );
             LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
@@ -148,6 +149,7 @@ namespace scarab
 
         LDEBUG( applog, "first configuration stage" );
         f_primary_config.merge( f_default_config );
+        LWARN( applog, "Primary config, after stage 1:\n" << f_primary_config )
         return;
     }
 
@@ -163,7 +165,17 @@ namespace scarab
             path t_config_filepath = scarab::expand_path( f_config_filename );
             LDEBUG( applog, "Loading config file <" << t_config_filepath << "> from filename <" << f_config_filename << ">" );
             param_translator t_translator;
-            std::unique_ptr< param > t_config_from_file( t_translator.read_file( t_config_filepath.string() ));
+            std::unique_ptr< param > t_config_from_file;
+            if( f_config_encoding.empty() )
+            {
+                t_config_from_file = t_translator.read_file( t_config_filepath.string() );
+            }
+            else
+            {
+                param_node t_file_opts;
+                t_file_opts.add( "encoding", f_config_encoding );
+                t_config_from_file = t_translator.read_file( t_config_filepath.string(), t_file_opts );
+            }
             if( t_config_from_file == NULL )
             {
                 throw error() << "[application] error parsing config file";
@@ -174,6 +186,7 @@ namespace scarab
             }
             f_primary_config.merge( t_config_from_file->as_node() );
         }
+        LWARN( applog, "Primary config, after stage 2:\n" << f_primary_config )
         return;
     }
 
@@ -185,6 +198,7 @@ namespace scarab
 
         LDEBUG( applog, "third configuration stage" );
         f_primary_config.merge( f_nonoption_kw_args );
+        LWARN( applog, "Primary config, after stage 3:\n" << f_primary_config )
         return;
     }
 
@@ -196,7 +210,58 @@ namespace scarab
 
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
+        LWARN( applog, "App options, before stage-4 merge:\n" << f_app_options );
         f_primary_config.merge( f_app_options );
+        LWARN( applog, "Primary config, after stage 4:\n" << f_primary_config )
+        return;
+    }
+
+    void main_app::do_config_stage_5()
+    {
+        // fifth configuration stage: additional modification of param_node:
+        // * environment variable substitution for ENV{[var]} tokens
+
+        if( ! f_use_config ) return;
+
+        param_env_modifier t_modifier;
+        t_modifier( f_primary_config );
+        LWARN( applog, "Primary config, after stage 5:\n" << f_primary_config )
+        return;
+    }
+
+    void main_app::do_authentication()
+    {
+        // Load the authentication specification into the authentication object
+        // Will throw scarab::error if the spec is not properly formatted
+        if( f_primary_config.has( f_auth_groups_key ) )
+        {
+            f_auth.add_groups( f_primary_config[f_auth_groups_key].as_node() );
+        }
+        if( f_primary_config.has( f_auth_file_key ) )
+        {
+            f_auth.set_auth_file( f_primary_config[f_auth_file_key]().as_string() );
+        }
+
+        f_auth.process_spec();
+        return;
+    }
+
+    void main_app::set_default_auth_spec_groups( const scarab::param_node& a_groups )
+    {
+        f_default_config.replace( f_auth_groups_key, a_groups );
+        return;
+    }
+
+    void main_app::add_default_auth_spec_group( const std::string& a_group_name, const scarab::param_node& a_spec_group )
+    {
+        if( ! f_default_config.has(f_auth_groups_key) ) f_default_config.add( f_auth_groups_key, scarab::param_node() );
+        f_default_config[f_auth_groups_key].as_node().replace( a_group_name, a_spec_group );
+        return;
+    }
+
+    void main_app::set_default_auth_file( const std::string& a_filename )
+    {
+        f_default_config.replace( f_auth_file_key, a_filename );
         return;
     }
 
@@ -259,15 +324,5 @@ namespace scarab
         applog.SetGlobalLevel( f_global_verbosity->second );
         return;
     }
-
-    void main_app::do_config_stage_5()
-    {
-        // fifth configuration stage: additional modification of param_node:
-        // * environment variable substitution for ENV{[var]} tokens
-        param_env_modifier t_modifier;
-        t_modifier( f_primary_config );
-        return;
-    }
-
 
 } /* namespace scarab */

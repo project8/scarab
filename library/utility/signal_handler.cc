@@ -401,11 +401,27 @@ namespace scarab
                 else { std::cerr << "Rethrowing current exception" << std::endl; }
                 std::rethrow_exception( t_exc_ptr ); // throw to recognize the type
             }
-            catch( const std::exception& e ) {
+            catch( const scarab::error& e ) 
+            {
+                if( a_use_logging ) 
+                { 
+                    LERROR( slog, "Caught unhandled exception. what(): " << e.what() ); 
+                    LERROR( slog, "\twhere(): " << e.where() );
+                }
+                else 
+                { 
+                    std::cerr << "Caught unhandled exception. what(): " << e.what() << std::endl; 
+                    std::cerr << "\twhere(): " << e.where() << std::endl;;
+                }
+
+            }
+            catch( const std::exception& e ) 
+            {
                 if( a_use_logging ) { LERROR( slog, "Caught unhandled exception. what(): " << e.what() ); }
                 else { std::cerr << "Caught unhandled exception. what(): " << e.what() << std::endl; }
             }
-            catch( ... ) {
+            catch( ... ) 
+            {
                 if( a_use_logging ) LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." )
                 else { std::cerr << "Caught unknown (non-std::exception) & unhandled exception." << std::endl; }
             }

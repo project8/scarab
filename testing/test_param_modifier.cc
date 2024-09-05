@@ -9,7 +9,7 @@
 
 #include "param_helpers_impl.hh"
 
-#include "catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 LOGGER( tlog, "test_param_modifier" )
 

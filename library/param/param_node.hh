@@ -13,6 +13,8 @@
 #include "param_value.hh"
 #include "param_visitor.hh"
 
+#include "error.hh"
+
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -129,10 +131,19 @@ namespace scarab
             XValType get_value( const std::string& a_name, XValType a_default ) const;
 
             /// Returns a reference to the param corresponding to a_name.
-            /// Throws an std::out_of_range if a_name is not present.
-            const param& operator[]( const std::string& a_name ) const;
+            /// Throws an scarab::error if a_name is not present.
+            const param& at( const std::string& a_name ) const;
             /// Returns a reference to the param corresponding to a_name.
             /// Throws an std::out_of_range if a_name is not present.
+            param& at( const std::string& a_name );
+
+            /// Returns a reference to the param corresponding to a_name.
+            /// Throws an scarab::error if a_name is not present.
+            /// Note that this behavior differs from the C++ STL map-like container behavior
+            const param& operator[]( const std::string& a_name ) const;
+            /// Returns a reference to the param corresponding to a_name.
+            /// Throws an scarab::error if a_name is not present.
+            /// Note that this behavior differs from the C++ STL map-like container behavior
             param& operator[]( const std::string& a_name );
 
             /// Adds an item or items to the node if items with the given names aren't already present.
@@ -226,7 +237,7 @@ namespace scarab
 
     inline std::string param_node::get_value( const std::string& a_name, const std::string& a_default ) const
     {
-        return has( a_name ) ? operator[]( a_name ).to_string() : a_default;
+        return has( a_name ) ? at( a_name ).to_string() : a_default;
     }
 
     inline std::string param_node::get_value( const std::string& a_name, const char* a_default ) const
@@ -234,14 +245,38 @@ namespace scarab
         return get_value( a_name, std::string( a_default ) );
     }
 
+    inline const param& param_node::at( const std::string& a_name ) const
+    {
+        try
+        {
+            return *f_contents.at( a_name );
+        }
+        catch( const std::out_of_range& )
+        {
+            throw error( __FILE__, __LINE__ ) << "Param node does not have item with key <" << a_name << ">";
+        }
+    }
+
+    inline param& param_node::at( const std::string& a_name )
+    {
+        try
+        {
+            return *f_contents.at( a_name );
+        }
+        catch( const std::out_of_range& )
+        {
+            throw error( __FILE__, __LINE__ ) << "Param node does not have item with key <" << a_name << ">";
+        }
+    }
+
     inline const param& param_node::operator[]( const std::string& a_name ) const
     {
-        return *f_contents.at( a_name );
+        return at( a_name );
     }
 
     inline param& param_node::operator[]( const std::string& a_name )
     {
-        return *f_contents.at( a_name );
+        return at( a_name );
     }
 
     template< typename T >

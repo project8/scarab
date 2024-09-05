@@ -386,10 +386,17 @@ function( pbuilder_component_install_and_export )
         set( INSERT_COMPONENT "_${CIE_COMPONENT}" )
     endif()
 
+    if( CIE_NAMESPACE )
+        message( "Doing installation of targets with namespace ${CIE_NAMESPACE}" )
+    else()
+        message( "Doing installation of targets with no namespace" )
+    endif()
+    message( "Targets are: (libs) ${CIE_LIBTARGETS} and (exes) ${CIE_EXETARGETS}" )
+
     # Libraries
     if( CIE_LIBTARGETS )
         message( "Installing and exporting libraries for component <${CIE_COMPONENT}>" )
-        message( STATUS "Targets are: ${CIE_LIBTARGETS}" )
+        message( STATUS "Library targets are: ${CIE_LIBTARGETS}" )
 
         # expand library names
         pbuilder_expand_lib_names( ${CIE_LIBTARGETS} )
@@ -417,13 +424,12 @@ function( pbuilder_component_install_and_export )
             COMPONENT ${CIE_COMPONENT}
             LIBRARY DESTINATION ${LIB_INSTALL_DIR}
         )
-endif()
+    endif()
 
     # Executables
     if( CIE_EXETARGETS )
         message( "Installing and exporting executables for component <${CIE_COMPONENT}>" )
-        message( STATUS "Targets are: ${CIE_EXETARGETS}" )
-
+        message( STATUS "Executable targets are: ${CIE_EXETARGETS}" )
         
         # make targets available at build time
         #message( STATUS "******* build-time exe targets file: ${PROJECT_BINARY_DIR}/${PROJECT_NAME}${INSERT_COMPONENT}_Targets.cmake" )
@@ -604,5 +610,5 @@ function( pbuilder_add_pybind11_module )
     message( STATUS "Installing module ${PY_MODULE_NAME} in ${PY_MODULE_INSTALL_DIR}" )
 
     install( TARGETS ${PB11_MODULE_NAME} DESTINATION ${PY_MODULE_INSTALL_DIR} )
-    
+
 endfunction()

@@ -30,6 +30,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
 set( Scarab_SOURCES ${Scarab_SOURCES}
     ${dir}/cancelable.cc
     ${dir}/digital.cc
+    ${dir}/error.cc
     ${dir}/path.cc
     ${dir}/signal_handler.cc
     ${dir}/time.cc

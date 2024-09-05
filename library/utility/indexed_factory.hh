@@ -221,7 +221,7 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     void indexed_factory< XIndexType, XBaseType, XArgs... >::remove_class(const XIndexType& a_index )
     {
-        LDEBUG( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
+        LTRACE( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;
@@ -347,7 +347,7 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     void indexed_factory< XIndexType, XBaseType, void >::remove_class(const XIndexType& a_index )
     {
-        LDEBUG( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
+        LTRACE( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;

@@ -14,19 +14,86 @@
 
 namespace scarab
 {
+    /*!
+     @class authentication
+     @author N. S. Oblath
 
-    class SCARAB_API authentication : public param_node
+     @brief Loads authentication information from configuration information, an authentication file or environment variables
+
+     @details
+     The interface to this class is split into two parts, the first addressing the authentication specification, and 
+     the second addressing the authentication data.
+
+     ### Specification interface
+     Groups and items are added with add_group() and add_item(), respectively.  add_item() requires specification 
+     of the enclosing group, which will add that group if it's not already there.  For each item, the name and 
+     default value are required, while the environment variable is optional.
+
+     An item can be specified from a file with `set_file()`.  
+     An item can also be specified directly with `set_value()`.  
+     In both cases, the item they're being added to must already exist; otherwise a 
+     scarab::error will be thrown.
+
+     The authentication file is set with set_auth_file().
+
+     When the specification is complete, process_specification() is used to convert the specification to data.
+
+     ### Data interface
+
+     Once the data has been created, individual items can be accessed with the get() function.
+    */
+    class SCARAB_API authentication
     {
         public:
-            authentication( const std::string& a_auth_file );
-            ~authentication();
+            authentication();
+            authentication( const authentication& ) = default;
+            authentication( authentication&& ) = default;
+            virtual ~authentication() = default;
+
+            authentication& operator=( const authentication& ) = default;
+            authentication& operator=( authentication&& ) = default;
 
         public:
-            bool load( const std::string& a_auth_file );
+            /// Adds a group to the specification; replaces the group in the spec if it already exists
+            void add_group( const std::string& a_group );
+            /// Adds an item to a group; adds the group if it doesn't exist; replaces the item in the spec if it already exists
+            void add_item( const std::string& a_group, const std::string& a_name, const std::string& a_default, const std::string& an_env = "" );
+            /// Adds a set of groups; for each group provided, replaces the group in the spec if it already exists
+            void add_groups( const scarab::param_node& a_groups_node );
+            /// Sets a file for an existing item; if the item does not already exist, throws scarab::error
+            void set_file( const std::string& a_group, const std::string& a_name, const std::string& a_filename );
+            /// Sets a value for an existing item; if the item does not already exist, throws scarab::error
+            void set_value( const std::string& a_group, const std::string& a_name, const std::string& a_value );
+
+            /// Sets the filename for an authentication file; note that auth files are not the preferred way of setting up authentication
+            void set_auth_file( const std::string& a_filename, const scarab::param_node& a_read_opts = scarab::param_node() );
+
+            void process_spec();
+
+            mv_referrable( scarab::param_node, spec );
+
+        protected:
+            param_ptr_t load_from_auth_file( const std::string& a_auth_file, const scarab::param_node& a_read_opts ) const;
+            std::string read_from_file( const std::string& a_filename ) const;
 
         public:
-            mv_referrable( std::string, auth_filename );
-            mv_accessible_noset( bool, is_loaded );
+            /// Check whether a group exists in the data
+            bool has( const std::string& a_group ) const;
+            /// Check whether a group/item combination exists in the data
+            bool has( const std::string& a_group, const std::string& an_item ) const;
+
+            /// Retrieve a particular item from the authentication data
+            /// Will throw std::out_of_range if the group or item does not exist
+            std::string get( const std::string& a_group, const std::string& an_item ) const;
+            /// Retrieve a particular item from the authentication data
+            /// Returns the default if the group or item does not exist
+            std::string get( const std::string& a_group, const std::string& an_item, const std::string& a_default ) const;
+
+            mv_referrable( scarab::param_node, data );
+
+        public:
+            /// Check that a file exists and return its path; throws scarab::error if the file does not exist
+            path check_path( const std::string& a_filename ) const;
 
     };
 

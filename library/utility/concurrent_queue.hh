@@ -48,17 +48,59 @@ namespace scarab
 
         public:
             concurrent_queue() :
-                f_queue(),
-                f_interrupt( false ),
-                f_timeout( std::chrono::milliseconds( 1000 ) ),
-                f_mutex(),
-                f_condition_var()
+                    f_queue(),
+                    f_interrupt( false ),
+                    f_timeout( std::chrono::milliseconds( 1000 ) ),
+                    f_mutex(),
+                    f_condition_var()
+            {}
+
+            concurrent_queue( const concurrent_queue& ) = delete;
+
+            concurrent_queue( concurrent_queue&& a_orig ) :
+                    f_queue(),
+                    f_interrupt(),
+                    f_timeout(),
+                    f_mutex(),
+                    f_condition_var()
             {
+                // This is a tricky operation given that threads might be waiting on a_orig's queue
+                // First lock the mutex
+                cq_lock orig_log( a_orig.f_mutex );
+                cq_lock lock( f_mutex );
+
+                // Move everything
+                f_queue = std::move( a_orig.f_queue );
+                f_interrupt = a_orig.f_interrupt;
+                f_timeout = std::move( a_orig.f_timeout );
+
+                // Release any waits on a_orig's queue
+                a_orig.f_condition_var.notify_all();
             }
 
             virtual ~concurrent_queue()
             {
                 f_queue.clear();
+            }
+
+            concurrent_queue& operator=( const concurrent_queue& ) = delete;
+
+            concurrent_queue& operator=( concurrent_queue&& a_orig )
+            {
+                // This is a tricky operation given that threads might be waiting on a_orig's queue
+                // First lock the mutex
+                cq_lock orig_log( a_orig.f_mutex );
+                cq_lock lock( f_mutex );
+                
+                // Move everything
+                f_queue = std::move( a_orig.f_queue );
+                f_interrupt = a_orig.f_interrupt;
+                f_timeout = std::move( a_orig.f_timeout );
+
+                // Release any waits on a_orig's queue
+                a_orig.f_condition_var.notify_all();
+
+                return *this;
             }
 
         private:
