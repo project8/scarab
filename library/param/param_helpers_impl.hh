@@ -10,6 +10,7 @@
 
 #include "param_helpers.hh"
 
+#include "param.hh"
 #include "param_array.hh"
 #include "param_node.hh"
 #include "param_value.hh"

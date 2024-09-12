@@ -149,7 +149,7 @@ namespace scarab
 
         LDEBUG( applog, "first configuration stage" );
         f_primary_config.merge( f_default_config );
-        LWARN( applog, "Primary config, after stage 1:\n" << f_primary_config )
+        //LWARN( applog, "Primary config, after stage 1:\n" << f_primary_config )
         return;
     }
 
@@ -186,7 +186,7 @@ namespace scarab
             }
             f_primary_config.merge( t_config_from_file->as_node() );
         }
-        LWARN( applog, "Primary config, after stage 2:\n" << f_primary_config )
+        //LWARN( applog, "Primary config, after stage 2:\n" << f_primary_config )
         return;
     }
 
@@ -198,7 +198,7 @@ namespace scarab
 
         LDEBUG( applog, "third configuration stage" );
         f_primary_config.merge( f_nonoption_kw_args );
-        LWARN( applog, "Primary config, after stage 3:\n" << f_primary_config )
+        //LWARN( applog, "Primary config, after stage 3:\n" << f_primary_config )
         return;
     }
 
@@ -208,11 +208,12 @@ namespace scarab
 
         if( ! f_use_config ) return;
 
+        LDEBUG( applog, "fourth configuration stage" );
         std::for_each( f_app_option_holders.begin(), f_app_option_holders.end(),
                        [this]( std::shared_ptr< app_option_holder > a_ptr ){ a_ptr->add_to_app_options(f_app_options); } );
-        LWARN( applog, "App options, before stage-4 merge:\n" << f_app_options );
+        //LWARN( applog, "App options, before stage-4 merge:\n" << f_app_options );
         f_primary_config.merge( f_app_options );
-        LWARN( applog, "Primary config, after stage 4:\n" << f_primary_config )
+        //LWARN( applog, "Primary config, after stage 4:\n" << f_primary_config )
         return;
     }
 
@@ -223,14 +224,16 @@ namespace scarab
 
         if( ! f_use_config ) return;
 
+        LDEBUG( applog, "fifth configuration stage" );
         param_env_modifier t_modifier;
         t_modifier( f_primary_config );
-        LWARN( applog, "Primary config, after stage 5:\n" << f_primary_config )
+        //LWARN( applog, "Primary config, after stage 5:\n" << f_primary_config )
         return;
     }
 
     void main_app::do_authentication()
     {
+        LDEBUG( applog, "Handling authentication" );
         // Load the authentication specification into the authentication object
         // Will throw scarab::error if the spec is not properly formatted
         if( f_primary_config.has( f_auth_groups_key ) )
