@@ -25,6 +25,8 @@
 
 using namespace std;
 
+static scarab::plog_initializer the_plog;
+
 namespace scarab
 {
     const string& EndColor()   {static string* color = new string(COLOR_PREFIX COLOR_NORMAL COLOR_SUFFIX); return *color;}

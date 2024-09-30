@@ -6,13 +6,13 @@
 
 #include "logger.hh"
 
-LOGGER( plog, "print" );
+LOGGER( parlog, "print" );
 
 namespace pbtest
 {
     void print( const scarab::param& a_param )
     {
-        LINFO( plog, a_param );
+        LINFO( parlog, a_param );
         return;
     }
 }

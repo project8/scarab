@@ -16,7 +16,7 @@
 #include <cstdlib>
 #include <regex>
 
-LOGGER( plog, "param_env_modifier" );
+LOGGER( parlog, "param_env_modifier" );
 
 namespace scarab
 {
@@ -34,13 +34,13 @@ namespace scarab
             // first we search for the search pattern
             // this should find exactly one match, if there's a match present
             // t_matches should be 2 because there's one match for the full pattern, and one match for what's in parentheses
-            //LWARN( plog, "the pattern: " << f_pattern_buffer );
+            //LWARN( parlog, "the pattern: " << f_pattern_buffer );
             if( std::smatch t_matches; std::regex_search( a_string, t_matches, std::regex( f_pattern_buffer ) ) )
             {
-                //LWARN( plog, "Number of matches: " << t_matches.size() );
+                //LWARN( parlog, "Number of matches: " << t_matches.size() );
                 //for( unsigned i = 0; i < t_matches.size(); ++i )
                 //{
-                //    LWARN( plog, "Match " << i << ": " << t_matches[i] );
+                //    LWARN( parlog, "Match " << i << ": " << t_matches[i] );
                 //}
                 if( t_matches.size() != 2 )
                 {
@@ -56,11 +56,11 @@ namespace scarab
                     // now we do the var replacement
                     // this should replace all matches to the ENV{variable_name}
                     std::string t_var_name( t_matches[1] );
-                    //LWARN( plog, "Var name is " << t_var_name );
+                    //LWARN( parlog, "Var name is " << t_var_name );
                     std::string t_var_pattern_buffer = f_parent->prefix() + t_var_name + f_parent->postfix();
                     const std::regex t_repl_pattern( t_var_pattern_buffer );
                     a_string = std::move( std::regex_replace( a_string, t_repl_pattern, t_value ) );
-                    LDEBUG( plog, "String after env replacement: " << a_string );
+                    LDEBUG( parlog, "String after env replacement: " << a_string );
                     return true;
 
                 }
@@ -68,13 +68,13 @@ namespace scarab
                 // if scarab::error was thrown, then that indicates the environment variable was not found, and we want that to propagate upwards
                 catch( const std::regex_error& e )
                 {
-                    LERROR( plog, "Regex error: " << e.what() );
+                    LERROR( parlog, "Regex error: " << e.what() );
                     throw scarab::error() << e.what();
                 }
                 
 
             }
-            //LWARN( plog, "No matches" );
+            //LWARN( parlog, "No matches" );
             return false;
         }
 
@@ -84,7 +84,7 @@ namespace scarab
             {
                 return std::string( t_env_value );
             }
-            LERROR( plog, "Environment variable not found: " << a_var );
+            LERROR( parlog, "Environment variable not found: " << a_var );
             throw error() << "Did not find environment variable <" << a_var << ">";
         }
 };

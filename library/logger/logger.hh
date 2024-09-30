@@ -12,6 +12,11 @@
 #include "macros.hh"
 #include "scarab_api.hh"
 
+#include <plog/Init.h>
+#include <plog/Log.h>
+#include <plog/Appenders/ColorConsoleAppender.h>
+#include <plog/Formatters/TxtFormatter.h>
+
 #include <memory>
 
 /**
@@ -302,7 +307,7 @@ namespace scarab
 }
 
 // PRIVATE MACROS
-
+/*
 #define __DEFAULT_LOGGER        scarab::logger::GetRootLogger()
 
 #define __LOG_LOCATION         scarab::logger::Location(__FILE__, __FUNC__, __LINE__)
@@ -318,10 +323,6 @@ namespace scarab
     } \
         }
 
-
-#define __LOG_LOG_3(I,L,M)     __LOG_LOG_4(I,L,M,false)
-#define __LOG_LOG_2(L,M)       __LOG_LOG_4(__DEFAULT_LOGGER,L,M,false)
-#define __LOG_LOG_1(M)         __LOG_LOG_4(__DEFAULT_LOGGER,Debug,M,false)
 
 #define __LOG_TRACE_2(I,M)     __LOG_LOG_4(I,Trace,M,false)
 #define __LOG_TRACE_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Trace,M,false)
@@ -341,73 +342,64 @@ namespace scarab
 #define __LOG_ERROR_2(I,M)     __LOG_LOG_4(I,Error,M,false)
 #define __LOG_ERROR_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Error,M,false)
 
-#define __LOG_FATAL_2(I,M)     __LOG_LOG_4(I,Fatal,M,false)
+#define __LOG_FATAL_2(I,M)     PLOG_FATAL_(I) << __LOG_LOG_4(I,Fatal,M,false)
 #define __LOG_FATAL_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Fatal,M,false)
-
-#define __LOG_ASSERT_3(I,C,M)  if (!(C)) { __LOG_ERROR_2(I,M) }
-#define __LOG_ASSERT_2(C,M)    __LOG_ASSERT_3(__DEFAULT_LOGGER,C,M)
-
-
-#define __LOG_LOG_ONCE_3(I,L,M)     __LOG_LOG_4(I,L,M,true)
-#define __LOG_LOG_ONCE_2(L,M)       __LOG_LOG_4(__DEFAULT_LOGGER,L,M,true)
-#define __LOG_LOG_ONCE_1(M)         __LOG_LOG_4(__DEFAULT_LOGGER,Debug,M,true)
-
-#define __LOG_TRACE_ONCE_2(I,M)     __LOG_LOG_4(I,Trace,M,true)
-#define __LOG_TRACE_ONCE_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Trace,M,true)
-
-#define __LOG_DEBUG_ONCE_2(I,M)     __LOG_LOG_4(I,Debug,M,true)
-#define __LOG_DEBUG_ONCE_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Debug,M,true)
-
-#define __LOG_INFO_ONCE_2(I,M)      __LOG_LOG_4(I,Info,M,true)
-#define __LOG_INFO_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Info,M,true)
-
-#define __LOG_PROG_ONCE_2(I,M)      __LOG_LOG_4(I,Prog,M,true)
-#define __LOG_PROG_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Prog,M,true)
-
-#define __LOG_WARN_ONCE_2(I,M)      __LOG_LOG_4(I,Warn,M,true)
-#define __LOG_WARN_ONCE_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Warn,M,true)
-
-#define __LOG_ERROR_ONCE_2(I,M)     __LOG_LOG_4(I,Error,M,true)
-#define __LOG_ERROR_ONCE_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Error,M,true)
-
-#define __LOG_FATAL_ONCE_2(I,M)     __LOG_LOG_4(I,Fatal,M,true)
-#define __LOG_FATAL_ONCE_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Fatal,M,true)
-
-
+*/
 // PUBLIC MACROS
+
+//namespace scarab
+//{
+//    struct plog_adapter
+//    {
+//
+//    }
+//}
 
 #define LOGGER(I,K)      static scarab::logger I(K);
 
+//#define LOGGER(I,K)  \
+//std::string t_logger_name(STRINGIFY(I));
+//scarab::factory< plog_adapter >* t_factory = scarab::factory< plog_adapter >::get_instance();
+//if( t_factory->has_class(t_logger_name) )
+//{
+//
+//}
+
+namespace scarab
+{
+    struct plog_initializer
+    {
+        plog_initializer()
+        {
+            static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
+            plog::init(plog::debug, &consoleAppender);
+            static int counter = 0;
+            ++counter;
+            std::cerr << "Counter: " << counter << std::endl;
+        }
+    };
+}
+
+//#define LOGGER(I,K) static std::string I(K);
+
 #ifndef _WIN32
 
-#define LOG(...)          macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
-#ifdef NDEBUG
-#define LTRACE(...)
-#define LDEBUG(...)
-#else
-#define LTRACE(...)       macro_dispatcher(__LOG_TRACE_, __VA_ARGS__)(__VA_ARGS__)
-#define LDEBUG(...)       macro_dispatcher(__LOG_DEBUG_, __VA_ARGS__)(__VA_ARGS__)
-#endif
-#define LINFO(...)        macro_dispatcher(__LOG_INFO_, __VA_ARGS__)(__VA_ARGS__)
-#define LPROG(...)        macro_dispatcher(__LOG_PROG_, __VA_ARGS__)(__VA_ARGS__)
-#define LWARN(...)        macro_dispatcher(__LOG_WARN_, __VA_ARGS__)(__VA_ARGS__)
-#define LERROR(...)       macro_dispatcher(__LOG_ERROR_, __VA_ARGS__)(__VA_ARGS__)
-#define LFATAL(...)       macro_dispatcher(__LOG_FATAL_, __VA_ARGS__)(__VA_ARGS__)
-#define LASSERT(...)      macro_dispatcher(__LOG_ASSERT_, __VA_ARGS__)(__VA_ARGS__)
+//#define LOG(...)          macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
+#define LTRACE(logger, ...)       PLOG_VERBOSE << __VA_ARGS__;
+#define LDEBUG(logger, ...)       PLOG_DEBUG << __VA_ARGS__;
+#define LINFO(logger, ...)        PLOG_INFO << __VA_ARGS__;
+#define LPROG(logger, ...)        PLOG_NONE << __VA_ARGS__;
+#define LWARN(logger, ...)        PLOG_WARNING << __VA_ARGS__;
+#define LERROR(logger, ...)       PLOG_ERROR << __VA_ARGS__;
+#define LFATAL(logger, ...)       PLOG_FATAL << __VA_ARGS__;
 
-#define LOG_ONCE(...)     macro_dispatcher(__LOG_LOG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#ifdef NDEBUG
-#define LTRACE_ONCE(...)
-#define LDEBUG_ONCE(...)
-#else
-#define LTRACE_ONCE(...)  macro_dispatcher(__LOG_TRACE_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define LDEBUG_ONCE(...)  macro_dispatcher(__LOG_DEBUG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#endif
-#define LINFO_ONCE(...)   macro_dispatcher(__LOG_INFO_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define LPROG_ONCE(...)   macro_dispatcher(__LOG_PROG_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define LWARN_ONCE(...)   macro_dispatcher(__LOG_WARN_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define LERROR_ONCE(...)  macro_dispatcher(__LOG_ERROR_ONCE_, __VA_ARGS__)(__VA_ARGS__)
-#define LFATAL_ONCE(...)  macro_dispatcher(__LOG_FATAL_ONCE_, __VA_ARGS__)(__VA_ARGS__)
+//#define LTRACE(...)       macro_dispatcher(__LOG_TRACE, __VA_ARGS__)(__VA_ARGS__)
+//#define LDEBUG(...)       macro_dispatcher(__LOG_DEBUG, __VA_ARGS__)(__VA_ARGS__)
+//#define LINFO(...)        macro_dispatcher(__LOG_INFO, __VA_ARGS__)(__VA_ARGS__)
+//#define LPROG(...)        macro_dispatcher(__LOG_PROG, __VA_ARGS__)(__VA_ARGS__)
+//#define LWARN(...)        macro_dispatcher(__LOG_WARN, __VA_ARGS__)(__VA_ARGS__)
+//#define LERROR(...)       macro_dispatcher(__LOG_ERROR, __VA_ARGS__)(__VA_ARGS__)
+//#define LFATAL(...)       macro_dispatcher(__LOG_FATAL, __VA_ARGS__)(__VA_ARGS__)
 
 #else /*_WIN32*/
 

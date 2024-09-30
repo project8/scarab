@@ -42,7 +42,6 @@ set( testing_SOURCES
     test_member_variables.cc
     test_signal_handler.cc
     test_time.cc
-    test_verbosity.cc
     ${CMAKE_CURRENT_BINARY_DIR}/test_path.cc 
 )
 
@@ -84,6 +83,7 @@ if( Scarab_BUILD_CLI )
         ${testing_SOURCES}
         test_main_app.cc
         test_nonoption_parser.cc
+        test_verbosity.cc
     )
 endif( Scarab_BUILD_CLI )
 

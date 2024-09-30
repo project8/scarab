@@ -13,7 +13,7 @@
 
 #include "logger.hh"
 
-LOGGER( plog, "param_visitor" );
+LOGGER( parlog, "param_visitor" );
 
 namespace scarab
 {
@@ -54,24 +54,24 @@ namespace scarab
         param_visitor_callback::param_visitor_callback() :
                 param_visitor(),
                 f_param_callback( [](const param&) {
-                    LDEBUG( plog, "param callback" );
+                    LDEBUG( parlog, "param callback" );
                 }),
                 f_param_array_callback( [this](const param_array& an_array) {
-                    LDEBUG( plog, "param_array callback: " << an_array );
+                    LDEBUG( parlog, "param_array callback: " << an_array );
                     for( const auto& it: an_array )
                     {
                         it.accept( *this );
                     }
                 }),
                 f_param_node_callback( [this](const param_node& a_node) {
-                    LDEBUG( plog, "param_node callback: " << a_node );
+                    LDEBUG( parlog, "param_node callback: " << a_node );
                     for( const auto& it: a_node )
                     {
                         it.accept( *this );
                     }
                 }),
                 f_param_value_callback( [](const param_value& a_value) {
-                    LDEBUG( plog, "param_value callback: " << a_value );
+                    LDEBUG( parlog, "param_value callback: " << a_value );
                 })
         {}
 

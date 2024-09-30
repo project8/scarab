@@ -64,6 +64,10 @@ set( CMAKE_CXX_STANDARD 17 )
 set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
+# logging
+find_package( plog REQUIRED )
+list( APPEND PRIVATE_EXT_LIBS plog::plog )
+
 if( Scarab_BUILD_CODEC_JSON )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
     

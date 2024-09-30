@@ -11,7 +11,7 @@
 
 #include "logger.hh"
 
-LOGGER( plog, "param_helpers" );
+LOGGER( parlog, "param_helpers" );
 
 namespace scarab
 {
@@ -109,18 +109,18 @@ namespace scarab
         // we've found the value; now check if it's a number or a string
         if( a_value.empty() )
         {
-            LTRACE( plog, "Parsed value as NULL" );
+            LTRACE( parlog, "Parsed value as NULL" );
             return std::unique_ptr< param >( new param() );
         }
         // if "true" or "false", then bool
         else if( a_value == "true" )
         {
-            LTRACE( plog, "Parsing value (" << a_value << ") as bool(true)" );
+            LTRACE( parlog, "Parsing value (" << a_value << ") as bool(true)" );
             return std::unique_ptr< param_value >( new param_value( true ) );
         }
         else if( a_value == "false" )
         {
-            LTRACE( plog, "Parsing value (" << a_value << ") as bool(false)" );
+            LTRACE( parlog, "Parsing value (" << a_value << ") as bool(false)" );
             return std::unique_ptr< param_value >( new param_value( false ) );
         }
         else
@@ -140,26 +140,26 @@ namespace scarab
                     a_value.find( 'E' ) != std::string::npos )
                 {
                     // value is a floating-point number, since it has a decimal point
-                    LTRACE( plog, "Parsing value (" << a_value << ") as double(" << t_double << ")" );
+                    LTRACE( parlog, "Parsing value (" << a_value << ") as double(" << t_double << ")" );
                     return std::unique_ptr< param_value >( new param_value( t_double ) );
                 }
                 else if( a_value[ 0 ] == '-' )
                 {
                     // value is a signed integer if it's negative
-                    LTRACE( plog, "Parsing value (" << a_value << ") as int(" << (int64_t)t_double << ")" );
+                    LTRACE( parlog, "Parsing value (" << a_value << ") as int(" << (int64_t)t_double << ")" );
                     return std::unique_ptr< param_value >( new param_value( (int64_t)t_double ) );
                 }
                 else
                 {
                     // value is assumed to be unsigned if it's positive
-                    LTRACE( plog, "Parsing value (" << a_value << ") as uint(" << (uint64_t)t_double << ")" );
+                    LTRACE( parlog, "Parsing value (" << a_value << ") as uint(" << (uint64_t)t_double << ")" );
                     return std::unique_ptr< param_value >( new param_value( (uint64_t)t_double ) );
                 }
             }
             else
             {
                 // value is not numeric; treat as a string
-                LTRACE( plog, "Parsing value (" << a_value << ") as a string" );
+                LTRACE( parlog, "Parsing value (" << a_value << ") as a string" );
                 return std::unique_ptr< param_value >( new param_value( a_value ) );
             }
         }
