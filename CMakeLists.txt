@@ -65,8 +65,8 @@ set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
 # logging
-find_package( plog REQUIRED )
-list( APPEND PRIVATE_EXT_LIBS plog::plog )
+find_package( quill REQUIRED )
+list( APPEND PRIVATE_EXT_LIBS quill::quill )
 
 if( Scarab_BUILD_CODEC_JSON )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )

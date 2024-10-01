@@ -25,8 +25,6 @@
 
 using namespace std;
 
-static scarab::plog_initializer the_plog;
-
 namespace scarab
 {
     const string& EndColor()   {static string* color = new string(COLOR_PREFIX COLOR_NORMAL COLOR_SUFFIX); return *color;}
@@ -243,9 +241,17 @@ namespace scarab
         UseGlobalLevel();
         logger::Private::AllLoggers()->insert(this);
 
+
+        static scarab::quill_initializer qInit;
+
+        auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( "console_sink" );
+        qLogger = quill::Frontend::create_or_get_logger( name, std::move(console_sink) );
+        qLogger->set_log_level( quill::LogLevel::TraceL3 );
+        //qLogger->set_log_level( quill::v7::LogLevel(fPrivate->fThreshold) );
+
         //std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
     }
-
+/*
     logger::logger(const std::string& name) : fPrivate(new Private())
     {
         if( logger::Private::count() == 0 )
@@ -263,7 +269,7 @@ namespace scarab
 
         //std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
     }
-
+*/
     logger::~logger()
     {
         fPrivate->count()--;

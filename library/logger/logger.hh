@@ -12,10 +12,11 @@
 #include "macros.hh"
 #include "scarab_api.hh"
 
-#include <plog/Init.h>
-#include <plog/Log.h>
-#include <plog/Appenders/ColorConsoleAppender.h>
-#include <plog/Formatters/TxtFormatter.h>
+#include <quill/Backend.h>
+#include <quill/Frontend.h>
+#include <quill/LogMacros.h>
+#include <quill/Logger.h>
+#include <quill/sinks/ConsoleSink.h>
 
 #include <memory>
 
@@ -126,13 +127,13 @@ namespace scarab
              */
             enum class ELevel : unsigned 
             {
-                eTrace = 0,
-                eDebug = 10,
-                eInfo = 20,
-                eProg = 25,
-                eWarn = 30,
-                eError = 40,
-                eFatal = 50
+                eTrace = int(quill::LogLevel::TraceL1),
+                eDebug = int(quill::LogLevel::Debug),
+                eInfo = int(quill::LogLevel::Info),
+                eProg = int(quill::LogLevel::Notice),
+                eWarn = int(quill::LogLevel::Warning),
+                eError = int(quill::LogLevel::Error),
+                eFatal = int(quill::LogLevel::Critical)
             };
 
         public:
@@ -162,7 +163,7 @@ namespace scarab
              */
             logger(const char* name = 0);
             /// @overload
-            logger(const std::string& name);
+            //logger(const std::string& name);
 
             virtual ~logger();
 
@@ -299,14 +300,45 @@ namespace scarab
                 Log(ELevel::eFatal, message, loc);
             }
 
+            logger& ref()
+            {
+                return *this;
+            }
+
+            template< typename T >
+            logger& operator<<( const T& data )
+            {
+                fStream << data;
+                return *this;
+            }
+
+            const std::string& buffer()
+            {
+                fBuffer = fStream.str();
+                //std::cerr << "Buffer: " << fBuffer << std::endl;
+                fStream.str( std::string() );
+                return fBuffer;
+            }
+
+            quill::Logger* quill()
+            {
+                return qLogger;
+            }
+
         private:
             struct Private;
             std::shared_ptr<Private> fPrivate;
+
+            std::stringstream fStream;
+            mutable std::string fBuffer;
+            quill::Logger* qLogger;
     };
 
 }
 
 // PRIVATE MACROS
+
+
 /*
 #define __DEFAULT_LOGGER        scarab::logger::GetRootLogger()
 
@@ -322,6 +354,7 @@ namespace scarab
         } \
     } \
         }
+
 
 
 #define __LOG_TRACE_2(I,M)     __LOG_LOG_4(I,Trace,M,false)
@@ -364,34 +397,54 @@ namespace scarab
 //{
 //
 //}
-
+/*
 namespace scarab
 {
-    struct plog_initializer
+    void start_logging_backend()
     {
-        plog_initializer()
+        quill::BackendOptions backend_options;
+        quill::Backend::start( backend_options );
+    }
+}
+*/
+namespace scarab
+{
+    struct quill_initializer
+    {
+        quill_initializer()
         {
-            static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-            plog::init(plog::debug, &consoleAppender);
-            static int counter = 0;
-            ++counter;
-            std::cerr << "Counter: " << counter << std::endl;
+            std::cerr << "Quill Initializer" << std::endl;
+            quill::BackendOptions backend_options;
+            quill::Backend::start( backend_options );
         }
     };
 }
 
 //#define LOGGER(I,K) static std::string I(K);
 
-#ifndef _WIN32
+////#define TO_QUILL(logger, level, qlevel, ...) if(logger.IsLevelEnabled(scarab::logger::ELevel::e##level)) {logger << __VA_ARGS__; LOG_##qlevel(logger.quill(), logger.stream().str());} else {;}
+#define TO_QUILL(a_logger, a_level, q_level, ...) if(a_logger.IsLevelEnabled(scarab::logger::ELevel::e##a_level)) {LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());} else {;}
+//#define TO_QUILL(a_logger, a_level, q_level, ...) LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());
 
+#ifndef _WIN32
+/**/
 //#define LOG(...)          macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
-#define LTRACE(logger, ...)       PLOG_VERBOSE << __VA_ARGS__;
-#define LDEBUG(logger, ...)       PLOG_DEBUG << __VA_ARGS__;
-#define LINFO(logger, ...)        PLOG_INFO << __VA_ARGS__;
-#define LPROG(logger, ...)        PLOG_NONE << __VA_ARGS__;
-#define LWARN(logger, ...)        PLOG_WARNING << __VA_ARGS__;
-#define LERROR(logger, ...)       PLOG_ERROR << __VA_ARGS__;
-#define LFATAL(logger, ...)       PLOG_FATAL << __VA_ARGS__;
+#define LTRACE(a_logger, ...)       TO_QUILL(a_logger, Trace, TRACE_L1, __VA_ARGS__ )
+#define LDEBUG(a_logger, ...)       TO_QUILL(a_logger, Debug, DEBUG, __VA_ARGS__ )
+#define LINFO(a_logger, ...)        TO_QUILL(a_logger, Info, INFO, __VA_ARGS__ )
+#define LPROG(a_logger, ...)        TO_QUILL(a_logger, Prog, NOTICE, __VA_ARGS__ )
+#define LWARN(a_logger, ...)        TO_QUILL(a_logger, Warn, WARNING, __VA_ARGS__ )
+#define LERROR(a_logger, ...)       TO_QUILL(a_logger, Error, ERROR, __VA_ARGS__ )
+#define LFATAL(a_logger, ...)       TO_QUILL(a_logger, Fatal, CRITICAL, __VA_ARGS__ )
+/**//*
+#define LTRACE(a_logger, ...)       LOG_TRACE_L1( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
+#define LDEBUG(a_logger, ...)       LOG_DEBUG( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
+#define LINFO(a_logger, ...)        LOG_INFO( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
+#define LPROG(a_logger, ...)        LOG_NOTICE( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
+#define LWARN(a_logger, ...)        LOG_WARNING( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
+#define LERROR(a_logger, ...)       LOG_ERROR( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
+#define LFATAL(a_logger, ...)       LOG_CRITICAL( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
+*/
 
 //#define LTRACE(...)       macro_dispatcher(__LOG_TRACE, __VA_ARGS__)(__VA_ARGS__)
 //#define LDEBUG(...)       macro_dispatcher(__LOG_DEBUG, __VA_ARGS__)(__VA_ARGS__)

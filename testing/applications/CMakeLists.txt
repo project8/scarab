@@ -13,6 +13,7 @@ set( testing_applications_SOURCES
     test_raise_sigquit.cc
     test_raise_sigterm.cc
     test_unhandled_exception.cc
+    print_something.cc
 )
 
 pbuilder_executables( SOURCES ${testing_applications_SOURCES}
