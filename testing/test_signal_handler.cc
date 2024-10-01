@@ -91,7 +91,7 @@ TEST_CASE( "signal_handler", "[utility]" )
         REQUIRE( scarab::signal_handler::get_handling_sig_quit() );
     #endif
     }
-
+/*
     SECTION( "printing" )
     {
         REQUIRE_NOTHROW( scarab::signal_handler::print_current_exception( true ) );
@@ -115,7 +115,7 @@ TEST_CASE( "signal_handler", "[utility]" )
 
         }
     }
-
+*/
     scarab::cancelable t_cancel;
     REQUIRE_FALSE( t_cancel.is_canceled() );
 

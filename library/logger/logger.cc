@@ -8,34 +8,34 @@
 
 #define SCARAB_API_EXPORTS
 
-
-#include <algorithm>
-#include <cstring> // for strrchr
-#include <iomanip>
-#include <iterator>
-#include <mutex>
-#include <set>
-#include <time.h>
-
-#ifndef NDEBUG
-#include <thread>
-#endif
-
 #include "logger.hh"
+
+#include <quill/Backend.h>
+#include <quill/Frontend.h>
+#include <quill/sinks/ConsoleSink.h>
+
+
+#include <memory>
+#include <set>
+
 
 using namespace std;
 
 namespace scarab
 {
-    const string& EndColor()   {static string* color = new string(COLOR_PREFIX COLOR_NORMAL COLOR_SUFFIX); return *color;}
-    const string& FatalColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_RED    COLOR_SUFFIX); return *color;}
-    const string& ErrorColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_RED    COLOR_SUFFIX); return *color;}
-    const string& WarnColor()  {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_YELLOW COLOR_SUFFIX); return *color;}
-    const string& InfoColor()  {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_GREEN  COLOR_SUFFIX); return *color;}
-    const string& ProgColor()  {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_BLUE   COLOR_SUFFIX); return *color;}
-    const string& DebugColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_CYAN   COLOR_SUFFIX); return *color;}
-    const string& TraceColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_WHITE  COLOR_SUFFIX); return *color;}
-    const string& OtherColor() {static string* color = new string(COLOR_PREFIX COLOR_BRIGHT COLOR_SEPARATOR COLOR_FOREGROUND_WHITE  COLOR_SUFFIX); return *color;}
+    struct quill_initializer
+    {
+        quill_initializer()
+        {
+            //std::cerr << "Quill Initializer" << std::endl;
+            quill::BackendOptions backend_options;
+            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Critical)] = "FATAL";
+            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Notice)] = "PROD";
+            backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Critical)] = "F";
+            backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Notice)] = "P";
+            quill::Backend::start( backend_options );
+        }
+    };
 
     struct logger::Private
     {
@@ -43,12 +43,6 @@ namespace scarab
         {
             static unsigned sCount = 0;
             return sCount;
-        }
-
-        static std::mutex& mutex()
-        {
-            static std::mutex sMutex;
-            return sMutex;
         }
 
         typedef std::set< logger* > LoggerSet;
@@ -59,53 +53,7 @@ namespace scarab
             return sAllLoggers;
         }
 
-        static char* dateTimeFormat()
-        {
-            static char sDateTimeFormat[16];
-
-            return sDateTimeFormat;
-        }
-
-        static char* getTimeAbsoluteStr( bool aGetNewTime = false )
-        {
-            static char sTimeBuff[512];
-            static time_t sRawTime;
-            static tm* sProcessedTime;
-
-            if( ! aGetNewTime ) return sTimeBuff;
-
-            time(&sRawTime);
-
-            sProcessedTime = localtime(&sRawTime);
-            strftime(sTimeBuff, 512, logger::Private::dateTimeFormat(), sProcessedTime);
-
-            return sTimeBuff;
-        }
-
-
         const char* fLogger;
-
-        static bool& colored()
-        {
-#ifndef _WIN32
-            static bool sColored = true;
-#else
-            static bool sColored = false;
-#endif
-            return sColored;
-        }
-
-        static std::ostream*& out()
-        {
-            static std::ostream* sOut = &std::cout;
-            return sOut;
-        }
-
-        static std::ostream*& err()
-        {
-            static std::ostream* sErr = &std::cerr;
-            return sErr;
-        }
 
         ELevel fThreshold;
         bool fThresholdIsGlobal;
@@ -116,7 +64,7 @@ namespace scarab
             static ELevel sGlobalThreshold = logger::Private::filterMinimumLevel(ELevel::eDebug);
             return sGlobalThreshold;
         }
-
+/*
         static const char* level2Str(ELevel level)
         {
             switch(level)
@@ -146,7 +94,7 @@ namespace scarab
                 default     : return OtherColor();
             }
         }
-
+*/
         static ELevel filterMinimumLevel(ELevel level)
         {
 #if defined(NDEBUG) && defined(STANDARD)
@@ -158,77 +106,24 @@ namespace scarab
 #endif
         }
 
-
-        void logCout(ELevel level, const string& message, const Location& loc)
-        {
-            logger::Private::mutex().lock();
-            logger::Private::getTimeAbsoluteStr( true );
-            if (logger::Private::colored())
-            {
-                //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                *logger::Private::out() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
-#ifndef NDEBUG
-                *logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
-#endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::out()));
-                *logger::Private::out() << "(" << loc.fLineNumber  << "): ";
-                *logger::Private::out() << message << EndColor() << endl;
-            }
-            else
-            {
-                //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                *logger::Private::out() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
-#ifndef NDEBUG
-                *logger::Private::out() << "(tid " << std::this_thread::get_id() << ") ";
-#endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::out()));
-                *logger::Private::out() << "(" << loc.fLineNumber  << "): ";
-                *logger::Private::out() << message << endl;
-            }
-            logger::Private::mutex().unlock();
-        }
-
-        void logCerr(ELevel level, const string& message, const Location& loc)
-        {
-            logger::Private::mutex().lock();
-            logger::Private::getTimeAbsoluteStr();
-            if (logger::Private::colored())
-            {
-                //cout << color << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << skKTEndColor << endl;
-                *logger::Private::err() << Private::level2Color(level) << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
-#ifndef NDEBUG
-                *logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
-#endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::err()));
-                *logger::Private::err() << "(" << loc.fLineNumber  << "): ";
-                *logger::Private::err() << message << EndColor() << endl;
-            }
-            else
-            {
-                //cout << KTLogger::Private::sTimeBuff << " [" << setw(5) << level << "] " << setw(16) << left << loc.fFileName << "(" << loc.fLineNumber  << "): " << message << endl;
-                *logger::Private::err() << logger::Private::getTimeAbsoluteStr() << " [" << setw(5) << Private::level2Str(level) << "] ";
-#ifndef NDEBUG
-                *logger::Private::err() << "(tid " << std::this_thread::get_id() << ") ";
-#endif
-                copy(loc.fFileName.end() - std::min< int >(loc.fFileName.size(), 16), loc.fFileName.end(), ostream_iterator<char>(*logger::Private::err()));
-                *logger::Private::err() << "(" << loc.fLineNumber  << "): ";
-                *logger::Private::err() << message << endl;
-            }
-            logger::Private::mutex().unlock();
-        }
-    };
+    }; // end of logger::Private struct
 
 
     logger::logger(const char* name) : fPrivate(new Private())
     {
-        if( logger::Private::count() == 0 )
-        {
-            snprintf( logger::Private::dateTimeFormat(), 16, "%%Y-%%m-%%d %%T" );
-        }
+        // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
+        static scarab::quill_initializer qInit;
+        auto console_colors = quill::ConsoleColours();
+        console_colors.set_default_colours();
+        console_colors.set_colour( quill::LogLevel::Notice, quill::ConsoleColours::blue);
+        auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( "console_sink", console_colors );
+        qLogger = quill::Frontend::create_or_get_logger( name, std::move(console_sink),
+                                                         quill::PatternFormatterOptions{ "%(time) [%(log_level)] (%(thread_id)) %(short_source_location) -> %(message)", "%Y-%m-%d %T.%Qms", quill::Timezone::GmtTime} );
+        //qLogger->set_log_level( quill::LogLevel::TraceL3 );
 
         logger::Private::count()++;
 
-        if (name == 0)
+        if (name == nullptr)
         {
             fPrivate->fLogger = "root";
         }
@@ -240,14 +135,6 @@ namespace scarab
 
         UseGlobalLevel();
         logger::Private::AllLoggers()->insert(this);
-
-
-        static scarab::quill_initializer qInit;
-
-        auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( "console_sink" );
-        qLogger = quill::Frontend::create_or_get_logger( name, std::move(console_sink) );
-        qLogger->set_log_level( quill::LogLevel::TraceL3 );
-        //qLogger->set_log_level( quill::v7::LogLevel(fPrivate->fThreshold) );
 
         //std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
     }
@@ -293,12 +180,14 @@ namespace scarab
     {
         fPrivate->fThreshold = logger::Private::filterMinimumLevel(level);
         fPrivate->fThresholdIsGlobal = false;
+        qLogger->set_log_level( quill::v7::LogLevel(fPrivate->fThreshold) );
     }
 
     void logger::UseGlobalLevel() const
     {
         fPrivate->fThreshold = logger::Private::filterMinimumLevel(logger::Private::GlobalThreshold());
         fPrivate->fThresholdIsGlobal = true;
+        qLogger->set_log_level( quill::v7::LogLevel(fPrivate->fThreshold) );
     }
 
     // static function
@@ -321,37 +210,4 @@ namespace scarab
         return;
     }
 
-    void logger::SetColored(bool flag)
-    {
-#ifndef _WIN32
-        logger::Private::colored() = flag;
-#else
-        std::cerr << "Colored logging is not enabled in Windows" << std::endl;
-#endif
-        return;
-    }
-
-    void logger::SetOutStream(std::ostream* stream)
-    {
-        logger::Private::out() = stream;
-        return;
-    }
-
-    void logger::SetErrStream(std::ostream* stream)
-    {
-        logger::Private::err() = stream;
-        return;
-    }
-
-    void logger::Log(ELevel level, const string& message, const Location& loc)
-    {
-        if (level >= ELevel::eWarn)
-        {
-            fPrivate->logCerr(level, message, loc);
-        }
-        else
-        {
-            fPrivate->logCout(level, message, loc);
-        }
-    }
 }

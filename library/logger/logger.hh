@@ -9,16 +9,16 @@
 #ifndef SCARAB_LOGGER_HH_
 #define SCARAB_LOGGER_HH_
 
-#include "macros.hh"
+//#include "macros.hh"
 #include "scarab_api.hh"
 
-#include <quill/Backend.h>
-#include <quill/Frontend.h>
 #include <quill/LogMacros.h>
 #include <quill/Logger.h>
-#include <quill/sinks/ConsoleSink.h>
 
-#include <memory>
+#include <cstring>
+#include <iostream>
+#include <sstream>
+
 
 /**
  * @file
@@ -28,26 +28,7 @@
  *
  */
 
-// UTILITY MACROS
-
-#ifndef LOGGER_UTILITY_MACROS_
-#define LOGGER_UTILITY_MACROS_
-
-#define msvc_bug_fix(m, args) m args
-#define expand_macro(x) x
-
-//#define va_num_args(...) va_num_args_(__VA_ARGS__, 5,4,3,2,1)
-//#define va_num_args_(...) msvc_bug_fix(va_num_args_impl, (__VA_ARGS__))
-#define va_num_args(...) expand_macro( va_num_args_impl(__VA_ARGS__, 5,4,3,2,1))
-#define va_num_args_impl(_1,_2,_3,_4,_5,N,...) N
-
-
-#define macro_dispatcher(func, ...) macro_dispatcher_(func, va_num_args(__VA_ARGS__))
-#define macro_dispatcher_(func, nargs) macro_dispatcher__(func, nargs)
-#define macro_dispatcher__(func, nargs) func ## nargs
-
-#endif  /* LOGGER_UTILITY_MACROS_ */
-
+/*
 // COLOR DEFINITIONS
 #define COLOR_NORMAL "0"
 #define COLOR_BRIGHT "1"
@@ -60,14 +41,7 @@
 #define COLOR_PREFIX "\033["
 #define COLOR_SUFFIX "m"
 #define COLOR_SEPARATOR ";"
-
-// INCLUDES
-
-#include <cstring>
-#include <iostream>
-#include <sstream>
-
-// CLASS DEFINITIONS
+*/
 
 /**
  * The standard scarab namespace.
@@ -104,16 +78,6 @@ namespace scarab
      * LERROR(myLogger, "message");
      * FATAL(myLogger, "message");
      *
-     * ASSERT(myLogger, assertion, "message");
-     *
-     * LOG_ONCE(myLogger, level, "message");
-     * TRACE_ONCE(myLogger, "message");
-     * DEBUG_ONCE(myLogger, "message");
-     * INFO_ONCE(myLogger, "message");
-     * PROG_ONCE(myLogger, "message");
-     * WARN_ONCE(myLogger, "message");
-     * ERROR_ONCE(myLogger, "message");
-     * FATAL_ONCE(myLogger, "message");
      * </pre>
      *
      */
@@ -134,20 +98,6 @@ namespace scarab
                 eWarn = int(quill::LogLevel::Warning),
                 eError = int(quill::LogLevel::Error),
                 eFatal = int(quill::LogLevel::Critical)
-            };
-
-        public:
-            /**
-             * A simple struct used by the Logger macros to pass information about the filename and line number.
-             * Not to be used directly by the user!
-             */
-            struct Location {
-                Location(const char* const fileName = "", const char* const functionName = "", int lineNumber = -1) :
-                    fLineNumber(lineNumber), fFileName(fileName), fFunctionName(functionName)
-                { }
-                int fLineNumber;
-                std::string fFileName;
-                std::string fFunctionName;
             };
 
         public:
@@ -208,98 +158,6 @@ namespace scarab
              */
             static void SetColored(bool flag);
 
-            /**
-             * Set the ostream pointer used for standard output messages
-             * @param stream Stream object for standard output
-             */
-            static void SetOutStream(std::ostream* stream);
-
-            /**
-             * Set the ostream pointer used for standard error messages
-             * @param stream Stream object for standard errors
-             */
-            static void SetErrStream(std::ostream* stream);
-
-            /**
-             * Log a message with the specified level.
-             * Use the macro LOG(logger, level, message).
-             * @param level The log level.
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void Log(ELevel level, const std::string& message, const Location& loc = Location());
-
-            /**
-             * Log a message at TRACE level.
-             * Use the macro LTRACE(logger, message).
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void LogTrace(const std::string& message, const Location& loc = Location())
-            {
-                Log(ELevel::eTrace, message, loc);
-            }
-            /**
-             * Log a message at DEBUG level.
-             * Use the macro LDEBUG(logger, message).
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void LogDebug(const std::string& message, const Location& loc = Location())
-            {
-                Log(ELevel::eDebug, message, loc);
-            }
-            /**
-             * Log a message at INFO level.
-             * Use the macro LINFO(logger, message).
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void LogInfo(const std::string& message, const Location& loc = Location())
-            {
-                Log(ELevel::eInfo, message, loc);
-            }
-            /**
-             * Log a message at PROG level.
-             * Use the macro PROG(logger, message).
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void LogProg(const std::string& message, const Location& loc = Location())
-            {
-                Log(ELevel::eProg, message, loc);
-            }
-            /**
-             * Log a message at WARN level.
-             * Use the macro LWARN(logger, message).
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void LogWarn(const std::string& message, const Location& loc = Location())
-            {
-                Log(ELevel::eWarn, message, loc);
-            }
-            /**
-             * Log a message at ERROR level.
-             * Use the macro LERROR(logger, message).
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void LogError(const std::string& message, const Location& loc = Location())
-            {
-                Log(ELevel::eError, message, loc);
-            }
-            /**
-             * Log a message at FATAL level.
-             * Use the macro FATAL(logger, message).
-             * @param message The message.
-             * @param loc Source code location (set automatically by the corresponding macro).
-             */
-            void LogFatal(const std::string& message, const Location& loc = Location())
-            {
-                Log(ELevel::eFatal, message, loc);
-            }
-
             logger& ref()
             {
                 return *this;
@@ -338,99 +196,23 @@ namespace scarab
 
 // PRIVATE MACROS
 
-
-/*
-#define __DEFAULT_LOGGER        scarab::logger::GetRootLogger()
-
-#define __LOG_LOCATION         scarab::logger::Location(__FILE__, __FUNC__, __LINE__)
-#define __LOG_LOG_4(I,L,M,O) \
-        { \
-    if (I.IsLevelEnabled(scarab::logger::ELevel::e##L)) { \
-        static bool _sLoggerMarker = false; \
-        if (!O || !_sLoggerMarker) { \
-            _sLoggerMarker = true; \
-            std::ostringstream stream; stream << M; \
-            I.Log(scarab::logger::ELevel::e##L, stream.str(), __LOG_LOCATION); \
-        } \
-    } \
-        }
-
-
-
-#define __LOG_TRACE_2(I,M)     __LOG_LOG_4(I,Trace,M,false)
-#define __LOG_TRACE_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Trace,M,false)
-
-#define __LOG_DEBUG_2(I,M)     __LOG_LOG_4(I,Debug,M,false)
-#define __LOG_DEBUG_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Debug,M,false)
-
-#define __LOG_INFO_2(I,M)      __LOG_LOG_4(I,Info,M,false)
-#define __LOG_INFO_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Info,M,false)
-
-#define __LOG_PROG_2(I,M)      __LOG_LOG_4(I,Prog,M,false)
-#define __LOG_PROG_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Prog,M,false)
-
-#define __LOG_WARN_2(I,M)      __LOG_LOG_4(I,Warn,M,false)
-#define __LOG_WARN_1(M)        __LOG_LOG_4(__DEFAULT_LOGGER,Warn,M,false)
-
-#define __LOG_ERROR_2(I,M)     __LOG_LOG_4(I,Error,M,false)
-#define __LOG_ERROR_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Error,M,false)
-
-#define __LOG_FATAL_2(I,M)     PLOG_FATAL_(I) << __LOG_LOG_4(I,Fatal,M,false)
-#define __LOG_FATAL_1(M)       __LOG_LOG_4(__DEFAULT_LOGGER,Fatal,M,false)
-*/
-// PUBLIC MACROS
-
-//namespace scarab
-//{
-//    struct plog_adapter
-//    {
-//
-//    }
-//}
-
-#define LOGGER(I,K)      static scarab::logger I(K);
-
-//#define LOGGER(I,K)  \
-//std::string t_logger_name(STRINGIFY(I));
-//scarab::factory< plog_adapter >* t_factory = scarab::factory< plog_adapter >::get_instance();
-//if( t_factory->has_class(t_logger_name) )
-//{
-//
-//}
-/*
-namespace scarab
-{
-    void start_logging_backend()
-    {
-        quill::BackendOptions backend_options;
-        quill::Backend::start( backend_options );
-    }
-}
-*/
-namespace scarab
-{
-    struct quill_initializer
-    {
-        quill_initializer()
-        {
-            std::cerr << "Quill Initializer" << std::endl;
-            quill::BackendOptions backend_options;
-            quill::Backend::start( backend_options );
-        }
-    };
-}
-
-//#define LOGGER(I,K) static std::string I(K);
-
 ////#define TO_QUILL(logger, level, qlevel, ...) if(logger.IsLevelEnabled(scarab::logger::ELevel::e##level)) {logger << __VA_ARGS__; LOG_##qlevel(logger.quill(), logger.stream().str());} else {;}
 #define TO_QUILL(a_logger, a_level, q_level, ...) if(a_logger.IsLevelEnabled(scarab::logger::ELevel::e##a_level)) {LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());} else {;}
 //#define TO_QUILL(a_logger, a_level, q_level, ...) LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());
 
-#ifndef _WIN32
+
+// PUBLIC MACROS
+
+#define LOGGER(I,K)      static scarab::logger I(K);
+
 /**/
-//#define LOG(...)          macro_dispatcher(__LOG_LOG_, __VA_ARGS__)(__VA_ARGS__)
+#ifdef NDEBUG
+#define LTRACE(a_logger, ...)
+#define LDEBUG(a_logger, ...)
+#else
 #define LTRACE(a_logger, ...)       TO_QUILL(a_logger, Trace, TRACE_L1, __VA_ARGS__ )
 #define LDEBUG(a_logger, ...)       TO_QUILL(a_logger, Debug, DEBUG, __VA_ARGS__ )
+#endif
 #define LINFO(a_logger, ...)        TO_QUILL(a_logger, Info, INFO, __VA_ARGS__ )
 #define LPROG(a_logger, ...)        TO_QUILL(a_logger, Prog, NOTICE, __VA_ARGS__ )
 #define LWARN(a_logger, ...)        TO_QUILL(a_logger, Warn, WARNING, __VA_ARGS__ )
@@ -445,46 +227,5 @@ namespace scarab
 #define LERROR(a_logger, ...)       LOG_ERROR( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
 #define LFATAL(a_logger, ...)       LOG_CRITICAL( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
 */
-
-//#define LTRACE(...)       macro_dispatcher(__LOG_TRACE, __VA_ARGS__)(__VA_ARGS__)
-//#define LDEBUG(...)       macro_dispatcher(__LOG_DEBUG, __VA_ARGS__)(__VA_ARGS__)
-//#define LINFO(...)        macro_dispatcher(__LOG_INFO, __VA_ARGS__)(__VA_ARGS__)
-//#define LPROG(...)        macro_dispatcher(__LOG_PROG, __VA_ARGS__)(__VA_ARGS__)
-//#define LWARN(...)        macro_dispatcher(__LOG_WARN, __VA_ARGS__)(__VA_ARGS__)
-//#define LERROR(...)       macro_dispatcher(__LOG_ERROR, __VA_ARGS__)(__VA_ARGS__)
-//#define LFATAL(...)       macro_dispatcher(__LOG_FATAL, __VA_ARGS__)(__VA_ARGS__)
-
-#else /*_WIN32*/
-
-#define LOG(I, ...)          __LOG_LOG_2(I, __VA_ARGS__)
-#ifdef NDEBUG
-#define LTRACE(I, ...)
-#define LDEBUG(I, ...)
-#else
-#define LTRACE(I, ...)       __LOG_TRACE_2(I, __VA_ARGS__)
-#define LDEBUG(I, ...)       __LOG_DEBUG_2(I, __VA_ARGS__)
-#endif
-#define LINFO(I, ...)        __LOG_INFO_2(I, __VA_ARGS__)
-#define LPROG(I, ...)        __LOG_PROG_2(I, __VA_ARGS__)
-#define LWARN(I, ...)        __LOG_WARN_2(I, __VA_ARGS__)
-#define LERROR(I, ...)       __LOG_ERROR_2(I, __VA_ARGS__)
-#define LFATAL(I, ...)       __LOG_FATAL_2(I, __VA_ARGS__)
-#define LASSERT(I, ...)      __LOG_ASSERT_2(I, __VA_ARGS__)
-
-#define LOG_ONCE(I, ...)     __LOG_LOG_ONCE_2(I, __VA_ARGS__)
-#ifdef NDEBUG
-#define LTRACE_ONCE(I, ...)
-#define LDEBUG_ONCE(I, ...)
-#else
-#define LTRACE_ONCE(I, ...)  __LOG_TRACE_ONCE_2(I, __VA_ARGS__)
-#define LDEBUG_ONCE(I, ...)  __LOG_DEBUG_ONCE_2(I, __VA_ARGS__)
-#endif
-#define LINFO_ONCE(I, ...)   __LOG_INFO_ONCE_2(I, __VA_ARGS__)
-#define LPROG_ONCE(I, ...)   __LOG_PROG_ONCE_2(I, __VA_ARGS__)
-#define LWARN_ONCE(I, ...)   __LOG_WARN_ONCE_2(I, __VA_ARGS__)
-#define LERROR_ONCE(I, ...)  __LOG_ERROR_ONCE_2(I, __VA_ARGS__)
-#define LFATAL_ONCE(I, ...)  __LOG_FATAL_ONCE_2(I, __VA_ARGS__)
-
-#endif /*_WIN32*/
 
 #endif /* SCARAB_LOGGER_HH_ */
