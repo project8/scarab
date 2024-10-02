@@ -200,7 +200,7 @@ namespace scarab
     void indexed_factory< XIndexType, XBaseType, XArgs... >::register_class( const XIndexType& a_index, const base_registrar< XBaseType, XArgs... >* a_registrar )
     {
         // A local (static) logger is created inside this function to avoid static initialization order problems
-        LOGGER( slog_ind_factory_reg, "indexed_factory-register");
+        LOGGER( slog_ind_factory_reg, "indexed_factory_register");
 
         std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_index);
@@ -221,7 +221,10 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     void indexed_factory< XIndexType, XBaseType, XArgs... >::remove_class(const XIndexType& a_index )
     {
-        LTRACE( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
+        // A local (static) logger is created inside this function to avoid static deletion order problems
+        LOGGER( slog_ind_factory_unreg, "indexed_factory_remove_class");
+
+        LTRACE( slog_ind_factory_unreg, "Removing indexed_factory for class " << a_index << " from " << this );
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;
@@ -325,7 +328,7 @@ namespace scarab
     void indexed_factory< XIndexType, XBaseType, void >::register_class( const XIndexType& a_index, const base_registrar< XBaseType >* a_registrar )
     {
         // A local (static) logger is created inside this function to avoid static initialization order problems
-        LOGGER( slog_ind_factory_reg, "indexed_factory-register");
+        LOGGER( slog_ind_factory_reg, "indexed_factory_register");
 
         std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_index);
@@ -347,7 +350,10 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     void indexed_factory< XIndexType, XBaseType, void >::remove_class(const XIndexType& a_index )
     {
-        LTRACE( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
+        // A local (static) logger is created inside this function to avoid static deletion order problems
+        LOGGER( slog_ind_factory_unreg, "indexed_factory_remove_class");
+
+        LTRACE( slog_ind_factory_unreg, "Removing indexed_factory for class " << a_index << " from " << this );
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;

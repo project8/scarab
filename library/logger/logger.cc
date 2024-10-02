@@ -119,7 +119,8 @@ namespace scarab
         console_colors.set_colour( quill::LogLevel::Notice, quill::ConsoleColours::blue);
         auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( "console_sink", console_colors );
         qLogger = quill::Frontend::create_or_get_logger( name, std::move(console_sink),
-                                                         quill::PatternFormatterOptions{ "%(time) [%(log_level)] (%(thread_id)) %(short_source_location) -> %(message)", "%Y-%m-%d %T.%Qms", quill::Timezone::GmtTime} );
+                                                         quill::PatternFormatterOptions{ "%(time) [%(log_level)] (%(thread_id)) %(short_source_location) -> %(message)", "%Y-%m-%d %T.%Qms", quill::Timezone::GmtTime}
+                                                       );
         //qLogger->set_log_level( quill::LogLevel::TraceL3 );
 
         logger::Private::count()++;

@@ -12,6 +12,7 @@ set( testing_applications_SOURCES
     test_raise_sigint.cc
     test_raise_sigquit.cc
     test_raise_sigterm.cc
+    test_static_initialization.cc
     test_unhandled_exception.cc
 )
 
@@ -32,6 +33,7 @@ if( Scarab_ENABLE_TESTING )
     add_test( NAME raise_sigint COMMAND test_raise_sigint WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
     add_test( NAME raise_sigquit COMMAND test_raise_sigquit WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
     add_test( NAME raise_sigterm COMMAND test_raise_sigterm WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
+    add_test( NAME static_initialization COMMAND test_static_initialization WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
     add_test( NAME unhandled_exception COMMAND test_unhandled_exception WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
 
     set_tests_properties( unhandled_exception PROPERTIES WILL_FAIL TRUE )
