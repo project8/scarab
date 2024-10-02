@@ -113,6 +113,7 @@ namespace scarab
     {
         // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
         static scarab::quill_initializer qInit;
+
         auto console_colors = quill::ConsoleColours();
         console_colors.set_default_colours();
         console_colors.set_colour( quill::LogLevel::Notice, quill::ConsoleColours::blue);
@@ -164,6 +165,11 @@ namespace scarab
         //std::cerr << "destructing logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
         logger::Private::AllLoggers()->erase(this);
         //std::cerr << "logger removed from set: " << fPrivate->fLogger << std::endl;
+
+        if( fPrivate->count() == 0 )
+        {
+            quill::Backend::stop();
+        }
     }
 
     bool logger::IsLevelEnabled(ELevel level) const
