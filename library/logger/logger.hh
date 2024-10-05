@@ -17,59 +17,50 @@
 
 #include <cstring>
 #include <iostream>
+#include <memory>
+#include <set>
 #include <sstream>
 
 
 /**
  * @file
- * @brief Contains the logger class and macros, based on Kasper's KLogger class.
- * @date Created on: 18.11.2011
- * @author Marco Haag <marco.haag@kit.edu>
+ * @brief Contains the logger class and macros
+ * @date Reborn on: Oct 4, 2024
+ * @author N.S. Oblath
  *
+ * \note This logger was originally based on Kasper's KLogger class.
  */
-
-/*
-// COLOR DEFINITIONS
-#define COLOR_NORMAL "0"
-#define COLOR_BRIGHT "1"
-#define COLOR_FOREGROUND_RED "31"
-#define COLOR_FOREGROUND_GREEN "32"
-#define COLOR_FOREGROUND_YELLOW "33"
-#define COLOR_FOREGROUND_BLUE "34"
-#define COLOR_FOREGROUND_CYAN "36"
-#define COLOR_FOREGROUND_WHITE "37"
-#define COLOR_PREFIX "\033["
-#define COLOR_SUFFIX "m"
-#define COLOR_SEPARATOR ";"
-*/
 
 /**
  * The standard scarab namespace.
  */
 namespace scarab
 {
+    struct quill_initializer
+    {
+        quill_initializer();
+        //~quill_initializer(); // uncomment if you'd like to print when the destructor is called
+    };
+
 
     /**
-     * The scarab logger.
-     *
-     * The usage and syntax is inspired by log4j. logger itself uses the log4cxx library if it
-     * was available on the system during compiling, otherwise it falls back to std::stream.
-     *
-     * The logger output can be configured in a file specified with the environment variable
-     * @a LOGGER_CONFIGURATION (by default log4cxx.properties in the config directory).
-     *
-     * In most cases the following macro can be used
-     * to instantiate a Logger in your code:
-     * <pre>LOGGER(myLogger, "loggerName");</pre>
-     *
-     * This is equivalent to:
-     * <pre>static mantis::logger myLogger("loggerName");</pre>
-     *
-     * For logging the following macros can be used. The source code location will then automatically
-     * included in the output:
-     *
-     * <pre>
-     * LOG(myLogger, level, "message");
+     \class logger
+     \brief The console logger for scarab-based software
+
+     \details
+     The scarab logger provides a front end for logging to the console.
+
+     The backend is provided by the Quill library (https://github.com/odygrd/quill)
+     
+     The primary interface for clients of the scarab logger is provided by a set of macros:
+
+     First, a logger must be created:
+
+     * LOGGER -- will create a static logger
+     * LOCAL_LOGGER -- will create a non-static logger
+
+     For logging the following macros can be used:
+
      * LTRACE(myLogger, "message");
      * LDEBUG(myLogger, "message");
      * LINFO(myLogger, "message");
@@ -77,9 +68,13 @@ namespace scarab
      * LWARN(myLogger, "message");
      * LERROR(myLogger, "message");
      * FATAL(myLogger, "message");
-     *
-     * </pre>
-     *
+     
+     Messages may use the `<<` operator for including any types that can be converted to a string with a stringstream:
+     ```
+     int age = 5;
+     LINFO(myLogger, "I am " << age << " years old");
+     ```
+
      */
     class SCARAB_API logger
     {
@@ -117,6 +112,8 @@ namespace scarab
 
             virtual ~logger();
 
+            const std::string& name() const;
+
             /**
              * Check whether a certain log-level is enabled.
              * @param level The log level
@@ -134,12 +131,12 @@ namespace scarab
              * Set a logger's minimum logging level
              * @param level The log level
              */
-            void SetLevel(ELevel level) const;
+            void SetLevel(ELevel level);
 
             /**
              * Set a logger's minimum logging level to the global level
              */
-            void UseGlobalLevel() const;
+            void UseGlobalLevel();
 
             /**
              * Get the global minimum logging level
@@ -183,49 +180,109 @@ namespace scarab
                 return qLogger;
             }
 
+            typedef std::set< logger* > LoggerSet;
+            static std::shared_ptr<LoggerSet>& AllLoggers();
+            static unsigned& count();
+            static ELevel& GlobalThreshold();
+            static ELevel filterMinimumLevel(ELevel level);
         private:
-            struct Private;
-            std::shared_ptr<Private> fPrivate;
+
+
+            std::string fName;
+
+            ELevel fThreshold;
+            bool fThresholdIsGlobal;
 
             std::stringstream fStream;
             mutable std::string fBuffer;
             quill::Logger* qLogger;
     };
 
-}
+
+    inline const std::string& logger::name() const
+    {
+        return fName;
+    }
+
+} // end namespace scarab
+
 
 // PRIVATE MACROS
 
-////#define TO_QUILL(logger, level, qlevel, ...) if(logger.IsLevelEnabled(scarab::logger::ELevel::e##level)) {logger << __VA_ARGS__; LOG_##qlevel(logger.quill(), logger.stream().str());} else {;}
-#define TO_QUILL(a_logger, a_level, q_level, ...) if(a_logger.IsLevelEnabled(scarab::logger::ELevel::e##a_level)) {LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());} else {;}
-//#define TO_QUILL(a_logger, a_level, q_level, ...) LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());
-
+/**
+ \def __TO_QUILL
+ \brief Private macro (not intended for client use) that converts between the scarab::logger interface and the Quill logger interface
+ */
+// this one would need to be adjusted before it works: logger --> a_logger; it uses a slightly different logic
+//#define __TO_QUILL(logger, level, qlevel, ...) if(logger.IsLevelEnabled(scarab::logger::ELevel::e##level)) {logger << __VA_ARGS__; LOG_##qlevel(logger.quill(), logger.stream().str());} else {;}
+// this one works
+#define __TO_QUILL(a_logger, a_level, q_level, ...) if(a_logger.IsLevelEnabled(scarab::logger::ELevel::e##a_level)) {LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());} else {;}
+// this one works, but doesn't have logic for whether or not to print based on level
+//#define __TO_QUILL(a_logger, a_level, q_level, ...) LOG_##q_level( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer());
+// this one does nothing
+//#define __TO_QUILL(a_logger, a_level, q_level, ...)
 
 // PUBLIC MACROS
 
-#define LOGGER(I,K)      static scarab::logger I(K);
+#define INITIALIZE_LOGGING    static scarab::quill_initializer quill_init;
 
-/**/
+/**
+ \brief Creates a static logger object.
+ \note This logger should not be used during the static-initialization phase to avoid the static initialization order fiasco.
+ \note Using this logger in a function called during the unloading phase (when static objects are destructed) can cause segfaults because objects used by the logger can be destructed before they're used.
+ \param I static variable name for the logger
+ \param K string name for the logger
+ */
+#define LOGGER(I,K)         static scarab::logger I(K);
+/**
+ \brief Creates a local (non-static) logger object; intended for use in situations where a static object could be problematic (e.g. during static initialization)
+ \note Using this logger in a function called during the unloading phase (when static objects are destructed) can cause segfaults because objects used by the logger can be destructed before they're used.
+ \param I static variable name for the logger
+ \param K string name for the logger
+ */
+#define LOCAL_LOGGER(I,K)   scarab::logger I(K);
+
+/**
+ \def LTRACE
+ \brief Print a trace-level log message
+ \note Only available if compiled in DEBUG mode
+ */
+/**
+ \def LDEBUG
+ \brief Print a debug-level log message
+ \note Only available if compiled in DEBUG mode
+ */
+/**
+ \def LINFO
+ \brief Print a info-level log message
+ */
+/**
+ \def LPROG
+ \brief Print a prog(ress)-level log message
+ */
+/**
+ \def LWARN
+ \brief Print a warning-level log message
+ */
+/**
+ \def LERROR
+ \brief Print a error-level log message
+ */
+/**
+ \def LFATAL
+ \brief Print a fatal-level log message
+ */
 #ifdef NDEBUG
 #define LTRACE(a_logger, ...)
 #define LDEBUG(a_logger, ...)
 #else
-#define LTRACE(a_logger, ...)       TO_QUILL(a_logger, Trace, TRACE_L1, __VA_ARGS__ )
-#define LDEBUG(a_logger, ...)       TO_QUILL(a_logger, Debug, DEBUG, __VA_ARGS__ )
+#define LTRACE(a_logger, ...)       __TO_QUILL(a_logger, Trace, TRACE_L1, __VA_ARGS__ )
+#define LDEBUG(a_logger, ...)       __TO_QUILL(a_logger, Debug, DEBUG, __VA_ARGS__ )
 #endif
-#define LINFO(a_logger, ...)        TO_QUILL(a_logger, Info, INFO, __VA_ARGS__ )
-#define LPROG(a_logger, ...)        TO_QUILL(a_logger, Prog, NOTICE, __VA_ARGS__ )
-#define LWARN(a_logger, ...)        TO_QUILL(a_logger, Warn, WARNING, __VA_ARGS__ )
-#define LERROR(a_logger, ...)       TO_QUILL(a_logger, Error, ERROR, __VA_ARGS__ )
-#define LFATAL(a_logger, ...)       TO_QUILL(a_logger, Fatal, CRITICAL, __VA_ARGS__ )
-/**//*
-#define LTRACE(a_logger, ...)       LOG_TRACE_L1( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
-#define LDEBUG(a_logger, ...)       LOG_DEBUG( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
-#define LINFO(a_logger, ...)        LOG_INFO( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
-#define LPROG(a_logger, ...)        LOG_NOTICE( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
-#define LWARN(a_logger, ...)        LOG_WARNING( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
-#define LERROR(a_logger, ...)       LOG_ERROR( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
-#define LFATAL(a_logger, ...)       LOG_CRITICAL( a_logger.quill(), "{}", (a_logger.ref() << __VA_ARGS__).buffer() );
-*/
+#define LINFO(a_logger, ...)        __TO_QUILL(a_logger, Info, INFO, __VA_ARGS__ )
+#define LPROG(a_logger, ...)        __TO_QUILL(a_logger, Prog, NOTICE, __VA_ARGS__ )
+#define LWARN(a_logger, ...)        __TO_QUILL(a_logger, Warn, WARNING, __VA_ARGS__ )
+#define LERROR(a_logger, ...)       __TO_QUILL(a_logger, Error, ERROR, __VA_ARGS__ )
+#define LFATAL(a_logger, ...)       __TO_QUILL(a_logger, Fatal, CRITICAL, __VA_ARGS__ )
 
 #endif /* SCARAB_LOGGER_HH_ */
