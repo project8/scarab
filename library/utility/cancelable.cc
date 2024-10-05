@@ -18,8 +18,7 @@
 
 namespace scarab
 {
-    //LOGGER( slog, "cancelable" );
-    static scarab::logger slog("cancelable");
+    LOGGER( slog, "cancelable" );
 
     cancelable::cancelable() :
             f_canceled( false ),
