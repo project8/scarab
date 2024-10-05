@@ -31,12 +31,14 @@ jobs:
           brew install \
             boost \
             pybind11 \
+            quill \
             rabbitmq-c \
             rapidjson \
             yaml-cpp
 
       - name: Install dependencies -- Linux
         # pybind11 is manually installed because the minimum version is 2.6.2, and Ubuntu 20.04 only has v2.4.3
+        # quill is manually installed because it's not available in apt
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
@@ -46,11 +48,19 @@ jobs:
             libyaml-cpp-dev
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
-          git checkout v2.7.0
+          git checkout v2.13.5
           mkdir build
           cd build
           sudo cmake -DPYBIND11_TEST=FALSE ..
           sudo make -j2 install
+          cd ../..
+          git clone https://github.com/odygrd/quill.git
+          cd quill
+          git checkout v7.3.0
+          mkdir build
+          cd build
+          sudo cmake ..
+          sudo make install
 
       - name: Configure
         run: |
