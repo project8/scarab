@@ -27,6 +27,10 @@ namespace scarab
 
     class main_app;
 
+    // Taken from CLI11 v1.9 because it was removed in v2
+    template <typename T> struct is_vector { static const bool value = false; };
+    template <class T, class A> struct is_vector<std::vector<T, A>> { static bool const value = true; };
+
     /*!
      @class config_decorator
      @author N. S. Oblath
@@ -72,13 +76,13 @@ namespace scarab
             config_decorator* add_config_subcommand( std::string a_subcommand_name, std::string a_description="" );
 
             /// Add an option that gets automatically added to the primary config of a main_app
-            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
+            template< typename T, CLI::enable_if_t< ! is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
             CLI::Option* add_config_option( std::string a_name,
                                             std::string a_primary_config_addr,
                                             std::string a_description = "" );
 
             /// Add an option that gets automatically added to the primary config of a main_app
-            template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
+            template< typename T, CLI::enable_if_t< ! is_vector<T>::value, CLI::detail::enabler > = CLI::detail::dummy >
             CLI::Option* add_config_multi_option( std::string a_name,
                                                   std::string a_primary_config_addr,
                                                   std::string a_description = "" );
@@ -150,7 +154,7 @@ namespace scarab
                     if( ! (*f_option) ) return;
                     param_ptr_t t_new_config_ptr = simple_parser::parse_address(
                             f_primary_config_addr,
-                            param_ptr_t( new param_value(*f_option) ) ); // throws scarab::error if top-level param object is not a node
+                            param_ptr_t( new param_value( bool(f_option->count()) ) ) ); // throws scarab::error if top-level param object is not a node
                     a_app_options.merge( t_new_config_ptr->as_node() );
                     return;
                 }
@@ -361,7 +365,7 @@ namespace scarab
     };
 
 
-    template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
+    template< typename T, CLI::enable_if_t< ! is_vector<T>::value, CLI::detail::enabler > >
     CLI::Option* config_decorator::add_config_option( std::string a_name,
                                                       std::string a_primary_config_addr,
                                                       std::string a_description )
@@ -373,7 +377,7 @@ namespace scarab
         return t_opt_holder_ptr->f_option;
     }
 
-    template< typename T, CLI::enable_if_t< ! CLI::is_vector<T>::value, CLI::detail::enabler > >
+    template< typename T, CLI::enable_if_t< ! is_vector<T>::value, CLI::detail::enabler > >
     CLI::Option* config_decorator::add_config_multi_option( std::string a_name,
                                                             std::string a_primary_config_addr,
                                                             std::string a_description )
