@@ -252,6 +252,10 @@ namespace scarab
          3. Configuration `nested { value: "hello" }` will be merged with the primary config
          4. Option `an_opt` will set something specified in the config to 20
 
+     @note There's a known problem that's a particular issue for short-running applications: a segfault can occurr when the program is exiting
+     due to an issue with the logging library backend.  A 0.5 s delay has been added to the pre-parsing stage of the application execution.
+     This small delay allows logging messages to get printed before the segfault occurs if the program is short lived (e.g. --help or --version was used).
+
      See CLI11 documentation for the CLI::App class:
      - GitHub Readme: https://github.com/CLIUtils/CLI11
      - Tutorial: https://cliutils.gitlab.io/CLI11Tutorial

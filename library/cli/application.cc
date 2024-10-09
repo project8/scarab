@@ -14,6 +14,9 @@
 #include "param_env_modifier.hh"
 #include "version_wrapper.hh"
 
+#include <thread>
+//#include <iostream>  // used for printing debugging statements sometimes
+
 using std::string;
 
 LOGGER(applog, "application");
@@ -98,6 +101,27 @@ namespace scarab
                 throw CLI::Success();
             };
         add_flag_function( "-V,--version", t_version_callback, "Print the version message and exit" );
+
+        // This preparse callback adds a small delay to every program execution that allows the logging thread to startup.
+        // The pre-parse stage is used so that it executes even for --help and --version calls.
+        // Without it, for short-running executions (e.g. calling --help, --version, or with invalid parameters that quickly exits) may segfault before printing log messages.
+        // If you want to use the preparse_callback for something, please include this delay (or ensure there's an equivalent delay)
+        auto t_preparse_callback = [](int)
+            {
+                std::this_thread::sleep_for( std::chrono::milliseconds(500) );
+            };
+        preparse_callback( t_preparse_callback );
+
+        // I attempted to use this to add the delay to avoid the segfault problem (see above, regarding the preparse callback).
+        // But for some reason it was not being run at all
+        // If we could use this function, we could implement something that only delays if the program was short-running. 
+        // Pre-parse, we could record the time.  Then we sleep_until we reach the preparse time + 500 ms, for instance.
+        //auto t_final_callback = []()
+        //    {
+        //        std::cerr << "final_callback delay" << std::endl;
+        //        std::this_thread::sleep_for( std::chrono::milliseconds(5000) );
+        //    };
+        //final_callback( t_final_callback );
     }
 
     void main_app::set_version( scarab::version_semantic_ptr_t a_ver )
