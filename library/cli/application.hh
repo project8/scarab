@@ -270,11 +270,11 @@ namespace scarab
         public:
             main_app( bool a_use_config = true );
             main_app( const main_app& ) = delete;
-            main_app( main_app&& ) = default;
+            main_app( main_app&& ) = delete;
             virtual ~main_app() = default;
 
             main_app& operator=( const main_app& ) = delete;
-            main_app& operator=( main_app&& ) = default;
+            main_app& operator=( main_app&& ) = delete;
 
         public:
             /// parses positional arguments into the global config
