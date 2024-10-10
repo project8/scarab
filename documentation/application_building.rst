@@ -110,6 +110,12 @@ Here are some useful resource for learning how to use the CLI11 library:
 *  `User manual <https://cliutils.gitlab.io/CLI11Tutorial/>`_
 *  `API reference <https://cliutils.github.io/CLI11/index.html>`_
 
+A Note about Logging
+####################
+
+Due to issues with static-object deletion in the logger setup, you must manually stop logging at the end of your executable.  
+The recommended way to do this is to use the ``STOP_LOGGING`` macro at the end of your ``main()`` function and at any exit point.
+
 The simplest example
 ####################
 

@@ -34,7 +34,7 @@
  */
 
 #include "signal_handler.hh"
-
+#include "logger.hh"
 
 #include <signal.h>
 
@@ -44,6 +44,8 @@ int main(int , char ** )
     scarab::signal_handler t_handler;
     
     raise( SIGABRT );
+
+    STOP_LOGGING;
 
     return( EXIT_SUCCESS );
 }

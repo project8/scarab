@@ -9,7 +9,7 @@
 #define SCARAB_TESTING_STREAM_CHECK_HH_
 
 #include <sstream>
-
+#include <string>
 
 namespace scarab
 {
