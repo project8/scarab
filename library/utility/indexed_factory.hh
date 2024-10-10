@@ -254,9 +254,12 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     indexed_factory< XIndexType, XBaseType, XArgs... >::indexed_factory() :
         fMap(new FactoryMap()),
-        f_factory_mutex(),
+        f_factory_mutex()
+    {
+#ifndef NDEBUG
         f_global_threshold( logger::GetGlobalLevel() )
-    {}
+#endif
+    }
 
     template< class XIndexType, class XBaseType, typename ... XArgs >
     indexed_factory< XIndexType, XBaseType, XArgs... >::~indexed_factory()
@@ -388,9 +391,12 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     indexed_factory< XIndexType, XBaseType, void >::indexed_factory() :
         fMap(new FactoryMap()),
-        f_factory_mutex(),
+        f_factory_mutex()
+    {
+#ifndef NDEBUG
         f_global_threshold( logger::GetGlobalLevel() )
-    {}
+#endif
+    }
 
     template< class XIndexType, class XBaseType >
     indexed_factory< XIndexType, XBaseType, void >::~indexed_factory()
