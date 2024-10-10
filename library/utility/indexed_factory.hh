@@ -19,6 +19,7 @@
 
 #include "error.hh"
 #include "logger.hh"
+#include <iostream>
 
 #include <map>
 #include <string>
@@ -97,6 +98,11 @@ namespace scarab
             allow_singleton_access( indexed_factory );
             indexed_factory();
             ~indexed_factory();
+
+#ifndef NDEBUG
+            // Since we can't use the logger at the unloading stage, when some registrars are removed, we cache the global threshold and manually apply it in remove_class()
+            logger::ELevel f_global_threshold;
+#endif
     };
 
 
@@ -161,6 +167,11 @@ namespace scarab
             allow_singleton_access( indexed_factory );
             indexed_factory();
             ~indexed_factory();
+
+#ifndef NDEBUG
+            // Since we can't use the logger at the unloading stage, when some registrars are removed, we cache the global threshold and manually apply it in remove_class()
+            logger::ELevel f_global_threshold;
+#endif
     };
 
 
@@ -190,6 +201,7 @@ namespace scarab
         if( it == fMap->end() )
         {
             LERROR( slog_ind_fact, "Did not find indexed_factory for <" << a_index << ">." );
+            //std::cerr << "Did not find indexed_factory for <" << a_index << ">." << std::endl;
             return nullptr;
         }
 
@@ -199,8 +211,8 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     void indexed_factory< XIndexType, XBaseType, XArgs... >::register_class( const XIndexType& a_index, const base_registrar< XBaseType, XArgs... >* a_registrar )
     {
-        // A local (static) logger is created inside this function to avoid static initialization order problems
-        LOGGER( slog_ind_factory_reg, "indexed_factory-register");
+        // A local (non-static) logger is created inside this function to avoid static initialization order problems
+        LOCAL_LOGGER( slog_ind_factory_reg, "indexed_factory_register");
 
         std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_index);
@@ -209,6 +221,7 @@ namespace scarab
             throw error() << "Already have indexed_factory registered for <" << a_index << ">.";
         }
         fMap->insert(std::pair< XIndexType, const base_registrar< XBaseType, XArgs... >* >(a_index, a_registrar));
+        //std::cout << "Registered a indexed_factory for class " << a_index << " at " << (*fMap)[ a_index ] << ", indexed_factory #" << fMap->size()-1 << " for " << this << std::endl;
         LDEBUG( slog_ind_factory_reg, "Registered a indexed_factory for class " << a_index << " at " << (*fMap)[ a_index ] << ", indexed_factory #" << fMap->size()-1 << " for " << this );
     }
 
@@ -221,7 +234,12 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     void indexed_factory< XIndexType, XBaseType, XArgs... >::remove_class(const XIndexType& a_index )
     {
-        LTRACE( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
+#ifndef NDEBUG
+        if( logger::ELevel::eTrace >= f_global_threshold )
+        {
+            std::cout << "Removing indexed_factory for class " << a_index << " from " << this << std::endl;
+        }
+#endif
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;
@@ -236,7 +254,8 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     indexed_factory< XIndexType, XBaseType, XArgs... >::indexed_factory() :
         fMap(new FactoryMap()),
-        f_factory_mutex()
+        f_factory_mutex(),
+        f_global_threshold( logger::GetGlobalLevel() )
     {}
 
     template< class XIndexType, class XBaseType, typename ... XArgs >
@@ -315,6 +334,7 @@ namespace scarab
         if( it == fMap->end() )
         {
             LERROR( slog_ind_fact, "Did not find indexed_factory for <" << a_index << ">." );
+            //std::cerr << "Did not find indexed_factory for <" << a_index << ">." << std::endl;
             return nullptr;
         }
 
@@ -324,8 +344,8 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     void indexed_factory< XIndexType, XBaseType, void >::register_class( const XIndexType& a_index, const base_registrar< XBaseType >* a_registrar )
     {
-        // A local (static) logger is created inside this function to avoid static initialization order problems
-        LOGGER( slog_ind_factory_reg, "indexed_factory-register");
+        // A local (non-static) logger is created inside this function to avoid static initialization order problems
+        LOCAL_LOGGER( slog_ind_factory_reg, "indexed_factory_register");
 
         std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
         FactoryCIt it = fMap->find(a_index);
@@ -335,6 +355,7 @@ namespace scarab
             return;
         }
         fMap->insert(std::pair< std::string, const base_registrar< XIndexType, XBaseType >* >(a_index, a_registrar));
+        //std::cout << "Registered a indexed_factory for class " << a_index << ", indexed_factory #" << fMap->size()-1 << " for " << this << std::endl;
         LDEBUG( slog_ind_factory_reg, "Registered a indexed_factory for class " << a_index << ", indexed_factory #" << fMap->size()-1 << " for " << this );
     }
 
@@ -347,7 +368,12 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     void indexed_factory< XIndexType, XBaseType, void >::remove_class(const XIndexType& a_index )
     {
-        LTRACE( slog_ind_fact, "Removing indexed_factory for class " << a_index << " from " << this );
+#ifndef NDEBUG
+        if( logger::ELevel::eTrace >= f_global_threshold )
+        {
+            std::cout << "Removing indexed_factory for class " << a_index << " from " << this << std::endl;
+        }
+#endif
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;
@@ -362,7 +388,8 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     indexed_factory< XIndexType, XBaseType, void >::indexed_factory() :
         fMap(new FactoryMap()),
-        f_factory_mutex()
+        f_factory_mutex(),
+        f_global_threshold( logger::GetGlobalLevel() )
     {}
 
     template< class XIndexType, class XBaseType >

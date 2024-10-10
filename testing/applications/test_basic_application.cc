@@ -42,6 +42,7 @@ Options:
  */
 
 #include "application.hh"
+#include "logger.hh"
 
 using namespace scarab;
 
@@ -50,6 +51,8 @@ int main( int argc, char **argv )
     main_app the_main( false );
 
     CLI11_PARSE( the_main, argc, argv );
+
+    STOP_LOGGING;
 
     return 0;
 }

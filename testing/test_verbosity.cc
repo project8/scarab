@@ -32,7 +32,7 @@ TEST_CASE( "verbosity", "[cli][logger]" )
     REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eFatal );
 
     // test setting verbosity
-    t_app.set_global_verbosity( 30 );
+    t_app.set_global_verbosity( 6 );
     REQUIRE( tlog.GetLevel() == scarab::logger::ELevel::eWarn );
 
     // test decreasing past the beginning

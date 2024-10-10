@@ -21,7 +21,7 @@
  */
 
 #include "signal_handler.hh"
-
+#include "logger.hh"
 
 #include <signal.h>
 
@@ -31,6 +31,8 @@ int main(int , char ** )
     scarab::signal_handler t_handler;
 
     raise( SIGINT );
+
+    STOP_LOGGING;
 
     return( EXIT_SUCCESS );
 }
