@@ -15,6 +15,11 @@
 #include <quill/LogMacros.h>
 #include <quill/Logger.h>
 
+#include <quill/Backend.h>
+#include <quill/Frontend.h>
+#include <quill/sinks/ConsoleSink.h>
+
+
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -36,11 +41,20 @@
  */
 namespace scarab
 {
+    /// Starts the quill backend when the first logger is initialized; 
+    /// Guarantees it's ready to receive log messages even during static initialization
     struct quill_initializer
     {
         quill_initializer();
         //~quill_initializer(); // uncomment if you'd like to print when the destructor is called
     };
+
+    /// Protects quill from being used after the execution phase (during static cleanup)
+    //struct quill_guard : quill_initializer
+    //{
+    //    quill_guard() = default;
+    //    ~quill_guard();
+    //};
 
 
     /**
@@ -225,6 +239,8 @@ namespace scarab
 // PUBLIC MACROS
 
 #define INITIALIZE_LOGGING    static scarab::quill_initializer quill_init;
+
+#define STOP_LOGGING    quill::Backend::stop();
 
 /**
  \brief Creates a static logger object.

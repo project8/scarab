@@ -10,11 +10,8 @@
 
 #include "logger.hh"
 
-#include <quill/Backend.h>
-#include <quill/Frontend.h>
-#include <quill/sinks/ConsoleSink.h>
 
-#include <quill/core/LoggerManager.h>
+//#include <quill/core/LoggerManager.h>
 
 using namespace std;
 
@@ -34,6 +31,12 @@ namespace scarab
     //quill_initializer::~quill_initializer()
     //{
     //    std::cerr << "Destructing quill initializer" << std::endl;
+    //}
+
+    //quill_guard::~quill_guard()
+    //{
+    //    std::cerr << "calling backend stop via quill guard" << std::endl;
+    //    quill::Backend::stop();
     //}
 
 

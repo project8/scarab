@@ -70,5 +70,7 @@ int main(int , char ** )
 {
     s_static_tester.print_something();
 
+    STOP_LOGGING;
+
     return( EXIT_SUCCESS );
 }
