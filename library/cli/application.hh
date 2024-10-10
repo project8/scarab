@@ -256,6 +256,9 @@ namespace scarab
      due to an issue with the logging library backend.  A 0.5 s delay has been added to the pre-parsing stage of the application execution.
      This small delay allows logging messages to get printed before the segfault occurs if the program is short lived (e.g. --help or --version was used).
 
+     @note Due to issues with static-object deletion in the logger, you must manually stop the logging process at the end of 
+     execution (i.e. at the end of ``main()``) with the ``STOP_LOGGING`` macro.
+
      See CLI11 documentation for the CLI::App class:
      - GitHub Readme: https://github.com/CLIUtils/CLI11
      - Tutorial: https://cliutils.gitlab.io/CLI11Tutorial

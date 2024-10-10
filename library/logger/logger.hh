@@ -49,7 +49,9 @@ namespace scarab
         //~quill_initializer(); // uncomment if you'd like to print when the destructor is called
     };
 
-    /// Protects quill from being used after the execution phase (during static cleanup)
+    // Protects quill from being used after the execution phase (during static cleanup)
+    // This was tested and didn't work for some reason.  Segfaults still occurred.
+    // Instead the recommendation is to use the STOP_LOGGER macro at the end of an executable.
     //struct quill_guard : quill_initializer
     //{
     //    quill_guard() = default;
@@ -89,6 +91,9 @@ namespace scarab
      LINFO(myLogger, "I am " << age << " years old");
      ```
 
+     Due to interactions between the staticly-initialized scarab loggers and the statically-initialized Quill loggers, 
+     the logging must be explicitly stopped at the end of execution, and loggers should not be used in post-execution 
+     static cleanup.  To stop execution, the ``STOP_LOGGER`` macro can be used (or ``quill::Backend::stop()`` can be called).
      */
     class SCARAB_API logger
     {
