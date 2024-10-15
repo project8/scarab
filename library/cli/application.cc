@@ -172,6 +172,7 @@ namespace scarab
         if( ! f_use_config ) return;
 
         LDEBUG( applog, "first configuration stage" );
+        //LWARN( applog, "merging default config: " << f_default_config );
         f_primary_config.merge( f_default_config );
         //LWARN( applog, "Primary config, after stage 1:\n" << f_primary_config )
         return;
@@ -281,8 +282,10 @@ namespace scarab
 
     void main_app::add_default_auth_spec_group( const std::string& a_group_name, const scarab::param_node& a_spec_group )
     {
+        //LWARN( applog, "Adding default auth spec group: " << a_group_name << " -- " << a_spec_group );
         if( ! f_default_config.has(f_auth_groups_key) ) f_default_config.add( f_auth_groups_key, scarab::param_node() );
         f_default_config[f_auth_groups_key].as_node().replace( a_group_name, a_spec_group );
+        //LWARN( applog, "Default config: " << f_default_config );
         return;
     }
 

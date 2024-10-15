@@ -11,7 +11,7 @@ include( FetchContent )
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v3.6.0
+    GIT_TAG        v3.7.1
 )
 
 FetchContent_MakeAvailable( Catch2 )
@@ -35,6 +35,7 @@ configure_file(
 )
 
 set( testing_SOURCES
+    run_tests.cc
     stream_check.cc
     test_digital.cc
     test_exponential_backoff.cc
@@ -102,7 +103,7 @@ pbuilder_executable(
     EXECUTABLE run_tests
     SOURCES ${testing_SOURCES}
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
-    PRIVATE_EXTERNAL_LIBRARIES Catch2::Catch2WithMain
+    PRIVATE_EXTERNAL_LIBRARIES Catch2::Catch2
 )
 
 ##########
@@ -130,8 +131,8 @@ list( APPEND programs "run_tests" )
 # Installation
 
 pbuilder_component_install_and_export( 
-    COMPONENT Library
-    LIBTARGETS Catch2 Catch2WithMain
+    COMPONENT Catch2
+    LIBTARGETS Catch2
     NAMESPACE Catch2::
 )
 
