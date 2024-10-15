@@ -65,6 +65,7 @@ namespace scarab
 
     void authentication::add_groups( const param_node& a_groups_node )
     {
+        //LWARN( mtlog, "adding groups: " << a_groups_node );
         for( auto it = a_groups_node.begin(); it != a_groups_node.end(); ++it )
         {
             LDEBUG( mtlog, "Found group <" << it.name() << ">" );
