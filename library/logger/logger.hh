@@ -223,6 +223,12 @@ namespace scarab
         return fName;
     }
 
+    /// Stop Quill logging
+    void SCARAB_API stop_logging()
+    {
+        quill::Backend::stop();
+    }
+
 } // end namespace scarab
 
 
