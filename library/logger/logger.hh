@@ -224,10 +224,7 @@ namespace scarab
     }
 
     /// Stop Quill logging
-    void SCARAB_API stop_logging()
-    {
-        quill::Backend::stop();
-    }
+    void SCARAB_API stop_logging();
 
 } // end namespace scarab
 

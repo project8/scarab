@@ -180,4 +180,9 @@ namespace scarab
         return;
     }
 
+    void SCARAB_API stop_logging()
+    {
+        quill::Backend::stop();
+    }
+
 }
