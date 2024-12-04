@@ -195,6 +195,7 @@ namespace scarab
             } // end if-have-groups
 
             //LWARN( mtlog, "Default data:\n" << t_default_data );
+            //if( t_file_data_ptr ) LWARN( mtlog, "Auth file:\n" << t_file_data_ptr->as_node() );
             //LWARN( mtlog, "Env data:\n" << t_env_data );
             //LWARN( mtlog, "Override data:\n" << t_override_data );
             
