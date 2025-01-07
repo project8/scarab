@@ -22,6 +22,7 @@ namespace scarab_pybind
             .def_static( "remove_cancelable", static_cast<void (*)(std::shared_ptr<scarab::cancelable>)>( &scarab::signal_handler::remove_cancelable ), "remove a cancelable object from the list to be canceled in the event of a SIGINT" )
             .def_static( "reset", &scarab::signal_handler::reset, "remove all cancelable objects", SCARAB_BIND_CALL_GUARD_STREAMS )
             .def_static( "cancel_all", &scarab::signal_handler::cancel_all, "cancel all cancelable objects known to the signal_handler", SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
+            .def_static( "print_cancelables", &scarab::signal_handler::print_cancelables, "print pointers to the cancelables known to the signal_handler", SCARAB_BIND_CALL_GUARD_STREAMS )
             ;
 
         return all_members;

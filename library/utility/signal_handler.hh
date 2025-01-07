@@ -128,6 +128,8 @@ namespace scarab
             static void remove_cancelable( std::shared_ptr< cancelable > a_cancelable );
             /// Static version: remove a cancelable object with a plain pointer
             static void remove_cancelable( cancelable* a_cancelable );
+            /// Print the pointers to the cancelables
+            static void print_cancelables();
 
             /// Remove all cancelables and signal handling
             static void reset();
@@ -137,7 +139,7 @@ namespace scarab
             /// Stop handling signals
             static void unhandle_signals();
             /// Check if a signal is handled
-            static bool is_handling( int a_signal );
+            static bool is_handling( int a_signal );            
 
             /// Handler for std::terminate -- does not cleanup memory or threads
             [[noreturn]] static void handle_terminate() noexcept;
