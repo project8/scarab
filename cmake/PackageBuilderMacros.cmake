@@ -5,10 +5,17 @@
 #
 # Requires: CMake v3.12 or better (FindPython3)
 
-# Conveniece function for overriding the value of an option (aka a cached bool variable)
+# Convenience function for overriding the value of an option (aka a cached bool variable)
 macro( set_option VARIABLE VALUE )
     set( ${VARIABLE} ${VALUE} CACHE BOOL "" FORCE )
 endmacro()
+
+# Convenience function for setting a variable to the maximum between itself and another value
+function( set_to_max VARIABLE VALUE )
+    if( ${VALUE} GREATER ${${VARIABLE}} )
+        set( ${VARIABLE} ${VALUE} )
+    endif()
+endfunction()
 
 # This should be called after setting options, and before adding submodules and building the project
 macro( pbuilder_prepare_project )
@@ -273,7 +280,7 @@ function( pbuilder_executables )
     #
     # Parameters
     #     TARGETS_VAR (output, optional): variable in which to store the names of the executables created
-    #     SOURCES: source files to be builT
+    #     SOURCES: source files to be built
     #     PROJECT_LIBRARIES: libraries from the same project to be linked against
     #     PUBLIC_EXTERNAL_LIBRARIES: public external libraries to be linked against
     #     PRIVATE_ETERNAL_LIBRARIES: private external libraries to be linked against
