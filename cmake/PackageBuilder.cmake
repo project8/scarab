@@ -12,6 +12,7 @@ cmake_policy( SET CMP0011 NEW )
 cmake_policy( SET CMP0012 NEW ) # how if-statements work
 cmake_policy( SET CMP0042 NEW ) # rpath on mac os x
 cmake_policy( SET CMP0048 NEW ) # version in project()
+cmake_policy( SET CMP0115 NEW ) # source file extensions must be explicit
 
 include ( PackageBuilderMacros )
 
