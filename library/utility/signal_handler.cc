@@ -98,6 +98,17 @@ namespace scarab
         return;
     }
 
+    void signal_handler::print_cancelables()
+    {
+        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        LOGGER( slog_print, "signal_handler print_cancelables" );
+        for( const auto& [t_key, t_value] : s_cancelers )
+        {
+            LINFO( slog_print, "Canceler: " << t_key );
+        }
+        return;
+    }
+
     void signal_handler::handle_signals()
     {
         std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
