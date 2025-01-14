@@ -75,7 +75,7 @@ namespace scarab
             /// cancelable wait function: wait for a given period of time, while checking if the function is cancelled
             void wait( unsigned a_wait_ms, unsigned a_check_ms=500 ) const;
 
-        private:
+        protected:
             virtual void do_cancellation( int a_code );
             virtual void do_reset_cancellation();
 

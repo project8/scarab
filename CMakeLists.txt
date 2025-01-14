@@ -20,6 +20,8 @@ list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
 include( PackageBuilder )
 
+# Require C++17 (minimum set by: Quill dependency)
+set_to_max( CMAKE_CXX_STANDARD 17 )
 
 ##################
 # Scarab options #
