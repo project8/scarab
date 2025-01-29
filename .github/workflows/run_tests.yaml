@@ -26,18 +26,26 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies -- Mac
+        # pybind11 is manually installed because we need to use the smart_holder branch
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install \
             boost \
-            pybind11 \
             quill \
             rabbitmq-c \
             rapidjson \
             yaml-cpp
+          git clone https://github.com/pybind/pybind11.git
+          cd pybind11
+          git checkout smart_holder
+          mkdir build
+          cd build
+          cmake -DPYBIND11_TEST=FALSE ..
+          make -j2 install
+
 
       - name: Install dependencies -- Linux
-        # pybind11 is manually installed because the minimum version is 2.6.2, and Ubuntu 20.04 only has v2.4.3
+        # pybind11 is manually installed because we need to use the smart_holder branch
         # quill is manually installed because it's not available in apt
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -48,7 +56,7 @@ jobs:
             libyaml-cpp-dev
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
-          git checkout v2.13.5
+          git checkout smart_holder
           mkdir build
           cd build
           sudo cmake -DPYBIND11_TEST=FALSE ..
@@ -56,7 +64,7 @@ jobs:
           cd ../..
           git clone https://github.com/odygrd/quill.git
           cd quill
-          git checkout v7.3.0
+          git checkout v8.1.0
           mkdir build
           cd build
           sudo cmake ..
