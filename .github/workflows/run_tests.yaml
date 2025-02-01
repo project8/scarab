@@ -27,7 +27,8 @@ jobs:
 
       - name: Install dependencies -- Mac
         # pybind11 is manually installed because we need to use the smart_holder branch
-        if: startsWith(matrix.os, 'macos')
+        # Fix the /usr/local directory structure
+          if: startsWith(matrix.os, 'macos')
         run: |
           brew install \
             boost \
@@ -35,6 +36,12 @@ jobs:
             rabbitmq-c \
             rapidjson \
             yaml-cpp
+          sudo mkdir -p /usr/local/include && \
+            sudo chown -R $(whoami) /usr/local/include
+          sudo mkdir -p /usr/local/lib && \
+            sudo chown -R $(whoami) /usr/local/lib
+          sudo mkdir -p /usr/local/bin && \
+            sudo chown -R $(whoami) /usr/local/bin
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
           git checkout smart_holder
