@@ -42,6 +42,8 @@ jobs:
             sudo chown -R $(whoami) /usr/local/lib
           sudo mkdir -p /usr/local/bin && \
             sudo chown -R $(whoami) /usr/local/bin
+          sudo mkdir -p /usr/local/share && \
+            sudo chown -R $(whoami) /usr/local/share
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
           git checkout smart_holder
