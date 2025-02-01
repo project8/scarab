@@ -45,9 +45,9 @@ namespace scarab
         // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
         static scarab::quill_initializer qInit;
 
-        auto console_colors = quill::ConsoleColours();
-        console_colors.set_default_colours();
-        console_colors.set_colour( quill::LogLevel::Notice, quill::ConsoleColours::blue);
+        auto console_colors = quill::ConsoleSink::Colours();
+        console_colors.apply_default_colours();
+        console_colors.assign_colour_to_log_level( quill::LogLevel::Notice, quill::ConsoleSink::Colours::blue);
         auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( "console_sink", console_colors );
         qLogger = quill::Frontend::create_or_get_logger( name, std::move(console_sink),
                                                          quill::PatternFormatterOptions{ "%(time) [%(log_level)] (%(thread_id)) %(short_source_location) -> %(message)", "%Y-%m-%d %T.%Qms", quill::Timezone::GmtTime}
@@ -116,14 +116,14 @@ namespace scarab
     {
         fThreshold = logger::filterMinimumLevel(level);
         fThresholdIsGlobal = false;
-        qLogger->set_log_level( quill::v7::LogLevel(fThreshold) );
+        qLogger->set_log_level( quill::v8::LogLevel(fThreshold) );
     }
 
     void logger::UseGlobalLevel()
     {
         fThreshold = logger::filterMinimumLevel(logger::GlobalThreshold());
         fThresholdIsGlobal = true;
-        qLogger->set_log_level( quill::v7::LogLevel(fThreshold) );
+        qLogger->set_log_level( quill::v8::LogLevel(fThreshold) );
     } 
 
     //////
