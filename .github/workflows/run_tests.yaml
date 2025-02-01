@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies -- Mac
         # pybind11 is manually installed because we need to use the smart_holder branch
         # Fix the /usr/local directory structure
-          if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos')
         run: |
           brew install \
             boost \
