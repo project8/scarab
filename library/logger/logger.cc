@@ -26,6 +26,9 @@ namespace scarab
         backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Notice)] = "PROD";
         backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Critical)] = "F";
         backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Notice)] = "P";
+        // Modify the character filtering: make \t visible
+        // The default filtering function is: [](char c){ return (c >= ' ' && c <= '~') || (c == '\n'); }
+        backend_options.check_printable_char = [](char c){ return (c >= ' ' && c <= '~') || (c == '\n') || (c == '\t'); };
         quill::Backend::start( backend_options );
     }
     //quill_initializer::~quill_initializer()
