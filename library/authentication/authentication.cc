@@ -81,13 +81,28 @@ namespace scarab
             for( auto gr_it = t_a_group.begin(); gr_it != t_a_group.end(); ++gr_it )
             {
                 LDEBUG( mtlog, "Processing item <" << gr_it.name() << ">" );
-                // throws if not a node
-                const param_node& t_an_item = gr_it->as_node();
 
-                // default value; required; throws if not present or not string
-                add_item( it.name(), gr_it.name(), t_an_item["default"]().as_string(), t_an_item.get_value("env", "") );
-                if( t_an_item.has("value") ) set_value( it.name(), gr_it.name(), t_an_item["value"]().as_string() );
-                if( t_an_item.has("file") ) set_file( it.name(), gr_it.name(), t_an_item["file"]().as_string() );
+                if( gr_it->is_node() )
+                {
+                    const param_node& t_an_item = gr_it->as_node();
+
+                    // default value; required; throws if not present or not string
+                    add_item( it.name(), gr_it.name(), t_an_item["default"]().as_string(), t_an_item.get_value("env", "") );
+                    if( t_an_item.has("value") ) set_value( it.name(), gr_it.name(), t_an_item["value"]().as_string() );
+                    if( t_an_item.has("file") ) set_file( it.name(), gr_it.name(), t_an_item["file"]().as_string() );
+                }
+                else if( gr_it->is_value() )
+                {
+                    const param_value& t_an_item = gr_it->as_value();
+
+                    // default value; required; throws if not present or not string
+                    add_item( it.name(), gr_it.name(), t_an_item.as_string() );
+                    set_value( it.name(), gr_it.name(), t_an_item.as_string() );
+                }
+                else
+                {
+                    throw scarab::error( __FILE__, __LINE__ ) << "Invalid group data type: " << gr_it->type();
+                }
             }
         }
         return;
