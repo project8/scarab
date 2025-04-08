@@ -26,7 +26,7 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies -- Mac
-        # pybind11 is manually installed because we need to use the smart_holder branch
+        # pybind11 is manually installed because we need to use the non-released master branch (as of 4/8/25)
         # Fix the /usr/local directory structure
         if: startsWith(matrix.os, 'macos')
         run: |
@@ -46,7 +46,7 @@ jobs:
             sudo chown -R $(whoami) /usr/local/share
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
-          git checkout smart_holder
+          git checkout master
           mkdir build
           cd build
           cmake -DPYBIND11_TEST=FALSE ..
@@ -54,7 +54,7 @@ jobs:
 
 
       - name: Install dependencies -- Linux
-        # pybind11 is manually installed because we need to use the smart_holder branch
+        # pybind11 is manually installed because we need to use the non-released master branch (as of 4/8/25)
         # quill is manually installed because it's not available in apt
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -65,7 +65,7 @@ jobs:
             libyaml-cpp-dev
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
-          git checkout smart_holder
+          git checkout master
           mkdir build
           cd build
           sudo cmake -DPYBIND11_TEST=FALSE ..
