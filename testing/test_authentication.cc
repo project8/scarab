@@ -219,6 +219,9 @@ TEST_CASE( "authentication", "[authentication]" )
                     "value"_a="value3",
                     "file"_a="file3"
                 )
+            ),
+            "group4"_a=scarab::param_node(
+                "name4"_a="value4"
             )
         );
         t_auth.add_groups( t_groups );
@@ -237,6 +240,19 @@ TEST_CASE( "authentication", "[authentication]" )
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["env"]().as_string(), Equals("SCARAB_AUTH_TEST_ENV3") );
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["value"]().as_string(), Equals("value3") );
         REQUIRE_THAT( t_auth.spec()["groups"]["group3"]["name3"]["file"]().as_string(), Equals("file3") );
+
+        REQUIRE( t_auth.spec()["groups"].as_node().has("group4") ); // group should be there
+        REQUIRE( t_auth.spec()["groups"]["group4"].as_node().has("name4") ); // item should be there
+        REQUIRE_THAT( t_auth.spec()["groups"]["group4"]["name4"]["default"]().as_string(), Equals("value4") );
+        REQUIRE_THAT( t_auth.spec()["groups"]["group4"]["name4"]["value"]().as_string(), Equals("value4") );
+
+        scarab::param_node t_invalid_group(
+            "group"_a=scarab::param_node(
+                "name"_a=scarab::param_array()
+            )
+        );
+        REQUIRE_THROWS_AS( t_auth.add_groups( t_invalid_group ), scarab::error );
+
     }
 
     SECTION( "Precedence: default --> file --> env var --> file --> value" )
