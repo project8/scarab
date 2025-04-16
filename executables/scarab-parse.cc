@@ -102,5 +102,7 @@ int main( int argc, char **argv )
     // Parse CL options and run the application
     CLI11_PARSE( the_main, argc, argv );
 
+    STOP_LOGGING;
+
     return t_parse.f_return;
 }
