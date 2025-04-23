@@ -25,6 +25,7 @@ set( Scarab_HEADERS ${Scarab_HEADERS}
     ${dir}/time.hh
     ${dir}/typename.hh
     ${dir}/unique_typelist.hh
+    ${dir}/weak_holder.hh
 ) # not PARENT_SCOPE so that we can set it to that scope in the set command below
 
 set( Scarab_SOURCES ${Scarab_SOURCES}

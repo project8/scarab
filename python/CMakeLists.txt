@@ -13,6 +13,7 @@ if( Scarab_BUILD_PYTHON )
         ${dir}/cancelable_pybind.hh
         ${dir}/signal_handler_pybind.hh
         ${dir}/version_pybind.hh
+        ${dir}/weak_holder_pybind.hh
     )
 
     # Python bindings

@@ -43,6 +43,7 @@ set( testing_SOURCES
     test_member_variables.cc
     test_signal_handler.cc
     test_time.cc
+    test_weak_holder.cc
     ${CMAKE_CURRENT_BINARY_DIR}/test_path.cc 
 )
 
@@ -103,7 +104,8 @@ pbuilder_executable(
     EXECUTABLE run_tests
     SOURCES ${testing_SOURCES}
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
-    PRIVATE_EXTERNAL_LIBRARIES Catch2::Catch2
+    PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+    PRIVATE_EXTERNAL_LIBRARIES Catch2::Catch2 ${PYBINDING_PROJECT_LIBRARIES}
 )
 
 ##########

@@ -142,6 +142,10 @@ if( Scarab_BUILD_PYTHON )
     #    message( STATUS "%%%%% Did NOT find Python::Python" )
     #endif()
     include_directories( ${Python3_INCLUDE_DIRS} )
+    add_definitions( -DUSE_PYTHON )
+    list( APPEND PUBLIC_EXT_LIBS Python3::Python )
+else( Scarab_BUILD_PYTHON )
+    remove_definitions( -DUSE_PYTHON )
 endif( Scarab_BUILD_PYTHON )
 
 

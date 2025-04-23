@@ -15,6 +15,7 @@
 #include "logging_pybind.hh"
 #include "signal_handler_pybind.hh"
 #include "version_pybind.hh"
+#include "weak_holder_pybind.hh"
 
 #ifdef BUILD_PARAM_PYBINDING
 #include "param_pybind.hh"
@@ -42,6 +43,7 @@ PYBIND11_MODULE( scarab, scarab_mod )
 #endif
     // utility
     all_members.splice( all_members.end(), scarab_pybind::export_version( scarab_mod ) );
+    all_members.splice( all_members.end(), scarab_pybind::export_weak_holder( scarab_mod ) );
 #ifdef BUILD_PARAM_PYBINDING
     // Param-related data objects
     all_members.splice( all_members.end(), scarab_pybind::export_param( scarab_mod ) );
