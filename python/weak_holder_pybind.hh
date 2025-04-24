@@ -42,6 +42,7 @@ namespace scarab_pybind
         all_members.push_back( "weak_holder_cancelable" );
         pybind11::classh< scarab::weak_holder<scarab::cancelable> >( mod, "WeakHolderCancelable", "Weak-reference holder for a cancelable object" )
             .def( pybind11::init< >() )
+            .def( pybind11::init<std::shared_ptr<scarab::cancelable> >() )
 
             .def( "load", &scarab::weak_holder<scarab::cancelable>::load_from_py, "Store a weak reference to a scarab::cancelable object" )
             .def( "lock", &scarab::weak_holder<scarab::cancelable>::lock, "Return a reference to a scarab::cancelable object if the object still exists")

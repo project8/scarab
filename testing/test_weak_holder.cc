@@ -12,7 +12,7 @@
  
 #include <memory>
 
-namespace scarab_test_weak_holder
+namespace scarab_testing
 {
     struct tester
     {
@@ -20,7 +20,7 @@ namespace scarab_test_weak_holder
     };
 }
 
-using scarab_test_weak_holder::tester;
+using scarab_testing::tester;
 using scarab::weak_holder;
 
 TEST_CASE( "weak_holder_default", "[utility]" )
