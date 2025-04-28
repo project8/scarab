@@ -21,10 +21,13 @@
 
 
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <set>
 #include <sstream>
+
+#include <iostream>
 
 
 /**
@@ -43,9 +46,10 @@ namespace scarab
 {
     /// Starts the quill backend when the first logger is initialized; 
     /// Guarantees it's ready to receive log messages even during static initialization
+    /// The callback function a_runtime_opts can be used to modify the backend settings at runtime.
     struct quill_initializer
     {
-        quill_initializer();
+        quill_initializer( std::function< void(quill::BackendOptions&) > a_runtime_opts );
         //~quill_initializer(); // uncomment if you'd like to print when the destructor is called
     };
 
@@ -125,7 +129,7 @@ namespace scarab
              * Standard constructor assigning a name to the logger instance.
              * @param name The logger name.
              */
-            logger(const char* name = 0);
+            logger(const char* name = 0, std::function< void(quill::BackendOptions&) > a_runtime_opts = [](quill::BackendOptions&){ std::cerr << "NO DEFAULT RUNTIME OPTIONS" << std::endl; });
             /// @overload
             //logger(const std::string& name);
 
@@ -247,6 +251,7 @@ namespace scarab
 // PUBLIC MACROS
 
 #define INITIALIZE_LOGGING    static scarab::quill_initializer quill_init;
+#define INITIALIZE_LOGGING_WOPTS(L)    static scarab::quill_initializer quill_init(L);
 
 #define STOP_LOGGING    quill::Backend::stop();
 
@@ -256,15 +261,18 @@ namespace scarab
  \note Using this logger in a function called during the unloading phase (when static objects are destructed) can cause segfaults because objects used by the logger can be destructed before they're used.
  \param I static variable name for the logger
  \param K string name for the logger
+ \param L callback to set Quill backend options (void(quill::BackendOptions&))
  */
 #define LOGGER(I,K)         static scarab::logger I(K);
+#define LOGGER_WOPTS(I,K,L) static scarab::logger I(K,L);
 /**
  \brief Creates a local (non-static) logger object; intended for use in situations where a static object could be problematic (e.g. during static initialization)
  \note Using this logger in a function called during the unloading phase (when static objects are destructed) can cause segfaults because objects used by the logger can be destructed before they're used.
  \param I static variable name for the logger
  \param K string name for the logger
  */
-#define LOCAL_LOGGER(I,K)   scarab::logger I(K);
+#define LOCAL_LOGGER(I,K)          scarab::logger I(K);
+#define LOCAL_LOGGER_WOPTS(I,K,L)  scarab::logger I(K,L);
 
 /**
  \def LTRACE

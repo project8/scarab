@@ -17,7 +17,7 @@ using namespace std;
 
 namespace scarab
 {
-    quill_initializer::quill_initializer()
+    quill_initializer::quill_initializer( std::function< void(quill::BackendOptions&) > a_runtime_opts )
     {
         //std::cerr << "Creating Quill Initializer" << std::endl;
         quill::BackendOptions backend_options;
@@ -29,6 +29,11 @@ namespace scarab
         // Modify the character filtering: make \t visible
         // The default filtering function is: [](char c){ return (c >= ' ' && c <= '~') || (c == '\n'); }
         backend_options.check_printable_char = [](char c){ return (c >= ' ' && c <= '~') || (c == '\n') || (c == '\t'); };
+        //
+        backend_options.sleep_duration = std::chrono::microseconds(50);
+        // Use the callback for any runtime options
+        std::cerr << "initializing quill and using runtime options setting" << std::endl;
+        a_runtime_opts( backend_options );
         quill::Backend::start( backend_options );
     }
     //quill_initializer::~quill_initializer()
@@ -43,10 +48,10 @@ namespace scarab
     //}
 
 
-    logger::logger(const char* name)
+    logger::logger( const char* name, std::function< void(quill::BackendOptions&) > a_runtime_opts )
     {
         // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
-        static scarab::quill_initializer qInit;
+        static scarab::quill_initializer qInit( a_runtime_opts );
 
         auto console_colors = quill::ConsoleSink::Colours();
         console_colors.apply_default_colours();
