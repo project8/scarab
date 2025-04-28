@@ -19,8 +19,15 @@ namespace scarab_testing_pybind
 {
     struct wh_tester
     {
-        virtual int value() {return 100;}
+        virtual int value() { return 100; }
+        wh_tester() = default;
         virtual ~wh_tester() = default;
+    };
+
+    struct wh_tester_trampoline : wh_tester
+    {
+        using wh_tester::wh_tester;
+        int value() override { PYBIND11_OVERRIDE(int, wh_tester, value, ); }
     };
 
     struct wp_tester_parent
@@ -30,6 +37,10 @@ namespace scarab_testing_pybind
         {
             f_ptr = a_ptr;
             return;
+        }
+        bool expired() const
+        {
+            return f_ptr.expired();
         }
         int value() const
         {
@@ -46,7 +57,16 @@ namespace scarab_testing_pybind
             f_holder.load( a_ptr );
             return;
         }
-         int value() const
+        void load_from_py( const std::shared_ptr< wh_tester > a_ptr )
+        {
+            f_holder.load_from_py( a_ptr );
+            return;
+        }
+        bool expired() const
+        {
+            return f_holder.expired();
+        }
+        int value() const
         {
             auto wht_ptr = f_holder.lock();
             return wht_ptr ? wht_ptr->value() : -999;
@@ -60,7 +80,7 @@ namespace scarab_testing_pybind
 
         // wh_tester
         all_members.push_back( "wh_tester" );
-        pybind11::classh< wh_tester >( mod, "WHTester", "WHTester base class" )
+        pybind11::classh< wh_tester, wh_tester_trampoline >( mod, "WHTester", "WHTester base class" )
             .def( pybind11::init< >() )
             .def( "value", &wh_tester::value, "Return a value" )
             ;
@@ -70,6 +90,7 @@ namespace scarab_testing_pybind
         pybind11::classh< wp_tester_parent >( mod, "WPTesterParent", "WPTesterParent base class" )
             .def( pybind11::init< >() )
             .def( "load", &wp_tester_parent::load, "Load a new pointer")
+            .def( "expired", &wp_tester_parent::expired, "Check if the pointer is expired" )
             .def( "value", &wp_tester_parent::value, "Return a value" )
             ;
  
@@ -77,7 +98,8 @@ namespace scarab_testing_pybind
         all_members.push_back( "wh_tester_parent" );
         pybind11::classh< wh_tester_parent >( mod, "WHTesterParent", "WHTesterParent base class" )
             .def( pybind11::init< >() )
-            .def( "load", &wh_tester_parent::load, "Load a new pointer")
+            .def( "load", &wh_tester_parent::load_from_py, "Load a new pointer")
+            .def( "expired", &wh_tester_parent::expired, "Check if the pointer is expired" )
             .def( "value", &wh_tester_parent::value, "Return a value" )
             ;
  
