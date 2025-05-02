@@ -20,7 +20,7 @@ namespace scarab_pybind
 
             .def_static( "add_cancelable", 
                          [](std::shared_ptr<scarab::cancelable> a_cancelable) {
-                             scarab::signal_handler::add_cancelable(pybind11::potentially_slicing_shared_ptr<scarab::cancelable>(pybind11::cast(a_cancelable)));
+                             scarab::signal_handler::add_cancelable(pybind11::potentially_slicing_weak_ptr<scarab::cancelable>(pybind11::cast(a_cancelable)).lock());
                          },
                          "add a cancelable object to the list to be canceled in the event of a SIGINT" )
             .def_static( "remove_cancelable", static_cast<void (*)(std::shared_ptr<scarab::cancelable>)>( &scarab::signal_handler::remove_cancelable ), "remove a cancelable object from the list to be canceled in the event of a SIGINT" )
