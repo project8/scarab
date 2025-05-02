@@ -63,9 +63,9 @@ jobs:
             libboost-all-dev \
             rapidjson-dev \
             libyaml-cpp-dev
-          git clone https://github.com/pybind/pybind11.git
-          cd pybind11
-          git checkout master
+          git clone https://github.com/nsoblath/pybind11_debug.git
+          cd pybind11_debug
+          git checkout weak_ptr_test_only
           mkdir build
           cd build
           sudo cmake -DPYBIND11_TEST=FALSE ..
@@ -78,6 +78,11 @@ jobs:
           cd build
           sudo cmake ..
           sudo make install
+
+#          git clone https://github.com/pybind/pybind11.git
+#          cd pybind11
+#          git checkout master
+
 
       - name: Configure
         run: |
