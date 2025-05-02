@@ -44,9 +44,9 @@ jobs:
             sudo chown -R $(whoami) /usr/local/bin
           sudo mkdir -p /usr/local/share && \
             sudo chown -R $(whoami) /usr/local/share
-          git clone https://github.com/pybind/pybind11.git
-          cd pybind11
-          git checkout master
+          git clone https://github.com/nsoblath/pybind11_debug.git
+          cd pybind11_debug
+          git checkout weak_ptr_test_only
           mkdir build
           cd build
           cmake -DPYBIND11_TEST=FALSE ..
