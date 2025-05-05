@@ -13,4 +13,15 @@ It contains three main components:
   * Authentication class
   * A variety of utilities
 * python: Python bindings for a subset of the C++ library
-  * Requires pybind11 v2.3.0 or greater
+
+Requirements:
+* CMake v3.12 or higher
+* Quill v9.x
+* Boost 1.46 or higher; filesystem and system components
+* For optional YAML/param codec
+  * yaml-cpp v1.0 or higher
+* For optional JSON/param codec
+  * RapidJSON
+* For optional Python bindings:
+  * Python 3
+  * Pybind11 v3 or higher
