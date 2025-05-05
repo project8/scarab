@@ -51,6 +51,7 @@ jobs:
           cd build
           cmake -DPYBIND11_TEST=FALSE ..
           make -j2 install
+          pip install pytest
 
 
       - name: Install dependencies -- Linux
@@ -78,6 +79,7 @@ jobs:
           cd build
           sudo cmake ..
           sudo make install
+          pip install pytest
 
       - name: Configure
         run: |
@@ -94,6 +96,7 @@ jobs:
         run: |
           cd build
           ctest --output-on-failure
+          source bin/add_lib_python_path.sh
           pytest testing/python
 
 # For debugging
