@@ -14,7 +14,7 @@ int main( int argc, char* argv[] ) {
 
   int result = Catch::Session().run( argc, argv );
 
-  STOP_LOGGING;
+  //STOP_LOGGING;
 
   return result;
 }

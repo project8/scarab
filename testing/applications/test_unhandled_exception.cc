@@ -48,7 +48,7 @@ int main(int , char ** )
 
     LERROR( slog, "This should never print" );
 
-    STOP_LOGGING;
+    //STOP_LOGGING;
 
     return( EXIT_SUCCESS );
 }

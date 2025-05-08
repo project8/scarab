@@ -30,7 +30,7 @@ namespace scarab
             // We create a dedicated logger in the constructor because we know this will be used for a static object
             // This avoid any static initialization order issue
             LOGGER( tlog_const, "test_static_initialization" );
-            LPROG( tlog_const, "Constructing test_class object")
+            LPROG( tlog_const, "Constructing test_class object");
         }
 
         ~test_class()
@@ -55,7 +55,7 @@ int main(int , char ** )
 {
     s_static_tester.print_something();
 
-    STOP_LOGGING;
+    //STOP_LOGGING;
 
     return( EXIT_SUCCESS );
 }

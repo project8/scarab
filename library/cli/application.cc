@@ -45,13 +45,13 @@ namespace scarab
     {
         main_app::verbosity_map_t t_map;
         // have to hard-code the filling of the verbosity map because you can't iterate over an enum
-        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eTrace) ] = logger::ELevel::eTrace;
-        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eDebug) ] = logger::ELevel::eDebug;
-        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eInfo) ] = logger::ELevel::eInfo;
-        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eProg) ] = logger::ELevel::eProg;
-        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eWarn) ] = logger::ELevel::eWarn;
-        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eError) ] = logger::ELevel::eError;
-        t_map[ static_cast< main_app::verbosity_t >(logger::ELevel::eFatal) ] = logger::ELevel::eFatal;
+        t_map[ static_cast< main_app::verbosity_t >(ELevel::eTrace) ] = ELevel::eTrace;
+        t_map[ static_cast< main_app::verbosity_t >(ELevel::eDebug) ] = ELevel::eDebug;
+        t_map[ static_cast< main_app::verbosity_t >(ELevel::eInfo) ] = ELevel::eInfo;
+        t_map[ static_cast< main_app::verbosity_t >(ELevel::eProg) ] = ELevel::eProg;
+        t_map[ static_cast< main_app::verbosity_t >(ELevel::eWarn) ] = ELevel::eWarn;
+        t_map[ static_cast< main_app::verbosity_t >(ELevel::eError) ] = ELevel::eError;
+        t_map[ static_cast< main_app::verbosity_t >(ELevel::eFatal) ] = ELevel::eFatal;
         return t_map;
     }
 
@@ -73,7 +73,7 @@ namespace scarab
             f_auth_file_key( "auth-file" ),
             f_auth()
     {
-        set_global_verbosity( logger::ELevel::eProg );
+        set_global_verbosity( ELevel::eProg );
 
         allow_extras(); // allow unrecognized options, which are parsed into the nonoption args
 
@@ -315,11 +315,11 @@ namespace scarab
         f_global_verbosity = t_it;
 
         // set the global verbosity in the logger
-        logger::SetGlobalLevel( f_global_verbosity->second );
+        logger_helper::set_global_threshold( f_global_verbosity->second );
         return;
     }
 
-    void main_app::set_global_verbosity( logger::ELevel a_verbosity )
+    void main_app::set_global_verbosity( ELevel a_verbosity )
     {
         set_global_verbosity( static_cast< verbosity_t >(a_verbosity) );
         return;
@@ -336,7 +336,7 @@ namespace scarab
             --f_global_verbosity;
         }
         // set the global verbosity in the logger
-        applog.SetGlobalLevel( f_global_verbosity->second );
+        logger_helper::set_global_threshold( f_global_verbosity->second );
         return;
     }
 
@@ -351,7 +351,7 @@ namespace scarab
             ++f_global_verbosity;
         }
         // set the global verbosity in the logger
-        applog.SetGlobalLevel( f_global_verbosity->second );
+        logger_helper::set_global_threshold( f_global_verbosity->second );
         return;
     }
 

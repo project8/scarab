@@ -72,7 +72,7 @@ int main( int argc, char **argv )
     LPROG( testlog, "Second value: " << the_main.second_value() );
     LPROG( testlog, "Third value: " << the_main.primary_config()["third-value"]() );
 
-    STOP_LOGGING;
+    //STOP_LOGGING;
 
     return 0;
 }

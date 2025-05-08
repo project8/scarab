@@ -101,7 +101,7 @@ namespace scarab
 
 #ifndef NDEBUG
             // Since we can't use the logger at the unloading stage, when some registrars are removed, we cache the global threshold and manually apply it in remove_class()
-            logger::ELevel f_global_threshold;
+            ELevel f_global_threshold;
 #endif
     };
 
@@ -170,7 +170,7 @@ namespace scarab
 
 #ifndef NDEBUG
             // Since we can't use the logger at the unloading stage, when some registrars are removed, we cache the global threshold and manually apply it in remove_class()
-            logger::ELevel f_global_threshold;
+            ELevel f_global_threshold;
 #endif
     };
 
@@ -235,7 +235,7 @@ namespace scarab
     void indexed_factory< XIndexType, XBaseType, XArgs... >::remove_class(const XIndexType& a_index )
     {
 #ifndef NDEBUG
-        if( logger::ELevel::eTrace >= f_global_threshold )
+        if( ELevel::eTrace >= f_global_threshold )
         {
             std::cout << "Removing indexed_factory for class " << a_index << " from " << this << std::endl;
         }
@@ -257,7 +257,7 @@ namespace scarab
         f_factory_mutex()
     {
 #ifndef NDEBUG
-        f_global_threshold = logger::GetGlobalLevel();
+        f_global_threshold = logger_helper::get_global_threshold();
 #endif
     }
 
@@ -372,7 +372,7 @@ namespace scarab
     void indexed_factory< XIndexType, XBaseType, void >::remove_class(const XIndexType& a_index )
     {
 #ifndef NDEBUG
-        if( logger::ELevel::eTrace >= f_global_threshold )
+        if( ELevel::eTrace >= f_global_threshold )
         {
             std::cout << "Removing indexed_factory for class " << a_index << " from " << this << std::endl;
         }
@@ -394,7 +394,7 @@ namespace scarab
         f_factory_mutex()
     {
 #ifndef NDEBUG
-        f_global_threshold = logger::GetGlobalLevel();
+        f_global_threshold = logger_helper::get_global_threshold();
 #endif
     }
 

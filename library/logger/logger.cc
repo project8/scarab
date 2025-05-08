@@ -42,8 +42,9 @@ namespace scarab
     //    quill::Backend::stop();
     //}
 
-
-    logger::logger(const char* name)
+    logger_helper::logger_helper( quill::Logger*& a_logger, const std::string& a_name ) :
+            fStream(),
+            fBuffer()
     {
         // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
         static scarab::quill_initializer qInit;
@@ -53,141 +54,33 @@ namespace scarab
         console_colors.assign_colour_to_log_level( quill::LogLevel::Notice, quill::ConsoleSinkConfig::Colours::blue);
         quill::ConsoleSinkConfig config;
         config.set_colours(console_colors);
-        auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( "console_sink", config );
-        qLogger = quill::Frontend::create_or_get_logger( name, std::move(console_sink),
+        auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( a_name+"_console_sink", config );
+        a_logger = quill::Frontend::create_or_get_logger( a_name, std::move(console_sink),
                                                          quill::PatternFormatterOptions{ "%(time) [%(log_level)] (%(thread_id)) %(short_source_location) -> %(message)", "%Y-%m-%d %T.%Qms", quill::Timezone::GmtTime}
                                                        );
         //qLogger->set_log_level( quill::LogLevel::TraceL3 );
+    }
 
-        logger::count()++;
+    logger_helper::~logger_helper()
+    {}
 
-        if (name == nullptr)
+    ELevel logger_helper::get_global_threshold()
+    {
+        return f_global_threshold;
+    }
+
+    void logger_helper::set_global_threshold( ELevel a_threshold )
+    {
+        f_global_threshold = a_threshold;
+        auto t_all_loggers = quill::Frontend::get_all_loggers();
+        for( auto t_logger : t_all_loggers )
         {
-            fName = "root";
-        }
-        else
-        {
-            const char* logName = strrchr(name, '/') ? strrchr(name, '/') + 1 : name;
-            fName = logName;
-        }
-
-        UseGlobalLevel();
-        logger::AllLoggers()->insert(this);
-
-        //std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
-    }
-/*
-    logger::logger(const std::string& name) : fPrivate(new Private())
-    {
-        if( logger::Private::count() == 0 )
-        {
-            snprintf( logger::Private::dateTimeFormat(), 16,  "%%Y-%%m-%%d %%T" );
-        }
-
-        logger::Private::count()++;
-        
-        fPrivate->fLogger = name.c_str();
-
-		UseGlobalLevel();
-
-		logger::Private::AllLoggers()->insert(this);
-
-        //std::cerr << "created logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
-    }
-*/
-    logger::~logger()
-    {
-        quill::detail::LoggerManager& lm = quill::detail::LoggerManager::instance();
-        //std::cerr << "Destructing logger <" << fName << ">; quill logger: " << lm.get_logger( fName ) << std::endl;
-
-        logger::count()--;
-        
-        //std::cerr << "destructing logger (" << fPrivate->count() << ") " << fPrivate->fLogger << std::endl;
-        logger::AllLoggers()->erase(this);
-        //std::cerr << "logger removed from set: " << fPrivate->fLogger << std::endl;
-    }
-
-    bool logger::IsLevelEnabled(ELevel level) const
-    {
-        return level >= fThreshold;
-    }
-
-    logger::ELevel logger::GetLevel() const
-    {
-        return fThreshold;
-    }
-
-    void logger::SetLevel(ELevel level)
-    {
-        fThreshold = logger::filterMinimumLevel(level);
-        fThresholdIsGlobal = false;
-        qLogger->set_log_level( quill::v9::LogLevel(fThreshold) );
-    }
-
-    void logger::UseGlobalLevel()
-    {
-        fThreshold = logger::filterMinimumLevel(logger::GlobalThreshold());
-        fThresholdIsGlobal = true;
-        qLogger->set_log_level( quill::v9::LogLevel(fThreshold) );
-    } 
-
-    //////
-    // Static functions
-    //////
-
-    std::shared_ptr<logger::LoggerSet>& logger::AllLoggers()
-    {
-        // construct-on-first-use strategy to avoid static initialization fiasco
-        static std::shared_ptr<LoggerSet> sAllLoggers = std::make_shared< LoggerSet >();
-        return sAllLoggers;
-    }
-
-    unsigned& logger::count()
-    {
-        // construct on first use to avoid static initialization fiasco
-        static unsigned sCount = 0;
-        return sCount;
-    }
-
-    logger::ELevel& logger::GlobalThreshold()
-    {
-        // construct-on-first-use strategy to avoid static initialization fiasco
-        static ELevel sGlobalThreshold = logger::filterMinimumLevel(ELevel::eDebug);
-        return sGlobalThreshold;
-    }
-
-    logger::ELevel logger::filterMinimumLevel(logger::ELevel level)
-    {
-#if defined(NDEBUG) && defined(STANDARD)
-        return level >= logger::ELevel::eInfo ? level : logger::ELevel::eInfo;
-#elif defined(NDEBUG)
-        return level >= logger::ELevel::eProg ? level : logger::ELevel::eProg;
-#else
-        return level;
-#endif
-    }
-
-    logger::ELevel logger::GetGlobalLevel()
-    {
-        return logger::GlobalThreshold();
-    }
-
-    void logger::SetGlobalLevel(ELevel level)
-    {
-        logger::GlobalThreshold() = logger::filterMinimumLevel(level);
-        for( logger::LoggerSet::iterator logIt = logger::AllLoggers()->begin(); logIt != logger::AllLoggers()->end(); ++logIt)
-        {
-            if( (*logIt)->fThresholdIsGlobal )
-            {
-                (*logIt)->fThreshold = logger::GlobalThreshold();
-            }
+            t_logger->set_log_level( quill::LogLevel(unsigned(f_global_threshold)) );
         }
         return;
     }
 
-    void SCARAB_API stop_logging()
-    {
-        quill::Backend::stop();
-    }
 
-}
+    ELevel logger_helper::f_global_threshold = ELevel::eDebug;
+
+} // namespace scarab

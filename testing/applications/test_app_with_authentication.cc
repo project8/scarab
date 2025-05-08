@@ -131,7 +131,7 @@ int main( int argc, char **argv )
 
     close( fd );
 
-    STOP_LOGGING;
+    //STOP_LOGGING;
 
     return 0;
 }
