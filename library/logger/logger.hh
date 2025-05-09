@@ -33,7 +33,13 @@
  * @date Reborn on: Oct 4, 2024
  * @author N.S. Oblath
  * 
- * Notes on the logging system design
+ * Basic use instructions:
+ * 
+ * 1. Create a logger with LOGGER or LOCAL_LOGGER
+ * 2. Use STOP_LOGGING or scarab::quill_guard to stop the use of Quill before main() returns in your application
+ * 3. Use L[level] macros to log messages
+ * 
+ * Notes on the logging system design:
  * 
  * * The logger was originally based on the Kasper KLogger class, from the KATRIN experiment. This established many of the interface 
  *   choices, including the use of the LOGGER macro, and the macros for the various logging levels.
@@ -57,6 +63,8 @@
  *   Therefore we implemented a system where the logging via Quill can be explicitly stopped, at which point the logging switches to using stdout.  
  *   This is why we have a series of function pointers and separate functions for printing each log level to Quill and to stdout.  Once Quill logging is stopped, 
  *   it's presumed that the application is exiting, so it's not possible to turn it back on.
+ * * The effect of not stopping the Quill logging mixed with printing after main execution can be seen by e.g. removing the quill_guard from test_static_initialization.  
+ *   Depending on runtime conditions, it can work, segfault, or hang indefinitely.
  * * The implementation of the logging macros and the reason it is like it is might be a bit confusing:
  *   * The main interface is via the L[level] macros.  These provide a way to conveniently specify the logging level, logger object, and 
  *     message being composed with operator<<, all of which is known at compile time.
@@ -72,7 +80,7 @@
  * * Debug and trace messages are not compiled when scarab is built in Release mode.  This is done by a compile-time choice of using empty DEBUG and TRACE macros 
  *   when in Release mode.  Quill has compile-time filtering capabilities too, but we don't use that because scarab::logger has whole setup with 
  *   function pointers that allow the Quill logging to be stopped.
- *
+ * * TODO: Individual logger verbosity can be controlled by requesting that logger via the string name that's provided in the LOGGER macro and an ELevel value.
  */
 
 /**
@@ -99,6 +107,16 @@ namespace scarab
         quill_initializer();
         //~quill_initializer(); // uncomment if you'd like to print when the destructor is called
     };
+
+    // Protects quill from being used after the execution phase (during static cleanup)
+    // This was tested and didn't work for some reason.  Segfaults still occurred.
+    // Instead the recommendation is to use the STOP_LOGGER macro at the end of an executable.
+    struct quill_guard : quill_initializer
+    {
+        quill_guard() = default;
+        ~quill_guard();
+    };
+
 
     class logger
     {
@@ -189,35 +207,30 @@ namespace scarab
 
 } // end namespace scarab
 
-#define LOGGER(a_logger, a_name)         static scarab::logger a_logger(a_name);
+/// Creates a static scarab::logger object with variable name a_logger; Quill Logger name will be a_name.
+#define LOGGER(a_logger, a_name)         static ::scarab::logger a_logger(a_name);
 
-#define LOCAL_LOGGER(a_logger, a_name)   scarab::logger a_logger(a_name);
+/// Creates a (non-static) scarab::logger object with variable name a_logger; Quill Logger name will be a_name.
+#define LOCAL_LOGGER(a_logger, a_name)   ::scarab::logger a_logger(a_name);
 
-//#define LOGGER_GET_STRING(a_logger, one_string) one_string
-#define LOGGER_GET_STRING(a_logger, ...) (a_logger.ref() << __VA_ARGS__).buffer()
+/// Stop Quill logging -- all loggers will switch to using stdout; this macro should be used just before returning from main().
+#define STOP_LOGGING  ::scarab::logger::stop_quill();
+
+/// Private macro for creating a single message string with a given logger object
+#define _LOGGER_GET_STRING(a_logger, ...) (a_logger.ref() << __VA_ARGS__).buffer()
 
 
 #ifdef NDEBUG
 #define LTRACE(a_logger, ...)
 #define LDEBUG(a_logger, ...)
 #else
-#define LTRACE(a_logger, ...)       scarab::logger::s_log_trace_fcn( a_logger, LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LDEBUG(a_logger, ...)       scarab::logger::s_log_debug_fcn( a_logger, LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LTRACE(a_logger, ...)       scarab::logger::s_log_trace_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LDEBUG(a_logger, ...)       scarab::logger::s_log_debug_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
 #endif
-#define LINFO(a_logger, ...)        scarab::logger::s_log_info_fcn( a_logger, LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LPROG(a_logger, ...)        scarab::logger::s_log_prog_fcn( a_logger, LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LWARN(a_logger, ...)        scarab::logger::s_log_warn_fcn( a_logger, LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LERROR(a_logger, ...)       scarab::logger::s_log_error_fcn( a_logger, LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LFATAL(a_logger, ...)       scarab::logger::s_log_fatal_fcn( a_logger, LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-
-
-    // Protects quill from being used after the execution phase (during static cleanup)
-    // This was tested and didn't work for some reason.  Segfaults still occurred.
-    // Instead the recommendation is to use the STOP_LOGGER macro at the end of an executable.
-    //struct quill_guard : quill_initializer
-    //{
-    //    quill_guard() = default;
-    //    ~quill_guard();
-    //};
+#define LINFO(a_logger, ...)        scarab::logger::s_log_info_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LPROG(a_logger, ...)        scarab::logger::s_log_prog_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LWARN(a_logger, ...)        scarab::logger::s_log_warn_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LERROR(a_logger, ...)       scarab::logger::s_log_error_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LFATAL(a_logger, ...)       scarab::logger::s_log_fatal_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
 
 #endif // SCARAB_LOGGER_HH_

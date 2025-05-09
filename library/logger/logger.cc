@@ -53,18 +53,18 @@ namespace scarab
             logger::s_log_fatal_fcn = &scarab::logger::log_fatal_to_stdout;
         }
 
-        logger::check_log_functions();
+        //logger::check_log_functions();
     }
     //quill_initializer::~quill_initializer()
     //{
     //    std::cerr << "Destructing quill initializer" << std::endl;
     //}
 
-    //quill_guard::~quill_guard()
-    //{
-    //    std::cerr << "calling backend stop via quill guard" << std::endl;
-    //    quill::Backend::stop();
-    //}
+    quill_guard::~quill_guard()
+    {
+        //std::cerr << "calling backend stop via quill guard" << std::endl;
+        logger::stop_quill();
+    }
 
     ELevel logger::f_global_threshold = ELevel::eDebug;
 
@@ -100,7 +100,7 @@ namespace scarab
             f_quill->set_log_level( quill::LogLevel(unsigned(f_global_threshold)) );
         }
 
-        logger::check_log_functions();
+        //logger::check_log_functions();
     }
 
     logger::~logger()
@@ -138,7 +138,7 @@ namespace scarab
 
         quill::Backend::stop();
 
-        logger::check_log_functions();
+        //logger::check_log_functions();
 
         return;
     }
