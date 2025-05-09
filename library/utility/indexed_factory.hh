@@ -257,7 +257,7 @@ namespace scarab
         f_factory_mutex()
     {
 #ifndef NDEBUG
-        f_global_threshold = logger_helper::get_global_threshold();
+        f_global_threshold = logger::get_global_threshold();
 #endif
     }
 
@@ -394,7 +394,7 @@ namespace scarab
         f_factory_mutex()
     {
 #ifndef NDEBUG
-        f_global_threshold = logger_helper::get_global_threshold();
+        f_global_threshold = logger::get_global_threshold();
 #endif
     }
 

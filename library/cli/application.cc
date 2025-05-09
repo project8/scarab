@@ -315,7 +315,7 @@ namespace scarab
         f_global_verbosity = t_it;
 
         // set the global verbosity in the logger
-        logger_helper::set_global_threshold( f_global_verbosity->second );
+        logger::set_global_threshold( f_global_verbosity->second );
         return;
     }
 
@@ -336,7 +336,7 @@ namespace scarab
             --f_global_verbosity;
         }
         // set the global verbosity in the logger
-        logger_helper::set_global_threshold( f_global_verbosity->second );
+        logger::set_global_threshold( f_global_verbosity->second );
         return;
     }
 
@@ -351,7 +351,7 @@ namespace scarab
             ++f_global_verbosity;
         }
         // set the global verbosity in the logger
-        logger_helper::set_global_threshold( f_global_verbosity->second );
+        logger::set_global_threshold( f_global_verbosity->second );
         return;
     }
 

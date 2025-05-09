@@ -53,9 +53,12 @@ static scarab::test_class s_static_tester;
 
 int main(int , char ** )
 {
+    scarab::logger::check_log_functions();
     s_static_tester.print_something();
 
     //STOP_LOGGING;
+    scarab::logger::stop_quill();
+    scarab::logger::check_log_functions();
 
     return( EXIT_SUCCESS );
 }
