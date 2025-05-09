@@ -173,7 +173,7 @@ namespace scarab
         }
         catch ( YAML::Exception& e )
         {
-            LERROR( slog, "YAML error in scalar_handler: " << e.what() )
+            LERROR( slog, "YAML error in scalar_handler: " << e.what() );
             return std::unique_ptr< param_value >();
         }
         return std::unique_ptr< param_value >();

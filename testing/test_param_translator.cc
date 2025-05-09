@@ -12,7 +12,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-LOGGER( testlog, "test_param_translator" )
+LOGGER( testlog, "test_param_translator" );
 
 using namespace scarab;
 
@@ -22,7 +22,7 @@ TEST_CASE( "param_translator", "[param]" )
 #ifdef USE_CODEC_YAML
     SECTION( "YAML" )
     {
-        LINFO( testlog, "Testing YAML translator" )
+        LINFO( testlog, "Testing YAML translator" );
 
         std::string test_yaml(
             "a-node:\n"
@@ -54,7 +54,7 @@ TEST_CASE( "param_translator", "[param]" )
 #ifdef USE_CODEC_JSON
     SECTION( "JSON" )
     {
-        LINFO( testlog, "Testing JSON translator" )
+        LINFO( testlog, "Testing JSON translator" );
 
         std::string test_json(
             "{\n"
