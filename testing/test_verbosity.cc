@@ -17,27 +17,27 @@ TEST_CASE( "verbosity", "[cli][logger]" )
     scarab::main_app t_app;
 
     // test default verbosity
-    REQUIRE( scarab::logger_helper::get_global_threshold() == scarab::ELevel::eProg );
+    REQUIRE( scarab::logger::get_global_threshold() == scarab::ELevel::eProg );
 
     // test increasing verbosity
     t_app.increase_global_verbosity( 1 );
-    REQUIRE( scarab::logger_helper::get_global_threshold() == scarab::ELevel::eInfo );
+    REQUIRE( scarab::logger::get_global_threshold() == scarab::ELevel::eInfo );
 
     // test increasing past the end
     t_app.increase_global_verbosity( 10 );
-    REQUIRE( scarab::logger_helper::get_global_threshold() == scarab::ELevel::eTrace );
+    REQUIRE( scarab::logger::get_global_threshold() == scarab::ELevel::eTrace );
 
     // test decreasing past the beginning
     t_app.decrease_global_verbosity( 100 );
-    REQUIRE( scarab::logger_helper::get_global_threshold() == scarab::ELevel::eFatal );
+    REQUIRE( scarab::logger::get_global_threshold() == scarab::ELevel::eFatal );
 
     // test setting verbosity
     t_app.set_global_verbosity( 6 );
-    REQUIRE( scarab::logger_helper::get_global_threshold() == scarab::ELevel::eWarn );
+    REQUIRE( scarab::logger::get_global_threshold() == scarab::ELevel::eWarn );
 
     // test decreasing past the beginning
     t_app.set_global_verbosity( 100 );
-    REQUIRE( scarab::logger_helper::get_global_threshold() == scarab::ELevel::eFatal );
+    REQUIRE( scarab::logger::get_global_threshold() == scarab::ELevel::eFatal );
 
 }
 /*
