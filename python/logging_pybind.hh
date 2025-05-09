@@ -42,10 +42,10 @@ namespace scarab_pybind
                  pybind11::arg("verbosity"),
                  "Convert Scarab's logging verbosity to Python's logging level." );
 
-//        all_members.push_back( "stop_logging" );
-//        mod.def( "stop_logging",
-//                &scarab::stop_logging,
-//                "Stop the C++ logging thread." );
+        all_members.push_back( "stop_logging" );
+        mod.def( "stop_logging",
+                &scarab::logger::stop_logging,
+                "Stop the C++ logging thread -- Use this at the end of your application." );
 
 
         return all_members;
