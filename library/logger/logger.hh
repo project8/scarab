@@ -224,13 +224,13 @@ namespace scarab
 #define LTRACE(a_logger, ...)
 #define LDEBUG(a_logger, ...)
 #else
-#define LTRACE(a_logger, ...)       scarab::logger::s_log_trace_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LDEBUG(a_logger, ...)       scarab::logger::s_log_debug_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LTRACE(a_logger, ...)       scarab::logger::s_log_trace_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+#define LDEBUG(a_logger, ...)       scarab::logger::s_log_debug_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
 #endif
-#define LINFO(a_logger, ...)        scarab::logger::s_log_info_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LPROG(a_logger, ...)        scarab::logger::s_log_prog_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LWARN(a_logger, ...)        scarab::logger::s_log_warn_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LERROR(a_logger, ...)       scarab::logger::s_log_error_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
-#define LFATAL(a_logger, ...)       scarab::logger::s_log_fatal_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) )
+#define LINFO(a_logger, ...)        scarab::logger::s_log_info_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+#define LPROG(a_logger, ...)        scarab::logger::s_log_prog_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+#define LWARN(a_logger, ...)        scarab::logger::s_log_warn_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+#define LERROR(a_logger, ...)       scarab::logger::s_log_error_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+#define LFATAL(a_logger, ...)       scarab::logger::s_log_fatal_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
 
 #endif // SCARAB_LOGGER_HH_
