@@ -44,7 +44,7 @@ namespace scarab_pybind
 
         all_members.push_back( "stop_logging" );
         mod.def( "stop_logging",
-                &scarab::logger::stop_logging,
+                &scarab::logger::stop_quill,
                 "Stop the C++ logging thread -- Use this at the end of your application." );
 
 
