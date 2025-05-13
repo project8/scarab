@@ -182,6 +182,7 @@ namespace scarab
 
     void logger::log_trace_to_stdout( logger& /*a_logger*/, const std::string& a_message )
     {
+        if( logger::f_global_threshold > ELevel::eTrace ) return;
         std::cout << "[TRACE] " << a_message << std::endl;
     }
 
@@ -192,6 +193,7 @@ namespace scarab
 
     void logger::log_debug_to_stdout( logger& /*a_logger*/, const std::string& a_message )
     {
+        if( logger::f_global_threshold > ELevel::eDebug ) return;
         std::cout << "[DEBUG] " << a_message << std::endl;
     }
 
@@ -202,6 +204,7 @@ namespace scarab
 
     void logger::log_info_to_stdout( logger& /*a_logger*/, const std::string& a_message )
     {
+        if( logger::f_global_threshold > ELevel::eInfo ) return;
         std::cout << "[INFO] " << a_message << std::endl;
     }
 
@@ -212,6 +215,7 @@ namespace scarab
 
     void logger::log_prog_to_stdout( logger& /*a_logger*/, const std::string& a_message )
     {
+        if( logger::f_global_threshold > ELevel::eProg ) return;
         std::cout << "[PROG] " << a_message << std::endl;
     }
 
@@ -222,6 +226,7 @@ namespace scarab
 
     void logger::log_warn_to_stdout( logger& /*a_logger*/, const std::string& a_message )
     {
+        if( logger::f_global_threshold > ELevel::eWarn ) return;
         std::cout << "[WARNING] " << a_message << std::endl;
     }
 
@@ -232,6 +237,7 @@ namespace scarab
 
     void logger::log_error_to_stdout( logger& /*a_logger*/, const std::string& a_message )
     {
+        if( logger::f_global_threshold > ELevel::eError ) return;
         std::cout << "[ERROR] " << a_message << std::endl;
     }
 
@@ -242,6 +248,7 @@ namespace scarab
 
     void logger::log_fatal_to_stdout( logger& /*a_logger*/, const std::string& a_message )
     {
+        if( logger::f_global_threshold > ELevel::eFatal ) return;
         std::cout << "[FATAL] " << a_message << std::endl;
     }
 
