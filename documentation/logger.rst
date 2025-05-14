@@ -142,8 +142,8 @@ Setup Logging in an Application
 
     1. Use the ``STOP_LOGGING`` macro at the end of your executable, immediately before returning from :cpp:func:`main()`.
     2. Use a :cpp:class:`scarab::quill_guard` object; create the :cpp:class:`quill_guard` at the beginning of your :cpp:func:`main()`, and it will 
-    stop logging when it goes out of scope.  Do not create the :cpp:class:`quill_guard` at global scope (see :ref:`stopping-quill` for 
-    details on why this is a bad idea).
+       stop logging when it goes out of scope.  Do not create the :cpp:class:`quill_guard` at global scope (see :ref:`stopping-quill` for 
+       details on why this is a bad idea).
 
 Log a Message
 ^^^^^^^^^^^^^
