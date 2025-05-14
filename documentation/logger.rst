@@ -199,8 +199,7 @@ In 2024 the Scarab logger was revamped to be based on the `Quill logging library
 Quill was chosen because it
 
 * Provides a rich logging environment with options that suited the existing needs of Scarab users;
-* Used macros that were almost compatible with the existing Scarab logging macros, so that no changes were necessary for 
-Scarab logger users;
+* Used macros that were almost compatible with the existing Scarab logging macros, so that no changes were necessary for Scarab logger users;
 * Funneled all logging through a single thread, so that Pybind11-wrapped code would be happy.
 
 Quill divides the logging implementation into "Frontend" components and "Backend" components.  Client code that wants to print a log 
@@ -230,5 +229,5 @@ To-do List
 ----------
 
 * Individual-logger control of verbosity.  This will allow users to increase verbosity to individual portions of executing code, depending on how 
-a package uses (or not) multiple Quill loggers.
+  a package uses (or not) multiple Quill loggers.
 * Investigate lazy evaluation of logging statements to move evaluation to the logging thread.
