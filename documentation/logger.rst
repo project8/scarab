@@ -15,34 +15,34 @@ Logging Levels
 
 .. _logging-levels:
 
-+-------------+------------------------------------------------+------------+-----------------+--------------+
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
 | Level       | Purpose                                        | Logging    | Terminal Color  | :cpp:enum:`scarab::ELevel`| 
-|             |                                                | Macro      |                 | enum         |
-+=============+================================================+============+=================+==============+
-| Fatal       | An error has occurred that should cause        | ``LFATAL`` | Red background  | ``eFatal``   |
-|             | an application to exit immediately             |            | Green text      |              |
-+-------------+------------------------------------------------+------------+-----------------+--------------+
-| Error       | Something has gone wrong that will cause       | ``LERROR`` | Red             | ``eError``   |
-|             | the application to act in an unexpected way    |            |                 |              |
-+-------------+------------------------------------------------+------------+-----------------+--------------+
-| Warning     | Something unexpected has happened, that the    | ``LWARN``  | Orange          | ``eWarn``    |
-|             | user should be aware of, but execution will    |            |                 |              |
-|             | continue                                       |            |                 |              |
-+-------------+------------------------------------------------+------------+-----------------+--------------+
-| Progress    | Reporting important information for the        | ``LPROG``  | Dark Blue       | ``eProg``    |
-|             | user where the printing will happen only       |            |                 |              |
-|             | once or infrequently                           |            |                 |              |
-+-------------+------------------------------------------------+------------+-----------------+--------------+
-| Information | Reporting useful information for the user;     | ``LINFO``  | Green           | ``eInfo``    | 
-|             | printing may repeat, but will be minimal       |            |                 |              |
-+-------------+------------------------------------------------+------------+-----------------+--------------+
-| Debug       | Reporting information useful for debugging;    | ``LDEBUG`` | Light Blue      | ``eDebug``   |
-|             | printing may be verbose and impact performance |            |                 |              |
-+-------------+------------------------------------------------+------------+-----------------+--------------+
-| Trace       | Reporting information useful for low-level     | ``LTRACE`` | White           | ``eTrace``   |
-|             | debugging; will be very verbose and impact     |            |                 |              |
-|             | performance significantly                      |            |                 |              |
-+-------------+------------------------------------------------+------------+-----------------+--------------+
+|             |                                                | Macro      |                 | enum                      |
++=============+================================================+============+=================+===========================+
+| Fatal       | An error has occurred that should cause        | ``LFATAL`` | Red background  | ``eFatal``                |
+|             | an application to exit immediately             |            | Green text      |                           |
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
+| Error       | Something has gone wrong that will cause       | ``LERROR`` | Red             | ``eError``                |
+|             | the application to act in an unexpected way    |            |                 |                           |
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
+| Warning     | Something unexpected has happened, that the    | ``LWARN``  | Orange          | ``eWarn``                 |
+|             | user should be aware of, but execution will    |            |                 |                           |
+|             | continue                                       |            |                 |                           |
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
+| Progress    | Reporting important information for the        | ``LPROG``  | Dark Blue       | ``eProg``                 |
+|             | user where the printing will happen only       |            |                 |                           |
+|             | once or infrequently                           |            |                 |                           |
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
+| Information | Reporting useful information for the user;     | ``LINFO``  | Green           | ``eInfo``                 | 
+|             | printing may repeat, but will be minimal       |            |                 |                           |
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
+| Debug       | Reporting information useful for debugging;    | ``LDEBUG`` | Light Blue      | ``eDebug``                |
+|             | printing may be verbose and impact performance |            |                 |                           |
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
+| Trace       | Reporting information useful for low-level     | ``LTRACE`` | White           | ``eTrace``                |
+|             | debugging; will be very verbose and impact     |            |                 |                           |
+|             | performance significantly                      |            |                 |                           |
++-------------+------------------------------------------------+------------+-----------------+---------------------------+
 
 Terminal Output
 ---------------
@@ -84,9 +84,9 @@ To log a message, use one of the logging macros in the :ref:`table above <loggin
 
     LINFO( mylog, "Hello, my count is " << counter );
 
-In an application the logging must be explicitly stopped before or when the :cpp:function:`main()` exits.  This can be done either by placing 
-the `STOP_LOGGING` macro just before returning from :cpp:function:`main()`, or by using a :cpp:class:`scarab::quill_guard` created at the beginning of 
-:cpp:function:`main()`, which will stop logging when it goes out of scope and is destructed.
+In an application the logging must be explicitly stopped before or when the :cpp:func:`main()` exits.  This can be done either by placing 
+the `STOP_LOGGING` macro just before returning from :cpp:func:`main()`, or by using a :cpp:class:`scarab::quill_guard` created at the beginning of 
+:cpp:func:`main()`, which will stop logging when it goes out of scope and is destructed.
 
 .. note::
     After stopping logging, the logger will revert to using ``std::cout`` to log messages, and it will not include the prepended information 
@@ -139,15 +139,15 @@ Setup Logging in an Application
 * If you application is built with :cpp:class:`scarab::application`, verbosity controls are already provided.
 * The logger backend will be configured and automatically started by the first use of the ``LOGGER()`` or ``LOCAL_LOGGER()`` macro.
 * You will need to ensure that logging stops, and you have a couple of options for accomplishing this::
-    1. Use the ``STOP_LOGGING`` macro at the end of your executable, immediately before returning from :cpp:function:`main()`.
-    2. Use a :cpp:class:`scarab::quill_guard` object; create the :cpp:class:`quill_guard` at the beginning of your :cpp:function:`main()`, and it will 
+    1. Use the ``STOP_LOGGING`` macro at the end of your executable, immediately before returning from :cpp:func:`main()`.
+    2. Use a :cpp:class:`scarab::quill_guard` object; create the :cpp:class:`quill_guard` at the beginning of your :cpp:func:`main()`, and it will 
     stop logging when it goes out of scope.  Do not create the :cpp:class:`quill_guard` at global scope (see :ref:`stopping-quill` for 
     details on why this is a bad idea).
 
 Log a Message
 ^^^^^^^^^^^^^
 
-Use one of the logging macros in the :ref:`logging-levels table <logging-levels>`.  For users familiar with using `std::cout`, for instance, 
+Use one of the logging macros in the :ref:`logging-levels table <logging-levels>`.  For users familiar with using ``std::cout``, for instance, 
 you would replace:: 
 
     std::cout << "Here's the value of my_counter: " << my_counter << std::endl;
@@ -221,7 +221,7 @@ Any thread that starts has to stop at some point before execution completely sto
 For most users of Quill, presumably the Quill's own handling of its logging thread is sufficient.  However, for Scarab, where objects that use 
 the logger are created at static initialization time, and therefore destructed after the main execution completes, it was found that 
 we could not reliably extend the operation of the Quill logging thread to cover the lifetime of all logger objects.  This would result in inconsistent 
-segfaults as an application exited.  Therefore the choice was made to manually stop Quill at the end of the :cpp:function:`main()` function 
+segfaults as an application exited.  Therefore the choice was made to manually stop Quill at the end of the :cpp:func:`main()` function 
 (see :ref:`hdi-setup-logging`) and switch to using ``std::cout`` to log messages to the terminal after that (typically only messages regarding the 
 destruction of statically-created objects).  
 
