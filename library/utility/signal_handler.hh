@@ -122,11 +122,11 @@ namespace scarab
             signal_handler& operator=( const signal_handler& ) = delete;
             signal_handler& operator=( signal_handler&& ) = delete;
 
-            /// Static version: add a cancelable object
+            /// Add a cancelable object
             static void add_cancelable( std::shared_ptr< cancelable > a_cancelable );
-            /// Static version: remove a cancelable object
+            /// Remove a cancelable object
             static void remove_cancelable( std::shared_ptr< cancelable > a_cancelable );
-            /// Static version: remove a cancelable object with a plain pointer
+            /// Remove a cancelable object with a plain pointer
             static void remove_cancelable( cancelable* a_cancelable );
             /// Print the pointers to the cancelables
             static void print_cancelables();
