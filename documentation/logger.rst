@@ -63,10 +63,10 @@ Use in Source Code
 Anywhere the logger is being used, with few exceptions, the ``LOGGER()`` macro must first be used to create a static logger object.  
 That macro takes two parameter:
 
-  1. The variable name to which the logger will be assigned.  This is a static variable, so it will have global scope.  It can be shared 
-  between all or multiple compilation units in a build, or it can be unique.
-  2. The string name for the backend logger object.  This may be shared between multiple logger objects or be unique.  Currently the 
-  logger name is not used in the Scarab logger API, but it may be used in the future.
+1. The variable name to which the logger will be assigned.  This is a static variable, so it will have global scope.  It can be shared 
+between all or multiple compilation units in a build, or it can be unique.
+2. The string name for the backend logger object.  This may be shared between multiple logger objects or be unique.  Currently the 
+logger name is not used in the Scarab logger API, but it may be used in the future.
 
 Here's an example creation of a static logger::
 
@@ -127,7 +127,7 @@ If an application is built with :cpp:class:`scarab::application` and the standar
 verbosity.  Each flag can be used multiple times to shift the verbosity by multiple levels.
 
 Interfacing with ``logger`` in source code
-"""""""""""::"""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""
 
 You can set the static parameter :cpp:var:`logger::f_global_verbosity` with values from the :cpp:enum:`scarab::ELevel` enum (see above).
 
@@ -136,13 +136,13 @@ You can set the static parameter :cpp:var:`logger::f_global_verbosity` with valu
 Setup Logging in an Application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    * If you application is built with :cpp:class:`scarab::application`, verbosity controls are already provided.
-    * The logger backend will be configured and automatically started by the first use of the ``LOGGER()`` or ``LOCAL_LOGGER()`` macro.
-    * You will need to ensure that logging stops, and you have a couple of options for accomplishing this::
-        1. Use the ``STOP_LOGGING`` macro at the end of your executable, immediately before returning from :cpp:function:`main()`.
-        2. Use a :cpp:class:`scarab::quill_guard` object; create the :cpp:class:`quill_guard` at the beginning of your :cpp:function:`main()`, and it will 
-        stop logging when it goes out of scope.  Do not create the :cpp:class:`quill_guard` at global scope (see :ref:`stopping-quill` for 
-        details on why this is a bad idea).
+* If you application is built with :cpp:class:`scarab::application`, verbosity controls are already provided.
+* The logger backend will be configured and automatically started by the first use of the ``LOGGER()`` or ``LOCAL_LOGGER()`` macro.
+* You will need to ensure that logging stops, and you have a couple of options for accomplishing this::
+    1. Use the ``STOP_LOGGING`` macro at the end of your executable, immediately before returning from :cpp:function:`main()`.
+    2. Use a :cpp:class:`scarab::quill_guard` object; create the :cpp:class:`quill_guard` at the beginning of your :cpp:function:`main()`, and it will 
+    stop logging when it goes out of scope.  Do not create the :cpp:class:`quill_guard` at global scope (see :ref:`stopping-quill` for 
+    details on why this is a bad idea).
 
 Log a Message
 ^^^^^^^^^^^^^
@@ -196,10 +196,11 @@ Logging Infrastructure: Quill
 
 In 2024 the Scarab logger was revamped to be based on the `Quill logging library <https://quillcpp.readthedocs.io/en/latest/index.html>`_.  
 Quill was chosen because it::
-    * Provides a rich logging environment with options that suited the existing needs of Scarab users;
-    * Used macros that were almost compatible with the existing Scarab logging macros, so that no changes were necessary for 
-    Scarab logger users;
-    * Funneled all logging through a single thread, so that Pybind11-wrapped code would be happy.
+
+* Provides a rich logging environment with options that suited the existing needs of Scarab users;
+* Used macros that were almost compatible with the existing Scarab logging macros, so that no changes were necessary for 
+Scarab logger users;
+* Funneled all logging through a single thread, so that Pybind11-wrapped code would be happy.
 
 Quill divides the logging implementation into "Frontend" components and "Backend" components.  Client code that wants to print a log 
 message interacts with the frontend, primarily via the logging macros.  The Scarab logger is a lightweight wrapper around the Quill logger 
@@ -227,6 +228,5 @@ destruction of statically-created objects).
 To-do List
 ----------
 
-    * Individual-logger control of verbosity.  This will allow users to increase verbosity to individual portions of executing code, depending on how 
-    a package uses (or not) multiple Quill loggers.
-    
+* Individual-logger control of verbosity.  This will allow users to increase verbosity to individual portions of executing code, depending on how 
+a package uses (or not) multiple Quill loggers.
