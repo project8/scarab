@@ -85,7 +85,7 @@ To log a message, use one of the logging macros in the :ref:`table above <loggin
     LINFO( mylog, "Hello, my count is " << counter );
 
 In an application the logging must be explicitly stopped before or when the :cpp:func:`main()` exits.  This can be done either by placing 
-the `STOP_LOGGING` macro just before returning from :cpp:func:`main()`, or by using a :cpp:class:`scarab::quill_guard` created at the beginning of 
+the ``STOP_LOGGING`` macro just before returning from :cpp:func:`main()`, or by using a :cpp:class:`scarab::quill_guard` created at the beginning of 
 :cpp:func:`main()`, which will stop logging when it goes out of scope and is destructed.
 
 .. note::
@@ -139,6 +139,7 @@ Setup Logging in an Application
 * If you application is built with :cpp:class:`scarab::application`, verbosity controls are already provided.
 * The logger backend will be configured and automatically started by the first use of the ``LOGGER()`` or ``LOCAL_LOGGER()`` macro.
 * You will need to ensure that logging stops, and you have a couple of options for accomplishing this::
+
     1. Use the ``STOP_LOGGING`` macro at the end of your executable, immediately before returning from :cpp:func:`main()`.
     2. Use a :cpp:class:`scarab::quill_guard` object; create the :cpp:class:`quill_guard` at the beginning of your :cpp:func:`main()`, and it will 
     stop logging when it goes out of scope.  Do not create the :cpp:class:`quill_guard` at global scope (see :ref:`stopping-quill` for 
@@ -185,7 +186,7 @@ Interface with Python
 ^^^^^^^^^^^^^^^^^^^^^
 
 If developing a Python application that uses wrapped Scarab code, minimal attention is needed.  For a Python-based executable, 
-it's highly recommended to use the :py:function:`scarab.stop_logging()` function to stop the C++ logging process.  The consequences 
+it's highly recommended to use the :py:func:`scarab.stop_logging()` function to stop the C++ logging process.  The consequences 
 of not using that function are potential instability when the executable exits (resulting in a segfault).  The actual execution 
 will not be affected.
 
@@ -199,7 +200,7 @@ Quill was chosen because it::
 
 * Provides a rich logging environment with options that suited the existing needs of Scarab users;
 * Used macros that were almost compatible with the existing Scarab logging macros, so that no changes were necessary for 
-Scarab logger users;
+  Scarab logger users;
 * Funneled all logging through a single thread, so that Pybind11-wrapped code would be happy.
 
 Quill divides the logging implementation into "Frontend" components and "Backend" components.  Client code that wants to print a log 
@@ -229,4 +230,5 @@ To-do List
 ----------
 
 * Individual-logger control of verbosity.  This will allow users to increase verbosity to individual portions of executing code, depending on how 
-a package uses (or not) multiple Quill loggers.
+  a package uses (or not) multiple Quill loggers.
+* Investigate lazy evaluation of logging statements to move evaluation to the logging thread.
