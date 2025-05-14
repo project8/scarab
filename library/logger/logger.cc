@@ -24,7 +24,8 @@ namespace scarab
             quill::BackendOptions backend_options;
             // Scarab uses slightly different level names at the fatal/critical and prog/notice levels
             backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Critical)] = "FATAL";
-            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Notice)] = "prog";
+            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Notice)] = "PROG";
+            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::TraceL1)] = "TRACE";
             backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Critical)] = "F";
             backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Notice)] = "P";
             // Modify the character filtering: make \t visible
