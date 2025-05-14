@@ -55,7 +55,7 @@ The default formatting for the terminal output at each level looks like this::
     2025-05-13 19:53:09.954 [PROG] (12683) logger.cc:213 -> Progress message
     2025-05-13 19:53:09.956 [INFO] (12683) logger.cc:202 -> Information message
     2025-05-13 19:53:09.957 [DEBUG] (12683) logger.cc:191 -> Debug message
-    2025-05-13 19:53:09.959 [TRACE_L1] (12683) logger.cc:180 -> Trace message
+    2025-05-13 19:53:09.959 [TRACE] (12683) logger.cc:180 -> Trace message
 
 Use in Source Code
 ------------------
@@ -138,8 +138,7 @@ Setup Logging in an Application
 
 * If you application is built with :cpp:class:`scarab::application`, verbosity controls are already provided.
 * The logger backend will be configured and automatically started by the first use of the ``LOGGER()`` or ``LOCAL_LOGGER()`` macro.
-* You will need to ensure that logging stops, and you have a couple of options for accomplishing this::
-
+* You will need to ensure that logging stops, and you have a couple of options for accomplishing this:
     1. Use the ``STOP_LOGGING`` macro at the end of your executable, immediately before returning from :cpp:func:`main()`.
     2. Use a :cpp:class:`scarab::quill_guard` object; create the :cpp:class:`quill_guard` at the beginning of your :cpp:func:`main()`, and it will 
     stop logging when it goes out of scope.  Do not create the :cpp:class:`quill_guard` at global scope (see :ref:`stopping-quill` for 
@@ -196,11 +195,11 @@ Logging Infrastructure: Quill
 -----------------------------
 
 In 2024 the Scarab logger was revamped to be based on the `Quill logging library <https://quillcpp.readthedocs.io/en/latest/index.html>`_.  
-Quill was chosen because it::
+Quill was chosen because it:
 
 * Provides a rich logging environment with options that suited the existing needs of Scarab users;
 * Used macros that were almost compatible with the existing Scarab logging macros, so that no changes were necessary for 
-  Scarab logger users;
+Scarab logger users;
 * Funneled all logging through a single thread, so that Pybind11-wrapped code would be happy.
 
 Quill divides the logging implementation into "Frontend" components and "Backend" components.  Client code that wants to print a log 
@@ -230,5 +229,5 @@ To-do List
 ----------
 
 * Individual-logger control of verbosity.  This will allow users to increase verbosity to individual portions of executing code, depending on how 
-  a package uses (or not) multiple Quill loggers.
+a package uses (or not) multiple Quill loggers.
 * Investigate lazy evaluation of logging statements to move evaluation to the logging thread.
