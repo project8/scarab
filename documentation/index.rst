@@ -6,6 +6,7 @@ Scarab Use and API Documentation
 
    Application Building (C++) <application_building>
    Authentication (C++) <authentication>
+   Logger (C++) <logger>
    Building Scarab <building_scarab>
    Package Builder (CMake) <package_builder>
 

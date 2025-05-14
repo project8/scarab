@@ -53,7 +53,6 @@ jobs:
           make -j2 install
           pip install pytest
 
-
       - name: Install dependencies -- Linux
         # pybind11 is manually installed because we need to use the non-released master branch (as of 4/8/25)
         # quill is manually installed because it's not available in apt
@@ -64,9 +63,9 @@ jobs:
             libboost-all-dev \
             rapidjson-dev \
             libyaml-cpp-dev
-          git clone https://github.com/nsoblath/pybind11_debug.git
-          cd pybind11_debug
-          git checkout weak_ptr_test_only
+          git clone https://github.com/pybind/pybind11.git
+          cd pybind11
+          git checkout master
           mkdir build
           cd build
           sudo cmake -DPYBIND11_TEST=FALSE ..
@@ -80,11 +79,6 @@ jobs:
           sudo cmake ..
           sudo make install
           pip install pytest
-
-#          git clone https://github.com/pybind/pybind11.git
-#          cd pybind11
-#          git checkout master
-
 
       - name: Configure
         run: |
@@ -105,7 +99,7 @@ jobs:
           pytest testing/python
 
 # For debugging
-      - name: Setup tmate session
-        if: ${{ ! success() }}
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        if: ${{ ! success() }}
+#        uses: mxschmitt/action-tmate@v3
 

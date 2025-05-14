@@ -69,6 +69,12 @@ set( PRIVATE_EXT_LIBS )
 # logging
 find_package( quill REQUIRED )
 list( APPEND PRIVATE_EXT_LIBS quill::quill )
+if( "${build_type_lower}" STREQUAL "debug" )
+    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
+else( "${build_type_lower}" STREQUAL "debug" )
+    remove_definitions( -DQUILL_IMMEDIATE_FLUSH )
+endif( "${build_type_lower}" STREQUAL "debug" )
+
 
 if( Scarab_BUILD_CODEC_JSON )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )

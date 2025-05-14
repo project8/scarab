@@ -433,7 +433,7 @@ namespace scarab
             }
             catch( ... ) 
             {
-                if( a_use_logging ) LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." )
+                if( a_use_logging ) { LERROR( slog, "Caught unknown (non-std::exception) & unhandled exception." ); }
                 else { std::cerr << "Caught unknown (non-std::exception) & unhandled exception." << std::endl; }
             }
         }

@@ -48,6 +48,8 @@ using namespace scarab;
 
 int main( int argc, char **argv )
 {
+    logger::set_global_threshold( ELevel::eDebug );
+
     main_app the_main( false );
 
     CLI11_PARSE( the_main, argc, argv );
