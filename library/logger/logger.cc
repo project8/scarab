@@ -10,6 +10,8 @@
 
 #include "logger.hh"
 
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -44,7 +46,7 @@ namespace scarab
 
     // This is to indicate whether Quill has been stopped via the logger class after having run,
     // so it needs to return false before it runs.
-    bool logger::s_quill_stopped = false;
+    std::atomic_bool logger::s_quill_stopped(false);
 
     //std::set< logger* > logger::s_all_loggers;
 
@@ -107,11 +109,6 @@ namespace scarab
         {
             t_logger_ptr->set_threshold( a_threshold );
         }
-//        auto t_all_loggers = quill::Frontend::get_all_loggers();
-//        for( auto t_logger : t_all_loggers )
-//        {
-//            t_logger->set_log_level( quill::LogLevel(unsigned(f_global_threshold)) );
-//        }
         return;
     }
 
@@ -123,16 +120,28 @@ namespace scarab
 
     void logger::stop_quill()
     {
-        s_quill_stopped = true;
+        using namespace std::chrono_literals;
+
+        // Do this first so that logging statements stop using Quill before we tell Quill to stop
+        s_quill_stopped.store(true);
 
         quill::Backend::stop();
+
+        const auto t_start = std::chrono::high_resolution_clock::now();
+        while( quill::Backend::is_running() )
+        {
+            std::this_thread::sleep_for(1ms);
+        }
+        const auto t_end = std::chrono::high_resolution_clock::now();
+        const std::chrono::duration<double, std::milli> t_elapsed = t_end - t_start;
+        std::cout << "Quill took " << t_elapsed.count() << " ms to shutdown" << std::endl;
 
         return;
     }
 
     bool logger::is_quill_stopped()
     {
-        return logger::s_quill_stopped;
+        return logger::s_quill_stopped.load();
     }
 
 } // namespace scarab

@@ -19,7 +19,7 @@
 #include <quill/Frontend.h>
 #include <quill/sinks/ConsoleSink.h>
 
-
+#include <atomic>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -163,7 +163,7 @@ namespace scarab
             static bool is_quill_stopped();
 
         private:
-            static bool s_quill_stopped;
+            static std::atomic_bool s_quill_stopped;
 
     };
 
