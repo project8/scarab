@@ -60,21 +60,18 @@
  *   The message is buffered in the logger object using stringstream, and then passed to the quill::Logger.
  * * In scarab and scarab-based code, sometimes log messages are printed from objects that exist after the main execution has stopped, as they're destructed at 
  *   the static cleanup phase.  This is a problem for Quill, because at some point, the Quill logging backend thread is automatically stopped and garbage collected.  
- *   Therefore we implemented a system where the logging via Quill can be explicitly stopped, at which point the logging switches to using stdout.  
- *   This is why we have a series of function pointers and separate functions for printing each log level to Quill and to stdout.  Once Quill logging is stopped, 
- *   it's presumed that the application is exiting, so it's not possible to turn it back on.
+ *   Therefore we implemented a system where the logging via Quill can be explicitly stopped, at which point the logging switches to using "local" logging: directly via cout and cerr.  
+ *   This is why we have a series of macros for printing each log level to Quill and locallly.  
+ * * Once Quill logging is stopped it's presumed that the application is exiting, so it's not possible to turn it back on.
  * * The effect of not stopping the Quill logging mixed with printing after main execution can be seen by e.g. removing the quill_guard from test_static_initialization.  
  *   Depending on runtime conditions, it can work, segfault, or hang indefinitely.
  * * The implementation of the logging macros and the reason it is like it is might be a bit confusing:
  *   * The main interface is via the L[level] macros.  These provide a way to conveniently specify the logging level, logger object, and 
  *     message being composed with operator<<, all of which is known at compile time.
- *   * The L[level] macros "call" one of the scarab::logger::s_log_[level]_fcn function pointers. We want to use a function pointer so that we can switch between 
- *     logging via Quill and logging via stdout at runtime.
- *   * Each function pointer points to either scarab::logger::log_level_to_quill() or scarab::logger::log_level_to_stdout().
- *   * The logging functions are provided with a logging message in the form of a std::string, which is composed using the LOGGER_GET_STRING macro; 
- *     this macro takes the variable macro arguments and creates a single string using the operator<< mechanism.
- *   * The scarab::logger::log_[level]_to_quill() functions use Quill's logging macros to pass the messages to Quill.
- *   * The scarab::logger::log_[level]_to_stdout() functions use std::cout to print the messages.
+ *   * The _LOGGER_IF_QUILL macro checks whether Quill is running to decide whether or not to use the Quill or local logging.
+ *   * Quill logging is dispatched to Quill with one of the _QUILL_[level] macros.
+ *   * Local logging is called with one of the _LOCAL_[level] macros.
+ *   * Local logging is performed by the _LOGGING_IF_PRINT macro, which also checks the message severity against the logger's threshold to know whether it should print or not.
  * * It's sometimes useful to get synchronous printing, e.g. for debugging.  Therefore when scarab is built in DEBUG mode, a preprocessor flag tells Quill to 
  *   log synchronously.
  * * Debug and trace messages are not compiled when scarab is built in Release mode.  This is done by a compile-time choice of using empty DEBUG and TRACE macros 
@@ -122,88 +119,79 @@ namespace scarab
     {
         public:
             logger( const std::string& a_name );
+            logger( const logger& ) = delete;
+            logger( logger&& ) = default;
             ~logger();
 
-            quill::Logger* quill()
-            {
-                return f_quill;
-            }
-
-            logger& ref()
-            {
-                return *this;
-            }
+            logger& operator=( const logger& ) = delete;
+            logger& operator=( logger&& ) = default;
 
             template< typename T >
-            logger& operator<<( const T& data )
-            {
-                f_stream << data;
-                return *this;
-            }
+            logger& operator<<( const T& data );
 
-            const std::string& buffer()
-            {
-                f_buffer = f_stream.str();
-                //std::cerr << "Buffer: " << fBuffer << std::endl;
-                f_stream.str( std::string() );
-                return f_buffer;
-            }
+            logger& ref();
+            const std::string& buffer();
+
+            quill::Logger* quill();
 
         private:
-            mutable std::stringstream f_stream;
+            mutable std::stringstream f_buffer_stream;
             mutable std::string f_buffer;
+
+            // for Quill logging
             quill::Logger* f_quill;
 
         public:
+            ELevel get_threshold() const;
+            void set_threshold( ELevel a_level );
+
             static ELevel get_global_threshold();
             static void set_global_threshold( ELevel a_threshold );
 
         private:
+            ELevel f_threshold;
             static ELevel f_global_threshold;
+
+        public:
+            static std::set< logger* >& all_loggers();
 
         public:
             /// Stops logging via Quill and switches logging functions to stdout
             /// Sets flag s_quill_stopped so that if other loggers are created, they won't use Quill
             static void stop_quill();
 
+            /// Indicates whether Quill has been stopped via the Scarab logger
             static bool is_quill_stopped();
 
         private:
             static bool s_quill_stopped;
 
-        public:
-            static void (*s_log_trace_fcn)(logger&, const std::string&);
-            static void (*s_log_debug_fcn)(logger&, const std::string&);
-            static void (*s_log_info_fcn)(logger&, const std::string&);
-            static void (*s_log_prog_fcn)(logger&, const std::string&);
-            static void (*s_log_warn_fcn)(logger&, const std::string&);
-            static void (*s_log_error_fcn)(logger&, const std::string&);
-            static void (*s_log_fatal_fcn)(logger&, const std::string&);
-
-            static void log_trace_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_trace_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_debug_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_debug_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_info_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_info_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_prog_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_prog_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_warn_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_warn_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_error_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_error_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_fatal_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_fatal_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-
-            static void check_log_functions();
-        
     };
+
+    inline logger& logger::ref()
+    {
+        return *this;
+    }
+
+    template< typename T >
+    logger& logger::operator<<( const T& data )
+    {
+        f_buffer_stream << data;
+        return *this;
+    }
+
+    inline const std::string& logger::buffer()
+    {
+        f_buffer = f_buffer_stream.str();
+        //std::cerr << "Buffer: " << fBuffer << std::endl;
+        f_buffer_stream.str( std::string() );
+        return f_buffer;
+    }
+
+    inline quill::Logger* logger::quill()
+    {
+        return f_quill;
+    }
 
 } // end namespace scarab
 
@@ -217,20 +205,61 @@ namespace scarab
 #define STOP_LOGGING  ::scarab::logger::stop_quill();
 
 /// Private macro for creating a single message string with a given logger object
-#define _LOGGER_GET_STRING(a_logger, ...) (a_logger.ref() << __VA_ARGS__).buffer()
+#define _LOGGER_GET_STRING( a_logger, ... ) (a_logger.ref() << __VA_ARGS__).buffer()
 
+/// Private macro used when local-logging (i.e. w/o Quill) to check the severity against the threshold and print the log message if it's above threshold
+#define _LOGGER_IF_PRINT( a_loglevel, a_stream, a_prefix, a_file, a_line_no, a_logger, a_message ) \
+    if( a_loglevel >= a_logger.get_threshold() ) { \
+        a_stream << a_prefix << a_file << ":" << a_line_no << " -> " << a_message << std::endl; \
+    }
 
+// These are the local-logging (i.e. w/o Quill) statements
+#define _LOCAL_TRACE( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::ELevel::eTrace,  std::cout, "[TRACE] ",   a_file, a_line_no, a_logger, a_message );
+#define _LOCAL_DEBUG( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::ELevel::eDebug,  std::cout, "[DEBUG] ",   a_file, a_line_no, a_logger, a_message );
+#define _LOCAL_INFO(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::ELevel::eInfo,   std::cout, "[INFO] ",    a_file, a_line_no, a_logger, a_message );
+#define _LOCAL_PROG(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::ELevel::eProg,   std::cout, "[PROG] ",    a_file, a_line_no, a_logger, a_message );
+#define _LOCAL_WARN(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::ELevel::eWarn,   std::cerr, "[WARNING] ", a_file, a_line_no, a_logger, a_message );
+#define _LOCAL_ERROR( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::ELevel::eError,  std::cerr, "[ERROR] ",   a_file, a_line_no, a_logger, a_message );
+#define _LOCAL_FATAL( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::ELevel::eFatal,  std::cerr, "[FATAL] ",   a_file, a_line_no, a_logger, a_message );
+
+// These are the Quill logging statements that dispatch the log messages to Quill via Quill's logging macros
+#define _QUILL_TRACE( a_logger, a_message )  LOG_TRACE_L1( a_logger.quill(), "{}", a_message );
+#define _QUILL_DEBUG( a_logger, a_message )  LOG_DEBUG(    a_logger.quill(), "{}", a_message );
+#define _QUILL_INFO( a_logger,  a_message )  LOG_INFO(     a_logger.quill(), "{}", a_message );
+#define _QUILL_PROG( a_logger,  a_message )  LOG_NOTICE(   a_logger.quill(), "{}", a_message );
+#define _QUILL_WARN( a_logger,  a_message )  LOG_WARNING(  a_logger.quill(), "{}", a_message );
+#define _QUILL_ERROR( a_logger, a_message )  LOG_ERROR(    a_logger.quill(), "{}", a_message );
+#define _QUILL_FATAL( a_logger, a_message )  LOG_CRITICAL( a_logger.quill(), "{}", a_message );
+
+/// Private macro that checks whether Quill is running to decide whether to use Quill or local logging
+#define _LOGGER_IF_QUILL(a_severity, a_file, a_line_no, a_logger, ...) \
+    if( quill::Backend::is_running() ) { \
+        PASTE(_QUILL_, a_severity)( a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
+    } else { \
+        PASTE(_LOCAL_, a_severity)( a_file, a_line_no, a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
+    }
+
+// Public logging functions
 #ifdef NDEBUG
+/// Log a message at the trace level (disabled when not in a debug build)
 #define LTRACE(a_logger, ...)
+/// Log a message at the debug level (disabled when not in a debug build)
 #define LDEBUG(a_logger, ...)
 #else
-#define LTRACE(a_logger, ...)       scarab::logger::s_log_trace_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LDEBUG(a_logger, ...)       scarab::logger::s_log_debug_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+/// Log a message at the trace level
+#define LTRACE(a_logger, ...)       _LOGGER_IF_QUILL( TRACE, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+/// Log a message at the debug level
+#define LDEBUG(a_logger, ...)       _LOGGER_IF_QUILL( DEBUG, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
 #endif
-#define LINFO(a_logger, ...)        scarab::logger::s_log_info_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LPROG(a_logger, ...)        scarab::logger::s_log_prog_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LWARN(a_logger, ...)        scarab::logger::s_log_warn_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LERROR(a_logger, ...)       scarab::logger::s_log_error_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LFATAL(a_logger, ...)       scarab::logger::s_log_fatal_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+/// Log a message at the info level
+#define LINFO(a_logger, ...)        _LOGGER_IF_QUILL( INFO,  __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+/// Log a message at the prog(ress) level
+#define LPROG(a_logger, ...)        _LOGGER_IF_QUILL( PROG,  __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+/// Log a message at the warn(ing) level
+#define LWARN(a_logger, ...)        _LOGGER_IF_QUILL( WARN,  __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+/// Log a message at the error level
+#define LERROR(a_logger, ...)       _LOGGER_IF_QUILL( ERROR, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+/// Log a message at the fatal level
+#define LFATAL(a_logger, ...)       _LOGGER_IF_QUILL( FATAL, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
 
 #endif // SCARAB_LOGGER_HH_
