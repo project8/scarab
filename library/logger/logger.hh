@@ -77,7 +77,6 @@
  * * Debug and trace messages are not compiled when scarab is built in Release mode.  This is done by a compile-time choice of using empty DEBUG and TRACE macros 
  *   when in Release mode.  Quill has compile-time filtering capabilities too, but we don't use that because scarab::logger has whole setup with 
  *   function pointers that allow the Quill logging to be stopped.
- * * TODO: Individual logger verbosity can be controlled by requesting that logger via the string name that's provided in the LOGGER macro and an ELevel value.
  */
 
 /**

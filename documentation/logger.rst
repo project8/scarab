@@ -224,10 +224,3 @@ we could not reliably extend the operation of the Quill logging thread to cover 
 segfaults as an application exited.  Therefore the choice was made to manually stop Quill at the end of the :cpp:func:`main()` function 
 (see :ref:`hdi-setup-logging`) and switch to using ``std::cout`` and ``std::cerr`` to log messages to the terminal after that (typically only messages regarding the 
 destruction of statically-created objects).  
-
-To-do List
-----------
-
-* Individual-logger control of verbosity.  This will allow users to increase verbosity to individual portions of executing code, depending on how 
-  a package uses (or not) multiple Quill loggers.
-* Investigate lazy evaluation of logging statements to move evaluation to the logging thread.
