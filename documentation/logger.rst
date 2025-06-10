@@ -222,7 +222,7 @@ For most users of Quill, presumably the Quill's own handling of its logging thre
 the logger are created at static initialization time, and therefore destructed after the main execution completes, it was found that 
 we could not reliably extend the operation of the Quill logging thread to cover the lifetime of all logger objects.  This would result in inconsistent 
 segfaults as an application exited.  Therefore the choice was made to manually stop Quill at the end of the :cpp:func:`main()` function 
-(see :ref:`hdi-setup-logging`) and switch to using ``std::cout`` to log messages to the terminal after that (typically only messages regarding the 
+(see :ref:`hdi-setup-logging`) and switch to using ``std::cout`` and ``std::cerr`` to log messages to the terminal after that (typically only messages regarding the 
 destruction of statically-created objects).  
 
 To-do List
