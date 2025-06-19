@@ -20,9 +20,10 @@ namespace scarab
 
     quill_initializer::quill_initializer()
     {
+        std::cerr << "#### quill_initializer constructor" << std::endl;
         if( ! logger::is_quill_stopped() )
         {
-            //std::cerr << "Creating Quill Initializer" << std::endl;
+            std::cerr << "#### Setting up Quill backend" << std::endl;
             quill::BackendOptions backend_options;
             // Scarab uses slightly different level names at the fatal/critical and prog/notice levels
             backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Critical)] = "FATAL";
@@ -34,6 +35,7 @@ namespace scarab
             // The default filtering function is: [](char c){ return (c >= ' ' && c <= '~') || (c == '\n'); }
             backend_options.check_printable_char = [](char c){ return (c >= ' ' && c <= '~') || (c == '\n') || (c == '\t'); };
             quill::Backend::start( backend_options );
+            std::atexit( [](){logger::stop_quill();} );
         }
     }
 
@@ -44,18 +46,13 @@ namespace scarab
 
     ELevel logger::f_global_threshold = ELevel::eDebug;
 
-    // This is to indicate whether Quill has been stopped via the logger class after having run,
-    // so it needs to return false before it runs.
-    std::atomic_bool logger::s_quill_stopped(false);
-
-    //std::set< logger* > logger::s_all_loggers;
-
     logger::logger( const std::string& a_name ) :
             f_buffer_stream(),
             f_buffer(),
             f_quill(nullptr),
             f_threshold(ELevel::eInfo)
     {
+        std::cerr << "#### logger constructor" << std::endl;
         // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
         static scarab::quill_initializer q_init;
 
@@ -63,6 +60,7 @@ namespace scarab
 
         if( ! logger::is_quill_stopped() )
         {
+            std::cerr << "#### Quill frontend setup" << std::endl;
             auto console_colors = quill::ConsoleSinkConfig::Colours();
             console_colors.apply_default_colours();
             console_colors.assign_colour_to_log_level( quill::LogLevel::Notice, quill::ConsoleSinkConfig::Colours::blue);
@@ -78,6 +76,7 @@ namespace scarab
 
     logger::~logger()
     {
+        std::cerr << "#### Logger destructor" << std::endl;
         all_loggers().erase(this);
     }
 
@@ -120,28 +119,34 @@ namespace scarab
 
     void logger::stop_quill()
     {
-        using namespace std::chrono_literals;
+        std::cerr << "#### stop_quill called" << std::endl; //; backend thread: " << quill::Backend::get_thread_id() << std::endl;
+        //using namespace std::chrono_literals;
+
+        if( logger::is_quill_stopped() ) return;
 
         // Do this first so that logging statements stop using Quill before we tell Quill to stop
-        s_quill_stopped.store(true);
+        logger::is_quill_stopped().store(true);
 
-        quill::Backend::stop();
-
-        const auto t_start = std::chrono::high_resolution_clock::now();
-        while( quill::Backend::is_running() )
-        {
-            std::this_thread::sleep_for(1ms);
-        }
-        const auto t_end = std::chrono::high_resolution_clock::now();
-        const std::chrono::duration<double, std::milli> t_elapsed = t_end - t_start;
-        std::cout << "Quill took " << t_elapsed.count() << " ms to shutdown" << std::endl;
+        //quill::Backend::stop();
+        //std::cerr << "After stop; backend thread: " << quill::Backend::get_thread_id() << std::endl;
+        //std::this_thread::sleep_for(100ms);
+//
+        //const auto t_start = std::chrono::high_resolution_clock::now();
+        //while( quill::Backend::is_running() )
+        //{
+        //    std::this_thread::sleep_for(1ms);
+        //}
+        //const auto t_end = std::chrono::high_resolution_clock::now();
+        //const std::chrono::duration<double, std::milli> t_elapsed = t_end - t_start;
+        //std::cout << "Quill took " << t_elapsed.count() << " ms to shutdown" << std::endl;
 
         return;
     }
 
-    bool logger::is_quill_stopped()
+    atomic_bool& logger::is_quill_stopped()
     {
-        return logger::s_quill_stopped.load();
+        static atomic_bool s_quill_stopped(false);
+        return s_quill_stopped;
     }
 
 } // namespace scarab

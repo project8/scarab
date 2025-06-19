@@ -125,20 +125,7 @@ namespace scarab
             logger& operator=( const logger& ) = delete;
             logger& operator=( logger&& ) = default;
 
-            template< typename T >
-            logger& operator<<( const T& data );
-
-            logger& ref();
-            const std::string& buffer();
-
-            quill::Logger* quill();
-
-        private:
-            mutable std::stringstream f_buffer_stream;
-            mutable std::string f_buffer;
-
-            // for Quill logging
-            quill::Logger* f_quill;
+            static std::set< logger* >& all_loggers();
 
         public:
             ELevel get_threshold() const;
@@ -152,18 +139,27 @@ namespace scarab
             static ELevel f_global_threshold;
 
         public:
-            static std::set< logger* >& all_loggers();
+            template< typename T >
+            logger& operator<<( const T& data );
 
-        public:
+            logger& ref();
+            std::string buffer();
+
+            quill::Logger* quill();
+
             /// Stops logging via Quill and switches logging functions to stdout
             /// Sets flag s_quill_stopped so that if other loggers are created, they won't use Quill
             static void stop_quill();
 
             /// Indicates whether Quill has been stopped via the Scarab logger
-            static bool is_quill_stopped();
+            static std::atomic_bool& is_quill_stopped();
 
         private:
-            static std::atomic_bool s_quill_stopped;
+            mutable std::stringstream f_buffer_stream;
+            mutable std::string f_buffer;
+
+            // for Quill logging
+            quill::Logger* f_quill;
 
     };
 
@@ -179,12 +175,15 @@ namespace scarab
         return *this;
     }
 
-    inline const std::string& logger::buffer()
+    //inline const std::string& logger::buffer()
+    inline std::string logger::buffer()
     {
-        f_buffer = f_buffer_stream.str();
+        std::string t_buffer( f_buffer_stream.str() );
+        //f_buffer = f_buffer_stream.str();
         //std::cerr << "Buffer: " << fBuffer << std::endl;
         f_buffer_stream.str( std::string() );
-        return f_buffer;
+        //return f_buffer;
+        return std::string( std::move(t_buffer) );
     }
 
     inline quill::Logger* logger::quill()
@@ -198,7 +197,7 @@ namespace scarab
 #define LOGGER(a_logger, a_name)         static ::scarab::logger a_logger(a_name);
 
 /// Creates a (non-static) scarab::logger object with variable name a_logger; Quill Logger name will be a_name.
-#define LOCAL_LOGGER(a_logger, a_name)   ::scarab::logger a_logger(a_name);
+//#define LOCAL_LOGGER(a_logger, a_name)   ::scarab::logger a_logger(a_name);
 
 /// Stop Quill logging -- all loggers will switch to using stdout; this macro should be used just before returning from main().
 #define STOP_LOGGING  ::scarab::logger::stop_quill();
@@ -232,10 +231,12 @@ namespace scarab
 
 /// Private macro that checks whether Quill is running to decide whether to use Quill or local logging
 #define _LOGGER_IF_QUILL(a_severity, a_file, a_line_no, a_logger, ...) \
-    if( quill::Backend::is_running() ) { \
-        PASTE(_QUILL_, a_severity)( a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
-    } else { \
+    if( ::scarab::logger::is_quill_stopped() ) { \
+        std::cerr << "Local logging" << std::endl; \
         PASTE(_LOCAL_, a_severity)( a_file, a_line_no, a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
+    } else { \
+        std::cerr << "Quill logging" << std::endl; \
+        PASTE(_QUILL_, a_severity)( a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
     }
 
 // Public logging functions
