@@ -18,7 +18,7 @@
 #include "singleton.hh"
 
 #include "error.hh"
-#include "logger.hh"
+#include "local_logger.hh"
 #include <iostream>
 
 #include <map>
@@ -222,7 +222,7 @@ namespace scarab
         }
         fMap->insert(std::pair< XIndexType, const base_registrar< XBaseType, XArgs... >* >(a_index, a_registrar));
         //std::cout << "Registered a indexed_factory for class " << a_index << " at " << (*fMap)[ a_index ] << ", indexed_factory #" << fMap->size()-1 << " for " << this << std::endl;
-        LDEBUG( slog_ind_factory_reg, "Registered a indexed_factory for class " << a_index << " at " << (*fMap)[ a_index ] << ", indexed_factory #" << fMap->size()-1 << " for " << this );
+        LOCAL_LDEBUG( slog_ind_factory_reg, "Registered a indexed_factory for class " << a_index << " at " << (*fMap)[ a_index ] << ", indexed_factory #" << fMap->size()-1 << " for " << this );
     }
 
     template< class XIndexType, class XBaseType, typename ... XArgs >
@@ -359,7 +359,7 @@ namespace scarab
         }
         fMap->insert(std::pair< std::string, const base_registrar< XIndexType, XBaseType >* >(a_index, a_registrar));
         //std::cout << "Registered a indexed_factory for class " << a_index << ", indexed_factory #" << fMap->size()-1 << " for " << this << std::endl;
-        LDEBUG( slog_ind_factory_reg, "Registered a indexed_factory for class " << a_index << ", indexed_factory #" << fMap->size()-1 << " for " << this );
+        LOCAL_LDEBUG( slog_ind_factory_reg, "Registered a indexed_factory for class " << a_index << ", indexed_factory #" << fMap->size()-1 << " for " << this );
     }
 
     template< class XIndexType, class XBaseType >

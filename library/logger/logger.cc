@@ -10,6 +10,8 @@
 
 #include "logger.hh"
 
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -18,9 +20,10 @@ namespace scarab
 
     quill_initializer::quill_initializer()
     {
+        std::cerr << "#### quill_initializer constructor" << std::endl;
         if( ! logger::is_quill_stopped() )
         {
-            //std::cerr << "Creating Quill Initializer" << std::endl;
+            std::cerr << "#### Setting up Quill backend" << std::endl;
             quill::BackendOptions backend_options;
             // Scarab uses slightly different level names at the fatal/critical and prog/notice levels
             backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Critical)] = "FATAL";
@@ -32,63 +35,32 @@ namespace scarab
             // The default filtering function is: [](char c){ return (c >= ' ' && c <= '~') || (c == '\n'); }
             backend_options.check_printable_char = [](char c){ return (c >= ' ' && c <= '~') || (c == '\n') || (c == '\t'); };
             quill::Backend::start( backend_options );
-
-            // Set the logging functions to use Quill
-            logger::s_log_trace_fcn = &scarab::logger::log_trace_to_quill;
-            logger::s_log_debug_fcn = &scarab::logger::log_debug_to_quill;
-            logger::s_log_info_fcn = &scarab::logger::log_info_to_quill;
-            logger::s_log_prog_fcn = &scarab::logger::log_prog_to_quill;
-            logger::s_log_warn_fcn = &scarab::logger::log_warn_to_quill;
-            logger::s_log_error_fcn = &scarab::logger::log_error_to_quill;
-            logger::s_log_fatal_fcn = &scarab::logger::log_fatal_to_quill;
+            std::atexit( [](){logger::stop_quill();} );
         }
-        else
-        {
-            // Set the logging functions to use stdout
-            logger::s_log_trace_fcn = &scarab::logger::log_trace_to_stdout;
-            logger::s_log_debug_fcn = &scarab::logger::log_debug_to_stdout;
-            logger::s_log_info_fcn = &scarab::logger::log_info_to_stdout;
-            logger::s_log_prog_fcn = &scarab::logger::log_prog_to_stdout;
-            logger::s_log_warn_fcn = &scarab::logger::log_warn_to_stdout;
-            logger::s_log_error_fcn = &scarab::logger::log_error_to_stdout;
-            logger::s_log_fatal_fcn = &scarab::logger::log_fatal_to_stdout;
-        }
-
-        //logger::check_log_functions();
     }
-    //quill_initializer::~quill_initializer()
-    //{
-    //    std::cerr << "Destructing quill initializer" << std::endl;
-    //}
 
     quill_guard::~quill_guard()
     {
-        //std::cerr << "calling backend stop via quill guard" << std::endl;
         logger::stop_quill();
     }
 
     ELevel logger::f_global_threshold = ELevel::eDebug;
 
-    bool logger::s_quill_stopped = false;
-
-    void (*logger::s_log_trace_fcn)(logger&, const std::string&) = &scarab::logger::log_trace_to_quill;
-    void (*logger::s_log_debug_fcn)(logger&, const std::string&) = &scarab::logger::log_debug_to_quill;
-    void (*logger::s_log_info_fcn)(logger&, const std::string&) = &scarab::logger::log_info_to_quill;
-    void (*logger::s_log_prog_fcn)(logger&, const std::string&) = &scarab::logger::log_prog_to_quill;
-    void (*logger::s_log_warn_fcn)(logger&, const std::string&) = &scarab::logger::log_warn_to_quill;
-    void (*logger::s_log_error_fcn)(logger&, const std::string&) = &scarab::logger::log_error_to_quill;
-    void (*logger::s_log_fatal_fcn)(logger&, const std::string&) = &scarab::logger::log_fatal_to_quill;
-
     logger::logger( const std::string& a_name ) :
-            f_stream(),
+            f_buffer_stream(),
             f_buffer(),
-            f_quill(nullptr)
+            f_quill(nullptr),
+            f_threshold(ELevel::eInfo)
     {
+        std::cerr << "#### logger constructor" << std::endl;
         // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
         static scarab::quill_initializer q_init;
 
+        logger::all_loggers().insert(this);
+
         if( ! logger::is_quill_stopped() )
         {
+            std::cerr << "#### Quill frontend setup" << std::endl;
             auto console_colors = quill::ConsoleSinkConfig::Colours();
             console_colors.apply_default_colours();
             console_colors.assign_colour_to_log_level( quill::LogLevel::Notice, quill::ConsoleSinkConfig::Colours::blue);
@@ -100,12 +72,28 @@ namespace scarab
                                                             );
             f_quill->set_log_level( quill::LogLevel(unsigned(f_global_threshold)) );
         }
-
-        //logger::check_log_functions();
     }
 
     logger::~logger()
-    {}
+    {
+        std::cerr << "#### Logger destructor" << std::endl;
+        all_loggers().erase(this);
+    }
+
+    ELevel logger::get_threshold() const
+    {
+        return f_threshold;
+    }
+
+    void logger::set_threshold( ELevel a_threshold )
+    {
+        f_threshold = a_threshold;
+        if( ! logger::is_quill_stopped() )
+        {
+            f_quill->set_log_level( quill::LogLevel(unsigned(f_threshold)) );
+        }
+        return;
+    }
 
     ELevel logger::get_global_threshold()
     {
@@ -114,143 +102,51 @@ namespace scarab
 
     void logger::set_global_threshold( ELevel a_threshold )
     {
-        f_global_threshold = a_threshold;
-        auto t_all_loggers = quill::Frontend::get_all_loggers();
-        for( auto t_logger : t_all_loggers )
+        logger::f_global_threshold = a_threshold;
+        std::set< logger* >& t_all_loggers = logger::all_loggers();
+        for( auto t_logger_ptr : t_all_loggers )
         {
-            t_logger->set_log_level( quill::LogLevel(unsigned(f_global_threshold)) );
+            t_logger_ptr->set_threshold( a_threshold );
         }
         return;
+    }
+
+    std::set< logger* >& logger::all_loggers()
+    {
+        static std::set< logger* > s_all_loggers;
+        return s_all_loggers;
     }
 
     void logger::stop_quill()
     {
-        std::cerr << "Stopping quill" << std::endl;
+        std::cerr << "#### stop_quill called" << std::endl; //; backend thread: " << quill::Backend::get_thread_id() << std::endl;
+        //using namespace std::chrono_literals;
 
-        s_quill_stopped = true;
+        if( logger::is_quill_stopped() ) return;
 
-        logger::s_log_trace_fcn = &scarab::logger::log_trace_to_stdout;
-        logger::s_log_debug_fcn = &scarab::logger::log_debug_to_stdout;
-        logger::s_log_info_fcn = &scarab::logger::log_info_to_stdout;
-        logger::s_log_prog_fcn = &scarab::logger::log_prog_to_stdout;
-        logger::s_log_warn_fcn = &scarab::logger::log_warn_to_stdout;
-        logger::s_log_error_fcn = &scarab::logger::log_error_to_stdout;
-        logger::s_log_fatal_fcn = &scarab::logger::log_fatal_to_stdout;
+        // Do this first so that logging statements stop using Quill before we tell Quill to stop
+        logger::is_quill_stopped().store(true);
 
-        quill::Backend::stop();
-
-        //logger::check_log_functions();
+        //quill::Backend::stop();
+        //std::cerr << "After stop; backend thread: " << quill::Backend::get_thread_id() << std::endl;
+        //std::this_thread::sleep_for(100ms);
+//
+        //const auto t_start = std::chrono::high_resolution_clock::now();
+        //while( quill::Backend::is_running() )
+        //{
+        //    std::this_thread::sleep_for(1ms);
+        //}
+        //const auto t_end = std::chrono::high_resolution_clock::now();
+        //const std::chrono::duration<double, std::milli> t_elapsed = t_end - t_start;
+        //std::cout << "Quill took " << t_elapsed.count() << " ms to shutdown" << std::endl;
 
         return;
     }
 
-    bool logger::is_quill_stopped()
+    atomic_bool& logger::is_quill_stopped()
     {
-        return logger::s_quill_stopped;
-    }
-
-    void logger::check_log_functions()
-    {
-        if( logger::is_quill_stopped() )
-        {
-            std::cerr << "Logger check functions: quill is stopped" << std::endl;
-            //std::cerr << "Trace? " << (logger::s_log_trace_fcn == &logger::log_trace_to_stdout) << std::endl;
-            //std::cerr << "Debug? " << (logger::s_log_debug_fcn == &logger::log_debug_to_stdout) << std::endl;
-            //std::cerr << "Info? " << (logger::s_log_info_fcn == &logger::log_info_to_stdout) << std::endl;
-            //std::cerr << "Prog? " << (logger::s_log_prog_fcn == &logger::log_prog_to_stdout) << std::endl;
-            //std::cerr << "Warn? " << (logger::s_log_warn_fcn == &logger::log_warn_to_stdout) << std::endl;
-            //std::cerr << "Error? " << (logger::s_log_error_fcn == &logger::log_error_to_stdout) << std::endl;
-            //std::cerr << "Fatal? " << (logger::s_log_fatal_fcn == &logger::log_fatal_to_stdout) << std::endl;
-        }
-        else
-        {
-            std::cerr << "Logger check functions: quill is NOT stopped" << std::endl;
-            //std::cerr << "Trace? " << (logger::s_log_trace_fcn == &logger::log_trace_to_quill) << std::endl;
-            //std::cerr << "Debug? " << (logger::s_log_debug_fcn == &logger::log_debug_to_quill) << std::endl;
-            //std::cerr << "Info? " << (logger::s_log_info_fcn == &logger::log_info_to_quill) << std::endl;
-            //std::cerr << "Prog? " << (logger::s_log_prog_fcn == &logger::log_prog_to_quill) << std::endl;
-            //std::cerr << "Warn? " << (logger::s_log_warn_fcn == &logger::log_warn_to_quill) << std::endl;
-            //std::cerr << "Error? " << (logger::s_log_error_fcn == &logger::log_error_to_quill) << std::endl;
-            //std::cerr << "Fatal? " << (logger::s_log_fatal_fcn == &logger::log_fatal_to_quill) << std::endl;
-        }
-        return;
-    }
-
-    void logger::log_trace_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_TRACE_L1(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_trace_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eTrace ) return;
-        std::cout << "[TRACE] " << a_message << std::endl;
-    }
-
-    void logger::log_debug_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_DEBUG(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_debug_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eDebug ) return;
-        std::cout << "[DEBUG] " << a_message << std::endl;
-    }
-
-    void logger::log_info_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_INFO(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_info_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eInfo ) return;
-        std::cout << "[INFO] " << a_message << std::endl;
-    }
-
-    void logger::log_prog_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_NOTICE(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_prog_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eProg ) return;
-        std::cout << "[PROG] " << a_message << std::endl;
-    }
-
-    void logger::log_warn_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_WARNING(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_warn_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eWarn ) return;
-        std::cout << "[WARNING] " << a_message << std::endl;
-    }
-
-    void logger::log_error_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_ERROR(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_error_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eError ) return;
-        std::cout << "[ERROR] " << a_message << std::endl;
-    }
-
-    void logger::log_fatal_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_CRITICAL(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_fatal_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eFatal ) return;
-        std::cout << "[FATAL] " << a_message << std::endl;
+        static atomic_bool s_quill_stopped(false);
+        return s_quill_stopped;
     }
 
 } // namespace scarab
