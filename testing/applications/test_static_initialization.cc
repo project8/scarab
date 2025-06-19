@@ -17,7 +17,7 @@
  *  
  */
 
-#include "logger.hh"
+#include "local_logger.hh"
 
 LOGGER( tlog, "test_static_initialization" );
 
@@ -37,8 +37,8 @@ namespace scarab
         {
             // We create a dedicated logger in the destructor because we know this will be used for a static object
             // This avoid any static destruction order issue
-            LOGGER( tlog_dest, "test_static_initialization" );
-            LPROG( tlog_dest, "Destructing test_class object" );
+            LOCAL_LOGGER( tlog_dest, "test_static_initialization" );
+            LOCAL_LPROG( tlog_dest, "Destructing test_class object" );
         }
 
         void print_something()
