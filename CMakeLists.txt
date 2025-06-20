@@ -164,6 +164,7 @@ pbuilder_prepare_project()
 
 add_subdirectory( library )
 
+add_subdirectory( yala )
 
 ##########
 # Python #
