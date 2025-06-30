@@ -3,7 +3,7 @@
 #include "yala.hh"
 
 
-static yala::logger t_logger( "test_class" );
+static yala::logger_type< yala::spd_initializer_async_stdout_color_mt > t_logger( "test_class" );
 
 namespace yala
 {

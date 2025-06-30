@@ -21,7 +21,14 @@ pbuilder_executable(
         PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
 
+pbuilder_executable( 
+        SOURCES yala.cc test_yala_st.cc
+        EXECUTABLE test_yala_st
+        PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+        PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+)
+
 pbuilder_component_install_and_export( 
     COMPONENT Executables
-    EXETARGETS test_yala test_yala_static
+    EXETARGETS test_yala test_yala_static test_yala_st
 )

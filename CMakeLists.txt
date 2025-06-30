@@ -67,13 +67,13 @@ set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
 # logging
-find_package( quill REQUIRED )
-list( APPEND PRIVATE_EXT_LIBS quill::quill )
-if( "${build_type_lower}" STREQUAL "debug" )
-    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
-else( "${build_type_lower}" STREQUAL "debug" )
-    remove_definitions( -DQUILL_IMMEDIATE_FLUSH )
-endif( "${build_type_lower}" STREQUAL "debug" )
+find_package( spdlog REQUIRED )
+list( APPEND PRIVATE_EXT_LIBS spdlog::spdlog )
+#if( "${build_type_lower}" STREQUAL "debug" )
+#    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
+#else( "${build_type_lower}" STREQUAL "debug" )
+#    remove_definitions( -DQUILL_IMMEDIATE_FLUSH )
+#endif( "${build_type_lower}" STREQUAL "debug" )
 
 
 if( Scarab_BUILD_CODEC_JSON )
