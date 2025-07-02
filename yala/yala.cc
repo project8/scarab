@@ -22,6 +22,21 @@ namespace yala
         spdlog::init_thread_pool(8192, 1);
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         // TODO: setup sink here
+
+        f_sink->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%l] (%t) %s:%# -> %v%$"); // TODO
+        //%(time) [%(log_level)] (%(thread_id)) %(short_source_location) -> %(message)
+
+        //quill::BackendOptions backend_options;
+        //// Scarab uses slightly different level names at the fatal/critical and prog/notice levels
+        //backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Critical)] = "FATAL";
+        //backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Notice)] = "PROG";
+        //backend_options.log_level_descriptions[uint8_t(quill::LogLevel::TraceL1)] = "TRACE";
+        //backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Critical)] = "F";
+        //backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Notice)] = "P";
+        //// Modify the character filtering: make \t visible
+        //// The default filtering function is: [](char c){ return (c >= ' ' && c <= '~') || (c == '\n'); }
+        //backend_options.check_printable_char = [](char c){ return (c >= ' ' && c <= '~') || (c == '\n') || (c == '\t'); };
+
     }
 
     std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger( const std::string& a_name )

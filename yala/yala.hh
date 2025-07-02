@@ -168,13 +168,13 @@ namespace yala
 #define _LOCAL_FATAL( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::yala::logger::ELevel::eFatal,  std::cerr, "[FATAL] ",   a_file, a_line_no, a_logger, a_message );
 
 // These are the Quill logging statements that dispatch the log messages to Quill via Quill's logging macros
-#define _SPD_TRACE( a_logger, a_message )  a_logger.spdlogger()->trace("{}", a_message ); //SPDLOG_TRACE(    *a_logger.spdlogger(), "{}", a_message );
-#define _SPD_DEBUG( a_logger, a_message )  a_logger.spdlogger()->debug("{}", a_message ); //SPDLOG_DEBUG(    *a_logger.spdlogger(), "{}", a_message );
-#define _SPD_INFO(  a_logger, a_message )  a_logger.spdlogger()->info("{}", a_message ); //SPDLOG_INFO(     *a_logger.spdlogger(), "{}", a_message );
-#define _SPD_PROG(  a_logger, a_message )  a_logger.spdlogger()->info("{}", a_message ); //SPDLOG_INFO(     *a_logger.spdlogger(), "{}", a_message );
-#define _SPD_WARN(  a_logger, a_message )  a_logger.spdlogger()->warn("{}", a_message ); //SPDLOG_WARN(     *a_logger.spdlogger(), "{}", a_message );
-#define _SPD_ERROR( a_logger, a_message )  a_logger.spdlogger()->error("{}", a_message ); //SPDLOG_ERROR(    *a_logger.spdlogger(), "{}", a_message );
-#define _SPD_FATAL( a_logger, a_message )  a_logger.spdlogger()->critical("{}", a_message ); //SPDLOG_CRITICAL( *a_logger.spdlogger(), "{}", a_message );
+#define _SPD_TRACE( a_logger, a_message )  SPDLOG_LOGGER_TRACE(    a_logger.spdlogger(), "{}", a_message );
+#define _SPD_DEBUG( a_logger, a_message )  SPDLOG_LOGGER_DEBUG(    a_logger.spdlogger(), "{}", a_message );
+#define _SPD_INFO(  a_logger, a_message )  SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", a_message );
+#define _SPD_PROG(  a_logger, a_message )  SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", a_message );
+#define _SPD_WARN(  a_logger, a_message )  SPDLOG_LOGGER_WARN(     a_logger.spdlogger(), "{}", a_message );
+#define _SPD_ERROR( a_logger, a_message )  SPDLOG_LOGGER_ERROR(    a_logger.spdlogger(), "{}", a_message );
+#define _SPD_FATAL( a_logger, a_message )  SPDLOG_LOGGER_CRITICAL( a_logger.spdlogger(), "{}", a_message );
 
 #define _LOGGER_IF_SPD(a_severity, a_file, a_line_no, a_logger, ...) \
     if( ::yala::logger::using_spd() ) { \
