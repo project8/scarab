@@ -1,0 +1,4 @@
+[submodule "external/spdlog"]
+	path = external/spdlog
+	url = https://github.com/project8/spdlog
+	branch = v1.x
