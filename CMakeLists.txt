@@ -67,9 +67,14 @@ set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
 # logging
-find_package( spdlog REQUIRED )
-list( APPEND PRIVATE_EXT_LIBS spdlog::spdlog )
+message( "###### Adding spdlog" )
+#find_package( spdlog REQUIRED )
 add_compile_definitions( SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE )
+set( SPDLOG_BUILD_SHARED TRUE )
+set( SPDLOG_INSTALL TRUE )
+# TODO: add setting of spdlog options here
+add_subdirectory( external/spdlog )
+list( APPEND PRIVATE_EXT_LIBS spdlog::spdlog )
 #if( "${build_type_lower}" STREQUAL "debug" )
 #    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
 #else( "${build_type_lower}" STREQUAL "debug" )
