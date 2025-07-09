@@ -47,7 +47,7 @@ namespace yala
                 eTrace = unsigned(SPDLOG_LEVEL_TRACE),
                 eDebug = unsigned(SPDLOG_LEVEL_DEBUG),
                 eInfo = unsigned(SPDLOG_LEVEL_INFO),
-                eProg = unsigned(SPDLOG_LEVEL_INFO),
+                eProg = unsigned(SPDLOG_LEVEL_NOTICE),
                 eWarn = unsigned(SPDLOG_LEVEL_WARN),
                 eError = unsigned(SPDLOG_LEVEL_ERROR),
                 eFatal = unsigned(SPDLOG_LEVEL_CRITICAL)
@@ -171,7 +171,7 @@ namespace yala
 #define _SPD_TRACE( a_logger, a_message )  SPDLOG_LOGGER_TRACE(    a_logger.spdlogger(), "{}", a_message );
 #define _SPD_DEBUG( a_logger, a_message )  SPDLOG_LOGGER_DEBUG(    a_logger.spdlogger(), "{}", a_message );
 #define _SPD_INFO(  a_logger, a_message )  SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", a_message );
-#define _SPD_PROG(  a_logger, a_message )  SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", a_message );
+#define _SPD_PROG(  a_logger, a_message )  SPDLOG_LOGGER_NOTICE(   a_logger.spdlogger(), "{}", a_message );
 #define _SPD_WARN(  a_logger, a_message )  SPDLOG_LOGGER_WARN(     a_logger.spdlogger(), "{}", a_message );
 #define _SPD_ERROR( a_logger, a_message )  SPDLOG_LOGGER_ERROR(    a_logger.spdlogger(), "{}", a_message );
 #define _SPD_FATAL( a_logger, a_message )  SPDLOG_LOGGER_CRITICAL( a_logger.spdlogger(), "{}", a_message );
