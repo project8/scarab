@@ -19,6 +19,7 @@ project( Scarab VERSION ${scarab_version} )
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
 include( PackageBuilder )
+include( FetchContent )
 
 # Require C++17 (minimum set by: Quill dependency)
 set_to_max( CMAKE_CXX_STANDARD 17 )
@@ -66,14 +67,18 @@ set( CMAKE_CXX_STANDARD 17 )
 set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
-# logging
+# logging via spdlog
 message( "###### Adding spdlog" )
 #find_package( spdlog REQUIRED )
 add_compile_definitions( SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE )
 set( SPDLOG_BUILD_SHARED TRUE )
 set( SPDLOG_INSTALL TRUE )
-# TODO: add setting of spdlog options here
-add_subdirectory( external/spdlog )
+FetchContent_Declare( spdlog
+    GIT_REPOSITORY git@github.com:project8/spdlog.git
+    GIT_TAG v1.x_p8
+)
+FetchContent_MakeAvailable( spdlog )
+#add_subdirectory( external/spdlog )
 list( APPEND PRIVATE_EXT_LIBS spdlog::spdlog )
 #if( "${build_type_lower}" STREQUAL "debug" )
 #    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
