@@ -79,7 +79,7 @@ FetchContent_Declare( spdlog
 )
 FetchContent_MakeAvailable( spdlog )
 #add_subdirectory( external/spdlog )
-list( APPEND PRIVATE_EXT_LIBS spdlog::spdlog )
+list( APPEND PUBLIC_EXT_LIBS spdlog::spdlog )
 #if( "${build_type_lower}" STREQUAL "debug" )
 #    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
 #else( "${build_type_lower}" STREQUAL "debug" )

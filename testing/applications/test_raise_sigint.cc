@@ -32,7 +32,5 @@ int main(int , char ** )
 
     raise( SIGINT );
 
-    STOP_LOGGING;
-
     return( EXIT_SUCCESS );
 }
