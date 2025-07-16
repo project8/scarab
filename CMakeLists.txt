@@ -74,7 +74,7 @@ add_compile_definitions( SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE )
 set( SPDLOG_BUILD_SHARED TRUE )
 set( SPDLOG_INSTALL TRUE )
 FetchContent_Declare( spdlog
-    GIT_REPOSITORY git@github.com:project8/spdlog.git
+    GIT_REPOSITORY https://github.com/project8/spdlog.git
     GIT_TAG v1.x_p8
 )
 FetchContent_MakeAvailable( spdlog )
