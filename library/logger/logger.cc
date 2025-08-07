@@ -13,13 +13,10 @@
 
 namespace scarab
 {
-    spd_initializer::spd_initializer()
+    spd_initializer::spd_initializer( const std::string& a_pattern ) :
+            f_pattern( a_pattern )
     {
-        std::atexit(
-            [](){
-                logger::stop_using_spd();
-            }
-        );
+        if( f_pattern.empty() ) f_pattern = "%^%Y-%m-%d %H:%M:%S.%e [%l] (%t) %s:%# -> %v%$";
     }
 
     std::shared_ptr< spdlog::logger > spd_initializer::make_or_get_logger( const std::string& a_name )
@@ -34,25 +31,15 @@ namespace scarab
     }
 
 
-    spd_initializer_async_stdout_color_mt::spd_initializer_async_stdout_color_mt() :
-            spd_initializer()
+    spd_initializer_async_stdout_color_mt::spd_initializer_async_stdout_color_mt( const std::string& a_pattern ) :
+            spd_initializer( a_pattern ),
+            f_sink()
     {
         spdlog::init_thread_pool(8192, 1);
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
-
-        f_sink->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%l] (%t) %s:%# -> %v%$"); 
-
-        //quill::BackendOptions backend_options;
-        //// Scarab uses slightly different level names at the fatal/critical and prog/notice levels
-        //backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Critical)] = "FATAL";
-        //backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Notice)] = "PROG";
-        //backend_options.log_level_descriptions[uint8_t(quill::LogLevel::TraceL1)] = "TRACE";
-        //backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Critical)] = "F";
-        //backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Notice)] = "P";
-        //// Modify the character filtering: make \t visible
-        //// The default filtering function is: [](char c){ return (c >= ' ' && c <= '~') || (c == '\n'); }
-        //backend_options.check_printable_char = [](char c){ return (c >= ' ' && c <= '~') || (c == '\n') || (c == '\t'); };
-
+        f_sink->set_pattern( f_pattern ); 
+        auto at_exit_fcn = [this](){ logger::stop_using_spd_asyc(); };
+        std::atexit( at_exit_fcn );
     }
 
     std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger( const std::string& a_name )
@@ -61,11 +48,12 @@ namespace scarab
     }
 
 
-    spd_initializer_stdout_color::spd_initializer_stdout_color() :
-            spd_initializer()
+    spd_initializer_stdout_color::spd_initializer_stdout_color( const std::string& a_pattern ) :
+            spd_initializer( a_pattern ),
+            f_sink()
     {
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_st >();
-        f_sink->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%l] (%t) %s:%# -> %v%$");
+        f_sink->set_pattern( f_pattern );
     }
 
     std::shared_ptr< spdlog::logger > spd_initializer_stdout_color::make_logger( const std::string& a_name )
@@ -101,10 +89,10 @@ namespace scarab
     void logger::set_threshold( logger::ELevel a_level )
     {
         f_threshold = a_level;
-        if( logger::using_spd() )
-        {
+        //if( logger::using_spd() )
+        //{
             f_spdlogger->set_level( spdlog::level::level_enum(unsigned(f_threshold)) );
-        }
+        //}
         return;
     }
 
@@ -143,24 +131,24 @@ namespace scarab
         return f_spdlogger;
     }
 
-    void logger::stop_using_spd()
+    void logger::stop_using_spd_async()
     {
-        std::cerr << "Stopping use of spd" << std::endl;
-        logger::using_spd().store(false);
+        std::cerr << "Stopping use of spd async" << std::endl;
+        logger::using_spd_async().store(false);
         return;
     }
 
-    void logger::reset_using_spd()
+    void logger::reset_using_spd_async()
     {
-        std::cerr << "Resetting use of spd" << std::endl;
-        logger::using_spd().store(true);
+        std::cerr << "Resetting use of spd async" << std::endl;
+        logger::using_spd_async().store(true);
         return;
     }
 
-    std::atomic_bool& logger::using_spd()
+    std::atomic_bool& logger::using_spd_async()
     {
-        static std::atomic_bool s_using_spd(true);
-        return s_using_spd;
+        static std::atomic_bool s_using_spd_async(true);
+        return s_using_spd_async;
     }
 
 }

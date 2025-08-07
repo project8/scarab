@@ -82,22 +82,24 @@ namespace scarab
 {
     struct SCARAB_API spd_initializer
     {
-        spd_initializer();
+        spd_initializer( const std::string& a_pattern = "" );
         std::shared_ptr< spdlog::logger > make_or_get_logger( const std::string& a_name );
         virtual std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name ) = 0;
-        std::shared_ptr< spdlog::sinks::sink > f_sink;
+        std::string f_pattern;
     };
 
     struct SCARAB_API spd_initializer_async_stdout_color_mt : spd_initializer
     {
-        spd_initializer_async_stdout_color_mt();
+        spd_initializer_async_stdout_color_mt( const std::string& a_pattern = "" );
         std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name );
+        std::shared_ptr< spdlog::sinks::sink > f_sink;
     };
 
     struct SCARAB_API spd_initializer_stdout_color : spd_initializer
     {
-        spd_initializer_stdout_color();
+        spd_initializer_stdout_color( const std::string& a_pattern = "" );
         std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name );
+        std::shared_ptr< spdlog::sinks::sink > f_sink;
     };
 
     class SCARAB_API logger
@@ -144,9 +146,9 @@ namespace scarab
 
             std::shared_ptr<spdlog::logger> spdlogger();
 
-            static void stop_using_spd();
-            static void reset_using_spd();
-            static std::atomic_bool& using_spd();
+            static void stop_using_spd_async();
+            static void reset_using_spd_async();
+            static std::atomic_bool& using_spd_async();
 
         protected:
             mutable std::stringstream f_strstr;
@@ -240,8 +242,8 @@ namespace scarab
 #define _SPD_FATAL( a_logger, a_message )  SPDLOG_LOGGER_CRITICAL( a_logger.spdlogger(), "{}", a_message );
 
 #define _LOGGER_IF_SPD(a_severity, a_file, a_line_no, a_logger, ...) \
-    if( ::scarab::logger::using_spd() ) { \
-        std::cerr << "spd logging" << std::endl; \
+    if( ::scarab::logger::using_spd_async() ) { \
+        std::cerr << "spd async logging" << std::endl; \
         PASTE(_SPD_, a_severity)( a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
     } else { \
         std::cerr << "Local logging" << std::endl; \
