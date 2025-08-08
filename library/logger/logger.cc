@@ -44,7 +44,17 @@ namespace scarab
 
     std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger( const std::string& a_name )
     {
+        return make_logger_async( a_name );
+    }
+
+    std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger_async( const std::string& a_name )
+    {
         return std::make_shared<spdlog::async_logger>( a_name, f_sink, spdlog::thread_pool(), spdlog::async_overflow_policy::block );
+    }
+
+    std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger_sync( const std::string& a_name )
+    {
+        return std::make_shared<spdlog::logger>( a_name, f_sink );
     }
 
 
@@ -63,6 +73,7 @@ namespace scarab
 
 
     logger::logger( const std::string& a_name ) :
+        f_name( a_name ),
         f_threshold( logger::ELevel::eInfo ),
         f_strstr(),
         f_spdlogger()
@@ -79,6 +90,11 @@ namespace scarab
     {
         static std::set< logger* > s_all_loggers;
         return s_all_loggers;
+    }
+
+    const std::string& logger::name() const
+    {
+        return f_name;
     }
 
     logger::ELevel logger::get_threshold() const
@@ -135,6 +151,42 @@ namespace scarab
     {
         std::cerr << "Stopping use of spd async" << std::endl;
         logger::using_spd_async().store(false);
+        // loop through all loggers
+            // if dynamic_cast to async version works, then switch backend to sync
+        std::set< logger* >& t_all_loggers = logger::all_loggers();
+        std::shared_ptr< spdlog::sinks::sink > t_new_sink;
+        std::set< std::string > t_replaced_loggers;
+        for( auto t_logger_ptr : t_all_loggers )
+        {
+            logger_type< spd_initializer_async_stdout_color_mt >* t_ltype_ptr = dynamic_cast< logger_type< spd_initializer_async_stdout_color_mt >* >(t_logger_ptr);
+            if( t_ltype_ptr != nullptr )
+            {
+                if( ! t_new_sink ) // then this is the first time we've gotten an async logger; we'll do this only once
+                {
+                    // We'll use the logger's pointer to the initializer to update the (static) initializer with the new sink
+                    // create the new sink and store to t_new_sink so this doesn't repeat
+                    t_new_sink = std::make_shared< spdlog::sinks::stdout_color_sink_st >();
+                    // we need to do the same steps that are in spd_initializer_stdout_color's constructor
+                    t_ltype_ptr->initializer().f_sink = t_new_sink;
+                    t_new_sink->set_pattern( t_ltype_ptr->initializer().f_pattern );
+                }
+                if( t_replaced_loggers.find(t_ltype_ptr->name()) == t_replaced_loggers.end() )
+                {
+                    // new spd logger doesn't exist, so create the new logger and save it to the scarab::logger
+                    t_replaced_loggers.insert( t_ltype_ptr->name() );
+                    std::shared_ptr< spdlog::logger > t_new_logger = t_ltype_ptr->initializer().make_logger_async( t_ltype_ptr->name() );
+                    spdlog::register_or_replace( t_new_logger );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+                else
+                {
+                    // new spd logger already exists, so get it and save it to the scarab::logger
+                    std::shared_ptr< spdlog::logger > t_new_logger = spdlog::get( t_ltype_ptr->name() );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+            }
+        }
+
         return;
     }
 
@@ -142,6 +194,8 @@ namespace scarab
     {
         std::cerr << "Resetting use of spd async" << std::endl;
         logger::using_spd_async().store(true);
+        // loop through all loggers
+            // if dynamic_cast to async version works, then switch backend to async
         return;
     }
 

@@ -92,6 +92,8 @@ namespace scarab
     {
         spd_initializer_async_stdout_color_mt( const std::string& a_pattern = "" );
         std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name );
+        std::shared_ptr< spdlog::logger > make_logger_async( const std::string& a_name );
+        std::shared_ptr< spdlog::logger > make_logger_sync( const std::string& a_name );
         std::shared_ptr< spdlog::sinks::sink > f_sink;
     };
 
@@ -126,6 +128,11 @@ namespace scarab
             logger& operator=( logger&& ) = default;
 
             static std::set< logger* >& all_loggers();
+
+            const std::string& name() const;
+
+        protected:
+            std::string f_name;
 
         public:
             ELevel get_threshold() const;
@@ -169,14 +176,22 @@ namespace scarab
             logger_type& operator=( const logger_type& ) = delete;
             logger_type& operator=( logger_type&& ) = default;
 
+            initializer_x& initializer() { return *f_initializer_ptr; }
+            const initializer_x& initializer() const { return *f_initializer_ptr; }
+
+        protected:
+            initializer_x* f_initializer_ptr;
+
     };
 
     template< typename initializer_x >
     logger_type< initializer_x >::logger_type( const std::string& a_name ) :
-            logger( a_name )
+            logger( a_name ),
+            f_initializer_ptr( nullptr )
     {
         // Start the backend, but only once
         static initializer_x s_init;
+        f_initializer_ptr = &s_init;
 
         f_spdlogger = s_init.make_or_get_logger( a_name );
     }
