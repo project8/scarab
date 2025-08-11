@@ -38,7 +38,7 @@ namespace scarab
         spdlog::init_thread_pool(8192, 1);
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         f_sink->set_pattern( f_pattern ); 
-        auto at_exit_fcn = [this](){ logger::stop_using_spd_asyc(); };
+        auto at_exit_fcn = [](){ logger::stop_using_spd_async(); };
         std::atexit( at_exit_fcn );
     }
 

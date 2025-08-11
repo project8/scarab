@@ -18,7 +18,7 @@ TEST_CASE( "logger", "[logger]" )
 {
     LOGGER( tlog, "test_logger" );
 
-    REQUIRE( logger::using_spd() );
+    REQUIRE( logger::using_spd_async() );
 
     //std::stringstream* t_outstream = new std::stringstream();
     //scarab::logger::SetOutStream( t_outstream );
@@ -84,7 +84,7 @@ TEST_CASE( "logger", "[logger]" )
     //REQUIRE( compare_and_clear( t_errstream, "test FATAL" ) );
 */
 
-    REQUIRE_NOTHROW( logger::stop_using_spd() );
+    REQUIRE_NOTHROW( logger::stop_using_spd_async() );
 
     LPROG( tlog, "test PROG" );
     //REQUIRE( compare_and_clear( t_outstream, "test PROG" ) );
@@ -109,5 +109,5 @@ TEST_CASE( "logger", "[logger]" )
     LFATAL( tlog, "test FATAL" );
     //REQUIRE( compare_and_clear( t_errstream, "test FATAL" ) );
 
-    REQUIRE_NOTHROW( logger::reset_using_spd() );
+    REQUIRE_NOTHROW( logger::reset_using_spd_async() );
 }
