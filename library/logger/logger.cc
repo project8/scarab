@@ -149,7 +149,9 @@ namespace scarab
 
     void logger::stop_using_spd_async()
     {
+#ifdef SCARAB_LOGGER_DEBUG
         std::cerr << "Stopping use of spd async" << std::endl;
+#endif
         logger::using_spd_async().store(false);
         // loop through all loggers
             // if dynamic_cast to async version works, then switch backend to sync

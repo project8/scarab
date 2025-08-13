@@ -40,6 +40,8 @@ option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interf
 
 option( Scarab_BUILD_PYTHON "Build python bindings" TRUE )
 
+option( Scarab_ENABLE_LOGGER_DEBUG "Flag to enable debug printing for the logger itself" FALSE )
+
 if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
     message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs, Authentication, and CLI requires Param.  If you want these elements, turn on Param.  If you want Param off, turn these elements off." )
 endif()
@@ -55,6 +57,12 @@ endif()
 if( Scarab_ENABLE_TESTING )
     enable_testing()
 endif()
+
+if( Scarab_ENABLE_LOGGER_DEBUG ) 
+    add_compile_definitions( SCARAB_LOGGER_DEBUG )
+else( Scarab_ENABLE_LOGGER_DEBUG )
+    remove_definitions( SCARAB_LOGGER_DEBUG )
+endif( Scarab_ENABLE_LOGGER_DEBUG )
 
 # Scarab needs C++11
 set( CMAKE_CXX_STANDARD 17 )

@@ -22,6 +22,7 @@
 
 #include "macros.hh"
 #include "scarab_api.hh"
+#include "typename.hh"
 
 /**
  * @file logger.hh
@@ -168,7 +169,7 @@ namespace scarab
     class logger_type : public logger
     {
         public:
-            logger_type( const std::string& a_name );
+            logger_type( const std::string& a_name, const std::string& a_file="[unknown]", int a_line=-1 );
             logger_type( const logger_type& ) = delete;
             logger_type( logger_type&& ) = default;
             virtual ~logger_type() = default;
@@ -185,10 +186,13 @@ namespace scarab
     };
 
     template< typename initializer_x >
-    logger_type< initializer_x >::logger_type( const std::string& a_name ) :
+    logger_type< initializer_x >::logger_type( const std::string& a_name, const std::string& a_file, int a_line ) :
             logger( a_name ),
             f_initializer_ptr( nullptr )
     {
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cout << "Logger <" << a_name << "> was initialized from <" << a_file << ":" << a_line << ">; type: " << ::scarab::type( *this ) << std::endl;
+#endif
         // Start the backend, but only once
         static initializer_x s_init;
         f_initializer_ptr = &s_init;
@@ -227,44 +231,48 @@ namespace scarab
 
 /// Creates a static scarab::logger object with variable name a_logger
 /// Uses spdlog's asynchronous logger; spdlog logger name will be a_name.
-#define LOGGER( a_logger, a_name )         static ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name );
-#define LOCAL_LOGGER( a_logger, a_name )          ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name );
+#define LOGGER( a_logger, a_name ) \
+    static ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name, __FILE_NAME__, __LINE__ );
+#define LOCAL_LOGGER( a_logger, a_name ) \
+    ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name, __FILE_NAME__, __LINE__ );
 
-/// Private macro for creating a single message string with a given logger object
-#define _LOGGER_GET_STRING( a_logger, ... ) (a_logger << __VA_ARGS__).buffer()
-
-#define _LOGGER_IF_PRINT( a_loglevel, a_stream, a_prefix, a_file, a_line_no, a_logger, a_message ) \
-    if( a_loglevel >= a_logger.get_threshold() ) { \
-        a_stream << a_prefix << a_file << ":" << a_line_no << " -> " << a_message << std::endl; \
-    }
-
-// These are the local-logging (i.e. w/o Quill) statements
-#define _LOCAL_TRACE( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eTrace,  std::cout, "[TRACE] ",   a_file, a_line_no, a_logger, a_message );
-#define _LOCAL_DEBUG( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eDebug,  std::cout, "[DEBUG] ",   a_file, a_line_no, a_logger, a_message );
-#define _LOCAL_INFO(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eInfo,   std::cout, "[INFO] ",    a_file, a_line_no, a_logger, a_message );
-#define _LOCAL_PROG(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eProg,   std::cout, "[PROG] ",    a_file, a_line_no, a_logger, a_message );
-#define _LOCAL_WARN(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eWarn,   std::cerr, "[WARNING] ", a_file, a_line_no, a_logger, a_message );
-#define _LOCAL_ERROR( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eError,  std::cerr, "[ERROR] ",   a_file, a_line_no, a_logger, a_message );
-#define _LOCAL_FATAL( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eFatal,  std::cerr, "[FATAL] ",   a_file, a_line_no, a_logger, a_message );
-
-// These are the Quill logging statements that dispatch the log messages to Quill via Quill's logging macros
-#define _SPD_TRACE( a_logger, a_message )  SPDLOG_LOGGER_TRACE(    a_logger.spdlogger(), "{}", a_message );
-#define _SPD_DEBUG( a_logger, a_message )  SPDLOG_LOGGER_DEBUG(    a_logger.spdlogger(), "{}", a_message );
-#define _SPD_INFO(  a_logger, a_message )  SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", a_message );
-#define _SPD_PROG(  a_logger, a_message )  SPDLOG_LOGGER_NOTICE(   a_logger.spdlogger(), "{}", a_message );
-#define _SPD_WARN(  a_logger, a_message )  SPDLOG_LOGGER_WARN(     a_logger.spdlogger(), "{}", a_message );
-#define _SPD_ERROR( a_logger, a_message )  SPDLOG_LOGGER_ERROR(    a_logger.spdlogger(), "{}", a_message );
-#define _SPD_FATAL( a_logger, a_message )  SPDLOG_LOGGER_CRITICAL( a_logger.spdlogger(), "{}", a_message );
-
-#define _LOGGER_IF_SPD(a_severity, a_file, a_line_no, a_logger, ...) \
-    if( ::scarab::logger::using_spd_async() ) { \
-        std::cerr << "spd async logging" << std::endl; \
-        PASTE(_SPD_, a_severity)( a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
-    } else { \
-        std::cerr << "Local logging" << std::endl; \
-        PASTE(_LOCAL_, a_severity)( a_file, a_line_no, a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
-    }
-
+///// Private macro for creating a single message string with a given logger object
+//#define _LOGGER_GET_STRING( a_logger, ... ) (a_logger << __VA_ARGS__).buffer()
+//
+//#define _LOGGER_IF_PRINT( a_loglevel, a_stream, a_prefix, a_file, a_line_no, a_logger, a_message ) \
+//    if( a_loglevel >= a_logger.get_threshold() ) { \
+//        a_stream << a_prefix << a_file << ":" << a_line_no << " -> " << a_message << std::endl; \
+//    }
+//
+//// These are the local-logging (i.e. w/o Quill) statements
+//#define _LOCAL_TRACE( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eTrace,  std::cout, "[TRACE] ",   a_file, a_line_no, a_logger, a_message );
+//#define _LOCAL_DEBUG( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eDebug,  std::cout, "[DEBUG] ",   a_file, a_line_no, a_logger, a_message );
+//#define _LOCAL_INFO(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eInfo,   std::cout, "[INFO] ",    a_file, a_line_no, a_logger, a_message );
+//#define _LOCAL_PROG(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eProg,   std::cout, "[PROG] ",    a_file, a_line_no, a_logger, a_message );
+//#define _LOCAL_WARN(  a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eWarn,   std::cerr, "[WARNING] ", a_file, a_line_no, a_logger, a_message );
+//#define _LOCAL_ERROR( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eError,  std::cerr, "[ERROR] ",   a_file, a_line_no, a_logger, a_message );
+//#define _LOCAL_FATAL( a_file, a_line_no, a_logger, a_message )  _LOGGER_IF_PRINT( ::scarab::logger::ELevel::eFatal,  std::cerr, "[FATAL] ",   a_file, a_line_no, a_logger, a_message );
+//
+//// These are the Quill logging statements that dispatch the log messages to Quill via Quill's logging macros
+//#define _SPD_TRACE( a_logger, a_message )  SPDLOG_LOGGER_TRACE(    a_logger.spdlogger(), "{}", a_message );
+//#define _SPD_DEBUG( a_logger, a_message )  SPDLOG_LOGGER_DEBUG(    a_logger.spdlogger(), "{}", a_message );
+//#define _SPD_INFO(  a_logger, a_message )  SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", a_message );
+//#define _SPD_PROG(  a_logger, a_message )  SPDLOG_LOGGER_NOTICE(   a_logger.spdlogger(), "{}", a_message );
+//#define _SPD_WARN(  a_logger, a_message )  SPDLOG_LOGGER_WARN(     a_logger.spdlogger(), "{}", a_message );
+//#define _SPD_ERROR( a_logger, a_message )  SPDLOG_LOGGER_ERROR(    a_logger.spdlogger(), "{}", a_message );
+//#define _SPD_FATAL( a_logger, a_message )  SPDLOG_LOGGER_CRITICAL( a_logger.spdlogger(), "{}", a_message );
+//
+//#define _LOGGER_IF_SPD(a_severity, a_file, a_line_no, a_logger, ...) \
+//    PASTE(_SPD_, a_severity)( a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) );
+//
+//    //if( ::scarab::logger::using_spd_async() ) { \
+//    //    std::cerr << "spd async logging" << std::endl; \
+//    //    PASTE(_SPD_, a_severity)( a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
+//    //} else { \
+//    //    std::cerr << "Local logging" << std::endl; \
+//    //    PASTE(_LOCAL_, a_severity)( a_file, a_line_no, a_logger, _LOGGER_GET_STRING( a_logger, __VA_ARGS__ ) ); \
+//    //}
+//
 // Public logging functions
 #ifdef NDEBUG
 /// Log a message at the trace level (disabled when not in a debug build)
@@ -273,20 +281,20 @@ namespace scarab
 #define LDEBUG(a_logger, ...)
 #else
 /// Log a message at the trace level
-#define LTRACE(a_logger, ...)       _LOGGER_IF_SPD( TRACE, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+#define LTRACE(a_logger, ...)       SPDLOG_LOGGER_TRACE(    a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 /// Log a message at the debug level
-#define LDEBUG(a_logger, ...)       _LOGGER_IF_SPD( DEBUG, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+#define LDEBUG(a_logger, ...)       SPDLOG_LOGGER_DEBUG(    a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 #endif
 /// Log a message at the info level
-#define LINFO(a_logger, ...)        _LOGGER_IF_SPD( INFO,  __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+#define LINFO(a_logger, ...)        SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 /// Log a message at the prog(ress) level
-#define LPROG(a_logger, ...)        _LOGGER_IF_SPD( PROG,  __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+#define LPROG(a_logger, ...)        SPDLOG_LOGGER_NOTICE(   a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 /// Log a message at the warn(ing) level
-#define LWARN(a_logger, ...)        _LOGGER_IF_SPD( WARN,  __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+#define LWARN(a_logger, ...)        SPDLOG_LOGGER_WARN(     a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 /// Log a message at the error level
-#define LERROR(a_logger, ...)       _LOGGER_IF_SPD( ERROR, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+#define LERROR(a_logger, ...)       SPDLOG_LOGGER_ERROR(    a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 /// Log a message at the fatal level
-#define LFATAL(a_logger, ...)       _LOGGER_IF_SPD( FATAL, __FILE_NAME__, __LINE__, a_logger, __VA_ARGS__ );
+#define LFATAL(a_logger, ...)       SPDLOG_LOGGER_CRITICAL( a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 
 
 
