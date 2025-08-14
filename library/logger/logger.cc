@@ -150,7 +150,7 @@ namespace scarab
     void logger::stop_using_spd_async()
     {
 #ifdef SCARAB_LOGGER_DEBUG
-        std::cerr << "Stopping use of spd async" << std::endl;
+        std::cout << "Stopping use of spd async" << std::endl;
 #endif
         logger::using_spd_async().store(false);
         // loop through all loggers
@@ -176,6 +176,59 @@ namespace scarab
                 {
                     // new spd logger doesn't exist, so create the new logger and save it to the scarab::logger
                     t_replaced_loggers.insert( t_ltype_ptr->name() );
+                    std::shared_ptr< spdlog::logger > t_new_logger = t_ltype_ptr->initializer().make_logger_sync( t_ltype_ptr->name() );
+                    spdlog::register_or_replace( t_new_logger );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+                else
+                {
+                    // new spd logger already exists, so get it and save it to the scarab::logger
+                    std::shared_ptr< spdlog::logger > t_new_logger = spdlog::get( t_ltype_ptr->name() );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+            }
+        }
+
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cout << "SPD logger changed to sync for " << t_replaced_loggers.size() << " loggers" << std::endl;
+#endif
+
+        return;
+    }
+
+    void logger::reset_using_spd_async()
+    {
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cerr << "Resetting use of spd async" << std::endl;
+#endif
+        logger::using_spd_async().store(true);
+        std::set< logger* >& t_all_loggers = logger::all_loggers();
+        std::shared_ptr< spdlog::sinks::sink > t_new_sink;
+        std::set< std::string > t_replaced_loggers;
+        // loop through all loggers
+            // if dynamic_cast to async version works, then switch backend to async
+        for( auto t_logger_ptr : t_all_loggers )
+        {
+            logger_type< spd_initializer_async_stdout_color_mt >* t_ltype_ptr = dynamic_cast< logger_type< spd_initializer_async_stdout_color_mt >* >(t_logger_ptr);
+            if( t_ltype_ptr != nullptr )
+            {
+                if( ! t_new_sink ) // then this is the first time we've gotten an async logger; we'll do this only once
+                {
+                    // We'll use the logger's pointer to the initializer to update the (static) initializer with the new sink
+                    // create the new sink and store to t_new_sink so this doesn't repeat
+                    t_new_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
+                    // we need to do the same steps that are in spd_initializer_async_stdout_color_mt's constructor
+                    if( ! spdlog::thread_pool() )
+                    {
+                        spdlog::init_thread_pool(8192, 1);
+                    }
+                    t_ltype_ptr->initializer().f_sink = t_new_sink;
+                    t_new_sink->set_pattern( t_ltype_ptr->initializer().f_pattern );
+                }
+                if( t_replaced_loggers.find(t_ltype_ptr->name()) == t_replaced_loggers.end() )
+                {
+                    // new spd logger doesn't exist, so create the new logger and save it to the scarab::logger
+                    t_replaced_loggers.insert( t_ltype_ptr->name() );
                     std::shared_ptr< spdlog::logger > t_new_logger = t_ltype_ptr->initializer().make_logger_async( t_ltype_ptr->name() );
                     spdlog::register_or_replace( t_new_logger );
                     t_ltype_ptr->f_spdlogger = t_new_logger;
@@ -189,15 +242,10 @@ namespace scarab
             }
         }
 
-        return;
-    }
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cout << "SPD logger changed to async for " << t_replaced_loggers.size() << " loggers" << std::endl;
+#endif
 
-    void logger::reset_using_spd_async()
-    {
-        std::cerr << "Resetting use of spd async" << std::endl;
-        logger::using_spd_async().store(true);
-        // loop through all loggers
-            // if dynamic_cast to async version works, then switch backend to async
         return;
     }
 
