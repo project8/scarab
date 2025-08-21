@@ -64,8 +64,11 @@
  *   Therefore we implemented a system where the async logging via spdlog can be explicitly stopped, at which point the logging switches to using single-threaded spdlog loggers.  
  * * The effect of not stopping the async spdlog logging mixed with logging after the async thread stops is undefined.
  * * Debug and trace messages are not compiled when scarab is built in Release mode.  This is done by a compile-time choice of using empty DEBUG and TRACE macros 
- *   when in Release mode.  spdlog has compile-time filtering capabilities too, but we don't use that because scarab::logger has whole setup with 
- *   function pointers that allow the Quill logging to be stopped.
+ *   when in Release mode.  spdlog has compile-time filtering capabilities too, but we don't use that currently.
+ * * The initializer struct includes a function `make_or_get_logger()` that takes a callback that will be responsible fore creating a logger if it's needed.  
+ *   This setup is used to avoid a virtual function call using spd_initializer::make_logger() to the derived initializer structs because 
+ *   this is typically done at static initialization, and we can't use virtual function calls then.
+ * * The macro SCARAB_LOGGER_DEBUG can be used to enable printing about the creation of spd loggers.
  */
 
 namespace scarab
@@ -73,6 +76,7 @@ namespace scarab
     struct SCARAB_API spd_initializer
     {
         spd_initializer( const std::string& a_pattern = "" );
+        // see the comment above about why the callback a_make_logger_fcn is used
         std::shared_ptr< spdlog::logger > make_or_get_logger( const std::string& a_name, std::function< std::shared_ptr< spdlog::logger > (const std::string&) > a_make_logger_fcn );
         //virtual std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name ) = 0;
         std::string f_pattern;

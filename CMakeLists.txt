@@ -76,8 +76,6 @@ set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
 # logging via spdlog
-message( "###### Adding spdlog" )
-#find_package( spdlog REQUIRED )
 add_compile_definitions( SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE )
 set( SPDLOG_BUILD_SHARED TRUE )
 set( SPDLOG_INSTALL TRUE )
@@ -86,13 +84,7 @@ FetchContent_Declare( spdlog
     GIT_TAG v1.x_p8
 )
 FetchContent_MakeAvailable( spdlog )
-#add_subdirectory( external/spdlog )
 list( APPEND PUBLIC_EXT_LIBS spdlog::spdlog )
-#if( "${build_type_lower}" STREQUAL "debug" )
-#    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
-#else( "${build_type_lower}" STREQUAL "debug" )
-#    remove_definitions( -DQUILL_IMMEDIATE_FLUSH )
-#endif( "${build_type_lower}" STREQUAL "debug" )
 
 
 if( Scarab_BUILD_CODEC_JSON )
@@ -183,7 +175,6 @@ pbuilder_prepare_project()
 
 add_subdirectory( library )
 
-add_subdirectory( yala )
 
 ##########
 # Python #

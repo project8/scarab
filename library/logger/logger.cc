@@ -24,6 +24,7 @@ namespace scarab
         std::shared_ptr< spdlog::logger > t_logger = spdlog::get( a_name );
         if( ! t_logger )
         {
+            // see the comment in logger.hh about why the a_make_logger_fcn callback is used instead of the virtual function call
             t_logger = a_make_logger_fcn( a_name ); //this->make_logger( a_name );
             spdlog::register_logger( t_logger );
         }
