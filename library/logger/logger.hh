@@ -9,6 +9,7 @@
 #define SCARAB_LOGGER_HH_
 
 #include <atomic>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <set>
@@ -72,8 +73,8 @@ namespace scarab
     struct SCARAB_API spd_initializer
     {
         spd_initializer( const std::string& a_pattern = "" );
-        std::shared_ptr< spdlog::logger > make_or_get_logger( const std::string& a_name );
-        virtual std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name ) = 0;
+        std::shared_ptr< spdlog::logger > make_or_get_logger( const std::string& a_name, std::function< std::shared_ptr< spdlog::logger > (const std::string&) > a_make_logger_fcn );
+        //virtual std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name ) = 0;
         std::string f_pattern;
     };
 
@@ -185,7 +186,7 @@ namespace scarab
         static initializer_x s_init;
         f_initializer_ptr = &s_init;
 
-        f_spdlogger = s_init.make_or_get_logger( a_name );
+        f_spdlogger = s_init.make_or_get_logger( a_name, [](const std::string& a_name) -> std::shared_ptr< spdlog::logger > { return s_init.make_logger( a_name ); } );
     }
 
 

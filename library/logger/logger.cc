@@ -19,12 +19,12 @@ namespace scarab
         if( f_pattern.empty() ) f_pattern = "%^%Y-%m-%d %H:%M:%S.%e [%l] (%t) %s:%# -> %v%$";
     }
 
-    std::shared_ptr< spdlog::logger > spd_initializer::make_or_get_logger( const std::string& a_name )
+    std::shared_ptr< spdlog::logger > spd_initializer::make_or_get_logger( const std::string& a_name, std::function< std::shared_ptr< spdlog::logger > (const std::string&) > a_make_logger_fcn )
     {
         std::shared_ptr< spdlog::logger > t_logger = spdlog::get( a_name );
         if( ! t_logger )
         {
-            t_logger = this->make_logger( a_name );
+            t_logger = a_make_logger_fcn( a_name ); //this->make_logger( a_name );
             spdlog::register_logger( t_logger );
         }
         return t_logger;
