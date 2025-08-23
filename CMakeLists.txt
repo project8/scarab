@@ -19,6 +19,7 @@ project( Scarab VERSION ${scarab_version} )
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
 include( PackageBuilder )
+include( FetchContent )
 
 # Require C++17 (minimum set by: Quill dependency)
 set_to_max( CMAKE_CXX_STANDARD 17 )
@@ -39,6 +40,8 @@ option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interf
 
 option( Scarab_BUILD_PYTHON "Build python bindings" TRUE )
 
+option( Scarab_ENABLE_LOGGER_DEBUG "Flag to enable debug printing for the logger itself" FALSE )
+
 if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
     message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs, Authentication, and CLI requires Param.  If you want these elements, turn on Param.  If you want Param off, turn these elements off." )
 endif()
@@ -55,6 +58,12 @@ if( Scarab_ENABLE_TESTING )
     enable_testing()
 endif()
 
+if( Scarab_ENABLE_LOGGER_DEBUG ) 
+    add_compile_definitions( SCARAB_LOGGER_DEBUG )
+else( Scarab_ENABLE_LOGGER_DEBUG )
+    remove_definitions( SCARAB_LOGGER_DEBUG )
+endif( Scarab_ENABLE_LOGGER_DEBUG )
+
 # Scarab needs C++11
 set( CMAKE_CXX_STANDARD 17 )
 
@@ -66,14 +75,16 @@ set( CMAKE_CXX_STANDARD 17 )
 set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
-# logging
-find_package( quill REQUIRED )
-list( APPEND PRIVATE_EXT_LIBS quill::quill )
-if( "${build_type_lower}" STREQUAL "debug" )
-    add_definitions( -DQUILL_IMMEDIATE_FLUSH=1 )
-else( "${build_type_lower}" STREQUAL "debug" )
-    remove_definitions( -DQUILL_IMMEDIATE_FLUSH )
-endif( "${build_type_lower}" STREQUAL "debug" )
+# logging via spdlog
+add_compile_definitions( SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE )
+set( SPDLOG_BUILD_SHARED TRUE )
+set( SPDLOG_INSTALL TRUE )
+FetchContent_Declare( spdlog
+    GIT_REPOSITORY https://github.com/project8/spdlog.git
+    GIT_TAG v1.x_p8
+)
+FetchContent_MakeAvailable( spdlog )
+list( APPEND PUBLIC_EXT_LIBS spdlog::spdlog )
 
 
 if( Scarab_BUILD_CODEC_JSON )

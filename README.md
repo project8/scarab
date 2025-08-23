@@ -16,7 +16,6 @@ It contains three main components:
 
 Requirements:
 * CMake v3.12 or higher
-* Quill v9.x
 * Boost 1.46 or higher; filesystem and system components
 * For optional YAML/param codec
   * yaml-cpp v1.0 or higher
@@ -24,4 +23,4 @@ Requirements:
   * RapidJSON
 * For optional Python bindings:
   * Python 3
-  * Pybind11 v3 or higher
+  * Pybind11 v3.0.0 or higher

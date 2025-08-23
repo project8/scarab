@@ -45,7 +45,5 @@ int main(int , char ** )
     
     raise( SIGABRT );
 
-    STOP_LOGGING;
-
     return( EXIT_SUCCESS );
 }

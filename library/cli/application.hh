@@ -350,19 +350,19 @@ namespace scarab
             // Verbosity
             //*************************
         public:
-            using verbosity_t = std::underlying_type< scarab::ELevel >::type; // typically is unsigned
+            using verbosity_t = std::underlying_type< scarab::logger::ELevel >::type; // typically is unsigned
 
             /// Get the global verbosity
             verbosity_t get_global_verbosity() const;
             /// Set the global verbosity with the verbosity value
             void set_global_verbosity( verbosity_t a_verbosity );
             /// Set the global verbosity with the verbosity enum
-            void set_global_verbosity( ELevel a_verbosity );
+            void set_global_verbosity( scarab::logger::ELevel a_verbosity );
 
             void increase_global_verbosity( unsigned an_offset );
             void decrease_global_verbosity( unsigned an_offset );
 
-            using verbosity_map_t = std::map< verbosity_t, scarab::ELevel >;
+            using verbosity_map_t = std::map< verbosity_t, scarab::logger::ELevel >;
             using verbosity_iterator_t = verbosity_map_t::iterator;
             static verbosity_map_t s_verbosities;
 
