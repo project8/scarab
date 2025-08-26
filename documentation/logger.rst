@@ -51,13 +51,13 @@ UPDATE
 
 The default formatting for the terminal output at each level looks like this::
 
-    2025-05-13 19:53:09.951 [FATAL] (12683) logger.cc:246 -> Fatal error message
-    2025-05-13 19:53:09.952 [ERROR] (12683) logger.cc:235 -> Error message
-    2025-05-13 19:53:09.953 [WARNING] (12683) logger.cc:224 -> Warning message
-    2025-05-13 19:53:09.954 [PROG] (12683) logger.cc:213 -> Progress message
-    2025-05-13 19:53:09.956 [INFO] (12683) logger.cc:202 -> Information message
-    2025-05-13 19:53:09.957 [DEBUG] (12683) logger.cc:191 -> Debug message
-    2025-05-13 19:53:09.959 [TRACE] (12683) logger.cc:180 -> Trace message
+    2025-08-25 21:12:21.020 [TRACE] (7) test_logger.cc:64 -> test TRACE
+    2025-08-25 21:12:21.020 [DEBUG] (7) test_logger.cc:67 -> test DEBUG
+    2025-08-25 21:12:21.020 [INFO] (7) test_logger.cc:70 -> test INFO
+    2025-08-25 21:12:21.020 [PROG] (7) test_logger.cc:73 -> test PROG
+    2025-08-25 21:12:21.020 [WARNING] (7) test_logger.cc:78 -> test WARN
+    2025-08-25 21:12:21.020 [ERROR] (7) test_logger.cc:81 -> test ERROR
+    2025-08-25 21:12:21.020 [FATAL] (7) test_logger.cc:84 -> test FATAL
 
 Use in Source Code
 ------------------

@@ -33,46 +33,45 @@ TEST_CASE( "logger", "[logger]" )
 
     // log
 
-    LPROG( tlog, "test PROG" );
-    //REQUIRE( compare_and_clear( t_outstream, "test PROG" ) );
-
-    LINFO( tlog, "test INFO" );
-    //REQUIRE( compare_and_clear( t_outstream, "test INFO" ) );
+    LTRACE( tlog, "test TRACE" );
+    //REQUIRE( compare_and_clear( t_outstream, "test TRACE" ) );
 
     LDEBUG( tlog, "test DEBUG" );
     //REQUIRE( compare_and_clear( t_outstream, "test DEBUG" ) );
 
-    LTRACE( tlog, "test TRACE" );
-    //REQUIRE( compare_and_clear( t_outstream, "test TRACE" ) );
-
-    // err
-
-    LWARN( tlog, "test WARN" );
-    //REQUIRE( compare_and_clear( t_errstream, "test WARN" ) );
-
-    LERROR( tlog, "test ERROR" );
-    //REQUIRE( compare_and_clear( t_errstream, "test ERROR" ) );
-
-    LFATAL( tlog, "test FATAL" );
-    //REQUIRE( compare_and_clear( t_errstream, "test FATAL" ) );
-
-/*
-    // Info and above
-    //tlog.SetGlobalLevel( scarab::logger::ELevel::eInfo );
-
-    // log
+    LINFO( tlog, "test INFO" );
+    //REQUIRE( compare_and_clear( t_outstream, "test INFO" ) );
 
     LPROG( tlog, "test PROG" );
     //REQUIRE( compare_and_clear( t_outstream, "test PROG" ) );
 
+    // err
+
+    LWARN( tlog, "test WARN" );
+    //REQUIRE( compare_and_clear( t_errstream, "test WARN" ) );
+
+    LERROR( tlog, "test ERROR" );
+    //REQUIRE( compare_and_clear( t_errstream, "test ERROR" ) );
+
+    LFATAL( tlog, "test FATAL" );
+    //REQUIRE( compare_and_clear( t_errstream, "test FATAL" ) );
+
+    // All
+    logger::set_global_threshold( scarab::logger::ELevel::eTrace );
+
+    // log
+
+    LTRACE( tlog, "test TRACE" );
+    //REQUIRE( compare_and_clear( t_outstream, "test TRACE" ) );
+
+    LDEBUG( tlog, "test DEBUG" );
+    //REQUIRE( compare_and_clear( t_outstream, "test DEBUG" ) );
+
     LINFO( tlog, "test INFO" );
     //REQUIRE( compare_and_clear( t_outstream, "test INFO" ) );
 
-    LDEBUG( tlog, "test DEBUG" );
-    //REQUIRE( compare_and_clear( t_outstream, "" ) );
-
-    LTRACE( tlog, "test TRACE" );
-    //REQUIRE( compare_and_clear( t_outstream, "" ) );
+    LPROG( tlog, "test PROG" );
+    //REQUIRE( compare_and_clear( t_outstream, "test PROG" ) );
 
     // err
 
@@ -84,7 +83,6 @@ TEST_CASE( "logger", "[logger]" )
 
     LFATAL( tlog, "test FATAL" );
     //REQUIRE( compare_and_clear( t_errstream, "test FATAL" ) );
-*/
 
 }
 
