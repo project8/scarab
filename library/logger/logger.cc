@@ -1,256 +1,259 @@
 /*
- * logger.cxx
- * based on KLogger.cxx from KATRIN's Kasper
+ * logger.cc
  *
- *  Created on: 18.11.2011
- *      Author: Marco Haag <marco.haag@kit.edu>
+ *  Created on: Jul 10, 2025
+ *      Author: N.S. Oblath
  */
 
-#define SCARAB_API_EXPORTS
+ #include "logger.hh"
 
-#include "logger.hh"
-
-
-using namespace std;
+#include "spdlog/async.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+//#include "spdlog/spdlog.h"
 
 namespace scarab
 {
-
-    quill_initializer::quill_initializer()
+    spd_initializer::spd_initializer( const std::string& a_pattern ) :
+            f_pattern( a_pattern )
     {
-        if( ! logger::is_quill_stopped() )
-        {
-            //std::cerr << "Creating Quill Initializer" << std::endl;
-            quill::BackendOptions backend_options;
-            // Scarab uses slightly different level names at the fatal/critical and prog/notice levels
-            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Critical)] = "FATAL";
-            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::Notice)] = "PROG";
-            backend_options.log_level_descriptions[uint8_t(quill::LogLevel::TraceL1)] = "TRACE";
-            backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Critical)] = "F";
-            backend_options.log_level_short_codes[uint8_t(quill::LogLevel::Notice)] = "P";
-            // Modify the character filtering: make \t visible
-            // The default filtering function is: [](char c){ return (c >= ' ' && c <= '~') || (c == '\n'); }
-            backend_options.check_printable_char = [](char c){ return (c >= ' ' && c <= '~') || (c == '\n') || (c == '\t'); };
-            quill::Backend::start( backend_options );
-
-            // Set the logging functions to use Quill
-            logger::s_log_trace_fcn = &scarab::logger::log_trace_to_quill;
-            logger::s_log_debug_fcn = &scarab::logger::log_debug_to_quill;
-            logger::s_log_info_fcn = &scarab::logger::log_info_to_quill;
-            logger::s_log_prog_fcn = &scarab::logger::log_prog_to_quill;
-            logger::s_log_warn_fcn = &scarab::logger::log_warn_to_quill;
-            logger::s_log_error_fcn = &scarab::logger::log_error_to_quill;
-            logger::s_log_fatal_fcn = &scarab::logger::log_fatal_to_quill;
-        }
-        else
-        {
-            // Set the logging functions to use stdout
-            logger::s_log_trace_fcn = &scarab::logger::log_trace_to_stdout;
-            logger::s_log_debug_fcn = &scarab::logger::log_debug_to_stdout;
-            logger::s_log_info_fcn = &scarab::logger::log_info_to_stdout;
-            logger::s_log_prog_fcn = &scarab::logger::log_prog_to_stdout;
-            logger::s_log_warn_fcn = &scarab::logger::log_warn_to_stdout;
-            logger::s_log_error_fcn = &scarab::logger::log_error_to_stdout;
-            logger::s_log_fatal_fcn = &scarab::logger::log_fatal_to_stdout;
-        }
-
-        //logger::check_log_functions();
-    }
-    //quill_initializer::~quill_initializer()
-    //{
-    //    std::cerr << "Destructing quill initializer" << std::endl;
-    //}
-
-    quill_guard::~quill_guard()
-    {
-        //std::cerr << "calling backend stop via quill guard" << std::endl;
-        logger::stop_quill();
+        if( f_pattern.empty() ) f_pattern = "%^%Y-%m-%d %H:%M:%S.%e [%l] (%t) %s:%# -> %v%$";
     }
 
-    ELevel logger::f_global_threshold = ELevel::eDebug;
+    std::shared_ptr< spdlog::logger > spd_initializer::make_or_get_logger( const std::string& a_name, std::function< std::shared_ptr< spdlog::logger > (const std::string&) > a_make_logger_fcn )
+    {
+        std::shared_ptr< spdlog::logger > t_logger = spdlog::get( a_name );
+        if( ! t_logger )
+        {
+            // see the comment in logger.hh about why the a_make_logger_fcn callback is used instead of the virtual function call
+            t_logger = a_make_logger_fcn( a_name ); //this->make_logger( a_name );
+            spdlog::register_logger( t_logger );
+        }
+        return t_logger;
+    }
 
-    bool logger::s_quill_stopped = false;
 
-    void (*logger::s_log_trace_fcn)(logger&, const std::string&) = &scarab::logger::log_trace_to_quill;
-    void (*logger::s_log_debug_fcn)(logger&, const std::string&) = &scarab::logger::log_debug_to_quill;
-    void (*logger::s_log_info_fcn)(logger&, const std::string&) = &scarab::logger::log_info_to_quill;
-    void (*logger::s_log_prog_fcn)(logger&, const std::string&) = &scarab::logger::log_prog_to_quill;
-    void (*logger::s_log_warn_fcn)(logger&, const std::string&) = &scarab::logger::log_warn_to_quill;
-    void (*logger::s_log_error_fcn)(logger&, const std::string&) = &scarab::logger::log_error_to_quill;
-    void (*logger::s_log_fatal_fcn)(logger&, const std::string&) = &scarab::logger::log_fatal_to_quill;
+    spd_initializer_async_stdout_color_mt::spd_initializer_async_stdout_color_mt( const std::string& a_pattern ) :
+            spd_initializer( a_pattern ),
+            f_sink()
+    {
+        spdlog::init_thread_pool(8192, 1);
+        f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
+        f_sink->set_pattern( f_pattern ); 
+        auto at_exit_fcn = [](){ logger::stop_using_spd_async(); };
+        std::atexit( at_exit_fcn );
+    }
+
+    std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger( const std::string& a_name )
+    {
+        return make_logger_async( a_name );
+    }
+
+    std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger_async( const std::string& a_name )
+    {
+        return std::make_shared<spdlog::async_logger>( a_name, f_sink, spdlog::thread_pool(), spdlog::async_overflow_policy::block );
+    }
+
+    std::shared_ptr< spdlog::logger > spd_initializer_async_stdout_color_mt::make_logger_sync( const std::string& a_name )
+    {
+        return std::make_shared<spdlog::logger>( a_name, f_sink );
+    }
+
+
+    spd_initializer_stdout_color::spd_initializer_stdout_color( const std::string& a_pattern ) :
+            spd_initializer( a_pattern ),
+            f_sink()
+    {
+        f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_st >();
+        f_sink->set_pattern( f_pattern );
+    }
+
+    std::shared_ptr< spdlog::logger > spd_initializer_stdout_color::make_logger( const std::string& a_name )
+    {
+        return std::make_shared<spdlog::logger>( a_name, f_sink );
+    }
+
 
     logger::logger( const std::string& a_name ) :
-            f_stream(),
-            f_buffer(),
-            f_quill(nullptr)
+        f_name( a_name ),
+        f_threshold( logger::ELevel::eInfo ),
+        f_strstr(),
+        f_spdlogger()
     {
-        // Use static initialization to ensure that there's a Quill Backend ready to print messages whenever the first logger is created
-        static scarab::quill_initializer q_init;
-
-        if( ! logger::is_quill_stopped() )
-        {
-            auto console_colors = quill::ConsoleSinkConfig::Colours();
-            console_colors.apply_default_colours();
-            console_colors.assign_colour_to_log_level( quill::LogLevel::Notice, quill::ConsoleSinkConfig::Colours::blue);
-            quill::ConsoleSinkConfig config;
-            config.set_colours(console_colors);
-            auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>( a_name+"_console_sink", config );
-            f_quill = quill::Frontend::create_or_get_logger( a_name, std::move(console_sink),
-                                                            quill::PatternFormatterOptions{ "%(time) [%(log_level)] (%(thread_id)) %(short_source_location) -> %(message)", "%Y-%m-%d %T.%Qms", quill::Timezone::GmtTime}
-                                                            );
-            f_quill->set_log_level( quill::LogLevel(unsigned(f_global_threshold)) );
-        }
-
-        //logger::check_log_functions();
+        scarab::logger::all_loggers().insert(this);
     }
 
     logger::~logger()
-    {}
-
-    ELevel logger::get_global_threshold()
     {
-        return f_global_threshold;
+        logger::all_loggers().erase(this);
     }
 
-    void logger::set_global_threshold( ELevel a_threshold )
+    std::set< logger* >& logger::all_loggers()
     {
-        f_global_threshold = a_threshold;
-        auto t_all_loggers = quill::Frontend::get_all_loggers();
-        for( auto t_logger : t_all_loggers )
+        static std::set< logger* > s_all_loggers;
+        return s_all_loggers;
+    }
+
+    const std::string& logger::name() const
+    {
+        return f_name;
+    }
+
+    logger::ELevel logger::get_threshold() const
+    {
+        return f_threshold;
+    }
+
+    void logger::set_threshold( logger::ELevel a_level )
+    {
+        f_threshold = a_level;
+        //if( logger::using_spd() )
+        //{
+            f_spdlogger->set_level( spdlog::level::level_enum(unsigned(f_threshold)) );
+        //}
+        return;
+    }
+
+    logger::ELevel logger::get_global_threshold()
+    {
+        return logger::global_threshold();
+    }
+
+    void logger::set_global_threshold( ELevel a_level )
+    {
+        logger::global_threshold() = a_level;
+        spdlog::set_level( spdlog::level::level_enum(unsigned(a_level)) );
+        std::set< logger* >& t_all_loggers = logger::all_loggers();
+        for( auto t_logger_ptr : t_all_loggers )
         {
-            t_logger->set_log_level( quill::LogLevel(unsigned(f_global_threshold)) );
+            t_logger_ptr->set_threshold( a_level );
         }
         return;
     }
 
-    void logger::stop_quill()
+    logger::ELevel& logger::global_threshold()
     {
-        std::cerr << "Stopping quill" << std::endl;
+        static logger::ELevel s_global_threshold( logger::ELevel::eInfo );
+        return s_global_threshold;
+    }
 
-        s_quill_stopped = true;
+    std::string logger::buffer()
+    {
+        std::string t_buffer( f_strstr.str() );
+        f_strstr.str( std::string() );
+        return std::string( std::move(t_buffer) );
+    }
 
-        logger::s_log_trace_fcn = &scarab::logger::log_trace_to_stdout;
-        logger::s_log_debug_fcn = &scarab::logger::log_debug_to_stdout;
-        logger::s_log_info_fcn = &scarab::logger::log_info_to_stdout;
-        logger::s_log_prog_fcn = &scarab::logger::log_prog_to_stdout;
-        logger::s_log_warn_fcn = &scarab::logger::log_warn_to_stdout;
-        logger::s_log_error_fcn = &scarab::logger::log_error_to_stdout;
-        logger::s_log_fatal_fcn = &scarab::logger::log_fatal_to_stdout;
+    std::shared_ptr<spdlog::logger> logger::spdlogger()
+    {
+        return f_spdlogger;
+    }
 
-        quill::Backend::stop();
+    void logger::stop_using_spd_async()
+    {
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cout << "Stopping use of spd async" << std::endl;
+#endif
+        logger::using_spd_async().store(false);
+        // loop through all loggers
+            // if dynamic_cast to async version works, then switch backend to sync
+        std::set< logger* >& t_all_loggers = logger::all_loggers();
+        std::shared_ptr< spdlog::sinks::sink > t_new_sink;
+        std::set< std::string > t_replaced_loggers;
+        for( auto t_logger_ptr : t_all_loggers )
+        {
+            logger_type< spd_initializer_async_stdout_color_mt >* t_ltype_ptr = dynamic_cast< logger_type< spd_initializer_async_stdout_color_mt >* >(t_logger_ptr);
+            if( t_ltype_ptr != nullptr )
+            {
+                if( ! t_new_sink ) // then this is the first time we've gotten an async logger; we'll do this only once
+                {
+                    // We'll use the logger's pointer to the initializer to update the (static) initializer with the new sink
+                    // create the new sink and store to t_new_sink so this doesn't repeat
+                    t_new_sink = std::make_shared< spdlog::sinks::stdout_color_sink_st >();
+                    // we need to do the same steps that are in spd_initializer_stdout_color's constructor
+                    t_ltype_ptr->initializer().f_sink = t_new_sink;
+                    t_new_sink->set_pattern( t_ltype_ptr->initializer().f_pattern );
+                }
+                if( t_replaced_loggers.find(t_ltype_ptr->name()) == t_replaced_loggers.end() )
+                {
+                    // new spd logger doesn't exist, so create the new logger and save it to the scarab::logger
+                    t_replaced_loggers.insert( t_ltype_ptr->name() );
+                    std::shared_ptr< spdlog::logger > t_new_logger = t_ltype_ptr->initializer().make_logger_sync( t_ltype_ptr->name() );
+                    spdlog::register_or_replace( t_new_logger );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+                else
+                {
+                    // new spd logger already exists, so get it and save it to the scarab::logger
+                    std::shared_ptr< spdlog::logger > t_new_logger = spdlog::get( t_ltype_ptr->name() );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+            }
+        }
 
-        //logger::check_log_functions();
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cout << "SPD logger changed to sync for " << t_replaced_loggers.size() << " loggers" << std::endl;
+#endif
 
         return;
     }
 
-    bool logger::is_quill_stopped()
+    void logger::reset_using_spd_async()
     {
-        return logger::s_quill_stopped;
-    }
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cerr << "Resetting use of spd async" << std::endl;
+#endif
+        logger::using_spd_async().store(true);
+        std::set< logger* >& t_all_loggers = logger::all_loggers();
+        std::shared_ptr< spdlog::sinks::sink > t_new_sink;
+        std::set< std::string > t_replaced_loggers;
+        // loop through all loggers
+            // if dynamic_cast to async version works, then switch backend to async
+        for( auto t_logger_ptr : t_all_loggers )
+        {
+            logger_type< spd_initializer_async_stdout_color_mt >* t_ltype_ptr = dynamic_cast< logger_type< spd_initializer_async_stdout_color_mt >* >(t_logger_ptr);
+            if( t_ltype_ptr != nullptr )
+            {
+                if( ! t_new_sink ) // then this is the first time we've gotten an async logger; we'll do this only once
+                {
+                    // We'll use the logger's pointer to the initializer to update the (static) initializer with the new sink
+                    // create the new sink and store to t_new_sink so this doesn't repeat
+                    t_new_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
+                    // we need to do the same steps that are in spd_initializer_async_stdout_color_mt's constructor
+                    if( ! spdlog::thread_pool() )
+                    {
+                        spdlog::init_thread_pool(8192, 1);
+                    }
+                    t_ltype_ptr->initializer().f_sink = t_new_sink;
+                    t_new_sink->set_pattern( t_ltype_ptr->initializer().f_pattern );
+                }
+                if( t_replaced_loggers.find(t_ltype_ptr->name()) == t_replaced_loggers.end() )
+                {
+                    // new spd logger doesn't exist, so create the new logger and save it to the scarab::logger
+                    t_replaced_loggers.insert( t_ltype_ptr->name() );
+                    std::shared_ptr< spdlog::logger > t_new_logger = t_ltype_ptr->initializer().make_logger_async( t_ltype_ptr->name() );
+                    spdlog::register_or_replace( t_new_logger );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+                else
+                {
+                    // new spd logger already exists, so get it and save it to the scarab::logger
+                    std::shared_ptr< spdlog::logger > t_new_logger = spdlog::get( t_ltype_ptr->name() );
+                    t_ltype_ptr->f_spdlogger = t_new_logger;
+                }
+            }
+        }
 
-    void logger::check_log_functions()
-    {
-        if( logger::is_quill_stopped() )
-        {
-            std::cerr << "Logger check functions: quill is stopped" << std::endl;
-            //std::cerr << "Trace? " << (logger::s_log_trace_fcn == &logger::log_trace_to_stdout) << std::endl;
-            //std::cerr << "Debug? " << (logger::s_log_debug_fcn == &logger::log_debug_to_stdout) << std::endl;
-            //std::cerr << "Info? " << (logger::s_log_info_fcn == &logger::log_info_to_stdout) << std::endl;
-            //std::cerr << "Prog? " << (logger::s_log_prog_fcn == &logger::log_prog_to_stdout) << std::endl;
-            //std::cerr << "Warn? " << (logger::s_log_warn_fcn == &logger::log_warn_to_stdout) << std::endl;
-            //std::cerr << "Error? " << (logger::s_log_error_fcn == &logger::log_error_to_stdout) << std::endl;
-            //std::cerr << "Fatal? " << (logger::s_log_fatal_fcn == &logger::log_fatal_to_stdout) << std::endl;
-        }
-        else
-        {
-            std::cerr << "Logger check functions: quill is NOT stopped" << std::endl;
-            //std::cerr << "Trace? " << (logger::s_log_trace_fcn == &logger::log_trace_to_quill) << std::endl;
-            //std::cerr << "Debug? " << (logger::s_log_debug_fcn == &logger::log_debug_to_quill) << std::endl;
-            //std::cerr << "Info? " << (logger::s_log_info_fcn == &logger::log_info_to_quill) << std::endl;
-            //std::cerr << "Prog? " << (logger::s_log_prog_fcn == &logger::log_prog_to_quill) << std::endl;
-            //std::cerr << "Warn? " << (logger::s_log_warn_fcn == &logger::log_warn_to_quill) << std::endl;
-            //std::cerr << "Error? " << (logger::s_log_error_fcn == &logger::log_error_to_quill) << std::endl;
-            //std::cerr << "Fatal? " << (logger::s_log_fatal_fcn == &logger::log_fatal_to_quill) << std::endl;
-        }
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cout << "SPD logger changed to async for " << t_replaced_loggers.size() << " loggers" << std::endl;
+#endif
+
         return;
     }
 
-    void logger::log_trace_to_quill( logger& a_logger, const std::string& a_message )
+    std::atomic_bool& logger::using_spd_async()
     {
-        LOG_TRACE_L1(a_logger.quill(), "{}", a_message);
+        static std::atomic_bool s_using_spd_async(true);
+        return s_using_spd_async;
     }
 
-    void logger::log_trace_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eTrace ) return;
-        std::cout << "[TRACE] " << a_message << std::endl;
-    }
-
-    void logger::log_debug_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_DEBUG(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_debug_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eDebug ) return;
-        std::cout << "[DEBUG] " << a_message << std::endl;
-    }
-
-    void logger::log_info_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_INFO(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_info_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eInfo ) return;
-        std::cout << "[INFO] " << a_message << std::endl;
-    }
-
-    void logger::log_prog_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_NOTICE(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_prog_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eProg ) return;
-        std::cout << "[PROG] " << a_message << std::endl;
-    }
-
-    void logger::log_warn_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_WARNING(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_warn_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eWarn ) return;
-        std::cout << "[WARNING] " << a_message << std::endl;
-    }
-
-    void logger::log_error_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_ERROR(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_error_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eError ) return;
-        std::cout << "[ERROR] " << a_message << std::endl;
-    }
-
-    void logger::log_fatal_to_quill( logger& a_logger, const std::string& a_message )
-    {
-        LOG_CRITICAL(a_logger.quill(), "{}", a_message);
-    }
-
-    void logger::log_fatal_to_stdout( logger& /*a_logger*/, const std::string& a_message )
-    {
-        if( logger::f_global_threshold > ELevel::eFatal ) return;
-        std::cout << "[FATAL] " << a_message << std::endl;
-    }
-
-} // namespace scarab
+}

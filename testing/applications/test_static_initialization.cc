@@ -53,8 +53,6 @@ static scarab::test_class s_static_tester;
 
 int main(int , char ** )
 {
-    scarab::quill_guard sqg;
-
     s_static_tester.print_something();
 
     return( EXIT_SUCCESS );

@@ -26,13 +26,12 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies -- Mac
-        # pybind11 is manually installed because we need to use the non-released master branch (as of 4/8/25)
+        # pybind11 is manually installed because we need to use v3.0.0 (as of 8/21/25)
         # Fix the /usr/local directory structure
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install \
             boost \
-            quill \
             rabbitmq-c \
             rapidjson \
             yaml-cpp
@@ -46,7 +45,7 @@ jobs:
             sudo chown -R $(whoami) /usr/local/share
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
-          git checkout master
+          git checkout v3.0.0
           mkdir build
           cd build
           cmake -DPYBIND11_TEST=FALSE ..
@@ -54,8 +53,7 @@ jobs:
           pip install pytest
 
       - name: Install dependencies -- Linux
-        # pybind11 is manually installed because we need to use the non-released master branch (as of 4/8/25)
-        # quill is manually installed because it's not available in apt
+        # pybind11 is manually installed because we need to use v3.0.0 (as of 8/21/25)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
@@ -65,19 +63,12 @@ jobs:
             libyaml-cpp-dev
           git clone https://github.com/pybind/pybind11.git
           cd pybind11
-          git checkout master
+          git checkout v3.0.0
           mkdir build
           cd build
           sudo cmake -DPYBIND11_TEST=FALSE ..
           sudo make -j2 install
           cd ../..
-          git clone https://github.com/odygrd/quill.git
-          cd quill
-          git checkout v9.0.2
-          mkdir build
-          cd build
-          sudo cmake ..
-          sudo make install
           pip install pytest
 
       - name: Configure

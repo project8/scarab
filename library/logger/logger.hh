@@ -1,43 +1,40 @@
 /*
  * logger.hh
- * Based on KLogger.h, from KATRIN's Kasper
  *
- *  Created on: Jan 21, 2014
- *      Author: nsoblath
+ *  Created on: Jul 10, 2025
+ *      Author: N.S. Oblath
  */
 
 #ifndef SCARAB_LOGGER_HH_
 #define SCARAB_LOGGER_HH_
 
-#include "macros.hh"
-#include "scarab_api.hh"
-
-#include <quill/LogMacros.h>
-#include <quill/Logger.h>
-
-#include <quill/Backend.h>
-#include <quill/Frontend.h>
-#include <quill/sinks/ConsoleSink.h>
-
-
-#include <cstring>
+#include <atomic>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <set>
+#include <string>
 #include <sstream>
 
+#include "spdlog/fwd.h"
+#include "spdlog/common.h"
+// this is here only for the logging macros; would be nice if the macros were in their own file
+#include "spdlog/spdlog.h"
+
+#include "macros.hh"
+#include "scarab_api.hh"
+#include "typename.hh"
 
 /**
- * @file
+ * @file logger.hh
  * @brief Contains the logger class and macros
- * @date Reborn on: Oct 4, 2024
+ * @date Reborn on: Jul 10, 2025
  * @author N.S. Oblath
  * 
  * Basic use instructions:
  * 
- * 1. Create a logger with LOGGER or LOCAL_LOGGER
- * 2. Use STOP_LOGGING or scarab::quill_guard to stop the use of Quill before main() returns in your application
- * 3. Use L[level] macros to log messages
+ * 1. Create a logger with LOGGER or LOCAL_LOGGER (for asynchronous logging) or LOGGER_ST or LOCAL_LOGGER_ST (for synchronous logging)
+ * 2. Use L[level] macros to log messages
  * 
  * Notes on the logging system design:
  * 
@@ -47,190 +44,211 @@
  * * In 2024 it was recognized that the existing logger was incompatible with the pybind11 handling of log messages 
  *   because the latter was not compatible with logging from multiple threads.  The choice was made to find a logging library
  *   that could funnel the logging through a single thread.
- * * The Quill library was selected because of the similarity of the logging macros and levels to the existing macros and levels, 
- *   meaning that adapting it to the existing macros would be relatively easy.  Quill provides asynchronous logging via a separate logging thread, 
+ * * The spdlog library was selected because of the similarity of the logging macros and levels to the existing macros and levels, 
+ *   meaning that adapting it to the existing macros would be relatively easy.  spdlog provides asynchronous logging via a separate logging thread, 
  *   satisfying the pybind11 needs.
- * * The scarab::logger class now stands as a thin wrapper on the quill::Logger objects.  scarab::logger is still what client code will interact with.
- * * The Quill backend logging thread is started up using an initializer object that's built statically in the scarab::logger constructor.  
+ * * The spdlog library was forked (project8/spdlog) and modified to add the NOTICE level of logging that's equivalent to scarab's PROG level.
+ * * The scarab::logger class now stands as a thin wrapper on the spdlog::logger objects.  scarab::logger is still what client code will interact with.
+ * * The spdlog async backend logging thread is started up using an initializer object that's built statically in the scarab::logger constructor.  
  *   This guarantees that it will be started when the first logger object is created.
- * * Logging levels had to be adapted slightly: only quill::TRACE_L1 is used of the trace levels, and it's equivalent to scarab's TRACE; Quill's NOTICE level 
- *   is used for scarab's PROG level, and Quill's CRITICAL level is used for scarab's FATAL level.
+ * * Logging levels had to be adapted slightly: forked spdlog's NOTICE level 
+ *   is used for scarab's PROG level, and spdlog's CRITICAL level is used for scarab's FATAL level.
  * * Logging colors are matched to Python's logging colors.
+ * * Verbosity can be set globally for all loggers and for individual loggers with the `set_global_threshold()` and `set_threshold() functions, respectively.  
+ *   The function `set_global_threshold()` will set the threshold for all loggers, regardless of whether their level has been previously set individually, 
+ *   so you should establish the global level first before customizing for individual loggers.
  * * The scarab::logger class also contains the mechanism for processing the streamer notation, using operator<< to compose log messages. 
- *   The message is buffered in the logger object using stringstream, and then passed to the quill::Logger.
+ *   The message is buffered in the logger object using stringstream, and then passed to the spdlog::logger.
  * * In scarab and scarab-based code, sometimes log messages are printed from objects that exist after the main execution has stopped, as they're destructed at 
- *   the static cleanup phase.  This is a problem for Quill, because at some point, the Quill logging backend thread is automatically stopped and garbage collected.  
- *   Therefore we implemented a system where the logging via Quill can be explicitly stopped, at which point the logging switches to using stdout.  
- *   This is why we have a series of function pointers and separate functions for printing each log level to Quill and to stdout.  Once Quill logging is stopped, 
- *   it's presumed that the application is exiting, so it's not possible to turn it back on.
- * * The effect of not stopping the Quill logging mixed with printing after main execution can be seen by e.g. removing the quill_guard from test_static_initialization.  
- *   Depending on runtime conditions, it can work, segfault, or hang indefinitely.
- * * The implementation of the logging macros and the reason it is like it is might be a bit confusing:
- *   * The main interface is via the L[level] macros.  These provide a way to conveniently specify the logging level, logger object, and 
- *     message being composed with operator<<, all of which is known at compile time.
- *   * The L[level] macros "call" one of the scarab::logger::s_log_[level]_fcn function pointers. We want to use a function pointer so that we can switch between 
- *     logging via Quill and logging via stdout at runtime.
- *   * Each function pointer points to either scarab::logger::log_level_to_quill() or scarab::logger::log_level_to_stdout().
- *   * The logging functions are provided with a logging message in the form of a std::string, which is composed using the LOGGER_GET_STRING macro; 
- *     this macro takes the variable macro arguments and creates a single string using the operator<< mechanism.
- *   * The scarab::logger::log_[level]_to_quill() functions use Quill's logging macros to pass the messages to Quill.
- *   * The scarab::logger::log_[level]_to_stdout() functions use std::cout to print the messages.
- * * It's sometimes useful to get synchronous printing, e.g. for debugging.  Therefore when scarab is built in DEBUG mode, a preprocessor flag tells Quill to 
- *   log synchronously.
+ *   the static cleanup phase.  This could cause a problem for spdlog if the asynchronous logging thread is automatically stopped and garbage collected.  
+ *   Therefore we implemented a system where the async logging via spdlog can be explicitly stopped, at which point the logging switches to using single-threaded spdlog loggers.  
+ * * The effect of not stopping the async spdlog logging mixed with logging after the async thread stops is undefined.
  * * Debug and trace messages are not compiled when scarab is built in Release mode.  This is done by a compile-time choice of using empty DEBUG and TRACE macros 
- *   when in Release mode.  Quill has compile-time filtering capabilities too, but we don't use that because scarab::logger has whole setup with 
- *   function pointers that allow the Quill logging to be stopped.
- * * TODO: Individual logger verbosity can be controlled by requesting that logger via the string name that's provided in the LOGGER macro and an ELevel value.
+ *   when in Release mode.  spdlog has compile-time filtering capabilities too, but we don't use that currently.
+ * * The initializer struct includes a function `make_or_get_logger()` that takes a callback that will be responsible fore creating a logger if it's needed.  
+ *   This setup is used to avoid a virtual function call using spd_initializer::make_logger() to the derived initializer structs because 
+ *   this is typically done at static initialization, and we can't use virtual function calls then.
+ * * The macro SCARAB_LOGGER_DEBUG can be used to enable printing about the creation of spd loggers.
  */
 
-/**
- * The standard scarab namespace.
- */
 namespace scarab
 {
-    enum class ELevel : unsigned 
+    struct SCARAB_API spd_initializer
     {
-        eTrace = unsigned(quill::LogLevel::TraceL1),
-        eDebug = unsigned(quill::LogLevel::Debug),
-        eInfo = unsigned(quill::LogLevel::Info),
-        eProg = unsigned(quill::LogLevel::Notice),
-        eWarn = unsigned(quill::LogLevel::Warning),
-        eError = unsigned(quill::LogLevel::Error),
-        eFatal = unsigned(quill::LogLevel::Critical)
+        spd_initializer( const std::string& a_pattern = "" );
+        // see the comment above about why the callback a_make_logger_fcn is used
+        std::shared_ptr< spdlog::logger > make_or_get_logger( const std::string& a_name, std::function< std::shared_ptr< spdlog::logger > (const std::string&) > a_make_logger_fcn );
+        //virtual std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name ) = 0;
+        std::string f_pattern;
     };
 
-
-    /// Starts the quill backend when the first logger is initialized; 
-    /// Guarantees it's ready to receive log messages even during static initialization
-    struct quill_initializer
+    struct SCARAB_API spd_initializer_async_stdout_color_mt : spd_initializer
     {
-        quill_initializer();
-        //~quill_initializer(); // uncomment if you'd like to print when the destructor is called
+        spd_initializer_async_stdout_color_mt( const std::string& a_pattern = "" );
+        std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name );
+        std::shared_ptr< spdlog::logger > make_logger_async( const std::string& a_name );
+        std::shared_ptr< spdlog::logger > make_logger_sync( const std::string& a_name );
+        std::shared_ptr< spdlog::sinks::sink > f_sink;
     };
 
-    // Protects quill from being used after the execution phase (during static cleanup)
-    // This was tested and didn't work for some reason.  Segfaults still occurred.
-    // Instead the recommendation is to use the STOP_LOGGER macro at the end of an executable.
-    struct quill_guard : quill_initializer
+    struct SCARAB_API spd_initializer_stdout_color : spd_initializer
     {
-        quill_guard() = default;
-        ~quill_guard();
+        spd_initializer_stdout_color( const std::string& a_pattern = "" );
+        std::shared_ptr< spdlog::logger > make_logger( const std::string& a_name );
+        std::shared_ptr< spdlog::sinks::sink > f_sink;
     };
 
-
-    class logger
+    class SCARAB_API logger
     {
+        public:
+            enum class ELevel : unsigned 
+            {
+                eTrace = unsigned(SPDLOG_LEVEL_TRACE),
+                eDebug = unsigned(SPDLOG_LEVEL_DEBUG),
+                eInfo = unsigned(SPDLOG_LEVEL_INFO),
+                eProg = unsigned(SPDLOG_LEVEL_NOTICE),
+                eWarn = unsigned(SPDLOG_LEVEL_WARN),
+                eError = unsigned(SPDLOG_LEVEL_ERROR),
+                eFatal = unsigned(SPDLOG_LEVEL_CRITICAL)
+            };
+
         public:
             logger( const std::string& a_name );
-            ~logger();
+            logger( const logger& ) = delete;
+            logger( logger&& ) = default;
+            virtual ~logger();
 
-            quill::Logger* quill()
-            {
-                return f_quill;
-            }
+            logger& operator=( const logger& ) = delete;
+            logger& operator=( logger&& ) = default;
 
-            logger& ref()
-            {
-                return *this;
-            }
+            static std::set< logger* >& all_loggers();
 
-            template< typename T >
-            logger& operator<<( const T& data )
-            {
-                f_stream << data;
-                return *this;
-            }
+            const std::string& name() const;
 
-            const std::string& buffer()
-            {
-                f_buffer = f_stream.str();
-                //std::cerr << "Buffer: " << fBuffer << std::endl;
-                f_stream.str( std::string() );
-                return f_buffer;
-            }
-
-        private:
-            mutable std::stringstream f_stream;
-            mutable std::string f_buffer;
-            quill::Logger* f_quill;
+        protected:
+            std::string f_name;
 
         public:
+            ELevel get_threshold() const;
+            void set_threshold( ELevel a_level );
+
             static ELevel get_global_threshold();
             static void set_global_threshold( ELevel a_threshold );
 
-        private:
-            static ELevel f_global_threshold;
+        protected:
+            ELevel f_threshold;
+            static ELevel& global_threshold();
 
         public:
-            /// Stops logging via Quill and switches logging functions to stdout
-            /// Sets flag s_quill_stopped so that if other loggers are created, they won't use Quill
-            static void stop_quill();
+            template< typename T >
+            logger& operator<<( const T& data );
 
-            static bool is_quill_stopped();
+            std::string buffer();
 
-        private:
-            static bool s_quill_stopped;
+            std::shared_ptr<spdlog::logger> spdlogger();
 
-        public:
-            static void (*s_log_trace_fcn)(logger&, const std::string&);
-            static void (*s_log_debug_fcn)(logger&, const std::string&);
-            static void (*s_log_info_fcn)(logger&, const std::string&);
-            static void (*s_log_prog_fcn)(logger&, const std::string&);
-            static void (*s_log_warn_fcn)(logger&, const std::string&);
-            static void (*s_log_error_fcn)(logger&, const std::string&);
-            static void (*s_log_fatal_fcn)(logger&, const std::string&);
+            static void stop_using_spd_async();
+            static void reset_using_spd_async();
+            static std::atomic_bool& using_spd_async();
 
-            static void log_trace_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_trace_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_debug_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_debug_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_info_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_info_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_prog_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_prog_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_warn_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_warn_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_error_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_error_to_stdout( logger& /*a_logger*/, const std::string& a_message );
-        
-            static void log_fatal_to_quill( logger& a_logger, const std::string& a_message );
-            static void log_fatal_to_stdout( logger& /*a_logger*/, const std::string& a_message );
+        protected:
+            mutable std::stringstream f_strstr;
 
-            static void check_log_functions();
-        
+            std::shared_ptr< spdlog::logger > f_spdlogger;
+
     };
 
-} // end namespace scarab
+    template< typename initializer_x >
+    class logger_type : public logger
+    {
+        public:
+            logger_type( const std::string& a_name, const std::string& a_file="[unknown]", int a_line=-1 );
+            logger_type( const logger_type& ) = delete;
+            logger_type( logger_type&& ) = default;
+            virtual ~logger_type() = default;
 
-/// Creates a static scarab::logger object with variable name a_logger; Quill Logger name will be a_name.
-#define LOGGER(a_logger, a_name)         static ::scarab::logger a_logger(a_name);
+            logger_type& operator=( const logger_type& ) = delete;
+            logger_type& operator=( logger_type&& ) = default;
 
-/// Creates a (non-static) scarab::logger object with variable name a_logger; Quill Logger name will be a_name.
-#define LOCAL_LOGGER(a_logger, a_name)   ::scarab::logger a_logger(a_name);
+            initializer_x& initializer() { return *f_initializer_ptr; }
+            const initializer_x& initializer() const { return *f_initializer_ptr; }
 
-/// Stop Quill logging -- all loggers will switch to using stdout; this macro should be used just before returning from main().
-#define STOP_LOGGING  ::scarab::logger::stop_quill();
+        protected:
+            initializer_x* f_initializer_ptr;
 
-/// Private macro for creating a single message string with a given logger object
-#define _LOGGER_GET_STRING(a_logger, ...) (a_logger.ref() << __VA_ARGS__).buffer()
+    };
+
+    template< typename initializer_x >
+    logger_type< initializer_x >::logger_type( const std::string& a_name, const std::string& a_file, int a_line ) :
+            logger( a_name ),
+            f_initializer_ptr( nullptr )
+    {
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cout << "Logger <" << a_name << "> was initialized from <" << a_file << ":" << a_line << ">; type: " << ::scarab::type( *this ) << std::endl;
+#endif
+        // Start the backend, but only once
+        static initializer_x s_init;
+        f_initializer_ptr = &s_init;
+
+        f_spdlogger = s_init.make_or_get_logger( a_name, [](const std::string& a_name) -> std::shared_ptr< spdlog::logger > { return s_init.make_logger( a_name ); } );
+    }
 
 
+    template< typename T >
+    logger& logger::operator<<( const T& data )
+    {
+        f_strstr << data;
+        return *this;
+    }
+
+}
+
+// Logging Macros
+
+// Logger creation
+
+/// Creates a static scarab::logger object with variable name a_logger
+/// Uses spdlog's asynchronous logger; spdlog logger name will be a_name.
+#define LOGGER( a_logger, a_name ) \
+    static ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name, __FILE_NAME__, __LINE__ );
+
+/// Creates a static single-threaded (non-asynchronous) scarab::logger object with variable name a_logger
+/// Uses spdlog's asynchronous logger; spdlog logger name will be a_name.
+#define LOGGER_ST( a_logger, a_name ) \
+    static ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name, __FILE_NAME__, __LINE__ );
+
+/// Creates a local scarab::logger object with variable name a_logger
+/// Uses spdlog's asynchronous logger; spdlog logger name will be a_name.
+#define LOCAL_LOGGER( a_logger, a_name ) \
+    ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name, __FILE_NAME__, __LINE__ );
+
+/// Creates a local single-threaded (non-asynchronous) scarab::logger object with variable name a_logger
+/// Uses spdlog's basic logger; spdlog logger name will be a_name.
+#define LOCAL_LOGGER_ST( a_logger, a_name ) \
+    ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name, __FILE_NAME__, __LINE__ );
+
+// Logging functions
 #ifdef NDEBUG
+/// Log a message at the trace level (disabled when not in a debug build)
 #define LTRACE(a_logger, ...)
+/// Log a message at the debug level (disabled when not in a debug build)
 #define LDEBUG(a_logger, ...)
 #else
-#define LTRACE(a_logger, ...)       scarab::logger::s_log_trace_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LDEBUG(a_logger, ...)       scarab::logger::s_log_debug_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+/// Log a message at the trace level
+#define LTRACE(a_logger, ...)       SPDLOG_LOGGER_TRACE(    a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
+/// Log a message at the debug level
+#define LDEBUG(a_logger, ...)       SPDLOG_LOGGER_DEBUG(    a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
 #endif
-#define LINFO(a_logger, ...)        scarab::logger::s_log_info_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LPROG(a_logger, ...)        scarab::logger::s_log_prog_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LWARN(a_logger, ...)        scarab::logger::s_log_warn_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LERROR(a_logger, ...)       scarab::logger::s_log_error_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
-#define LFATAL(a_logger, ...)       scarab::logger::s_log_fatal_fcn( a_logger, _LOGGER_GET_STRING(a_logger, __VA_ARGS__) );
+/// Log a message at the info level
+#define LINFO(a_logger, ...)        SPDLOG_LOGGER_INFO(     a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
+/// Log a message at the prog(ress) level
+#define LPROG(a_logger, ...)        SPDLOG_LOGGER_NOTICE(   a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
+/// Log a message at the warn(ing) level
+#define LWARN(a_logger, ...)        SPDLOG_LOGGER_WARN(     a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
+/// Log a message at the error level
+#define LERROR(a_logger, ...)       SPDLOG_LOGGER_ERROR(    a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
+/// Log a message at the fatal level
+#define LFATAL(a_logger, ...)       SPDLOG_LOGGER_CRITICAL( a_logger.spdlogger(), "{}", (a_logger << __VA_ARGS__).buffer() );
+
 
 #endif // SCARAB_LOGGER_HH_
