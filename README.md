@@ -15,6 +15,7 @@ It contains three main components:
 * python: Python bindings for a subset of the C++ library
 
 Requirements:
+* GCC (v12 or higher) or Clang
 * CMake v3.12 or higher
 * Boost 1.46 or higher; filesystem and system components
 * For optional YAML/param codec
