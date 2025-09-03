@@ -126,7 +126,7 @@ else( Scarab_BUILD_CODEC_YAML )
 endif( Scarab_BUILD_CODEC_YAML )
 
 # Create a cache variable for boost components that can be set from dependent projects
-set( Scarab_BOOST_COMPONENTS "${Scarab_BOOST_COMPONENTS};filesystem;system" CACHE INTERNAL "Boost components to be found by Scarab" )
+set( Scarab_BOOST_COMPONENTS "${Scarab_BOOST_COMPONENTS};filesystem" CACHE INTERNAL "Boost components to be found by Scarab" )
 
 #list( APPEND Scarab_BOOST_COMPONENTS filesystem system )
 list( APPEND PUBLIC_EXT_LIBS Boost::filesystem )
