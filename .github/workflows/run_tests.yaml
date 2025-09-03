@@ -25,6 +25,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Select CC version
+        # We require GCC 12 or higher if using GCC
+        # The default GCC for Ubuntu 22.04 is 11, but 12 is available
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: |
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
+
       - name: Install dependencies -- Mac
         # pybind11 is manually installed because we need to use v3.0.0 (as of 8/21/25)
         # Fix the /usr/local directory structure
