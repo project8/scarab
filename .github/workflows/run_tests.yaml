@@ -102,3 +102,25 @@ jobs:
 #        if: ${{ ! success() }}
 #        uses: mxschmitt/action-tmate@v3
 
+  Release:
+
+    runs-on: ubuntu-22.04
+
+    if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/') }}
+
+    needs: [RunTests]
+
+    steps:
+
+      - name: Checkout the repo 
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Release with a changelog
+        uses: rasmus-saks/release-a-changelog-action@v1.2.0
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          path: 'changelog.md'
+          title-template: 'Scarab v{version} -- Release Notes'
+          tag-template: 'v{version}'
