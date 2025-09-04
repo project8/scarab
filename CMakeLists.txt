@@ -136,6 +136,8 @@ if( Scarab_BOOST_COMPONENTS )
     list( REMOVE_DUPLICATES Scarab_BOOST_COMPONENTS )
 endif( Scarab_BOOST_COMPONENTS )
 
+message( STATUS "$$$$$$ boost components: ${Scarab_BOOST_COMPONENTS}" )
+
 # Boost (1.46 required for filesystem version 3)
 find_package( Boost 1.46.0 REQUIRED COMPONENTS ${Scarab_BOOST_COMPONENTS} )
 # make sure dynamic linking is assumed for all boost libraries
