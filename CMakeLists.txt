@@ -126,7 +126,7 @@ else( Scarab_BUILD_CODEC_YAML )
 endif( Scarab_BUILD_CODEC_YAML )
 
 # Create a cache variable for boost components that can be set from dependent projects
-set( Scarab_BOOST_COMPONENTS "${Scarab_BOOST_COMPONENTS};filesystem;system" CACHE INTERNAL "Boost components to be found by Scarab" )
+set( Scarab_BOOST_COMPONENTS "${Scarab_BOOST_COMPONENTS};filesystem" CACHE INTERNAL "Boost components to be found by Scarab" )
 
 #list( APPEND Scarab_BOOST_COMPONENTS filesystem system )
 list( APPEND PUBLIC_EXT_LIBS Boost::filesystem )
@@ -135,6 +135,8 @@ list( APPEND PUBLIC_EXT_LIBS Boost::filesystem )
 if( Scarab_BOOST_COMPONENTS )
     list( REMOVE_DUPLICATES Scarab_BOOST_COMPONENTS )
 endif( Scarab_BOOST_COMPONENTS )
+
+#message( STATUS "Boost components: ${Scarab_BOOST_COMPONENTS}" )
 
 # Boost (1.46 required for filesystem version 3)
 find_package( Boost 1.46.0 REQUIRED COMPONENTS ${Scarab_BOOST_COMPONENTS} )

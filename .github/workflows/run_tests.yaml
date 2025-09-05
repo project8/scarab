@@ -14,9 +14,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: [false]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-24.04, ubuntu-22.04, macos-15, macos-14, macos-13]
 
     steps:
 
@@ -24,6 +24,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Select CC version
+        # We require GCC 12 or higher if using GCC
+        # The default GCC for Ubuntu 22.04 is 11, but 12 is available
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: |
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
 
       - name: Install dependencies -- Mac
         # pybind11 is manually installed because we need to use v3.0.0 (as of 8/21/25)
@@ -94,3 +102,25 @@ jobs:
 #        if: ${{ ! success() }}
 #        uses: mxschmitt/action-tmate@v3
 
+  Release:
+
+    runs-on: ubuntu-22.04
+
+    if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/') }}
+
+    needs: [RunTests]
+
+    steps:
+
+      - name: Checkout the repo 
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Release with a changelog
+        uses: rasmus-saks/release-a-changelog-action@v1.2.0
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          path: 'changelog.md'
+          title-template: 'Scarab v{version} -- Release Notes'
+          tag-template: 'v{version}'

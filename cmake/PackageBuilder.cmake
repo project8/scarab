@@ -39,8 +39,13 @@ if( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
         message( STATUS "Install prefix is set to ${CMAKE_INSTALL_PREFIX}" )
     endif()
 
-    # option to force linking when using g++
     if( CMAKE_COMPILER_IS_GNUCXX )
+        # require gcc 12 for __FILE_NAME__
+        if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12 )
+            message(FATAL_ERROR "GCC version must be at least 12" )
+        endif()
+
+        # option to force linking when using g++
         option( GCC_FORCE_LINKING "Fix linker errors with some GCC versions by adding the --no-as-needed flag" ON )
         if( GCC_FORCE_LINKING )
             set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed" )
