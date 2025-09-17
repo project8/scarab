@@ -9,6 +9,17 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
+
+## [3.13.2] - 2025-09-17
+
+### Changed
+
+- Updated CLI11 to v2.5.0
+
+### Fixed
+
+- Issue with CLI11 flags fixed
+
 ### Removed
 
 - Removed the logging test directory
