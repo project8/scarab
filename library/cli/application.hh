@@ -154,10 +154,11 @@ namespace scarab
                     if( ! (*f_option) ) return;
                     param_ptr_t t_new_config_ptr = simple_parser::parse_address(
                             f_primary_config_addr,
-                            param_ptr_t( new param_value( bool(f_option->count()) ) ) ); // throws scarab::error if top-level param object is not a node
+                            param_ptr_t( new param_value( bool(f_value > 0) ) ) ); // throws scarab::error if top-level param object is not a node
                     a_app_options.merge( t_new_config_ptr->as_node() );
                     return;
                 }
+                int f_value;
                 virtual ~app_option_holder_bool_flag() {}
             };
 
@@ -414,7 +415,7 @@ namespace scarab
                                                     std::string a_description )
     {
         auto t_opt_holder_ptr = std::make_shared< app_option_holder_bool_flag >();
-        t_opt_holder_ptr->f_option = f_this->add_flag( a_name, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
+        t_opt_holder_ptr->f_option = f_this->add_flag( a_name, t_opt_holder_ptr->f_value, a_description ); // throws CLI::OptionAlreadyAdded if the option's already there
         t_opt_holder_ptr->f_primary_config_addr = a_primary_config_addr;
         f_main->app_option_holders().push_back( t_opt_holder_ptr );
         return t_opt_holder_ptr->f_option;
