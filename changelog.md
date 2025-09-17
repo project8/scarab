@@ -9,6 +9,11 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
+### Removed
+
+- Removed the logging test directory
+
+
 ## [3.13.1] - 2025-09-04
 
 ### Added
@@ -19,6 +24,7 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 ### Fixed
 
 - Use GCC 12 on Ubuntu 22.04 GHA runners
+
 
 ## [3.13.0] -- 2025-08-26
 
