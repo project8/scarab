@@ -25,6 +25,10 @@
 #include "scarab_api.hh"
 #include "typename.hh"
 
+#ifndef SCARAB_LOGGER_DEFAULT_THRESHOLD
+#define SCARAB_LOGGER_DEFAULT_THRESHOLD eInfo
+#endif
+
 /**
  * @file logger.hh
  * @brief Contains the logger class and macros

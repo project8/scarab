@@ -40,6 +40,8 @@ option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interf
 
 option( Scarab_BUILD_PYTHON "Build python bindings" TRUE )
 
+set( Scarab_LOGGER_DEFAULT_THRESHOLD "eTrace" CACHE STRING "Default threshold for printing: eTrace, eDebug, eInfo, eProg, eWarn, eError, eFatal" )
+
 option( Scarab_ENABLE_LOGGER_DEBUG "Flag to enable debug printing for the logger itself" FALSE )
 
 if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
@@ -57,6 +59,8 @@ endif()
 if( Scarab_ENABLE_TESTING )
     enable_testing()
 endif()
+
+add_compile_definitions( SCARAB_LOGGER_DEFAULT_THRESHOLD=${Scarab_LOGGER_DEFAULT_THRESHOLD} )
 
 if( Scarab_ENABLE_LOGGER_DEBUG ) 
     add_compile_definitions( SCARAB_LOGGER_DEBUG )

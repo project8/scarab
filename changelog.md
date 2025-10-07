@@ -9,6 +9,13 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
+## [3.13.3] - 2025-10-06
+
+### Changed
+
+- Default threshold configurable with preprocessor macro and via CMake
+- Splash screen callback added to main_app
+
 
 ## [3.13.2] - 2025-09-17
 

@@ -71,7 +71,8 @@ namespace scarab
             f_use_config( a_use_config ),
             f_auth_groups_key( "auth-groups" ),
             f_auth_file_key( "auth-file" ),
-            f_auth()
+            f_auth(),
+            f_splash( [](){} ) // empty function with signature void()
     {
         set_global_verbosity( logger::ELevel::eProg );
 
@@ -162,6 +163,9 @@ namespace scarab
             LPROG( applog, "Final configuration:\n" << f_primary_config );
             LPROG( applog, "Ordered args:\n" << f_nonoption_ord_args );
         }
+
+        f_splash();
+
         return;
     }
 
