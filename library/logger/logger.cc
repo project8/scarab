@@ -26,6 +26,7 @@ namespace scarab
         {
             // see the comment in logger.hh about why the a_make_logger_fcn callback is used instead of the virtual function call
             t_logger = a_make_logger_fcn( a_name ); //this->make_logger( a_name );
+            t_logger->set_level( spdlog::level::level_enum(unsigned(logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD)) );
             spdlog::register_logger( t_logger );
         }
         return t_logger;
