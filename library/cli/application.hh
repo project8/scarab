@@ -347,6 +347,9 @@ namespace scarab
             /// Authentication object
             mv_referrable( authentication, auth );
 
+            /// Splash text callback
+            mv_referrable( std::function< void() >, splash );
+
             //*************************
             // Verbosity
             //*************************

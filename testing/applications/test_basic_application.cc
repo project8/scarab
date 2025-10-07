@@ -46,11 +46,16 @@ Options:
 
 using namespace scarab;
 
+LOGGER( slog, "basic_application" );
+
 int main( int argc, char **argv )
 {
     logger::set_global_threshold( logger::ELevel::eDebug );
 
     main_app the_main( false );
+
+    // this isn't strictly necessary, but tests the splash screen feature
+    the_main.splash() = [](){ LPROG( slog, "WELCOME TO BASIC APPLICATION!" ); };
 
     CLI11_PARSE( the_main, argc, argv );
 
