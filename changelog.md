@@ -9,6 +9,13 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
+## [3.13.4] - 2025-11-03
+
+### Fixed
+
+- Find spdlog dependency in ScarabConfig.cmake.in
+
+
 ## [3.13.3] - 2025-10-06
 
 ### Changed
