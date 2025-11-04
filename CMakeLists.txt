@@ -90,7 +90,6 @@ FetchContent_Declare( spdlog
 FetchContent_MakeAvailable( spdlog )
 list( APPEND PUBLIC_EXT_LIBS spdlog::spdlog )
 
-
 if( Scarab_BUILD_CODEC_JSON )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
     
