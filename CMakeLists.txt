@@ -88,8 +88,12 @@ FetchContent_Declare( spdlog
     GIT_TAG v1.x_p8
 )
 FetchContent_MakeAvailable( spdlog )
+# if Scarab is being built as a submodule, the parent might need to know where to find spdlog
+get_directory_property( hasParent PARENT_DIRECTORY )
+if( hasParent )
+    set( spdlog_DIR ${spdlog_BINARY_DIR} PARENT_SCOPE )
+endif()
 list( APPEND PUBLIC_EXT_LIBS spdlog::spdlog )
-
 
 if( Scarab_BUILD_CODEC_JSON )
     set( RAPIDJSON_FILE_BUFFER_SIZE 65536 CACHE STRING "Buffer size for reading and writing files using RapidJSON (in Bytes)" )
