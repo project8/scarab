@@ -14,10 +14,7 @@
 #include <memory>
 #include <mutex>
 #include <map>
-
-#ifndef _WIN32
-#include <signal.h>  // for struct sigaction, which is in signal.h but not csignal
-#endif
+#include <signal.h>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -134,21 +131,24 @@ namespace scarab
             /// Remove all cancelables and signal handling
             static void reset();
 
-            /// Start handling signals
-            static void handle_signals();
-            /// Stop handling signals
-            static void unhandle_signals();
+            /// Blocking call to handle signals; waits for a signal
+            /// Returns immediately if it's already been called; otherwise blocks then returns the signal or error value
+            static int do_handle_signals();
+
+            static int wait_on_signals();
+            /// Requests the aborting of waiting for a signal; causes do_handle_signal() to return
+            static void abort_handle_signals();
             /// Check if a signal is handled
-            static bool is_handling( int a_signal );            
+            static bool is_handling();            
 
             /// Handler for std::terminate -- does not cleanup memory or threads
             [[noreturn]] static void handle_terminate() noexcept;
 
             /// Handler for error signals -- cleanly exits
-            static void handle_exit_error( int a_sig );
+            //static void handle_exit_error( int a_sig );
 
             /// Handler for success signals -- cleanly exits
-            static void handle_exit_success( int a_sig );
+            //static void handle_exit_success( int a_sig );
 
             /// Main terminate function -- does not cleanup memory or threads
             [[noreturn]] static void terminate( int a_code ) noexcept;
@@ -184,23 +184,11 @@ namespace scarab
             mv_accessible_static_noset( bool, exited );
             mv_accessible_static( int, return_code );
 
-            mv_accessible_static_noset( bool, handling_sig_abrt );
-            mv_accessible_static_noset( bool, handling_sig_term );
-            mv_accessible_static_noset( bool, handling_sig_int );
-            mv_accessible_static_noset( bool, handling_sig_quit );
+            mv_accessible_static( sigset_t, sigset );
 
-#ifndef _WIN32
-            mv_referrable_static( struct sigaction, old_sig_abrt_action );
-            mv_referrable_static( struct sigaction, old_sig_term_action );
-            mv_referrable_static( struct sigaction, old_sig_int_action );
-            mv_referrable_static( struct sigaction, old_sig_quit_action );
-#else // _WIN32
-            typedef void (*handler_t)(int);
-            mv_referrable_static( handler_t, old_sig_abrt_handler );
-            mv_referrable_static( handler_t, old_sig_term_handler );
-            mv_referrable_static( handler_t, old_sig_int_handler );
-            mv_referrable_static( handler_t, old_sig_quit_handler );
-#endif
+        protected:
+            static std::mutex s_handle_mutex;
+
     };
 
 } /* namespace scarab */

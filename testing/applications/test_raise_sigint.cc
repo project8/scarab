@@ -23,14 +23,43 @@
 #include "signal_handler.hh"
 #include "logger.hh"
 
+#include <future>
 #include <signal.h>
+#include <thread>
 
+LOGGER( testlog, "test_raise_sigint" );
 
 int main(int , char ** )
 {
-    scarab::signal_handler t_handler;
+    scarab::signal_handler t_sh;
 
+    std::cerr << "Starting to wait-on-signals thread" << std::endl;
+    std::thread t_sh_thread( &scarab::signal_handler::wait_on_signals );
+
+    std::this_thread::sleep_for( std::chrono::seconds(1) );
+
+    std::cerr << "Raising SIGINT" << std::endl;
     raise( SIGINT );
+    std::cerr << "Raised" << std::endl;
+
+    t_sh_thread.join();
+    
+    /*
+    auto raise_signal = []() {
+        std::this_thread::sleep_for( std::chrono::seconds(1) );
+        LWARN( testlog, "Raising SIGINT" );
+        std::cerr << "Raising SIGINT" << std::endl;
+        raise( SIGINT );
+        return;
+    };
+    auto ft = std::async( std::launch::async, raise_signal );
+
+    // blocks
+    std::cerr << "Starting to handle signals" << std::endl;
+    scarab::signal_handler::do_handle_signals();
+    std::cerr << "Exited from handling signals" << std::endl;
+    ft.get();
+    */
 
     return( EXIT_SUCCESS );
 }
