@@ -186,11 +186,11 @@ namespace scarab
                 handled_signal_info& sig_info = signal_handler::s_handled_signals.at( int(signal_handler::s_signal_received) );
                 if( sig_info.indicates_error )
                 {
-                    LERROR( slog, "Received signal " << sig_info.name << "<" << s_signal_received << "> as an error condition; return code: " << sig_info.return_code );
+                    LERROR( slog, "Received signal " << sig_info.name << " <" << s_signal_received << "> as an error condition; return code: " << sig_info.return_code );
                 }
                 else
                 {
-                    LDEBUG( slog, "Received signal " << sig_info.name << "<" << s_signal_received << "> as an exit condition; return code: " << sig_info.return_code );
+                    LDEBUG( slog, "Received signal " << sig_info.name << " <" << s_signal_received << "> as an exit condition; return code: " << sig_info.return_code );
                 }
 
                 // Call exit to cancel cancelables if requested
