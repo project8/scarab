@@ -24,13 +24,24 @@
 #include "logger.hh"
 
 #include <signal.h>
+#include <thread>
 
+LOGGER_ST( testlog, "test_raise_sigquit" );
 
 int main(int , char ** )
 {
-    scarab::signal_handler t_handler;
+    scarab::signal_handler t_sh;
 
+    LINFO( testlog, "Starting to wait-on-signals thread" );
+    std::thread t_sh_thread( [](){scarab::signal_handler::wait_for_signals();} );
+
+    std::this_thread::sleep_for( std::chrono::seconds(1) );
+
+    LINFO( testlog, "Raising SIGQUIT" );
     raise( SIGQUIT );
+    LINFO( testlog, "Raised" );
 
+    t_sh_thread.join();
+    
     return( EXIT_SUCCESS );
 }

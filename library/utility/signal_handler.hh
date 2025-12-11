@@ -70,18 +70,30 @@ namespace scarab
 
      To perform the tasks of exiting and terminating applications, `signal_handler` allows the user to control when signals
      are handled, and when they aren't.  In most cases, a user will control signal handling through the existence of
-     a `signal_handler` instance.  The user should create the instance of `signal_handler` when they want `signal_handler`
-     to start handling those signals, and it should be destructed when handling the signals should cease.
-     Here are several examples of how this could be done:
+     a `signal_handler` instance and watch for signals with signal_handler::watch_for_signals() run in a separate thread.  
+     The user should create the instance of `signal_handler` when they want `signal_handler`
+     to start handling those signals, run the signal-watcher thread for as long as the application should react to 
+     raised signals, and the handler should be destructed when handling the signals should cease.
+     
+     Here are several examples of how the lifetime of the signal_handler can be managed:
 
      1. The instance is created as a global static object at static initialization time.  Signals will be handled for the entire
-     time the application is running.
+     time the application is running.  
      2. The instance is created in the `main()` function of the application and exists until the application exits.
      3. The instance is created in some function for a specific limited time to cover a particular action.
      This could be for the entire scope of the function, or it could be destructed when signal handling is no longer wanted.
 
      Note that signals are handled as long as one or more instances of `signal_handler` exist.  If two instance exist, and one
-     goes out of scope, signals are still handled until the second instance is destructed.
+     goes out of scope, signals are still handled until the second instance is destructed.  Signals are only reacted to 
+     while the watcher function/thread is active.  If there is a delay between when the watching function/thread exits and when 
+     the signal_handler is destructed (or unhandle_signals() is called), during that period signals will not cause 
+     the application to exit.
+
+     For simple examples of creating a signal_handler and running a watcher thread, see the test_raise_sig*.cc files.
+
+     By default the signals handled are SIGABRT (abort() and unhandled exceptions), SIGTERM (shell command kill), 
+     SIGINT (ctrl-c), and SIGQUIT (ctrl-\).  
+     The set of signals can be edited by modifying the handled signals map (via signal_handler::handled_signals()).
 
      In addition to this typical behavior, `signal_handler` includes an interface for more fine-grained control over when
      signals are handled while the `signal_handler` exists (i.e. handle_signals(), unhandle_signals(), and is_handling()),
@@ -107,6 +119,24 @@ namespace scarab
      terminate(), exit(), or cancel_all(), respectively.  cancel_all() will only affect the canceled objects.
      exit() perform a clean exit using cancel_all(), in addition to setting a return code, though it assumes the
      application will take care of actually exiting.  And terminate() will immediately exit the application using std::_Exit().
+
+     # Design details for signal handling
+
+     We need a way to turn a raised signal into a call to cancel_all() (via exit()).  However, a POSIX signal handler 
+     is only allowed to call a limited class of functions that are async-signal-safe (see https://pubs.opengroup.org/onlinepubs/9799919799/functions/V2_chap02.html#tag_16_04).
+     So we need an asynchronous method for getting the information about the raised signal to exit() instead.  
+     We are allowed to set variables of type volatile sig_atomic_t (an integer), so we can use that as an indicator 
+     that exit() needs to be called.  We can call exit() in a function that runs in a separate thread and watches the value of the 
+     volatile sig_atomic_t indicator.  So our functionality has two parts:
+
+       1. "handling" signals: we replace the default handler functions for the four signals of interest 
+       (SIGABRT, SIGTERM, SIGINT, and SIGQUIT).  It prints a simple message to the error stream (write() is allowed) and 
+       sets the value of s_signal_received, a volatile sig_atomic_t static variable.
+       2. "watching" for signals: The function watch_for_signals() starts a loop that waits for s_signal_received to be nonzero.  
+       It then breaks out of the loop and calls exit() with the appropriate return value (depending on the specific signal raised).  
+       The watch loop can be broken out of manually by calling abort_wait(), which sets s_signal_received to a negative number.  
+       All signals are positive integers in the POSIX standard, so the negative number differentiates an abort (exit() is not called) 
+       from a handled signal (exit() is called).
     */
     class SCARAB_API signal_handler
     {
@@ -131,24 +161,30 @@ namespace scarab
             /// Remove all cancelables and signal handling
             static void reset();
 
+            /// Fine-grained signal-handling control; called from the constructor
+            /// Uses handle_signal() as the signal-handling function for the relevant signals.
+            static void start_handling_signals();
+            /// Fine-grained signal-handling control; called from the destructor
+            /// Returns the previous signal-handling functions to the signals.
+            static void unhandle_signals();
+            static bool is_handling(); // just calls get_is_waiting(); is here to have parallel syntax to waiting
+
             /// Blocking call to handle signals; waits for a signal
             /// Returns immediately if it's already been called; otherwise blocks then returns the signal or error value
-            static int do_handle_signals();
+            /// Has an option to not call the exit() function; defaults to true (i.e. exit() will be called)
+            static int wait_for_signals( bool call_exit = true );
 
-            static int wait_on_signals();
+            //static int wait_on_signals();
             /// Requests the aborting of waiting for a signal; causes do_handle_signal() to return
-            static void abort_handle_signals();
+            static void abort_wait();
             /// Check if a signal is handled
-            static bool is_handling();            
+            static bool is_waiting();            
 
             /// Handler for std::terminate -- does not cleanup memory or threads
             [[noreturn]] static void handle_terminate() noexcept;
 
-            /// Handler for error signals -- cleanly exits
-            //static void handle_exit_error( int a_sig );
-
-            /// Handler for success signals -- cleanly exits
-            //static void handle_exit_success( int a_sig );
+            /// Handler for the relevant signals (SIGABRT, SIGTERM, SIGINT, and SIGQUIT by default)
+            static void handle_signal( int a_sig );
 
             /// Main terminate function -- does not cleanup memory or threads
             [[noreturn]] static void terminate( int a_code ) noexcept;
@@ -179,15 +215,33 @@ namespace scarab
             static std::recursive_mutex s_mutex;
 
         public:
+            struct handled_signal_info
+            {
+                std::string name;
+                bool handling;
+                struct sigaction old_action;
+                bool indicates_error;
+                int return_code;
+            };
+            typedef std::map<int, handled_signal_info> signal_map_t;
+
+            static sig_atomic_t get_signal_received() { return s_signal_received; }
+            static signal_map_t handled_signals() { return s_handled_signals; }
+
             mv_accessible_static_noset( int, ref_count );
 
             mv_accessible_static_noset( bool, exited );
             mv_accessible_static( int, return_code );
 
-            mv_accessible_static( sigset_t, sigset );
+            mv_accessible_static_noset( bool, is_handling );
+
 
         protected:
             static std::mutex s_handle_mutex;
+
+            static volatile sig_atomic_t s_signal_received;
+
+            static signal_map_t s_handled_signals;
 
     };
 

@@ -27,27 +27,63 @@ TEST_CASE( "signal_handler", "[utility]" )
 {
     LOGGER( tlog, "test_signal_handler" );
 
-    SECTION( "not_handling" )
+    // Thread safety note
+    // From: https://github.com/catchorg/Catch2/blob/devel/docs/thread-safety.md
+    // Assertion macros are thread safe.
+    // Section macros, generator macros, and test-case macros are not thread safe.
+    //   So starting a test case or section and then spawning a thread inside is ok;
+    //   Having multiple threads running in different sections or test cases in parallel is not ok.
+    // Calling REQUIRE in a spawned thread is dangerous because if it is false, the exception thrown will not be caught properly, bringing down the whole process.
+    //   Instead, call CHECK in a thread, which will record the proper failures/successes, but not crash the program.
+
+    SECTION( "handling" )
+    {
+        REQUIRE( scarab::signal_handler::get_ref_count() == 0 );
+        REQUIRE_FALSE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
+        REQUIRE( scarab::signal_handler::get_signal_received() == 0 );
+
+        scarab::signal_handler t_handler;
+        REQUIRE( scarab::signal_handler::get_ref_count() == 1 );
+        REQUIRE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
+
+        t_handler.unhandle_signals();
+        REQUIRE_FALSE( scarab::signal_handler::is_handling() );
+    }
+
+    SECTION( "handle while in scope" )
     {
         REQUIRE( scarab::signal_handler::get_ref_count() == 0 );
         REQUIRE_FALSE( scarab::signal_handler::is_handling() );
 
-        // Prior to v3.13.5 signal_handler started handling on construction, so this ensures that's not the case
-        scarab::signal_handler t_handler;
-        REQUIRE( scarab::signal_handler::get_ref_count() == 1 );
+        {
+            scarab::signal_handler t_handler;
+            REQUIRE( scarab::signal_handler::get_ref_count() == 1 );
+            REQUIRE( scarab::signal_handler::is_handling() );
+        } // t_handler destructed, which should unhandle signals
+
+        REQUIRE( scarab::signal_handler::get_ref_count() == 0 );
         REQUIRE_FALSE( scarab::signal_handler::is_handling() );
+
     }
 
-    SECTION( "handling" )
+    SECTION( "wait then abort" )
     {
-        // start handling threads
-        std::thread t_handler_thread( [](){ scarab::signal_handler::do_handle_signals(); } );
-        std::this_thread::sleep_for( std::chrono::seconds(1) );
+        scarab::signal_handler t_handler;
         REQUIRE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
 
-        scarab::signal_handler::abort_handle_signals();
+        // start handling threads
+        std::thread t_handler_thread( [](){ scarab::signal_handler::wait_for_signals(); } );
+        std::this_thread::sleep_for( std::chrono::seconds(1) );
+        REQUIRE( scarab::signal_handler::is_waiting() );
+
+        scarab::signal_handler::abort_wait();
         t_handler_thread.join();
-        REQUIRE_FALSE( scarab::signal_handler::is_handling() );
+        REQUIRE( scarab::signal_handler::get_signal_received() == -1 );
+        REQUIRE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
     }
 
 /*
