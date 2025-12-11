@@ -15,6 +15,7 @@
 #include <mutex>
 #include <map>
 #include <signal.h>
+#include <string>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
