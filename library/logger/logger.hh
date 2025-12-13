@@ -223,13 +223,13 @@ namespace scarab
 
 /// Creates a local scarab::logger object with variable name a_logger
 /// Uses spdlog's asynchronous logger; spdlog logger name will be a_name.
-#define LOCAL_LOGGER( a_logger, a_name ) \
-    ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name, __FILE_NAME__, __LINE__ );
+//#define LOCAL_LOGGER( a_logger, a_name ) \
+//    ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name, __FILE_NAME__, __LINE__ );
 
 /// Creates a local single-threaded (non-asynchronous) scarab::logger object with variable name a_logger
 /// Uses spdlog's basic logger; spdlog logger name will be a_name.
-#define LOCAL_LOGGER_ST( a_logger, a_name ) \
-    ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name, __FILE_NAME__, __LINE__ );
+//#define LOCAL_LOGGER_ST( a_logger, a_name ) \
+//    ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name, __FILE_NAME__, __LINE__ );
 
 // Logging functions
 #ifdef NDEBUG

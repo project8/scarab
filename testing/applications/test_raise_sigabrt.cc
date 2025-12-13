@@ -37,13 +37,24 @@
 #include "logger.hh"
 
 #include <signal.h>
+#include <thread>
 
+LOGGER_ST( testlog, "test_raise_sigabrt" );
 
 int main(int , char ** )
 {
-    scarab::signal_handler t_handler;
-    
-    raise( SIGABRT );
+    scarab::signal_handler t_sh;
 
+    LINFO( testlog, "Starting to wait-on-signals thread" );
+    std::thread t_sh_thread( [](){scarab::signal_handler::wait_for_signals();} );
+
+    std::this_thread::sleep_for( std::chrono::seconds(1) );
+
+    LINFO( testlog, "Raising SIGABRT" );
+    raise( SIGABRT );
+    LINFO( testlog, "Raised" );
+
+    t_sh_thread.join();
+    
     return( EXIT_SUCCESS );
 }
