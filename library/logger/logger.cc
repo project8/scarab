@@ -24,7 +24,6 @@ namespace scarab
         std::shared_ptr< spdlog::logger > t_logger = spdlog::get( a_name );
         if( ! t_logger )
         {
-            std::cerr << "Creating logger <" << a_name << ">" << std::endl;
             // see the comment in logger.hh about why the a_make_logger_fcn callback is used instead of the virtual function call
             t_logger = a_make_logger_fcn( a_name ); //this->make_logger( a_name );
             t_logger->set_level( spdlog::level::level_enum(unsigned(logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD)) );
@@ -38,7 +37,6 @@ namespace scarab
             spd_initializer( a_pattern ),
             f_sink()
     {
-        std::cerr << "initializing thread pool and mt sink" << std::endl;
         spdlog::init_thread_pool(8192, 1);
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         f_sink->set_pattern( f_pattern ); 
@@ -66,7 +64,6 @@ namespace scarab
             spd_initializer( a_pattern ),
             f_sink()
     {
-        std::cerr << "initializing st sink" << std::endl;
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_st >();
         f_sink->set_pattern( f_pattern );
     }
@@ -83,13 +80,11 @@ namespace scarab
         f_strstr(),
         f_spdlogger()
     {
-        std::cerr << "creating logger <" << a_name << ">" << std::endl;
         scarab::logger::all_loggers().insert(this);
     }
 
     logger::~logger()
     {
-        std::cerr << "destructing logger <" << f_name << ">" << std::endl;
         logger::all_loggers().erase(this);
     }
 
