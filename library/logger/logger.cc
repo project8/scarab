@@ -24,15 +24,11 @@ namespace scarab
         std::shared_ptr< spdlog::logger > t_logger = spdlog::get( a_name );
         if( ! t_logger )
         {
-            std::cerr << "Creating spdlog logger <" << a_name << ">" << std::endl;
+            std::cerr << "Creating logger <" << a_name << ">" << std::endl;
             // see the comment in logger.hh about why the a_make_logger_fcn callback is used instead of the virtual function call
             t_logger = a_make_logger_fcn( a_name ); //this->make_logger( a_name );
             t_logger->set_level( spdlog::level::level_enum(unsigned(logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD)) );
             spdlog::register_logger( t_logger );
-        }
-        else
-        {
-            std::cerr << "Returning existing logger <" << a_name << ">" << std::endl;
         }
         return t_logger;
     }
@@ -46,7 +42,7 @@ namespace scarab
         spdlog::init_thread_pool(8192, 1);
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         f_sink->set_pattern( f_pattern ); 
-        auto at_exit_fcn = [](){ std::cerr << "at exit fcn" << std::endl; logger::stop_using_spd_async(); };
+        auto at_exit_fcn = [](){ logger::stop_using_spd_async(); };
         std::atexit( at_exit_fcn );
     }
 
@@ -87,7 +83,7 @@ namespace scarab
         f_strstr(),
         f_spdlogger()
     {
-        std::cerr << "scarab::logger constructor: creating logger <" << a_name << ">" << std::endl;
+        std::cerr << "creating logger <" << a_name << ">" << std::endl;
         scarab::logger::all_loggers().insert(this);
     }
 
