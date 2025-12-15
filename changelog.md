@@ -9,6 +9,21 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
+## [3.13.5] - 2025-12-15
+
+### Changed
+
+- Signal handling now requires a dedicated thread
+- Updated GHA runners
+- Removed local loggers
+
+### Fixed
+
+- Tied spdlog to a tag and not a branch
+- Updated spdlog fork from upstream
+- signal_handler signal handling functions use only approved function calls
+
+
 ## [3.13.4] - 2025-11-04
 
 ### Fixed
