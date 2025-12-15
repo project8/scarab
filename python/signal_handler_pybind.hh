@@ -27,6 +27,8 @@ namespace scarab_pybind
             .def_static( "reset", &scarab::signal_handler::reset, "remove all cancelable objects", SCARAB_BIND_CALL_GUARD_STREAMS )
             .def_static( "cancel_all", &scarab::signal_handler::cancel_all, "cancel all cancelable objects known to the signal_handler", SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
             .def_static( "print_cancelables", &scarab::signal_handler::print_cancelables, "print pointers to the cancelables known to the signal_handler", SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def_static( "start_waiting_thread", &scarab::signal_handler::start_waiting_thread, "starts the thread that waits for signals", SCARAB_BIND_CALL_GUARD_STREAMS )
+            .def_static( "join_waiting_thread", &scarab::signal_handler::join_waiting_thread, "joins the thread that waits for signals", SCARAB_BIND_CALL_GUARD_STREAMS_AND_GIL )
             ;
 
         return all_members;
