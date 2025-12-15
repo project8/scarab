@@ -46,7 +46,7 @@ int main(int , char ** )
     scarab::signal_handler t_sh;
 
     LINFO( testlog, "Starting to wait-on-signals thread" );
-    std::thread t_sh_thread( [](){scarab::signal_handler::wait_for_signals();} );
+    scarab::signal_handler::start_waiting_thread();
 
     std::this_thread::sleep_for( std::chrono::seconds(1) );
 
@@ -54,7 +54,7 @@ int main(int , char ** )
     raise( SIGABRT );
     LINFO( testlog, "Raised" );
 
-    t_sh_thread.join();
+    scarab::signal_handler::join_waiting_thread();
     
     return( EXIT_SUCCESS );
 }

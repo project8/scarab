@@ -39,6 +39,8 @@ namespace scarab
 
     bool signal_handler::s_is_handling = false;
 
+    std::thread signal_handler::s_waiting_thread;
+
     std::mutex signal_handler::s_handle_mutex;
 
     signal_handler::signal_map_t signal_handler::s_handled_signals = {
@@ -225,12 +227,26 @@ namespace scarab
         return ! t_lock.try_lock();
     }
 
+    void signal_handler::start_waiting_thread()
+    {
+        signal_handler::s_waiting_thread = std::thread( [](){scarab::signal_handler::wait_for_signals();} );
+        return;
+    }
+
+    void signal_handler::join_waiting_thread()
+    {
+        s_waiting_thread.join();
+        s_waiting_thread = std::thread();
+        return;
+    }
+
     void signal_handler::reset()
     {
         LDEBUG( slog, "Resetting signal_handler" );
 
         signal_handler::unhandle_signals();
 
+        s_waiting_thread = std::thread();
         s_exited = false;
         s_return_code = RETURN_SUCCESS;
         s_cancelers.clear();

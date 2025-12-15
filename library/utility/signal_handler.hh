@@ -16,6 +16,7 @@
 #include <map>
 #include <signal.h>
 #include <string>
+#include <thread>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -67,15 +68,25 @@ namespace scarab
      Responsibility for canceling a cancelable is given to the signal_handler using add_cancelable(), and it's taken away
      using remove_cancelable().
 
+     Note that the interface for `signal_handler` uses all static functions, so there is no need to create an extra instance of
+     the class to use any part of that interface.  So the creation and destruction of instances can be used to control
+     whether or not signals are handled, and the rest of the interface can be used without an instance.
+
      # Signal Handling
 
      To perform the tasks of exiting and terminating applications, `signal_handler` allows the user to control when signals
-     are handled, and when they aren't.  In most cases, a user will control signal handling through the existence of
-     a `signal_handler` instance and watch for signals with signal_handler::watch_for_signals() run in a separate thread.  
-     The user should create the instance of `signal_handler` when they want `signal_handler`
-     to start handling those signals, run the signal-watcher thread for as long as the application should react to 
-     raised signals, and the handler should be destructed when handling the signals should cease.
+     are handled, and when they aren't.  In most cases, a user will (1) control signal handling through the existence of
+     a `signal_handler` instance and then (2) wait for signals with a separate thread:
      
+     1. The user should create the instance of `signal_handler` when they want `signal_handler`
+     to start handling those signals.
+     2. The user should run the signal-waiting thread for as long as the application should react to 
+     raised signals.
+     3. Waiting for signals is complete when a signal is received or the wait is aborted; the waiting thread is then joined.
+     4. The handler should be destructed when handling the signals should cease.
+
+     ## Controling the scope of signal handling and which signals are handled
+
      Here are several examples of how the lifetime of the signal_handler can be managed:
 
      1. The instance is created as a global static object at static initialization time.  Signals will be handled for the entire
@@ -90,19 +101,28 @@ namespace scarab
      the signal_handler is destructed (or unhandle_signals() is called), during that period signals will not cause 
      the application to exit.
 
-     For simple examples of creating a signal_handler and running a watcher thread, see the test_raise_sig*.cc files.
-
      By default the signals handled are SIGABRT (abort() and unhandled exceptions), SIGTERM (shell command kill), 
      SIGINT (ctrl-c), and SIGQUIT (ctrl-\).  
-     The set of signals can be edited by modifying the handled signals map (via signal_handler::handled_signals()).
+     For customized signal handling, the set of signals can be edited by modifying the handled signals map 
+     (via signal_handler::handled_signals()).
 
      In addition to this typical behavior, `signal_handler` includes an interface for more fine-grained control over when
      signals are handled while the `signal_handler` exists (i.e. handle_signals(), unhandle_signals(), and is_handling()),
      but the recommended use case is as described above, where signal handling is controled by the existence of a `signal_handler` instance.
 
-     Note that the interface for `signal_handler` uses all static functions, so there is no need to create an extra instance of
-     the class to use any part of that interface.  So the creation and destruction of instances can be used to control
-     whether or not signals are handled, and the rest of the interface can be used without an instance.
+     ## Waiting for signals
+
+     The function `signal_handler::wait_for_signals()` is a blocking call to wait for the arrival of signals.  
+     That wait can be aborted asynchronously with `signal_handler::abort_wait()`.  
+     The waiting is intended to be done in a separate thread from the main application execution.
+
+     Thread management for the wait can be done manually (i.e. by creating a thread for `wait_for_signals()` in the application code) 
+     or internally in signal_handler with `signal_handler::start_waiting_thread()` and `signal_handler::join_waiting_thread()`.  
+     In the latter case, the thread object is a static member of the class.
+
+     ## Examples
+
+     For simple examples of creating a signal_handler and running a watcher thread, see the test_raise_sig*.cc files.
 
      # Cancelables
 
@@ -168,18 +188,20 @@ namespace scarab
             /// Fine-grained signal-handling control; called from the destructor
             /// Returns the previous signal-handling functions to the signals.
             static void unhandle_signals();
-            static bool is_handling(); // just calls get_is_waiting(); is here to have parallel syntax to waiting
+            static bool is_handling(); // just calls get_is_handling(); is here to have parallel syntax to waiting
 
             /// Blocking call to handle signals; waits for a signal
             /// Returns immediately if it's already been called; otherwise blocks then returns the signal or error value
             /// Has an option to not call the exit() function; defaults to true (i.e. exit() will be called)
             static int wait_for_signals( bool call_exit = true );
-
             //static int wait_on_signals();
             /// Requests the aborting of waiting for a signal; causes do_handle_signal() to return
             static void abort_wait();
             /// Check if a signal is handled
-            static bool is_waiting();            
+            static bool is_waiting();
+
+            static void start_waiting_thread();
+            static void join_waiting_thread();
 
             /// Handler for std::terminate -- does not cleanup memory or threads
             [[noreturn]] static void handle_terminate() noexcept;
@@ -236,6 +258,7 @@ namespace scarab
 
             mv_accessible_static_noset( bool, is_handling );
 
+            mv_referrable_static( std::thread, waiting_thread );
 
         protected:
             static std::mutex s_handle_mutex;
