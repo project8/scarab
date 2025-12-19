@@ -43,7 +43,12 @@ namespace scarab
             f_sink()
     {
         std::cerr << "initializing thread pool and mt sink" << std::endl;
-        spdlog::init_thread_pool(8192, 1);
+        int counter = __COUNTER__;
+        std::cerr << "initialization counter: " << counter << std::endl;
+        spdlog::init_thread_pool(8192, 1,
+            [counter](){ std::cerr << "thread starting for counter " << counter << std::endl; },
+            [counter](){ std::cerr << "thread stopping for counter " << counter << std::endl; }
+        );
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         f_sink->set_pattern( f_pattern ); 
         auto at_exit_fcn = [](){ std::cerr << "at exit fcn" << std::endl; logger::stop_using_spd_async(); };
