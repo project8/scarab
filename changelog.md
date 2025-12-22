@@ -9,7 +9,7 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
-## [3.13.5] - 2025-12-15
+## [3.13.5] - 2025-12-22
 
 ### Changed
 
@@ -22,6 +22,7 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 - Tied spdlog to a tag and not a branch
 - Updated spdlog fork from upstream
 - signal_handler signal handling functions use only approved function calls
+- Check if spdlog thread pool exists before making a new one
 
 
 ## [3.13.4] - 2025-11-04
