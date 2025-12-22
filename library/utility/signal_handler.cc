@@ -44,8 +44,9 @@ namespace scarab
     std::mutex signal_handler::s_handle_mutex;
 
     signal_handler::signal_map_t signal_handler::s_handled_signals = {
+        // handled_signal_info args: name, is handling, old action, indicates error, return code  
         {SIGABRT, signal_handler::handled_signal_info{"SIGABRT", false, {}, true, RETURN_ERROR}},
-        {SIGTERM, signal_handler::handled_signal_info{"SIGTERM", false, {}, true, RETURN_SUCCESS}},
+        {SIGTERM, signal_handler::handled_signal_info{"SIGTERM", false, {}, false, RETURN_SUCCESS}},
         {SIGINT,  signal_handler::handled_signal_info{"SIGINT",  false, {}, false, RETURN_SUCCESS}},
         {SIGQUIT, signal_handler::handled_signal_info{"SIGQUIT", false, {}, false, RETURN_SUCCESS}}
     };
