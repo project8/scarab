@@ -45,7 +45,7 @@ namespace scarab
 
     signal_handler::signal_map_t signal_handler::s_handled_signals = {
         {SIGABRT, signal_handler::handled_signal_info{"SIGABRT", false, {}, true, RETURN_ERROR}},
-        {SIGTERM, signal_handler::handled_signal_info{"SIGTERM", false, {}, true, RETURN_ERROR}},
+        {SIGTERM, signal_handler::handled_signal_info{"SIGTERM", false, {}, true, RETURN_SUCCESS}},
         {SIGINT,  signal_handler::handled_signal_info{"SIGINT",  false, {}, false, RETURN_SUCCESS}},
         {SIGQUIT, signal_handler::handled_signal_info{"SIGQUIT", false, {}, false, RETURN_SUCCESS}}
     };
