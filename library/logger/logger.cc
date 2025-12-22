@@ -24,15 +24,10 @@ namespace scarab
         std::shared_ptr< spdlog::logger > t_logger = spdlog::get( a_name );
         if( ! t_logger )
         {
-            std::cerr << "Creating spdlog logger <" << a_name << ">" << std::endl;
             // see the comment in logger.hh about why the a_make_logger_fcn callback is used instead of the virtual function call
             t_logger = a_make_logger_fcn( a_name ); //this->make_logger( a_name );
             t_logger->set_level( spdlog::level::level_enum(unsigned(logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD)) );
             spdlog::register_logger( t_logger );
-        }
-        else
-        {
-            std::cerr << "Returning existing logger <" << a_name << ">" << std::endl;
         }
         return t_logger;
     }
@@ -42,25 +37,15 @@ namespace scarab
             spd_initializer( a_pattern ),
             f_sink()
     {
-        std::cerr << "initializing thread pool and mt sink" << std::endl;
-        static int counter = 0;
-        std::cerr << "initialization counter: " << counter << std::endl;
+        // We check before creating the new thread pool because we've had problems in some situations (e.g. when started from Python)
+        // with a new thread pool being created and the old one being killed, resulting in strange errors during execution
         if( ! spdlog::thread_pool() )
         {
-            std::cerr << "No thread pool exists; creating a new one" << std::endl;
-            spdlog::init_thread_pool(8192, 1,
-                [count = counter](){ std::cerr << "thread starting for counter " << count << std::endl; },
-                [count = counter](){ std::cerr << "thread stopping for counter " << count << std::endl; }
-            );
+            spdlog::init_thread_pool(8192, 1);
         }
-        else
-        {
-            std::cerr << "Thread pool exists; not creating a new one" << std::endl;
-        }
-        ++counter;
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         f_sink->set_pattern( f_pattern ); 
-        auto at_exit_fcn = [](){ std::cerr << "at exit fcn" << std::endl; logger::stop_using_spd_async(); };
+        auto at_exit_fcn = [](){ logger::stop_using_spd_async(); };
         std::atexit( at_exit_fcn );
     }
 
@@ -84,7 +69,6 @@ namespace scarab
             spd_initializer( a_pattern ),
             f_sink()
     {
-        std::cerr << "initializing st sink" << std::endl;
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_st >();
         f_sink->set_pattern( f_pattern );
     }
@@ -101,13 +85,11 @@ namespace scarab
         f_strstr(),
         f_spdlogger()
     {
-        std::cerr << "scarab::logger constructor: creating logger <" << a_name << ">" << std::endl;
         scarab::logger::all_loggers().insert(this);
     }
 
     logger::~logger()
     {
-        std::cerr << "destructing logger <" << f_name << ">" << std::endl;
         logger::all_loggers().erase(this);
     }
 
@@ -224,7 +206,7 @@ namespace scarab
     void logger::reset_using_spd_async()
     {
 #ifdef SCARAB_LOGGER_DEBUG
-        std::cerr << "Resetting use of spd async" << std::endl;
+        std::cerr << "[logger::reset_using_spd_async()] Resetting use of spd async" << std::endl;
 #endif
         logger::using_spd_async().store(true);
         std::set< logger* >& t_all_loggers = logger::all_loggers();

@@ -187,9 +187,9 @@ namespace scarab
             logger( a_name ),
             f_initializer_ptr( nullptr )
     {
-//#ifdef SCARAB_LOGGER_DEBUG
-        std::cerr << "Logger <" << a_name << "> was initialized from <" << a_file << ":" << a_line << ">; type: " << ::scarab::type( *this ) << std::endl;
-//#endif
+#ifdef SCARAB_LOGGER_DEBUG
+        std::cerr << "[logger_type constructor] Logger <" << a_name << "> was initialized from <" << a_file << ":" << a_line << ">; type: " << ::scarab::type( *this ) << std::endl;
+#endif
         // Start the backend, but only once
         static initializer_x s_init;
         f_initializer_ptr = &s_init;
