@@ -85,7 +85,7 @@ set( SPDLOG_BUILD_SHARED TRUE )
 set( SPDLOG_INSTALL TRUE )
 FetchContent_Declare( spdlog
     GIT_REPOSITORY https://github.com/project8/spdlog.git
-    GIT_TAG v1.x_p8_debugging
+    GIT_TAG v1.x_p8_r1
 )
 FetchContent_MakeAvailable( spdlog )
 # if Scarab is being built as a submodule, the parent might need to know where to find spdlog
