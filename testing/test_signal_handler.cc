@@ -40,13 +40,14 @@ TEST_CASE( "signal_handler", "[utility]" )
     {
         REQUIRE( scarab::signal_handler::get_ref_count() == 0 );
         REQUIRE_FALSE( scarab::signal_handler::is_handling() );
-        REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
         REQUIRE( scarab::signal_handler::get_signal_received() == 0 );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
 
-        scarab::signal_handler t_handler;
+        scarab::signal_handler t_handler( false );
         REQUIRE( scarab::signal_handler::get_ref_count() == 1 );
         REQUIRE( scarab::signal_handler::is_handling() );
         REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
 
         t_handler.unhandle_signals();
         REQUIRE_FALSE( scarab::signal_handler::is_handling() );
@@ -56,34 +57,68 @@ TEST_CASE( "signal_handler", "[utility]" )
     {
         REQUIRE( scarab::signal_handler::get_ref_count() == 0 );
         REQUIRE_FALSE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
 
         {
-            scarab::signal_handler t_handler;
+            scarab::signal_handler t_handler( false );
             REQUIRE( scarab::signal_handler::get_ref_count() == 1 );
             REQUIRE( scarab::signal_handler::is_handling() );
+            REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
         } // t_handler destructed, which should unhandle signals
 
         REQUIRE( scarab::signal_handler::get_ref_count() == 0 );
         REQUIRE_FALSE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
 
     }
 
-    SECTION( "wait then abort" )
+    SECTION( "wait then abort -- user wait thread" )
     {
-        scarab::signal_handler t_handler;
+        scarab::signal_handler t_handler( false );
         REQUIRE( scarab::signal_handler::is_handling() );
-        REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
 
         // start handling threads
         std::thread t_handler_thread( [](){ scarab::signal_handler::wait_for_signals(); } );
         std::this_thread::sleep_for( std::chrono::seconds(1) );
-        REQUIRE( scarab::signal_handler::is_waiting() );
 
         scarab::signal_handler::abort_wait();
         t_handler_thread.join();
         REQUIRE( scarab::signal_handler::get_signal_received() == -1 );
         REQUIRE( scarab::signal_handler::is_handling() );
-        REQUIRE_FALSE( scarab::signal_handler::is_waiting() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
+    }
+
+    SECTION( "wait then abort -- manual wait thread" )
+    {
+        scarab::signal_handler t_handler( false );
+        REQUIRE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
+
+        // start handling threads
+        scarab::signal_handler::start_waiting_thread();
+        std::this_thread::sleep_for( std::chrono::seconds(2) );
+        REQUIRE( scarab::signal_handler::waiting_thread_joinable() );
+
+        scarab::signal_handler::abort_wait();
+        scarab::signal_handler::join_waiting_thread();
+        REQUIRE( scarab::signal_handler::get_signal_received() == -1 );
+        REQUIRE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
+    }
+
+    SECTION( "wait then abort -- automatic wait thread" )
+    {
+        scarab::signal_handler t_handler;
+        std::this_thread::sleep_for( std::chrono::seconds(2) );
+        REQUIRE( scarab::signal_handler::is_handling() );
+        REQUIRE( scarab::signal_handler::waiting_thread_joinable() );
+
+        scarab::signal_handler::abort_wait();
+        scarab::signal_handler::join_waiting_thread();
+        REQUIRE( scarab::signal_handler::get_signal_received() == -1 );
+        REQUIRE( scarab::signal_handler::is_handling() );
+        REQUIRE_FALSE( scarab::signal_handler::waiting_thread_joinable() );
     }
 
 /*
@@ -111,7 +146,7 @@ TEST_CASE( "signal_handler", "[utility]" )
         }
     }
 */
-    scarab::signal_handler t_handler;
+    scarab::signal_handler t_handler( false );
 
     scarab::cancelable t_cancel;
     REQUIRE_FALSE( t_cancel.is_canceled() );
@@ -124,6 +159,7 @@ TEST_CASE( "signal_handler", "[utility]" )
     {
         t_handler.cancel_all( 0 );
         REQUIRE( t_cancel.is_canceled() );
+        REQUIRE( scarab::signal_handler::get_signal_received() == -1 );
     }
 
     SECTION( "terminating" )

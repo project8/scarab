@@ -34,7 +34,7 @@ namespace scarab
     bool signal_handler::s_exited = false;
     int signal_handler::s_return_code = RETURN_SUCCESS;
 
-    std::recursive_mutex signal_handler::s_mutex;
+    std::mutex signal_handler::s_cancelers_mutex;
     signal_handler::cancelers signal_handler::s_cancelers;
 
     bool signal_handler::s_is_handling = false;
@@ -53,13 +53,18 @@ namespace scarab
 
     volatile sig_atomic_t signal_handler::s_signal_received = 0;
 
-    signal_handler::signal_handler()
+    signal_handler::signal_handler( bool start_waiting_thread )
     {
         ++signal_handler::s_ref_count;
         if( signal_handler::s_ref_count == 1 )
         {
             signal_handler::start_handling_signals();
         }
+        if( start_waiting_thread && ! signal_handler::s_waiting_thread.joinable() )
+        {
+            signal_handler::start_waiting_thread();
+        }
+
     }
 
     signal_handler::~signal_handler()
@@ -73,28 +78,28 @@ namespace scarab
 
     void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         s_cancelers.insert( std::make_pair(a_cancelable.get(), cancelable_wptr_t(a_cancelable) ) );
         return;
     }
 
     void signal_handler::remove_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         s_cancelers.erase( a_cancelable.get() );
         return;
     }
 
     void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         s_cancelers.erase( a_cancelable );
         return;
     }
 
     void signal_handler::print_cancelables()
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         LOGGER( slog_print, "signal_handler print_cancelables" );
         for( const auto& [t_key, t_value] : s_cancelers )
         {
@@ -107,7 +112,7 @@ namespace scarab
     {
         if( signal_handler::get_is_handling() || signal_handler::is_waiting() ) return;
 
-        std::unique_lock t_lock( s_handle_mutex );
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex );
 
         LOGGER( slog_constr, "signal_handler::start_handling_signals" );
         LDEBUG( slog_constr, "Taking over signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
@@ -146,7 +151,7 @@ namespace scarab
 
         if( signal_handler::is_waiting() ) signal_handler::abort_wait();
 
-        std::unique_lock t_lock( s_handle_mutex );
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex );
 
         LDEBUG( slog, "Returning signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
 
@@ -171,13 +176,16 @@ namespace scarab
     int signal_handler::wait_for_signals( bool call_exit )
     {
         // Try to lock the mutex; if it didn't lock, then return
-        std::unique_lock t_lock( s_handle_mutex, std::defer_lock_t() );
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex, std::defer_lock_t() );
         if( ! t_lock.try_lock() ) return -1;
+        LTRACE( slog, "Started wait_for_signals" );
 
         while( signal_handler::s_signal_received == 0 )
         {
             std::this_thread::sleep_for( std::chrono::milliseconds(500)) ;
         }
+
+        LTRACE( slog, "past wait-for-signals loop" );
 
         // Handle situation where a signal was recieved
         if( s_signal_received > 0 )
@@ -224,12 +232,13 @@ namespace scarab
 
     bool signal_handler::is_waiting()
     {
-        std::unique_lock t_lock( s_handle_mutex, std::defer_lock_t() );
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex, std::defer_lock_t() );
         return ! t_lock.try_lock();
     }
 
     void signal_handler::start_waiting_thread()
     {
+        if( signal_handler::s_waiting_thread.joinable() ) return;
         signal_handler::s_waiting_thread = std::thread( [](){scarab::signal_handler::wait_for_signals();} );
         return;
     }
@@ -241,11 +250,16 @@ namespace scarab
         return;
     }
 
+    bool signal_handler::waiting_thread_joinable()
+    {
+        return signal_handler::s_waiting_thread.joinable();
+    }
+
     void signal_handler::reset()
     {
         LDEBUG( slog, "Resetting signal_handler" );
 
-        signal_handler::unhandle_signals();
+        signal_handler::unhandle_signals(); // calls abort_wait() if waiting
 
         s_waiting_thread = std::thread();
         s_exited = false;
@@ -264,7 +278,7 @@ namespace scarab
     {
         signal_handler::s_signal_received = a_sig;
 
-        const char str[] = "Received a signal\n";
+        const char str[] = "[signal_handler::handle_signal()] Received a signal\n";
         write( STDERR_FILENO, str, sizeof(str)-1 );
 
         return;
@@ -272,7 +286,6 @@ namespace scarab
 
     [[noreturn]] void signal_handler::terminate( int a_code ) noexcept
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         print_current_exception( false );
         if( a_code > 0 )
         {
@@ -283,7 +296,6 @@ namespace scarab
 
     void signal_handler::exit( int a_code )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         s_exited = true;
         s_return_code = a_code;
         print_current_exception( true );
@@ -363,8 +375,11 @@ namespace scarab
 
     void signal_handler::cancel_all( int a_code )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         LDEBUG( slog, "Canceling all cancelables" );
+
+        // Cause the waiting loop to abort if it's running
+        if( signal_handler::s_signal_received == 0 ) signal_handler::s_signal_received = -1;
 
         while( ! s_cancelers.empty() )
         {

@@ -32,9 +32,7 @@ int main(int , char ** )
 {
     scarab::signal_handler t_sh;
 
-    LINFO( testlog, "Starting to wait-on-signals thread" );
-    scarab::signal_handler::start_waiting_thread();
-
+    // let the signal-waiting thread start up
     std::this_thread::sleep_for( std::chrono::seconds(1) );
 
     LINFO( testlog, "Raising SIGQUIT" );

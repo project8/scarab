@@ -74,16 +74,27 @@ namespace scarab
 
      # Signal Handling
 
-     To perform the tasks of exiting and terminating applications, `signal_handler` allows the user to control when signals
-     are handled, and when they aren't.  In most cases, a user will (1) control signal handling through the existence of
-     a `signal_handler` instance and then (2) wait for signals with a separate thread:
-     
-     1. The user should create the instance of `signal_handler` when they want `signal_handler`
-     to start handling those signals.
-     2. The user should run the signal-waiting thread for as long as the application should react to 
-     raised signals.
-     3. Waiting for signals is complete when a signal is received or the wait is aborted; the waiting thread is then joined.
-     4. The handler should be destructed when handling the signals should cease.
+     The process of signal handling has several steps, some of which are automated:
+
+     1. Create the signal handler
+     2. Start handling signals --- the default function that gets called when a signal is raised is replaced with signal_handler's function
+     3. Start the thread waiting for signals
+     4. Run the application, including the possibility of raising a signal
+     5. Join the thread waiting for signals
+     6. Stop handling signals -- the default signal-handling function is put back in place
+     7. Signal handler is destructed
+
+     In practice, the user has several options for performing these steps in application code.  
+     The recommended method is the fully automatic method described here.  
+     For other options on thread management, see below.
+
+     1. Create the signal handler with the default argument for `start_waiting_thread` (true)
+       * Creates the signal handler
+       * Starts handling signals
+       * Runs the signal-waiting thread
+     2. Run the application
+     3. Join the signal-waiting thread with `signal_handler::join_waiting_thread()`
+     4. Let signal handler be destructed automatically
 
      ## Controling the scope of signal handling and which signals are handled
 
@@ -112,13 +123,21 @@ namespace scarab
 
      ## Waiting for signals
 
-     The function `signal_handler::wait_for_signals()` is a blocking call to wait for the arrival of signals.  
-     That wait can be aborted asynchronously with `signal_handler::abort_wait()`.  
-     The waiting is intended to be done in a separate thread from the main application execution.
+     The process of waiting for signals requires a separate thread, and that thread can be managed in three ways:
 
-     Thread management for the wait can be done manually (i.e. by creating a thread for `wait_for_signals()` in the application code) 
-     or internally in signal_handler with `signal_handler::start_waiting_thread()` and `signal_handler::join_waiting_thread()`.  
-     In the latter case, the thread object is a static member of the class.
+     1. Automatically -- The thread is started when the first `signal_handler` is constructed. 
+        The thread should still be joined with `signal_handler::join_waiting_thread()` 
+        at the appropriate time (after all application functionality has started).
+        This option is the default, but can be avoided by setting the `start_waiting_thread` argument to the 
+        `signal_handler` constructor to false.  
+     2. Manually with internal thread management -- Create the `signal_handler` with `start_waiting_thread` set to false, 
+        and then use `signal_handler::start_waiting_thread()` to manually start the thread.  
+        Use `signal_handler::join_waiting_thread()` to join the thread at the appropriate time.
+     3. Manually with user thread management -- Create the `signal_handler` with `start_waiting_thread` set to false, 
+        and then start your own thread to run `signal_handler::wait_for_signals()`, which is a blocking call to wait 
+        for the arrival of signals.
+
+    The waiting for signals is cancelled with `signal_handler::abort_wait()` regardless of hwo the waiting thread is managed.
 
      ## Examples
 
@@ -162,7 +181,7 @@ namespace scarab
     class SCARAB_API signal_handler
     {
         public:
-            signal_handler();
+            signal_handler( bool start_waiting_thread = true );
             signal_handler( const signal_handler& ) = delete;
             signal_handler( signal_handler&& ) = delete;
             virtual ~signal_handler();
@@ -200,8 +219,12 @@ namespace scarab
             /// Check if a signal is handled
             static bool is_waiting();
 
+            /// Starts the thread waiting on signals (internally using wait_for_signals() and an internal thread storage)
             static void start_waiting_thread();
+            /// Joins the internal wait-for-signals thread
             static void join_waiting_thread();
+            /// Checks if the internal thread is in use
+            static bool waiting_thread_joinable();
 
             /// Handler for std::terminate -- does not cleanup memory or threads
             [[noreturn]] static void handle_terminate() noexcept;
@@ -235,7 +258,7 @@ namespace scarab
             typedef cancelers::iterator cancelers_it_t;
 
             static cancelers s_cancelers;
-            static std::recursive_mutex s_mutex;
+            static std::mutex s_cancelers_mutex;
 
         public:
             struct handled_signal_info
