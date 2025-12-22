@@ -45,10 +45,18 @@ namespace scarab
         std::cerr << "initializing thread pool and mt sink" << std::endl;
         static int counter = 0;
         std::cerr << "initialization counter: " << counter << std::endl;
-        spdlog::init_thread_pool(8192, 1,
-            [count = counter](){ std::cerr << "thread starting for counter " << count << std::endl; },
-            [count = counter](){ std::cerr << "thread stopping for counter " << count << std::endl; }
-        );
+        if( ! spdlog::thread_pool() )
+        {
+            std::cerr << "No thread pool exists; creating a new one" << std::endl;
+            spdlog::init_thread_pool(8192, 1,
+                [count = counter](){ std::cerr << "thread starting for counter " << count << std::endl; },
+                [count = counter](){ std::cerr << "thread stopping for counter " << count << std::endl; }
+            );
+        }
+        else
+        {
+            std::cerr << "Thread pool exists; not creating a new one" << std::endl;
+        }
         ++counter;
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         f_sink->set_pattern( f_pattern ); 
