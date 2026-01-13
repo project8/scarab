@@ -43,7 +43,7 @@ LOGGER_ST( testlog, "test_raise_sigterm" );
 
 int main(int , char ** )
 {
-    scarab::signal_handler t_sh;
+    scarab::signal_handler t_sh( false );
 
     LINFO( testlog, "Starting to wait-on-signals thread" );
     std::thread t_sh_thread( [](){scarab::signal_handler::wait_for_signals();} );
