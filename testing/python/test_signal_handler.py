@@ -15,6 +15,8 @@ def test_cancelation():
     sig_handler.cancel_all(0)
     assert test.is_canceled()
 
+    sig_handler.join_waiting_thread()
+
 def test_remove_cancelable():
     test = Tester()
     assert not test.is_canceled()
@@ -25,3 +27,5 @@ def test_remove_cancelable():
 
     sig_handler.cancel_all(0)
     assert not test.is_canceled()
+
+    sig_handler.join_waiting_thread()
