@@ -72,7 +72,11 @@ namespace scarab
         --signal_handler::s_ref_count;
         if( signal_handler::s_ref_count == 0 )
         {
+            // This will call abort_wait(), which should result in the waiting thread ending if it's being used
             signal_handler::unhandle_signals();
+            // If the waiting thread is being used, this will wait for it to complete
+            // If it's not being used, it just returns
+            signal_handler::join_waiting_thread();
         }
     }
 
@@ -185,8 +189,6 @@ namespace scarab
             std::this_thread::sleep_for( std::chrono::milliseconds(500)) ;
         }
 
-        LTRACE( slog, "past wait-for-signals loop" );
-
         // Handle situation where a signal was recieved
         if( s_signal_received > 0 )
         {
@@ -232,6 +234,10 @@ namespace scarab
 
     bool signal_handler::is_waiting()
     {
+        // If the waiting thread is joinable, then we know it's waiting
+        // But if it's not joinable, it could still be waiting but using an external thread
+        if( signal_handler::s_waiting_thread.joinable() ) return true;
+        // If the lock is locked, then it's waiting
         std::unique_lock< std::mutex > t_lock( s_handle_mutex, std::defer_lock_t() );
         return ! t_lock.try_lock();
     }
@@ -245,6 +251,7 @@ namespace scarab
 
     void signal_handler::join_waiting_thread()
     {
+        if( ! signal_handler::s_waiting_thread.joinable() ) return;
         s_waiting_thread.join();
         s_waiting_thread = std::thread();
         return;

@@ -41,7 +41,7 @@ namespace scarab
 
 int main(int , char ** )
 {
-    scarab::signal_handler t_handler;
+    scarab::signal_handler t_handler( true );
 
     // cause the unhandled exception to be thrown, which should exit immediately
     scarab::foo1();

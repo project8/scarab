@@ -14,7 +14,7 @@ namespace scarab_pybind
 
         all_members.push_back( "SignalHandler" );
         pybind11::class_< scarab::signal_handler >( mod, "SignalHandler", "handle system signals and pass cancel status to associated objects" )
-            .def( pybind11::init< >(), 
+            .def( pybind11::init<bool>(), 
                   pybind11::return_value_policy::take_ownership,
                   SCARAB_BIND_CALL_GUARD_STREAMS )
 

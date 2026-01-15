@@ -88,7 +88,7 @@ namespace scarab
      The recommended method is the fully automatic method described here.  
      For other options on thread management, see below.
 
-     1. Create the signal handler with the default argument for `start_waiting_thread` (true)
+     1. Create the signal handler with the `start_waiting_thread` argument set to `true`
        * Creates the signal handler
        * Starts handling signals
        * Runs the signal-waiting thread
@@ -128,8 +128,7 @@ namespace scarab
      1. Automatically -- The thread is started when the first `signal_handler` is constructed. 
         The thread should still be joined with `signal_handler::join_waiting_thread()` 
         at the appropriate time (after all application functionality has started).
-        This option is the default, but can be avoided by setting the `start_waiting_thread` argument to the 
-        `signal_handler` constructor to false.  
+        This option is selected by setting `start_waiting_thread` to `true`. 
      2. Manually with internal thread management -- Create the `signal_handler` with `start_waiting_thread` set to false, 
         and then use `signal_handler::start_waiting_thread()` to manually start the thread.  
         Use `signal_handler::join_waiting_thread()` to join the thread at the appropriate time.
@@ -181,7 +180,9 @@ namespace scarab
     class SCARAB_API signal_handler
     {
         public:
-            signal_handler( bool start_waiting_thread = true );
+            /// Start handling signals and optionally start the thread waiting for signals.
+            /// It's recommended to use the automated waiting-thread start.
+            signal_handler( bool start_waiting_thread );
             signal_handler( const signal_handler& ) = delete;
             signal_handler( signal_handler&& ) = delete;
             virtual ~signal_handler();

@@ -109,7 +109,7 @@ TEST_CASE( "signal_handler", "[utility]" )
 
     SECTION( "wait then abort -- automatic wait thread" )
     {
-        scarab::signal_handler t_handler;
+        scarab::signal_handler t_handler( true );
         std::this_thread::sleep_for( std::chrono::seconds(2) );
         REQUIRE( scarab::signal_handler::is_handling() );
         REQUIRE( scarab::signal_handler::waiting_thread_joinable() );
