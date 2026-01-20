@@ -15,13 +15,8 @@
 
 #include <execinfo.h>
 #include <stdexcept>
-#include <thread>
-
-#ifdef _WIN32
-#include <csignal>
-#include <Windows.h>
-//#include "processthreadsapi.h"
-#endif
+#include <future>
+#include <signal.h>
 
 namespace {
     // function to catch unhandled exceptions
@@ -39,68 +34,76 @@ namespace scarab
     bool signal_handler::s_exited = false;
     int signal_handler::s_return_code = RETURN_SUCCESS;
 
-    bool signal_handler::s_handling_sig_abrt = false;
-    bool signal_handler::s_handling_sig_term = false;
-    bool signal_handler::s_handling_sig_int = false;
-    bool signal_handler::s_handling_sig_quit = false;
-
-#ifndef _WIN32
-    struct sigaction signal_handler::s_old_sig_abrt_action;
-    struct sigaction signal_handler::s_old_sig_term_action;
-    struct sigaction signal_handler::s_old_sig_int_action;
-    struct sigaction signal_handler::s_old_sig_quit_action;
-#else // _WIN32
-    signal_handler::handler_t signal_handler::s_old_sig_abrt_handler = SIG_DFL;
-    signal_handler::handler_t signal_handler::s_old_sig_term_handler = SIG_DFL;
-    signal_handler::handler_t signal_handler::s_old_sig_int_handler = SIG_DFL;
-    signal_handler::handler_t signal_handler::s_old_sig_quit_handler = SIG_DFL;
-#endif
-
-    std::recursive_mutex signal_handler::s_mutex;
+    std::mutex signal_handler::s_cancelers_mutex;
     signal_handler::cancelers signal_handler::s_cancelers;
 
-    signal_handler::signal_handler()
-    {
-        //std::cerr << "signal_handler constructor" << std::endl;
-        ++signal_handler::s_ref_count;
+    bool signal_handler::s_is_handling = false;
 
-        signal_handler::handle_signals();
+    std::thread signal_handler::s_waiting_thread;
+
+    std::mutex signal_handler::s_handle_mutex;
+
+    signal_handler::signal_map_t signal_handler::s_handled_signals = {
+        // handled_signal_info args: name, is handling, old action, indicates error, return code  
+        {SIGABRT, signal_handler::handled_signal_info{"SIGABRT", false, {}, true, RETURN_ERROR}},
+        {SIGTERM, signal_handler::handled_signal_info{"SIGTERM", false, {}, false, RETURN_SUCCESS}},
+        {SIGINT,  signal_handler::handled_signal_info{"SIGINT",  false, {}, false, RETURN_SUCCESS}},
+        {SIGQUIT, signal_handler::handled_signal_info{"SIGQUIT", false, {}, false, RETURN_SUCCESS}}
+    };
+
+    volatile sig_atomic_t signal_handler::s_signal_received = 0;
+
+    signal_handler::signal_handler( bool start_waiting_thread )
+    {
+        ++signal_handler::s_ref_count;
+        if( signal_handler::s_ref_count == 1 )
+        {
+            signal_handler::start_handling_signals();
+        }
+        if( start_waiting_thread && ! signal_handler::s_waiting_thread.joinable() )
+        {
+            signal_handler::start_waiting_thread();
+        }
+
     }
 
     signal_handler::~signal_handler()
     {
-        //std::cerr << "signal_handler destructor" << std::endl;
         --signal_handler::s_ref_count;
         if( signal_handler::s_ref_count == 0 )
         {
+            // This will call abort_wait(), which should result in the waiting thread ending if it's being used
             signal_handler::unhandle_signals();
+            // If the waiting thread is being used, this will wait for it to complete
+            // If it's not being used, it just returns
+            signal_handler::join_waiting_thread();
         }
     }
 
     void signal_handler::add_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         s_cancelers.insert( std::make_pair(a_cancelable.get(), cancelable_wptr_t(a_cancelable) ) );
         return;
     }
 
     void signal_handler::remove_cancelable( std::shared_ptr< scarab::cancelable > a_cancelable )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         s_cancelers.erase( a_cancelable.get() );
         return;
     }
 
     void signal_handler::remove_cancelable( scarab::cancelable* a_cancelable )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         s_cancelers.erase( a_cancelable );
         return;
     }
 
     void signal_handler::print_cancelables()
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         LOGGER( slog_print, "signal_handler print_cancelables" );
         for( const auto& [t_key, t_value] : s_cancelers )
         {
@@ -109,245 +112,167 @@ namespace scarab
         return;
     }
 
-    void signal_handler::handle_signals()
+    void signal_handler::start_handling_signals()
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        if( signal_handler::get_is_handling() || signal_handler::is_waiting() ) return;
 
-        // we create a new logger here so that handle_signals() can be called from the signal_handler constructor during static initalization
-        LOGGER( slog_constr, "signal_handler handle_signals" );
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex );
 
+        LOGGER( slog_constr, "signal_handler::start_handling_signals" );
         LDEBUG( slog_constr, "Taking over signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
 
-#ifndef _WIN32  // on a POSIX system we use sigaction
+        struct sigaction t_action;
+        t_action.sa_handler = signal_handler::handle_signal;
+        sigemptyset(&t_action.sa_mask);
+        t_action.sa_flags = 0;
 
-        struct sigaction t_exit_error_action, t_exit_success_action;
-
-        t_exit_error_action.sa_handler = signal_handler::handle_exit_error;
-        sigemptyset(&t_exit_error_action.sa_mask);
-        t_exit_error_action.sa_flags = 0;
-
-        t_exit_success_action.sa_handler = signal_handler::handle_exit_success;
-        sigemptyset(&t_exit_success_action.sa_mask);
-        t_exit_success_action.sa_flags = 0;
-
-        // setup to handle SIGABRT
-        if( ! s_handling_sig_abrt && sigaction( SIGABRT, &t_exit_error_action, &s_old_sig_abrt_action ) != 0 )
+        for( auto it = signal_handler::s_handled_signals.begin(); it != signal_handler::s_handled_signals.end(); ++it )
         {
-            LWARN( slog_constr, "Unable to setup handling of SIGABRT: abort() and unhandled exceptions will result in an unclean exit" );
-        }
-        else
-        {
-            LTRACE( slog_constr, "Handling SIGABRT (abort() and unhandled exceptions)" );
-            s_handling_sig_abrt = true;
-        }
-
-        // setup to handle SIGTERM
-        if( ! s_handling_sig_term && sigaction( SIGTERM, &t_exit_error_action, &s_old_sig_term_action ) != 0 )
-        {
-            LWARN( slog_constr, "Unable to setup handling of SIGTERM: SIGTERM will result in an unclean exit" );
-        }
-        else
-        {
-            LTRACE( slog_constr, "Handling SIGTERM" );
-            s_handling_sig_term = true;
-        }
-
-        // setup to handle SIGINT
-        if( ! s_handling_sig_int && sigaction( SIGINT, &t_exit_success_action, &s_old_sig_int_action ) != 0 )
-        {
-            LWARN( slog_constr, "Unable to setup handling of SIGINT: ctrl-c cancellation will result in an unclean exit" );
-        }
-        else
-        {
-            LTRACE( slog_constr, "Handling SIGINT (ctrl-c)" );
-            s_handling_sig_int = true;
-        }
-
-        // setup to handle SIGQUIT
-        if( ! s_handling_sig_quit && sigaction( SIGQUIT, &t_exit_success_action, &s_old_sig_quit_action ) != 0 )
-        {
-            LWARN( slog_constr, "Unable to setup handling of SIGQUIT: ctrl-\\ cancellation will result in an unclean exit" );
-        }
-        else
-        {
-            LTRACE( slog_constr, "Handling SIGQUIT (ctrl-\\)" );
-            s_handling_sig_quit = true;
-        }
-
-        if( signal(SIGPIPE, SIG_IGN) == SIG_ERR )
-        {
-            throw error() << "Unable to ignore SIGPIPE\n";
-        }
-
-#else // _WIN32; on a Windows system we use std::signal
-
-        // setup to handle SIGABRT
-        if( ! s_handling_sig_abrt )
-        {
-            auto t_sig_ret = signal( SIGABRT, signal_handler::handle_exit_error );
-            if( t_sig_ret == SIG_ERR )
+            if( ! it->second.handling && sigaction( it->first, &t_action, &it->second.old_action ) != 0 )
             {
-                LWARN( slog_constr, "Unable to setup handling of SIGABRT: abort() and unhandled exceptions will result in an unclean exit" );
+                LWARN( slog_constr, "Unable to setup handling of " << it->second.name );
             }
             else
             {
-                s_handling_sig_abrt = true;
-                s_old_sig_abrt_handler = t_sig_ret;
+                LTRACE( slog_constr, "Handling " <<  it->second.name );
+                it->second.handling = true;
             }
         }
-        if( s_handling_sig_abrt ) LTRACE( slog_constr, "Handling SIGABRT (abort() and unhandled exceptions)" );
 
+        signal_handler::s_is_handling = true;
 
-        // setup to handle SIGTERM
-        if( ! s_handling_sig_term )
-        {
-            auto t_sig_ret = signal( SIGTERM, signal_handler::handle_exit_error );
-            if( t_sig_ret == SIG_ERR )
-            {
-                LWARN( slog_constr, "Unable to setup handling of SIGTERM: SIGTERM will result in an unclean exit" );
-            }
-            else
-            {
-                s_handling_sig_term = true;
-                s_old_sig_abrt_handler = t_sig_ret;
-            }
-        }
-        if( s_handling_sig_term ) LTRACE( slog_constr, "Handling SIGTERM" );
-
-        // setup to handle SIGINT
-        if( ! s_handling_sig_int )
-        {
-            auto t_sig_ret = signal( SIGINT, signal_handler::handle_exit_error );
-            if( t_sig_ret == SIG_ERR )
-            {
-                LWARN( slog_constr, "Unable to setup handling of SIGINT: ctrl-c cancellation will result in an unclean exit" );
-            }
-            else
-            {
-                s_handling_sig_int = true;
-                s_old_sig_abrt_handler = t_sig_ret;
-            }
-        }
-        if( s_handling_sig_int ) LTRACE( slog_constr, "Handling SIGINT (ctrl-c))" );
-
-#endif
         return;
+    }
+
+    bool signal_handler::is_handling()
+    {
+        return signal_handler::get_is_handling();
     }
 
     void signal_handler::unhandle_signals()
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        if( ! signal_handler::get_is_handling() ) return;
+
+        if( signal_handler::is_waiting() ) signal_handler::abort_wait();
+
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex );
 
         LDEBUG( slog, "Returning signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT" );
 
-#ifndef _WIN32
-
-        if( s_handling_sig_abrt && sigaction( SIGABRT, &s_old_sig_abrt_action, nullptr ) != 0 )
+        for( auto it = signal_handler::s_handled_signals.begin(); it != signal_handler::s_handled_signals.end(); ++it )
         {
-            LWARN( slog, "Unable to switch SIGABRT to previous handler" );
-        }
-        else
-        {
-            s_handling_sig_abrt = false;
-        }
-        
-        if( s_handling_sig_term && sigaction( SIGTERM, &s_old_sig_term_action, nullptr ) != 0 )
-        {
-            LWARN( slog, "Unable to switch SIGTERM to previous handler" );
-        }
-        else
-        {
-            s_handling_sig_term = false;
-        }
-        
-        if( s_handling_sig_int && sigaction( SIGINT, &s_old_sig_int_action, nullptr ) != 0 )
-        {
-            LWARN( slog, "Unable to switch SIGINT to previous handler" );
-        }
-        else
-        {
-            s_handling_sig_int = false;
-        }
-        
-        if( s_handling_sig_quit && sigaction( SIGQUIT, &s_old_sig_quit_action, nullptr ) != 0 )
-        {
-            LWARN( slog, "Unable to switch SIGQUIT to previous handler" );
-        }
-        else
-        {
-            s_handling_sig_quit = false;
+            if( it->second.handling && sigaction( it->first, &it->second.old_action, nullptr ) != 0 )
+            {
+                LWARN( slog, "Unable to switch " << it->second.name << " to previous handler" );
+            }
+            else
+            {
+                LTRACE( slog, "Stopped handling " <<  it->second.name );
+                it->second.handling = false;
+            }
         }
 
-#else // _WIN32
+        signal_handler::s_is_handling = false;
 
-        if( s_handling_sig_abrt && signal( SIGABRT, s_old_sig_abrt_handler ) == SIG_ERR )
-        {
-            LWARN( slog, "Unable to switch SIGABRT to previous handler" );
-        }
-        else
-        {
-            s_handling_sig_abrt = false;
-        }
-        
-        if( s_handling_sig_term && signal( SIGTERM, s_old_sig_term_handler ) == SIG_ERR )
-        {
-            LWARN( slog, "Unable to switch SIGTERM to previous handler" );
-        }
-        else
-        {
-            s_handling_sig_term = false;
-        }
-        
-        if( s_handling_sig_int && signal( SIGINT, s_old_sig_int_handler ) == SIG_ERR )
-        {
-            LWARN( slog, "Unable to switch SIGINT to previous handler" );
-        }
-        else
-        {
-            s_handling_sig_int = false;
-        }
-       
-#endif
         return;
     }
 
-    bool signal_handler::is_handling( int a_signal )
+    int signal_handler::wait_for_signals( bool call_exit )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        // Try to lock the mutex; if it didn't lock, then return
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex, std::defer_lock_t() );
+        if( ! t_lock.try_lock() ) return -1;
+        LTRACE( slog, "Started wait_for_signals" );
 
-        bool t_is_handled = false;
-        switch( a_signal )
+        while( signal_handler::s_signal_received == 0 )
         {
-            case SIGABRT:
-                if( s_handling_sig_abrt) t_is_handled = true;
-                break;
-            case SIGTERM:
-                if( s_handling_sig_term) t_is_handled = true;
-                break;
-            case SIGINT:
-                if( s_handling_sig_int) t_is_handled = true;
-                break;
-#ifndef _WIN32
-            case SIGQUIT:
-                if( s_handling_sig_quit) t_is_handled = true;
-                break;
-#endif
-            default:
-                break;
+            std::this_thread::sleep_for( std::chrono::milliseconds(500)) ;
         }
-        return t_is_handled;
+
+        // Handle situation where a signal was recieved
+        if( s_signal_received > 0 )
+        {
+            // this is a valid signal
+            LDEBUG( slog, "Exiting loop for signals after getting signal " << s_signal_received );
+            if( signal_handler::s_handled_signals.count( int(signal_handler::s_signal_received) ) > 0 )
+            {
+                handled_signal_info& sig_info = signal_handler::s_handled_signals.at( int(signal_handler::s_signal_received) );
+                if( sig_info.indicates_error )
+                {
+                    LERROR( slog, "Received signal " << sig_info.name << " <" << s_signal_received << "> as an error condition; return code: " << sig_info.return_code );
+                }
+                else
+                {
+                    LDEBUG( slog, "Received signal " << sig_info.name << " <" << s_signal_received << "> as an exit condition; return code: " << sig_info.return_code );
+                }
+
+                // Call exit to cancel cancelables if requested
+                if( call_exit ) exit( sig_info.return_code );
+            }
+            else
+            {
+                LERROR( slog, "Received unknown signal <" << s_signal_received << ">; using with return code " << RETURN_ERROR );
+                if( call_exit ) exit( RETURN_ERROR );
+            }
+
+            return s_signal_received; 
+        }
+
+        // Handle the situation where no signal was received; wait loop was aborted
+        // s_signal_received < 0 --> requested to exit wait for signals
+        LDEBUG( slog, "Exited loop waiting for signals (wait aborted)" );
+        return s_signal_received;
+
+    }
+
+    void signal_handler::abort_wait()
+    {
+        LDEBUG( slog, "Requesting stop of signal wait" );
+        signal_handler::s_signal_received = -1;
+        return;
+    }
+
+    bool signal_handler::is_waiting()
+    {
+        // If the waiting thread is joinable, then we know it's waiting
+        // But if it's not joinable, it could still be waiting but using an external thread
+        if( signal_handler::s_waiting_thread.joinable() ) return true;
+        // If the lock is locked, then it's waiting
+        std::unique_lock< std::mutex > t_lock( s_handle_mutex, std::defer_lock_t() );
+        return ! t_lock.try_lock();
+    }
+
+    void signal_handler::start_waiting_thread()
+    {
+        if( signal_handler::s_waiting_thread.joinable() ) return;
+        signal_handler::s_waiting_thread = std::thread( [](){scarab::signal_handler::wait_for_signals();} );
+        return;
+    }
+
+    void signal_handler::join_waiting_thread()
+    {
+        if( ! signal_handler::s_waiting_thread.joinable() ) return;
+        s_waiting_thread.join();
+        s_waiting_thread = std::thread();
+        return;
+    }
+
+    bool signal_handler::waiting_thread_joinable()
+    {
+        return signal_handler::s_waiting_thread.joinable();
     }
 
     void signal_handler::reset()
     {
         LDEBUG( slog, "Resetting signal_handler" );
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
 
+        signal_handler::unhandle_signals(); // calls abort_wait() if waiting
+
+        s_waiting_thread = std::thread();
         s_exited = false;
         s_return_code = RETURN_SUCCESS;
         s_cancelers.clear();
 
-        signal_handler::unhandle_signals();
         return;
     }
 
@@ -356,44 +281,36 @@ namespace scarab
         terminate( RETURN_ERROR );
     }
 
-    void signal_handler::handle_exit_error( int a_sig )
+    void signal_handler::handle_signal( int a_sig )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        LERROR( slog, "Handling signal <" << a_sig << "> as an error condition; return code: " << RETURN_ERROR );
-        exit( RETURN_ERROR );
-        return;
-    }
+        signal_handler::s_signal_received = a_sig;
 
-    void signal_handler::handle_exit_success( int a_sig )
-    {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
-        LPROG( slog, "Handling signal <" << a_sig << ">; return code: " << RETURN_SUCCESS );
-        exit( RETURN_SUCCESS );
+        const char str[] = "[signal_handler::handle_signal()] Received a signal\n";
+        write( STDERR_FILENO, str, sizeof(str)-1 );
+
         return;
     }
 
     [[noreturn]] void signal_handler::terminate( int a_code ) noexcept
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         print_current_exception( false );
         if( a_code > 0 )
         {
             print_stack_trace( false );
         }
-        std::cerr << "Exiting abruptly" << std::endl;
         std::_Exit( a_code );
     }
 
     void signal_handler::exit( int a_code )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
         s_exited = true;
         s_return_code = a_code;
         print_current_exception( true );
-        if( a_code > 0 )
-        {
-            print_stack_trace( true );
-        }
+        // Removed stack trace printing because it's just the trace at the point exit() is called, which is often the wait_for_signals(), which isn't very useful
+        //if( a_code > 0 )
+        //{
+        //    print_stack_trace( true );
+        //}
         cancel_all( a_code );
         return;
     }
@@ -443,7 +360,6 @@ namespace scarab
     void signal_handler::print_stack_trace( bool a_use_logging )
     {
         // no mutex locking needed here
-#ifndef _WIN32 // stack trace printing not implemented for windows
         void* t_bt_array[50];
         int t_size = backtrace( t_bt_array, 50 );
 
@@ -461,14 +377,16 @@ namespace scarab
         else { std::cerr << "Backtrace:\n" << t_bt_str.str() << std::endl; }
 
         free( t_messages );
-#endif
         return;
     }
 
     void signal_handler::cancel_all( int a_code )
     {
-        std::unique_lock< std::recursive_mutex > t_lock( s_mutex );
+        std::unique_lock< std::mutex > t_lock( s_cancelers_mutex );
         LDEBUG( slog, "Canceling all cancelables" );
+
+        // Cause the waiting loop to abort if it's running
+        if( signal_handler::s_signal_received == 0 ) signal_handler::s_signal_received = -1;
 
         while( ! s_cancelers.empty() )
         {
@@ -480,10 +398,6 @@ namespace scarab
             s_cancelers.erase( t_canceler_it );
             std::this_thread::sleep_for( std::chrono::seconds(1) );
         }
-
-#ifdef _WIN32
-        ExitProcess( a_code );
-#endif
 
         return;
     }

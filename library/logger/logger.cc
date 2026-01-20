@@ -37,7 +37,12 @@ namespace scarab
             spd_initializer( a_pattern ),
             f_sink()
     {
-        spdlog::init_thread_pool(8192, 1);
+        // We check before creating the new thread pool because we've had problems in some situations (e.g. when started from Python)
+        // with a new thread pool being created and the old one being killed, resulting in strange errors during execution
+        if( ! spdlog::thread_pool() )
+        {
+            spdlog::init_thread_pool(8192, 1);
+        }
         f_sink = std::make_shared< spdlog::sinks::stdout_color_sink_mt >();
         f_sink->set_pattern( f_pattern ); 
         auto at_exit_fcn = [](){ logger::stop_using_spd_async(); };
@@ -201,7 +206,7 @@ namespace scarab
     void logger::reset_using_spd_async()
     {
 #ifdef SCARAB_LOGGER_DEBUG
-        std::cerr << "Resetting use of spd async" << std::endl;
+        std::cerr << "[logger::reset_using_spd_async()] Resetting use of spd async" << std::endl;
 #endif
         logger::using_spd_async().store(true);
         std::set< logger* >& t_all_loggers = logger::all_loggers();

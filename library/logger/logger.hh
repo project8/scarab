@@ -188,7 +188,7 @@ namespace scarab
             f_initializer_ptr( nullptr )
     {
 #ifdef SCARAB_LOGGER_DEBUG
-        std::cout << "Logger <" << a_name << "> was initialized from <" << a_file << ":" << a_line << ">; type: " << ::scarab::type( *this ) << std::endl;
+        std::cerr << "[logger_type constructor] Logger <" << a_name << "> was initialized from <" << a_file << ":" << a_line << ">; type: " << ::scarab::type( *this ) << std::endl;
 #endif
         // Start the backend, but only once
         static initializer_x s_init;
@@ -223,13 +223,13 @@ namespace scarab
 
 /// Creates a local scarab::logger object with variable name a_logger
 /// Uses spdlog's asynchronous logger; spdlog logger name will be a_name.
-#define LOCAL_LOGGER( a_logger, a_name ) \
-    ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name, __FILE_NAME__, __LINE__ );
+//#define LOCAL_LOGGER( a_logger, a_name ) \
+//    ::scarab::logger_type< ::scarab::spd_initializer_async_stdout_color_mt > a_logger( a_name, __FILE_NAME__, __LINE__ );
 
 /// Creates a local single-threaded (non-asynchronous) scarab::logger object with variable name a_logger
 /// Uses spdlog's basic logger; spdlog logger name will be a_name.
-#define LOCAL_LOGGER_ST( a_logger, a_name ) \
-    ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name, __FILE_NAME__, __LINE__ );
+//#define LOCAL_LOGGER_ST( a_logger, a_name ) \
+//    ::scarab::logger_type< ::scarab::spd_initializer_stdout_color > a_logger( a_name, __FILE_NAME__, __LINE__ );
 
 // Logging functions
 #ifdef NDEBUG
