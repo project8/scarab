@@ -8,28 +8,29 @@
  *    > bin/test_raise_sigterm
  * 
  *  The signal should be caught and the application exit cleanly.
- *  Since this is an error signal, a stack trace should be displayed.
+ * 
+ *  This program does not use signal_handler's waiting thread, and supplies a thread of its own.
  * 
  *  Example output (irrelevant lines removed):
  * 
- * 2020-07-20 14:39:53 [DEBUG] (tid 0x10dbef5c0) ignal_handler.cc(78): Handling SIGTERM
- * 2020-07-20 14:39:53 [DEBUG] (tid 0x10dbef5c0) ignal_handler.cc(89): Handling SIGINT (ctrl-c)
- * 2020-07-20 14:39:53 [DEBUG] (tid 0x10dbef5c0) ignal_handler.cc(101): Handling SIGQUIT (ctrl-\)
- * 2020-07-20 14:39:53 [ERROR] (tid 0x10dbef5c0) ignal_handler.cc(187): Handling termination due to an error condition; signal <15>
- * 2020-07-20 14:39:53 [ERROR] (tid 0x10dbef5c0) ignal_handler.cc(254): Backtrace from terminate() returned 9 frames
- * 
- * 2020-07-20 14:39:53 [ERROR] (tid 0x10dbef5c0) ignal_handler.cc(263): Backtrace:
- * [bt]: (0) 0   libScarab.dylib                     0x000000010233afca _ZN6scarab14signal_handler17print_stack_traceEv + 42
- * [bt]: (1) 1   libScarab.dylib                     0x000000010233aa34 _ZN6scarab14signal_handler9terminateEi + 68
- * [bt]: (2) 2   libScarab.dylib                     0x0000000102339bc2 _ZN6scarab14signal_handler22handle_terminate_errorEi + 434
- * [bt]: (3) 3   libsystem_platform.dylib            0x00007fff7300ab5d _sigtramp + 29
- * [bt]: (4) 4   ???                                 0x000000010dbbcf50 0x0 + 4525379408
- * [bt]: (5) 5   libsystem_c.dylib                   0x00007fff72e77d8a raise + 26
- * [bt]: (6) 6   test_raise_sigterm                  0x0000000102326f80 main + 32
- * [bt]: (7) 7   libdyld.dylib                       0x00007fff72e1f3d5 start + 1
- * [bt]: (8) 8   ???                                 0x0000000000000001 0x0 + 1
- * 
- * 2020-07-20 14:39:53 [DEBUG] (tid 0x10dbef5c0) ignal_handler.cc(273): Canceling all cancelables
+ *    2026-01-14 16:11:02.634 [DEBUG] (5699839) signal_handler.cc:122 -> Taking over signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT
+ *    2026-01-14 16:11:02.634 [TRACE] (5699839) signal_handler.cc:137 -> Handling SIGINT
+ *    2026-01-14 16:11:02.634 [INFO] (5699839) test_raise_sigterm.cc:50 -> Starting to wait-on-signals thread
+ *    2026-01-14 16:11:02.634 [TRACE] (5699839) signal_handler.cc:137 -> Handling SIGQUIT
+ *    2026-01-14 16:11:02.634 [TRACE] (5699839) signal_handler.cc:137 -> Handling SIGABRT
+ *    2026-01-14 16:11:02.634 [TRACE] (5699839) signal_handler.cc:137 -> Handling SIGTERM
+ *    2026-01-14 16:11:02.634 [TRACE] (5699854) signal_handler.cc:185 -> Started wait_for_signals
+ *    2026-01-14 16:11:03.639 [INFO] (5699839) test_raise_sigterm.cc:55 -> Raising SIGTERM
+ *    [signal_handler::handle_signal()] Received a signal
+ *    2026-01-14 16:11:03.639 [INFO] (5699839) test_raise_sigterm.cc:57 -> Raised
+ *    2026-01-14 16:11:03.644 [DEBUG] (5699854) signal_handler.cc:198 -> Exiting loop for signals after getting signal 15
+ *    2026-01-14 16:11:03.644 [DEBUG] (5699854) signal_handler.cc:208 -> Received signal SIGTERM <15> as an exit condition; return code: 0
+ *    2026-01-14 16:11:03.644 [DEBUG] (5699854) signal_handler.cc:388 -> Canceling all cancelables
+ *    2026-01-14 16:11:03.644 [DEBUG] (5699839) signal_handler.cc:160 -> Returning signal handling for SIGABRT, SIGTERM, SIGINT, and SIGQUIT
+ *    2026-01-14 16:11:03.644 [TRACE] (5699839) signal_handler.cc:170 -> Stopped handling SIGINT
+ *    2026-01-14 16:11:03.644 [TRACE] (5699839) signal_handler.cc:170 -> Stopped handling SIGQUIT
+ *    2026-01-14 16:11:03.644 [TRACE] (5699839) signal_handler.cc:170 -> Stopped handling SIGABRT
+ *    2026-01-14 16:11:03.644 [TRACE] (5699839) signal_handler.cc:170 -> Stopped handling SIGTERM
  * 
  */
 
@@ -37,13 +38,24 @@
 #include "logger.hh"
 
 #include <signal.h>
+#include <thread>
 
+LOGGER_ST( testlog, "test_raise_sigterm" );
 
 int main(int , char ** )
 {
-    scarab::signal_handler t_handler;
+    scarab::signal_handler t_sh( false );
 
+    LINFO( testlog, "Starting to wait-on-signals thread" );
+    std::thread t_sh_thread( [](){scarab::signal_handler::wait_for_signals();} );
+
+    std::this_thread::sleep_for( std::chrono::seconds(1) );
+
+    LINFO( testlog, "Raising SIGTERM" );
     raise( SIGTERM );
+    LINFO( testlog, "Raised" );
 
+    t_sh_thread.join();
+    
     return( EXIT_SUCCESS );
 }

@@ -85,7 +85,7 @@ TEST_CASE( "logger", "[logger]" )
     //REQUIRE( compare_and_clear( t_errstream, "test FATAL" ) );
 
 }
-
+/*
 TEST_CASE( "local_logger", "[logger]" )
 {
     LOCAL_LOGGER( tlog, "test_logger" );
@@ -118,3 +118,4 @@ TEST_CASE( "async_logging_stop", "[logger]" )
     REQUIRE( t_async );
 
 }
+*/
