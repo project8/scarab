@@ -9,10 +9,11 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
-## [3.13.5] - 2025-12-22
+## [3.13.5] - 2026-01-19
 
 ### Changed
 
+- NOTE: signal_handler's constructor now requires bool argument to flag whether to use its own signal-watching thread
 - Signal handling now requires a dedicated thread
 - Updated GHA runners
 - Removed local loggers
