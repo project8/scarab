@@ -9,7 +9,7 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
-## [3.13.5] - 2026-01-19
+## [3.14.0] - 2026-01-19
 
 ### Changed
 
