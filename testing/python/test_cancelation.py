@@ -6,6 +6,7 @@ class Tester(scarab.Cancelable):
         scarab.Cancelable.__init__(self)
 
 def test_cancel():
+    print("Test flag: A")
     test = Tester()
     assert not test.is_canceled()
     test.cancel(0)
