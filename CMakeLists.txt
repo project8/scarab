@@ -146,8 +146,8 @@ endif( Scarab_BOOST_COMPONENTS )
 
 #message( STATUS "Boost components: ${Scarab_BOOST_COMPONENTS}" )
 
-# Boost (1.46 required for filesystem version 3)
-find_package( Boost 1.46.0 REQUIRED COMPONENTS ${Scarab_BOOST_COMPONENTS} )
+# Boost (>=1.70 required for consistent provision of BoostConfig.cmake)
+find_package( Boost 1.70.0 REQUIRED COMPONENTS ${Scarab_BOOST_COMPONENTS} )
 # make sure dynamic linking is assumed for all boost libraries
 set( Boost_USE_STATIC_LIBS OFF )
 set( Boost_USE_STATIC_RUNTIME OFF )
