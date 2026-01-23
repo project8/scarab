@@ -9,6 +9,18 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
+## [3.14.1] - 2026-01-23
+
+### Added
+
+- Python cancelation tests
+
+### Fixed
+
+- Give hint to find spdlog during build in the cmake config file
+- Set CMake policy 167 to NEW
+
+
 ## [3.14.0] - 2026-01-19
 
 ### Changed

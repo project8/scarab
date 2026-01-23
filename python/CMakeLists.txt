@@ -48,6 +48,14 @@ if( Scarab_BUILD_PYTHON )
         )
     endif( Scarab_BUILD_AUTHENTICATION )
 
+    if( Scarab_ENABLE_TESTING )
+        add_definitions( -DBUILD_TESTING_PYBINDING )
+        set( PYBINDING_HEADERFILES
+            ${PYBINDING_HEADERFILES}
+            ${dir}/testing_pybind.hh
+        )
+    endif()
+
 
     set( PYBINDING_PROJECT_LIBRARIES Scarab )
 
