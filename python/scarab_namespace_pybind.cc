@@ -27,6 +27,10 @@
 #include "authentication_pybind.hh"
 #endif
 
+#ifdef BUILD_TESTING_PYBINDING
+#include "testing_pybind.hh"
+#endif
+
 PYBIND11_MODULE( scarab, scarab_mod )
 {
     std::list< std::string > all_members;
@@ -52,6 +56,10 @@ PYBIND11_MODULE( scarab, scarab_mod )
 #ifdef BUILD_AUTH_PYBINDING
     // authentication
     all_members.splice( all_members.end(), scarab_pybind::export_authentication( scarab_mod ) );
+#endif
+#ifdef BUILD_TESTING_PYBINDING
+    // testing
+    all_members.splice( all_members.end(), scarab_pybind::export_testing( scarab_mod ) );
 #endif
     scarab_mod.attr( "__all__" ) = all_members;
 }
