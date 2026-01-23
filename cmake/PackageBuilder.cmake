@@ -13,6 +13,9 @@ cmake_policy( SET CMP0012 NEW ) # how if-statements work
 cmake_policy( SET CMP0042 NEW ) # rpath on mac os x
 cmake_policy( SET CMP0048 NEW ) # version in project()
 cmake_policy( SET CMP0115 NEW ) # source file extensions must be explicit
+if( POLICY CMP0167 )
+    cmake_policy( SET CMP0167 NEW ) # find_package(boost) uses config method only
+endif()
 
 include ( PackageBuilderMacros )
 
