@@ -7,7 +7,15 @@ get_filename_component( Scarab_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
 # Find the dependencies
 include( CMakeFindDependencyMacro )
 find_dependency( Boost 1.46 REQUIRED COMPONENTS @Scarab_BOOST_COMPONENTS@ )
+
 find_dependency( spdlog REQUIRED HINTS @spdlog_BINARY_DIR@ )
+# For some reason the INTERFACE_LINK_LIBRARIES property of the scarab library, which should include spdlog::spdlog, 
+# ends up including Scarab::spdlog instead.
+# As a workaround, we create an alias library target from Scarab::splog to spdlog::spdlog
+if( TARGET spdlog::spdlog AND NOT TARGET Scarab::spdlog )
+    add_library( Scarab::spdlog ALIAS spdlog::spdlog )
+endif()
+
 if( @Scarab_BUILD_CODEC_JSON@ ) #Scarab_BUILD_CODEC_JSON
     find_dependency( RapidJSON REQUIRED )
     if(NOT TARGET rapidjson)
@@ -29,13 +37,6 @@ if( NOT TARGET Scarab::@Scarab_FULL_TARGET_NAME@ )
     else()
         include( "${Scarab_CMAKE_DIR}/Scarab_Library_Targets.cmake" )
     endif()
-endif()
-
-# For some reason the INTERFACE_LINK_LIBRARIES property of the scarab library, which should include spdlog::spdlog, 
-# ends up including Scarab::spdlog instead.
-# As a workaround, we create an alias library target from Scarab::splog to spdlog::spdlog
-if( TARGET spdlog AND NOT TARGET Scarab::spdlog )
-    add_library( Scarab::spdlog ALIAS spdlog )
 endif()
 
 check_required_components( Scarab )
