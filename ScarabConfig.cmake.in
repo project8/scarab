@@ -12,8 +12,14 @@ find_dependency( spdlog REQUIRED HINTS @spdlog_BINARY_DIR@ )
 # For some reason the INTERFACE_LINK_LIBRARIES property of the scarab library, which should include spdlog::spdlog, 
 # ends up including Scarab::spdlog instead.
 # As a workaround, we create an alias library target from Scarab::splog to spdlog::spdlog
-if( TARGET spdlog::spdlog AND NOT TARGET Scarab::spdlog )
-    add_library( Scarab::spdlog ALIAS spdlog::spdlog )
+if( NOT TARGET Scarab::spdlog )
+    # Check spdlog first to satisfy use when in a submodule (then spdlog::spdlog is itself an alias)
+    if( TARGET spdlog )
+        add_library( Scarab::spdlog ALIAS spdlog )
+    # Next check spdlog::spdlog; when used as a previously-installed dependency, spdlog::spdlog is an imported target
+    elseif( TARGET spdlog::spdlog )
+        add_library( Scarab::spdlog ALIAS spdlog::spdlog )
+    endif()
 endif()
 
 if( @Scarab_BUILD_CODEC_JSON@ ) #Scarab_BUILD_CODEC_JSON
