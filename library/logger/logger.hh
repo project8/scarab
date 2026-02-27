@@ -26,7 +26,7 @@
 #include "typename.hh"
 
 #ifndef SCARAB_LOGGER_DEFAULT_THRESHOLD
-#define SCARAB_LOGGER_DEFAULT_THRESHOLD eInfo
+#define SCARAB_LOGGER_DEFAULT_THRESHOLD
 #endif
 
 /**
