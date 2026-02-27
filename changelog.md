@@ -9,6 +9,14 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 
 ## [Unreleased]
 
+
+## [3.14.2] - 2026-02-??
+
+### Fixed
+
+- Fixed handling of dependencies in ScarabConfig.cmake.in
+
+
 ## [3.14.1] - 2026-01-23
 
 ### Added
