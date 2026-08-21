@@ -222,7 +222,7 @@ function( pbuilder_add_library )
     
     # this will set the INTERFACE_INCLUDE_DIRECTORIES property using the INTERFACE option
     # it's assumed that the include_directories() command was used to set the INCLUDE_DIRECTORIES property for the private side.
-    target_include_directories( ${FULL_LIB_TARGET} 
+    target_include_directories( ${FULL_LIB_TARGET} BEFORE
         INTERFACE 
             "$<BUILD_INTERFACE:${SOURCE_TREE_INCLUDE_DIRS}>"
             "$<INSTALL_INTERFACE:${TOP_PROJECT_INCLUDE_INSTALL_SUBDIR}${SM_INCLUDE_SUBDIR}>"
