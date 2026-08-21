@@ -10,7 +10,15 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 ## [Unreleased]
 
 
-## [3.14.2] - 2026-02-??
+## [3.14.3] - 2026-08-21
+
+### Fixed
+
+- Boost min required version in CMake config file set to v1.70.0
+- Updated spdlog tag to v1.x_p8_r2
+
+
+## [3.14.2] - 2026-02-27
 
 ### Fixed
 
