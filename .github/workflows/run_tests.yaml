@@ -145,8 +145,12 @@ jobs:
         # abort_on_error makes a sanitizer report fail the test rather than only printing.
         # Leak detection is off: this job targets memory-safety errors, and the existing
         # tests have not been audited for leaks.
+        # Container-overflow detection is off because it gives false positives unless the
+        # whole standard library is also built with the sanitizer; param_array's deque of
+        # unique_ptrs trips it.  See
+        # https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow
         env:
-          ASAN_OPTIONS: abort_on_error=1:detect_leaks=0
+          ASAN_OPTIONS: abort_on_error=1:detect_leaks=0:detect_container_overflow=0
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: |
           cd build
