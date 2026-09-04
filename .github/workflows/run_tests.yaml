@@ -103,13 +103,62 @@ jobs:
 #        if: ${{ ! success() }}
 #        uses: mxschmitt/action-tmate@v3
 
+  RunTestsSanitizers:
+
+    # A separate job rather than part of the RunTests matrix: the sanitizers roughly double
+    # the build time and need a different ctest invocation, and there is no reason to slow
+    # down all five platforms.  One Linux runner is enough -- the memory errors these catch
+    # are platform-independent.
+    runs-on: ubuntu-24.04
+
+    steps:
+
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            libboost-all-dev \
+            rapidjson-dev \
+            libyaml-cpp-dev
+
+      - name: Configure
+        # The python bindings are off because running the sanitizers through the python
+        # interpreter requires preloading the sanitizer runtime, and adds no coverage here.
+        # CMAKE_BUILD_TYPE is deliberately left unset so that it defaults to DEBUG: NDEBUG
+        # must stay undefined, because LTRACE and LDEBUG compile to nothing when it is set.
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DScarab_ENABLE_TESTING=TRUE -DScarab_ENABLE_SANITIZERS=TRUE -DScarab_BUILD_PYTHON=FALSE
+
+      - name: Build
+        run: |
+          cd build
+          make -j2 install
+
+      - name: Run tests
+        # abort_on_error makes a sanitizer report fail the test rather than only printing.
+        # Leak detection is off: this job targets memory-safety errors, and the existing
+        # tests have not been audited for leaks.
+        env:
+          ASAN_OPTIONS: abort_on_error=1:detect_leaks=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: |
+          cd build
+          ctest --output-on-failure
+
   Release:
 
     runs-on: ubuntu-22.04
 
     if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/') }}
 
-    needs: [RunTests]
+    needs: [RunTests, RunTestsSanitizers]
 
     steps:
 
