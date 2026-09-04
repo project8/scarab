@@ -17,6 +17,10 @@ Types of changes: Added, Changed, Deprecated, Removed, Fixed, Security
 - Static destruction test for indexed_factory and indexed_registrar
 - Scarab_ENABLE_SANITIZERS CMake option to build the test programs with the address and UB sanitizers, and a CI job that uses it
 
+### Changed
+
+- Updated actions versions (actions/checkout to v7)
+
 ### Fixed
 
 - Removed the trace logging from `indexed_factory::remove_class()`, which caused a heap-use-after-free during static destruction: `remove_class()` is called from `~indexed_registrar()`, at which point the static logger it created may already have been destroyed
