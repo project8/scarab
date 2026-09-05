@@ -44,6 +44,10 @@ set( Scarab_LOGGER_DEFAULT_THRESHOLD "eTrace" CACHE STRING "Default threshold fo
 
 option( Scarab_ENABLE_LOGGER_DEBUG "Flag to enable debug printing for the logger itself" FALSE )
 
+# Applies to the test programs only, so that the installed library's ABI is unchanged.
+# The sanitizer runtime is interposed process-wide, so errors inside the library are still caught.
+option( Scarab_ENABLE_SANITIZERS "Flag to build the test programs with the address and UB sanitizers" FALSE )
+
 if( (Scarab_BUILD_CODEC_JSON OR Scarab_BUILD_CODEC_YAML OR Scarab_BUILD_AUTHENTICATION OR Scarab_BUILD_CLI) AND NOT Scarab_BUILD_PARAM )
     message( FATAL_ERROR "Invalid combination of build options.  Building the Codecs, Authentication, and CLI requires Param.  If you want these elements, turn on Param.  If you want Param off, turn these elements off." )
 endif()

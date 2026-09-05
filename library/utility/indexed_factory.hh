@@ -211,7 +211,8 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     void indexed_factory< XIndexType, XBaseType, XArgs... >::register_class( const XIndexType& a_index, const base_registrar< XBaseType, XArgs... >* a_registrar )
     {
-        // A local (non-static) logger is created inside this function to avoid static initialization order problems
+        // A function-local static logger is used so that it is initialized on first use,
+        // avoiding static initialization order problems.
         LOGGER( slog_ind_factory_reg, "indexed_factory_register");
 
         std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
@@ -234,17 +235,8 @@ namespace scarab
     template< class XIndexType, class XBaseType, typename ... XArgs >
     void indexed_factory< XIndexType, XBaseType, XArgs... >::remove_class(const XIndexType& a_index )
     {
-        // A local (non-static) logger is created inside this function to avoid static destruction problems
-        LOGGER( slog_ind_factory_rem, "indexed_factory_remove");
-        LTRACE( slog_ind_factory_rem, "Removing indexed_factory for class " << a_index << " from " << this );
-        /*
-#ifndef NDEBUG
-        if( ELevel::eTrace >= f_global_threshold )
-        {
-            std::cout << "Removing indexed_factory for class " << a_index << " from " << this << std::endl;
-        }
-#endif
-        */
+        // No logging here: remove_class() is called from ~indexed_registrar() during static
+        // destruction, when a static logger may already have been destroyed.
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;
@@ -352,7 +344,8 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     void indexed_factory< XIndexType, XBaseType, void >::register_class( const XIndexType& a_index, const base_registrar< XBaseType >* a_registrar )
     {
-        // A local (non-static) logger is created inside this function to avoid static initialization order problems
+        // A function-local static logger is used so that it is initialized on first use,
+        // avoiding static initialization order problems.
         LOGGER( slog_ind_factory_reg, "indexed_factory_register");
 
         std::unique_lock< std::mutex > t_lock( this->f_factory_mutex );
@@ -376,15 +369,8 @@ namespace scarab
     template< class XIndexType, class XBaseType >
     void indexed_factory< XIndexType, XBaseType, void >::remove_class(const XIndexType& a_index )
     {
-        // A local (non-static) logger is created inside this function to avoid static destruction problems
-        LOGGER( slog_ind_factory_rem, "indexed_factory_remove");
-        LTRACE( slog_ind_factory_rem, "Removing indexed_factory for class " << a_index << " from " << this );
-//#ifndef NDEBUG
-//        if( ELevel::eTrace >= f_global_threshold )
-//        {
-//            std::cout << "Removing indexed_factory for class " << a_index << " from " << this << std::endl;
-//        }
-//#endif
+        // No logging here: remove_class() is called from ~indexed_registrar() during static
+        // destruction, when a static logger may already have been destroyed.
         FactoryIt iter = fMap->find( a_index );
         if( iter != fMap->end() ) fMap->erase( iter );
         return;

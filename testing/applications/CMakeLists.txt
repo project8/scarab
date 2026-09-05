@@ -12,6 +12,7 @@ set( testing_applications_SOURCES
     test_raise_sigint.cc
     test_raise_sigquit.cc
     test_raise_sigterm.cc
+    test_static_destruction.cc
     test_static_initialization.cc
     test_unhandled_exception.cc
 )
@@ -20,6 +21,16 @@ pbuilder_executables( SOURCES ${testing_applications_SOURCES}
         TARGETS_VAR programs
         PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
 )
+
+# LINK_FLAGS is used rather than target_link_options because the latter requires CMake 3.13,
+# and cmake_minimum_required is 3.12.
+if( Scarab_ENABLE_SANITIZERS )
+    foreach( program ${programs} )
+        target_compile_options( ${program} PRIVATE -fsanitize=address,undefined -g )
+        set_property( TARGET ${program} APPEND_STRING PROPERTY LINK_FLAGS " -fsanitize=address,undefined" )
+    endforeach()
+endif()
+
 set( programs ${programs} PARENT_SCOPE )
 
 if( Scarab_ENABLE_TESTING )
@@ -33,6 +44,7 @@ if( Scarab_ENABLE_TESTING )
     add_test( NAME raise_sigint COMMAND test_raise_sigint WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
     add_test( NAME raise_sigquit COMMAND test_raise_sigquit WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
     add_test( NAME raise_sigterm COMMAND test_raise_sigterm WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
+    add_test( NAME static_destruction COMMAND test_static_destruction WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
     add_test( NAME static_initialization COMMAND test_static_initialization WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
     add_test( NAME unhandled_exception COMMAND test_unhandled_exception WORKING_DIRECTORY ${BIN_INSTALL_DIR} )
 

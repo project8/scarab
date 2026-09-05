@@ -99,12 +99,19 @@ set( testing_LIB_DEPENDENCIES
     Scarab
 )
 
-pbuilder_executable( 
+pbuilder_executable(
     EXECUTABLE run_tests
     SOURCES ${testing_SOURCES}
     PROJECT_LIBRARIES ${testing_LIB_DEPENDENCIES}
     PRIVATE_EXTERNAL_LIBRARIES Catch2::Catch2
 )
+
+# LINK_FLAGS is used rather than target_link_options because the latter requires CMake 3.13,
+# and cmake_minimum_required is 3.12.
+if( Scarab_ENABLE_SANITIZERS )
+    target_compile_options( run_tests PRIVATE -fsanitize=address,undefined -g )
+    set_property( TARGET run_tests APPEND_STRING PROPERTY LINK_FLAGS " -fsanitize=address,undefined" )
+endif()
 
 ##########
 
