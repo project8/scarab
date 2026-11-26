@@ -40,7 +40,11 @@ option( Scarab_BUILD_CLI "Flag to enable the building of the command-line interf
 
 option( Scarab_BUILD_PYTHON "Build python bindings" TRUE )
 
-set( Scarab_LOGGER_DEFAULT_THRESHOLD "eTrace" CACHE STRING "Default threshold for printing: eTrace, eDebug, eInfo, eProg, eWarn, eError, eFatal" )
+# This is the threshold that loggers are created with, so it applies to any message logged
+# before something lowers it (e.g. main_app's constructor, or a -v/-q option).  Loggers used
+# during static initialization only ever use this value, so a verbose default means those
+# messages are printed unconditionally.
+set( Scarab_LOGGER_DEFAULT_THRESHOLD "eWarn" CACHE STRING "Default threshold for printing: eTrace, eDebug, eInfo, eProg, eWarn, eError, eFatal" )
 
 option( Scarab_ENABLE_LOGGER_DEBUG "Flag to enable debug printing for the logger itself" FALSE )
 

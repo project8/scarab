@@ -25,8 +25,11 @@
 #include "scarab_api.hh"
 #include "typename.hh"
 
+// Normally provided by the build via the Scarab_LOGGER_DEFAULT_THRESHOLD CMake variable.
+// The fallback needs a value: the macro is used as logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD,
+// so an empty definition does not compile.
 #ifndef SCARAB_LOGGER_DEFAULT_THRESHOLD
-#define SCARAB_LOGGER_DEFAULT_THRESHOLD
+#define SCARAB_LOGGER_DEFAULT_THRESHOLD eWarn
 #endif
 
 /**

@@ -11,6 +11,30 @@
 #include "catch2/catch_test_macros.hpp"
 
 
+TEST_CASE( "logger_default_threshold", "[logger]" )
+{
+    // A logger is created with the compile-time default threshold, and that is the only
+    // threshold that applies to messages logged during static initialization, before
+    // main_app's constructor (or a -v/-q option) lowers the global threshold.  The scarab-side
+    // threshold and the spdlog level have to agree, or get_threshold() reports a level that is
+    // not the one being applied.  They did not agree previously: the constructor used eInfo
+    // while the spdlog logger was created with the compile-time default.
+    //
+    // A name no other test uses, so that this gets a freshly created logger regardless of the
+    // order the test cases run in.
+    scarab::logger_type< scarab::spd_initializer_stdout_color > t_logger( "test_default_threshold" );
+
+    REQUIRE( t_logger.get_threshold() == scarab::logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD );
+    REQUIRE( t_logger.spdlogger() );
+    REQUIRE( t_logger.spdlogger()->level() ==
+             spdlog::level::level_enum( unsigned( scarab::logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD ) ) );
+
+    // Trace and debug must be off by default, which is the regression that motivated this:
+    // dl-agent printed trace lines from static initializers no matter what verbosity was asked for.
+    REQUIRE_FALSE( t_logger.spdlogger()->should_log( spdlog::level::trace ) );
+    REQUIRE_FALSE( t_logger.spdlogger()->should_log( spdlog::level::debug ) );
+}
+
 TEST_CASE( "verbosity_via_app", "[cli][logger]" )
 {
     LOGGER( tlog, "test_verbosity" );
