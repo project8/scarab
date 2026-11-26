@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, ubuntu-22.04, macos-15-intel, macos-15, macos-14]
+        os: [ubuntu-26.04, ubuntu-24.04, ubuntu-26.04-arm, macos-15-intel, macos-26, macos-15]
 
     steps:
 
@@ -109,7 +109,7 @@ jobs:
     # the build time and need a different ctest invocation, and there is no reason to slow
     # down all five platforms.  One Linux runner is enough -- the memory errors these catch
     # are platform-independent.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
 
@@ -158,7 +158,7 @@ jobs:
 
   Release:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/') }}
 

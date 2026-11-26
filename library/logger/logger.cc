@@ -81,7 +81,9 @@ namespace scarab
 
     logger::logger( const std::string& a_name ) :
         f_name( a_name ),
-        f_threshold( logger::ELevel::eInfo ),
+        // must match the level make_or_get_logger() gives the spdlog logger, otherwise
+        // get_threshold() reports a level that is not the one actually being applied
+        f_threshold( logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD ),
         f_strstr(),
         f_spdlogger()
     {
@@ -138,7 +140,7 @@ namespace scarab
 
     logger::ELevel& logger::global_threshold()
     {
-        static logger::ELevel s_global_threshold( logger::ELevel::eInfo );
+        static logger::ELevel s_global_threshold( logger::ELevel::SCARAB_LOGGER_DEFAULT_THRESHOLD );
         return s_global_threshold;
     }
 
